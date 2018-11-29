@@ -1,5 +1,6 @@
 package dedicace.com;
 
+import android.arch.persistence.room.Room;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,12 +15,17 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager layoutManager;
     private List<Song> songs;
 
+    public static AppDataBase choeurDataBase;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+
+        initData();
 
         recyclerView = findViewById(R.id.recyclerview_media_item);
 
@@ -30,6 +36,21 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
 
         recyclerView.setAdapter(songsAdapter);
+
+    }
+
+    private void initData() {
+        choeurDataBase = Room.databaseBuilder(this,AppDataBase.class,"ChoeurDataBase")
+                .allowMainThreadQueries()
+                .fallbackToDestructiveMigration()
+                .build();
+
+        Song song1 = new Song("Menuet","Krieger");
+        Song song2 = new  Song("Concerto","Van Den BudenMayer");
+
+        choeurDataBase.songsDao().insertSongs(song1,song2);
+
+        songs=choeurDataBase.songsDao().getAllSongs();
 
     }
 }

@@ -3,9 +3,6 @@ package dedicace.com;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
-import android.graphics.Bitmap;
-
-import java.net.URI;
 
 @Entity
 public class Song {
@@ -22,10 +19,48 @@ public class Song {
     @ColumnInfo(name = "duration")
     private int duration;
 
-    @ColumnInfo(name = "uri")
-    private URI uri;
+    /*@ColumnInfo(name = "fichier_mp3")
+    private Resources songRaw;
 
     @ColumnInfo(name = "image_fond")
-    private Bitmap bitmap;
+    private Bitmap bitmap;*/
 
+
+    public Song(String titre, String groupe) {
+        this.titre = titre;
+        this.groupe = groupe;
+    }
+
+
+    public String getTitre() {
+        return titre;
+    }
+
+    public String getGroupe() {
+        return groupe;
+    }
+
+    public int getSongId() {
+        return songId;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setSongId(int songId) {
+        this.songId = songId;
+    }
+
+    public void setTitre(String titre) {
+        this.titre = titre;
+    }
+
+    public void setGroupe(String groupe) {
+        this.groupe = groupe;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
 }

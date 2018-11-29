@@ -27,6 +27,9 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull SongsViewHolder songsViewHolder, int i) {
 
+        songsViewHolder.setTitre(songs.get(i).getTitre());
+        songsViewHolder.setGroupe(songs.get(i).getGroupe());
+
     }
 
     @Override
