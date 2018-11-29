@@ -19,5 +19,8 @@ public interface SongsDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertSongs(Song... songs);
 
+    @Query("DELETE FROM song")
+    void deleteAll();
+
 
 }

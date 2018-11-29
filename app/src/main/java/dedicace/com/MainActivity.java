@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recyclerview_media_item);
 
-        songsAdapter =new SongsAdapter(songs);
+        songsAdapter =new SongsAdapter(songs,this);
 
         layoutManager = new LinearLayoutManager(this);
 
@@ -45,8 +45,12 @@ public class MainActivity extends AppCompatActivity {
                 .fallbackToDestructiveMigration()
                 .build();
 
-        Song song1 = new Song("Menuet","Krieger");
-        Song song2 = new  Song("Concerto","Van Den BudenMayer");
+        choeurDataBase.songsDao().deleteAll();
+
+        int imageId = R.raw.menuett_krieger;
+
+        Song song1 = new Song("Menuet","Krieger",R.raw.menuett_krieger,R.drawable.hand);
+        Song song2 = new  Song("Concerto","Van Den BudenMayer",R.raw.van_den_budenmayer_concerto,R.drawable.water);
 
         choeurDataBase.songsDao().insertSongs(song1,song2);
 

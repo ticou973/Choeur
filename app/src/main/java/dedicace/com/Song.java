@@ -2,6 +2,7 @@ package dedicace.com;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 @Entity
@@ -19,18 +20,34 @@ public class Song {
     @ColumnInfo(name = "duration")
     private int duration;
 
-    /*@ColumnInfo(name = "fichier_mp3")
-    private Resources songRaw;
+    @ColumnInfo(name = "fichier_mp3")
+    private int songResId;
 
-    @ColumnInfo(name = "image_fond")
-    private Bitmap bitmap;*/
+    @ColumnInfo(name = "background")
+    private int bgSong;
 
 
+
+
+    @Ignore
     public Song(String titre, String groupe) {
         this.titre = titre;
         this.groupe = groupe;
     }
 
+    @Ignore
+    public Song(String titre, String groupe, int songResId) {
+        this.titre = titre;
+        this.groupe = groupe;
+        this.songResId = songResId;
+    }
+
+    public Song(String titre, String groupe, int songResId, int bgSong) {
+        this.titre = titre;
+        this.groupe = groupe;
+        this.songResId = songResId;
+        this.bgSong = bgSong;
+    }
 
     public String getTitre() {
         return titre;
@@ -62,5 +79,21 @@ public class Song {
 
     public void setDuration(int duration) {
         this.duration = duration;
+    }
+
+    public int getSongResId() {
+        return songResId;
+    }
+
+    public void setSongResId(int songResId) {
+        this.songResId = songResId;
+    }
+
+    public int getBgSong() {
+        return bgSong;
+    }
+
+    public void setBgSong(int bgSong) {
+        this.bgSong = bgSong;
     }
 }
