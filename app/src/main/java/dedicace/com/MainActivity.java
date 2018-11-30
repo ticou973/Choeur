@@ -47,10 +47,11 @@ public class MainActivity extends AppCompatActivity {
 
         choeurDataBase.songsDao().deleteAll();
 
-        int imageId = R.raw.menuett_krieger;
+        SourceSong sourceSong1 = new SourceSong("Menuet","Krieger",90,R.drawable.hand,"");
+        SourceSong sourceSong2 = new SourceSong("Concerto","Van Den BudenMayer",270,R.drawable.water,"");
 
-        Song song1 = new Song("Menuet","Krieger",R.raw.menuett_krieger,R.drawable.hand);
-        Song song2 = new  Song("Concerto","Van Den BudenMayer",R.raw.van_den_budenmayer_concerto,R.drawable.water);
+        Song song1 = new Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.TUTTI,R.raw.menuett_krieger);
+        Song song2 = new  Song(sourceSong2,RecordSource.LIVE,Pupitre.ALTO,R.raw.van_den_budenmayer_concerto);
 
         choeurDataBase.songsDao().insertSongs(song1,song2);
 

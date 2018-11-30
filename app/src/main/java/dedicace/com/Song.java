@@ -1,8 +1,8 @@
 package dedicace.com;
 
 import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 @Entity
@@ -11,74 +11,40 @@ public class Song {
     @PrimaryKey(autoGenerate = true)
     private int songId;
 
-    @ColumnInfo(name = "titre")
-    private String titre;
+    @Embedded
+    private SourceSong sourceSong;
 
-    @ColumnInfo(name = "groupe")
-    private String groupe;
+    @ColumnInfo(name = "source_enregistrement")
+    private RecordSource recordSource;
 
-    @ColumnInfo(name = "duration")
-    private int duration;
+    @ColumnInfo(name = "pupitre")
+    Pupitre pupitre;
 
     @ColumnInfo(name = "fichier_mp3")
     private int songResId;
 
-    @ColumnInfo(name = "background")
-    private int bgSong;
 
-
-
-
-    @Ignore
-    public Song(String titre, String groupe) {
-        this.titre = titre;
-        this.groupe = groupe;
-    }
-
-    @Ignore
-    public Song(String titre, String groupe, int songResId) {
-        this.titre = titre;
-        this.groupe = groupe;
+    public Song(SourceSong sourceSong, RecordSource recordSource, Pupitre pupitre, int songResId) {
+        this.sourceSong = sourceSong;
+        this.recordSource = recordSource;
+        this.pupitre = pupitre;
         this.songResId = songResId;
-    }
-
-    public Song(String titre, String groupe, int songResId, int bgSong) {
-        this.titre = titre;
-        this.groupe = groupe;
-        this.songResId = songResId;
-        this.bgSong = bgSong;
-    }
-
-    public String getTitre() {
-        return titre;
-    }
-
-    public String getGroupe() {
-        return groupe;
     }
 
     public int getSongId() {
         return songId;
     }
 
-    public int getDuration() {
-        return duration;
-    }
-
     public void setSongId(int songId) {
         this.songId = songId;
     }
 
-    public void setTitre(String titre) {
-        this.titre = titre;
+    public SourceSong getSourceSong() {
+        return sourceSong;
     }
 
-    public void setGroupe(String groupe) {
-        this.groupe = groupe;
-    }
-
-    public void setDuration(int duration) {
-        this.duration = duration;
+    public void setSourceSong(SourceSong sourceSong) {
+        this.sourceSong = sourceSong;
     }
 
     public int getSongResId() {
@@ -89,11 +55,19 @@ public class Song {
         this.songResId = songResId;
     }
 
-    public int getBgSong() {
-        return bgSong;
+    public RecordSource getRecordSource() {
+        return recordSource;
     }
 
-    public void setBgSong(int bgSong) {
-        this.bgSong = bgSong;
+    public void setRecordSource(RecordSource recordSource) {
+        this.recordSource = recordSource;
+    }
+
+    public Pupitre getPupitre() {
+        return pupitre;
+    }
+
+    public void setPupitre(Pupitre pupitre) {
+        this.pupitre = pupitre;
     }
 }
