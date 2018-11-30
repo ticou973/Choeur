@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import static android.graphics.Color.rgb;
@@ -14,6 +15,7 @@ class SongsViewHolder extends RecyclerView.ViewHolder {
     private TextView titre, groupe;
     private ImageView imageSong, playSongs,stopSongs,recordSongs;
     private Button bsBtn, liveBtn, tuttiBtn, bassBtn, tenorBtn, altoBtn, sopranoBtn;
+    private SeekBar seekBar;
 
 
 
@@ -33,6 +35,7 @@ class SongsViewHolder extends RecyclerView.ViewHolder {
         tenorBtn=itemView.findViewById(R.id.btn_tenor);
         altoBtn=itemView.findViewById(R.id.btn_alto);
         sopranoBtn=itemView.findViewById(R.id.btn_soprano);
+        seekBar=itemView.findViewById(R.id.seekBar);
     }
 
     public void setColorButton (Button button, boolean focus) {
@@ -104,5 +107,17 @@ class SongsViewHolder extends RecyclerView.ViewHolder {
 
     public Button getSopranoBtn() {
         return sopranoBtn;
+    }
+
+    public ImageView getImageSong() {
+        return imageSong;
+    }
+
+    public ImageView getRecordSongs() {
+        return recordSongs;
+    }
+
+    public SeekBar getSeekBar() {
+        return seekBar;
     }
 }
