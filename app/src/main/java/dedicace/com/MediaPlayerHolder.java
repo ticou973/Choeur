@@ -57,6 +57,8 @@ public final class MediaPlayerHolder implements PlayerAdapter {
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     stopUpdatingCallbackWithPosition(true);
 
+                    //todo voir si on peut supprimer le playbackinfo
+
                     if (mPlaybackInfoListener != null) {
                         mPlaybackInfoListener.onStateChanged(PlaybackInfoListener.State.COMPLETED);
                         mPlaybackInfoListener.onPlaybackCompleted();
@@ -73,7 +75,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
 
     // Implements PlaybackControl.
     @Override
-    public void loadMedia(Context context, int songResId) {
+    public void prepareMediaPlayer() {
         /*mResourceId = resourceId;
 
         initializeMediaPlayer();
@@ -94,11 +96,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
             e.printStackTrace();
         }*/
 
-        mResourceId =songResId;
-
-        mContext=context;
-
-        mMediaPlayer=MediaPlayer.create(mContext,songResId);
+        initializeMediaPlayer();
 
         initializeProgressCallback();
 
@@ -122,8 +120,14 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     }
 
     @Override
-    public void play() {
+    public void play(Context context, int songResId) {
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
+
+            mResourceId =songResId;
+
+            mContext=context;
+
+            mMediaPlayer=MediaPlayer.create(mContext,songResId);
 
             mMediaPlayer.start();
             if (mPlaybackInfoListener != null) {
@@ -138,7 +142,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         if (mMediaPlayer != null) {
 
             mMediaPlayer.reset();
-            loadMedia(mContext,mResourceId);
+            prepareMediaPlayer();
             if (mPlaybackInfoListener != null) {
                 mPlaybackInfoListener.onStateChanged(PlaybackInfoListener.State.RESET);
             }

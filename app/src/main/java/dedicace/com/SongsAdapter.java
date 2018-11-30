@@ -20,7 +20,7 @@ import static android.content.ContentValues.TAG;
 
 public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
-    private List<Song> songs;
+    private List<SourceSong> songs;
     private Context context;
     private boolean mUserIsSeeking = false;
 
@@ -34,7 +34,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
     private MediaRecorder mediaRecorder;
 
 
-    public SongsAdapter(List<Song> songs, Context context) {
+    public SongsAdapter(List<SourceSong> songs, Context context) {
         this.songs = songs;
         this.context = context;
     }
@@ -56,9 +56,9 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
 
         //Gestion des datas de la SourceSong
-        songsViewHolder.setTitre(songs.get(position).getSourceSong().getTitre());
-        songsViewHolder.setGroupe(songs.get(position).getSourceSong().getGroupe());
-        songsViewHolder.setImageSong(songs.get(position).getSourceSong().getBgSong());
+        songsViewHolder.setTitre(songs.get(position).getTitre());
+        songsViewHolder.setGroupe(songs.get(position).getGroupe());
+        songsViewHolder.setImageSong(songs.get(position).getBgSong());
 
         //Gestion des boutons de RecordSource
         setListener2Button(songsViewHolder,position, songsViewHolder.getLiveBtn(),songsViewHolder.getBsBtn());
@@ -78,7 +78,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         initializePlaybackController(songsViewHolder,position);
 
         //Fournit et parépare le Mediaplayer
-        mPlayerAdapter.loadMedia(context, songs.get(position).getSongResId());
+        mPlayerAdapter.prepareMediaPlayer();
 
         //gestion de Play
         setPlayListener(songsViewHolder, position);
@@ -103,7 +103,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
     private void initData() {
 
-        for (Song song: songs) {
+        for (SourceSong song: songs) {
             pupitres.add(Pupitre.NA);
             sources.add(RecordSource.NA);
         }
@@ -148,7 +148,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
                     Toast.makeText(context, "Veuillez renseigner le pupitre et/ou la source (Live ou Bande Son) !", Toast.LENGTH_LONG).show();
                 }else{
 
-                    mPlayerAdapter.play();
+                    mPlayerAdapter.play(context,R.raw.menuett_krieger);
                     /*mediaPlayer = MediaPlayer.create(context, songs.get(position).getSongResId());
                     mediaPlayer.start();*/
                 }

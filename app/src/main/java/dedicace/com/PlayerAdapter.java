@@ -7,13 +7,11 @@ import android.content.Context;
  */
 public interface PlayerAdapter {
 
-    void loadMedia(Context context, int songResId);
-
     void release();
 
     boolean isPlaying();
 
-    void play();
+    void play(Context context, int songResId);
 
     void reset();
 
@@ -22,4 +20,6 @@ public interface PlayerAdapter {
     void initializeProgressCallback();
 
     void seekTo(int position);
+
+    void prepareMediaPlayer();
 }
