@@ -18,6 +18,7 @@ package dedicace.com;
 
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.util.Log;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -50,12 +51,15 @@ public final class MediaPlayerHolder implements PlayerAdapter {
      * not the constructor.
      */
     private void initializeMediaPlayer() {
+        Log.d(SongsAdapter.TAG, "initializeMediaPlayer: ");
         if (mMediaPlayer == null) {
             mMediaPlayer = new MediaPlayer();
             mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     stopUpdatingCallbackWithPosition(true);
+
+                    Log.d(SongsAdapter.TAG, "onCompletion: ");
 
                     //todo voir si on peut supprimer le playbackinfo
 
@@ -75,32 +79,20 @@ public final class MediaPlayerHolder implements PlayerAdapter {
 
     // Implements PlaybackControl.
     @Override
-    public void prepareMediaPlayer() {
-        /*mResourceId = resourceId;
+    public void prepareMediaPlayer(Context context, int songResId) {
 
+        mContext=context;
+        mResourceId =songResId;
         initializeMediaPlayer();
 
-        AssetFileDescriptor assetFileDescriptor =
-                mContext.getResources().openRawResourceFd(mResourceId);
-        try {
+        mMediaPlayer=MediaPlayer.create(mContext,songResId);
 
-            mMediaPlayer.setDataSource(assetFileDescriptor);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-
-            mMediaPlayer.prepare();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-
-        initializeMediaPlayer();
+        Log.d(SongsAdapter.TAG, "prepareMediaPlayer: ");
 
         initializeProgressCallback();
-
     }
+
+
 
     @Override
     public void release() {
@@ -119,17 +111,13 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         return false;
     }
 
+
+
     @Override
-    public void play(Context context, int songResId) {
+    public void play() {
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
-
-            mResourceId =songResId;
-
-            mContext=context;
-
-            mMediaPlayer=MediaPlayer.create(mContext,songResId);
-
             mMediaPlayer.start();
+
             if (mPlaybackInfoListener != null) {
                 mPlaybackInfoListener.onStateChanged(PlaybackInfoListener.State.PLAYING);
             }
@@ -142,7 +130,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         if (mMediaPlayer != null) {
 
             mMediaPlayer.reset();
-            prepareMediaPlayer();
+            prepareMediaPlayer(mContext,mResourceId);
             if (mPlaybackInfoListener != null) {
                 mPlaybackInfoListener.onStateChanged(PlaybackInfoListener.State.RESET);
             }
@@ -215,7 +203,10 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     @Override
     public void initializeProgressCallback() {
         final int duration = mMediaPlayer.getDuration();
+        Log.d(SongsAdapter.TAG, "initializeProgressCallback: "+ duration);
         if (mPlaybackInfoListener != null) {
+
+
             mPlaybackInfoListener.onDurationChanged(duration);
             mPlaybackInfoListener.onPositionChanged(0);
 

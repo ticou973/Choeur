@@ -11,7 +11,7 @@ public interface PlayerAdapter {
 
     boolean isPlaying();
 
-    void play(Context context, int songResId);
+    void play();
 
     void reset();
 
@@ -21,5 +21,7 @@ public interface PlayerAdapter {
 
     void seekTo(int position);
 
-    void prepareMediaPlayer();
+    void prepareMediaPlayer(Context context, int songResId);
+
+
 }

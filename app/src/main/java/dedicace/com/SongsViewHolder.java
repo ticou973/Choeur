@@ -2,6 +2,7 @@ package dedicace.com;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -36,7 +37,14 @@ class SongsViewHolder extends RecyclerView.ViewHolder {
         altoBtn=itemView.findViewById(R.id.btn_alto);
         sopranoBtn=itemView.findViewById(R.id.btn_soprano);
         seekBar=itemView.findViewById(R.id.seekBar);
+
+        Log.d(SongsAdapter.TAG, "SongsViewHolder: ");
     }
+
+
+
+
+
 
     public void setColorButton (Button button, boolean focus) {
 

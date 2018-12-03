@@ -1,8 +1,6 @@
 package dedicace.com;
 
 import android.content.Context;
-import android.media.MediaPlayer;
-import android.media.MediaRecorder;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -16,8 +14,6 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.content.ContentValues.TAG;
-
 public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
     private List<SourceSong> songs;
@@ -26,12 +22,11 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
     private List<Pupitre> pupitres = new ArrayList<>();
     private List<RecordSource> sources = new ArrayList<>();
+    private  List<Boolean> isFirstTime = new ArrayList<>();
 
     private PlayerAdapter mPlayerAdapter;
 
-
-    private MediaPlayer mediaPlayer;
-    private MediaRecorder mediaRecorder;
+    public static final String TAG = "coucou";
 
 
     public SongsAdapter(List<SourceSong> songs, Context context) {
@@ -46,14 +41,16 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
         initData();
 
-        return new SongsViewHolder(view);
+        SongsViewHolder songsViewHolder = new SongsViewHolder(view);
+
+        return songsViewHolder;
     }
 
 
     @Override
     public void onBindViewHolder(@NonNull final SongsViewHolder songsViewHolder, final int position) {
 
-
+        Log.d(TAG, "onBindViewHolder: " + position);
 
         //Gestion des datas de la SourceSong
         songsViewHolder.setTitre(songs.get(position).getTitre());
@@ -71,15 +68,6 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         setListener4Button(songsViewHolder,position,songsViewHolder.getAltoBtn(), songsViewHolder.getTuttiBtn(),songsViewHolder.getBassBtn(),songsViewHolder.getTenorBtn(),songsViewHolder.getSopranoBtn());
         setListener4Button(songsViewHolder,position,songsViewHolder.getSopranoBtn(),songsViewHolder.getTuttiBtn(),songsViewHolder.getBassBtn(),songsViewHolder.getTenorBtn(),songsViewHolder.getAltoBtn());
 
-        //Gestion de la seekBar
-        initializeSeekbar(songsViewHolder,position);
-
-        //PlayBackController
-        initializePlaybackController(songsViewHolder,position);
-
-        //Fournit et parépare le Mediaplayer
-        mPlayerAdapter.prepareMediaPlayer();
-
         //gestion de Play
         setPlayListener(songsViewHolder, position);
 
@@ -96,6 +84,14 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         return songs.size();
     }
 
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+
+        mPlayerAdapter.release();
+        Log.d(TAG, "onStop: release MediaPlayer");
+    }
+
 
 
 
@@ -106,6 +102,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         for (SourceSong song: songs) {
             pupitres.add(Pupitre.NA);
             sources.add(RecordSource.NA);
+            isFirstTime.add(true);
         }
 
     }
@@ -137,20 +134,40 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
     }
 
-    private void setPlayListener(SongsViewHolder songsViewHolder, final int position) {
+    private void setPlayListener(final SongsViewHolder songsViewHolder, final int position) {
 
         songsViewHolder.getPlaySongs().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                Log.d(TAG, "onClick: "+position);
 
                 if(pupitres.get(position)==Pupitre.NA||sources.get(position)==RecordSource.NA){
 
                     Toast.makeText(context, "Veuillez renseigner le pupitre et/ou la source (Live ou Bande Son) !", Toast.LENGTH_LONG).show();
                 }else{
 
-                    mPlayerAdapter.play(context,R.raw.menuett_krieger);
-                    /*mediaPlayer = MediaPlayer.create(context, songs.get(position).getSongResId());
-                    mediaPlayer.start();*/
+                    if(isFirstTime.get(position)) {
+
+                        //Gestion de la seekBar
+                        initializeSeekbar(songsViewHolder);
+
+                        //PlayBackController
+                        initializePlaybackController(songsViewHolder);
+
+                        //Fournit et parépare le Mediaplayer
+                        mPlayerAdapter.prepareMediaPlayer(context, R.raw.menuett_krieger);
+
+                        isFirstTime.set(position,false);
+                    }
+
+                    if(!mPlayerAdapter.isPlaying()) {
+
+                        mPlayerAdapter.play();
+
+                    }else {
+                        mPlayerAdapter.pause();
+                    }
                 }
             }
         });
@@ -208,7 +225,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
     }
 
-    private void initializeSeekbar(SongsViewHolder songsViewHolder, int position) {
+    private void initializeSeekbar(SongsViewHolder songsViewHolder) {
         songsViewHolder.getSeekBar().setOnSeekBarChangeListener(
                 new SeekBar.OnSeekBarChangeListener() {
                     int userSelectedPosition = 0;
@@ -233,7 +250,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
                 });
     }
 
-    private void initializePlaybackController(SongsViewHolder songsViewHolder,int position) {
+    private void initializePlaybackController(SongsViewHolder songsViewHolder) {
         MediaPlayerHolder mMediaPlayerHolder = new MediaPlayerHolder(context);
 
         mMediaPlayerHolder.setPlaybackInfoListener(new PlaybackListener(songsViewHolder));
