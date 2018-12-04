@@ -9,19 +9,20 @@ public class Converters {
 
         if (pupitre == Pupitre.BASS) {
 
-            return "Bass";
+            return "1_Bass";
 
         }else if (pupitre == Pupitre.TENOR) {
 
-            return "Tenor";
+            return "2_Tenor";
         }else if (pupitre == Pupitre.ALTO) {
 
-            return "Alto";
+            return "3_Alto";
         }else if (pupitre == Pupitre.SOPRANO) {
 
-            return "Soprano";
+            return "4_Soprano";
+
         }else if(pupitre==Pupitre.TUTTI){
-            return "Tutti";
+            return "0_Tutti";
         }
 
         return "N/A";
@@ -30,23 +31,23 @@ public class Converters {
     @TypeConverter
     public static Pupitre CodePupitreToPupitre (String codePupitre) {
 
-        if (codePupitre.equals("Bass")) {
+        if (codePupitre.equals("1_Bass")) {
 
             return Pupitre.BASS;
 
-        }else if (codePupitre.equals("Tenor") ) {
+        }else if (codePupitre.equals("2_Tenor") ) {
 
             return Pupitre.TENOR;
 
-        }else if (codePupitre.equals("Alto")) {
+        }else if (codePupitre.equals("3_Alto")) {
 
             return Pupitre.ALTO;
 
-        }else if (codePupitre.equals("Soprano")) {
+        }else if (codePupitre.equals("4_Soprano")) {
 
             return Pupitre.SOPRANO;
 
-        }else if(codePupitre=="Tutti"){
+        }else if(codePupitre.equals("0_Tutti")){
 
             return Pupitre.TUTTI;
         }

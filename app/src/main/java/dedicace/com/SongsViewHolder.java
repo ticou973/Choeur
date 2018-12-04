@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import static android.graphics.Color.rgb;
 
-class SongsViewHolder extends RecyclerView.ViewHolder {
+class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
     private TextView titre, groupe;
     private ImageView imageSong, playSongs,stopSongs,recordSongs;
@@ -39,6 +39,26 @@ class SongsViewHolder extends RecyclerView.ViewHolder {
         seekBar=itemView.findViewById(R.id.seekBar);
 
         Log.d(SongsAdapter.TAG, "SongsViewHolder: ");
+
+        int position = getAdapterPosition();
+    }
+
+
+    public void setButtonActivable(boolean activable, Button... buttons){
+
+        for (Button button: buttons) {
+
+            if(activable){
+
+                button.setAlpha(1.0f);
+                button.setEnabled(true);
+
+            }else{
+
+                button.setAlpha(0.3f);
+                button.setEnabled(false);
+            }
+        }
     }
 
 
@@ -46,24 +66,29 @@ class SongsViewHolder extends RecyclerView.ViewHolder {
 
 
 
-    public void setColorButton (Button button, boolean focus) {
+    public void setColorButton(boolean focus, Button... buttons) {
 
         int red, green, blue;
 
-        if(focus) {
-            red = 255;
-            green = 235;
-            blue = 59;
-            button.setAlpha(1.0f);
+        for (Button button: buttons) {
 
-        }else{
-            red = 128;
-            green = 226;
-            blue = 126;
-            button.setAlpha(0.3f);
+            if(focus) {
+                red = 255;
+                green = 235;
+                blue = 59;
+                button.setAlpha(1.0f);
+
+            }else{
+                red = 128;
+                green = 226;
+                blue = 126;
+                button.setAlpha(0.3f);
+            }
+
+            button.setBackgroundColor(rgb(red,green,blue));
         }
 
-        button.setBackgroundColor(rgb(red,green,blue));
+
     }
 
     public void setTitre(String titre){
@@ -127,5 +152,21 @@ class SongsViewHolder extends RecyclerView.ViewHolder {
 
     public SeekBar getSeekBar() {
         return seekBar;
+    }
+
+    @Override
+    public void onClick(View view) {
+
+
+
+    }
+
+    public void disableBtn(Button ... buttons) {
+
+        for (Button button:buttons) {
+            button.setAlpha(0.3f);
+            button.setEnabled(false);
+
+        }
     }
 }

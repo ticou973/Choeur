@@ -13,6 +13,20 @@ public interface SongsDao {
     @Query("SELECT * FROM song")
     List<Song> getAllSongs();
 
+    @Query("SELECT * FROM song WHERE titre IN (:titre)")
+    List<Song> getSongsBySourceSong(String titre);
+
+    @Query("SELECT * FROM song WHERE (titre IN (:titre)) AND (pupitre IN (:pupitre)) AND (source_enregistrement IN (:source))")
+    Song getSongsByTitrePupitreSource(String titre, Pupitre pupitre, RecordSource source);
+
+    @Query("SELECT * FROM song WHERE (titre IN (:titre)) AND (source_enregistrement IN (:source))")
+    List<Song> getSongsByTitreSource(String titre, RecordSource source);
+
+
+    @Query("SELECT * FROM song WHERE (titre IN (:titre)) AND (source_enregistrement IN (:source)) ORDER BY pupitre ASC ")
+    List<Song> getSongOrderedByPupitre(String titre, RecordSource source);
+
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertSong(Song song);
 
