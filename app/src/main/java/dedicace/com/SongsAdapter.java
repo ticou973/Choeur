@@ -425,7 +425,6 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
             }
 
-
     }
 
 
@@ -511,7 +510,12 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
                         initializePlaybackController(songsViewHolder);
 
                         //Fournit et parépare le Mediaplayer
-                        mPlayerAdapter.prepareMediaPlayer(context, R.raw.menuett_krieger);
+                        Pupitre pupitreToPlay = pupitres.get(position);
+                        RecordSource sourceToPlay = sources.get(position);
+                        Song songToPlay = MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(songs.get(position).getTitre(),pupitreToPlay,sourceToPlay);
+                        int resIdToPlay = songToPlay.getSongResId();
+
+                        mPlayerAdapter.prepareMediaPlayer(context, resIdToPlay);
 
                         isFirstTime.set(position,false);
                     }
