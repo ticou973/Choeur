@@ -82,13 +82,35 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 red = 128;
                 green = 226;
                 blue = 126;
-                button.setAlpha(0.3f);
+                button.setAlpha(0.5f);
             }
 
             button.setBackgroundColor(rgb(red,green,blue));
         }
 
 
+    }
+
+    public void setGreyButton(boolean focus, Button... buttons){
+
+        int red, green, blue;
+
+        for (Button button: buttons) {
+
+            red = 224;
+            green = 224;
+            blue = 224;
+
+
+            if(focus) { button.setAlpha(1.0f);
+
+            }else{ button.setAlpha(0.5f); }
+
+
+
+            button.setBackgroundColor(rgb(red,green,blue));
+
+        }
     }
 
     public void setTitre(String titre){

@@ -32,7 +32,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
     private List<Boolean> isAlto = new ArrayList<>();
     private List<Boolean> isSoprano = new ArrayList<>();
     private boolean dispo[][] = new boolean[2][6];
-    private int i,j;
+    private int previousPlay;
 
     private Button bsBtn;
     private Button liveBtn;
@@ -69,13 +69,10 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull final SongsViewHolder songsViewHolder, final int position) {
 
-        Log.d(TAG, "onBindViewHolder: " + position);
-
         //Gestion des datas de la SourceSong
-        songsViewHolder.setTitre(songs.get(position).getTitre());
-        songsViewHolder.setGroupe(songs.get(position).getGroupe());
-        songsViewHolder.setImageSong(songs.get(position).getBgSong());
+        initDataSourceSong(songsViewHolder, position);
 
+        //Selection des songs disponibles
         VerifyExistingSongs(songsViewHolder,position);
 
         //Gestion des boutons de RecordSource
@@ -89,7 +86,6 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         setListener4Button(songsViewHolder,position,songsViewHolder.getAltoBtn(), songsViewHolder.getTuttiBtn(),songsViewHolder.getBassBtn(),songsViewHolder.getTenorBtn(),songsViewHolder.getSopranoBtn());
         setListener4Button(songsViewHolder,position,songsViewHolder.getSopranoBtn(),songsViewHolder.getTuttiBtn(),songsViewHolder.getBassBtn(),songsViewHolder.getTenorBtn(),songsViewHolder.getAltoBtn());
 
-
         //gestion de Play
         setPlayListener(songsViewHolder, position);
 
@@ -99,6 +95,15 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         //gestion de record
         setRecordListener(songsViewHolder,position);
 
+    }
+
+    private void initDataSourceSong(SongsViewHolder songsViewHolder, int position) {
+        songsViewHolder.setTitre(songs.get(position).getTitre());
+        songsViewHolder.setGroupe(songs.get(position).getGroupe());
+        GlideApp.with(context)
+                .load(songs.get(position).getBgSong())
+                .centerCrop() // scale to fill the ImageView and crop any extra
+                .into(songsViewHolder.getImageSong());
     }
 
 
@@ -138,19 +143,13 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
         }else{
 
-            setActivableBtn(songsViewHolder,choeurSongs,position);
+            setActivableBtn(songsViewHolder,RecordSource.BANDE_SON,position);
 
             //setButtonActivables(songsViewHolder,choeurSongs);
 
             //getSongsPossible(choeurSongs,position);
 
         }
-
-        /*if(songBTU!=null){
-            sources.set(position,RecordSource.BANDE_SON);
-            pupitres.set(position,Pupitre.TUTTI);
-            songsViewHolder.setColorButton(true,bsBtn,tuttiBtn);
-        }*/
 
     }
 
@@ -249,98 +248,109 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
     }
 
 
-    public void setActivableBtn(SongsViewHolder songsViewHolder, List<Song> choeurSongs, int position){
+    public void setActivableBtn(SongsViewHolder songsViewHolder, RecordSource recordSource, int position){
+
+        Log.d(TAG, "setActivableBtn: A "+recordSource);
 
         String titre = songs.get(position).getTitre();
-        Log.d(TAG, "setActivableBtn: "+titre);
-        RecordSource recordSourceBS= RecordSource.BANDE_SON;
-        RecordSource recordSourceLive = RecordSource.LIVE;
+        RecordSource secondSource = RecordSource.NA;
+        Button mainBtn=null,secondBtn=null;
 
-        List<Song> songsBS = MainActivity.choeurDataBase.songsDao().getSongOrderedByPupitre(titre,recordSourceBS);
-        List<Song> songsLive = MainActivity.choeurDataBase.songsDao().getSongOrderedByPupitre(titre,recordSourceLive);
+        resetButton(songsViewHolder);
 
+        if(recordSource==RecordSource.BANDE_SON){
+            secondSource=RecordSource.LIVE;
+            mainBtn = bsBtn;
+            secondBtn = liveBtn;
+        }else if(recordSource==RecordSource.LIVE){
+            secondSource=RecordSource.BANDE_SON;
+            mainBtn = liveBtn;
+            secondBtn = bsBtn;
 
-        for (Song song:songsBS) {
-            Log.d(TAG, "setActivableBtn: BS "+song.getPupitre().toString()+song.getRecordSource().toString());        }
-
-        for (Song song:songsLive) {
-            Log.d(TAG, "setActivableBtn: Live "+song.getPupitre().toString()+song.getRecordSource().toString());
+            Log.d(TAG, "setActivableBtn: B "+secondSource);
         }
 
-        if(songsBS.size()==0){
-            songsViewHolder.setButtonActivable(false,bsBtn);
+        List<Song> songsMainSource = MainActivity.choeurDataBase.songsDao().getSongOrderedByPupitre(titre,recordSource);
+        List<Song> songsSecondSource = MainActivity.choeurDataBase.songsDao().getSongOrderedByPupitre(titre,secondSource);
+
+        if(songsMainSource.size()==0){
+            songsViewHolder.setButtonActivable(false,mainBtn);
         }
 
-        if(songsLive.size()==0){
-            songsViewHolder.setButtonActivable(false,liveBtn);
+        if(songsSecondSource.size()==0){
+            songsViewHolder.setButtonActivable(false,secondBtn);
         }
 
 
-        if(songsBS.size()!=0){
-            songsViewHolder.setButtonActivable(true,bsBtn);
-            songsViewHolder.setColorButton(true,bsBtn);
-            sources.set(position,RecordSource.BANDE_SON);
+        if(songsMainSource.size()!=0){
+            Log.d(TAG, "setActivableBtn: C "+ songsMainSource.size());
+            songsViewHolder.setButtonActivable(true,mainBtn);
+            songsViewHolder.setColorButton(true,mainBtn);
+            sources.set(position,recordSource);
 
-            if(MainActivity.choeurDataBase.songsDao().getSongsByTitreSource(titre,RecordSource.LIVE)==null){
-                songsViewHolder.setButtonActivable(false,liveBtn);
+            if(MainActivity.choeurDataBase.songsDao().getSongsByTitreSource(titre,secondSource)==null){
+                songsViewHolder.setButtonActivable(false,secondBtn);
+            }else{
+                songsViewHolder.setColorButton(false,secondBtn);
             }
 
-            for (Song songBS: songsBS) {
+            for (Song mainSourceSong: songsMainSource) {
 
-                Pupitre pupitre = songBS.getPupitre();
+                Pupitre pupitre = mainSourceSong.getPupitre();
 
                 if(pupitre==Pupitre.TUTTI){
                     songsViewHolder.setButtonActivable(true,tuttiBtn);
                     songsViewHolder.setColorButton(true,tuttiBtn);
                     pupitres.set(position,Pupitre.TUTTI);
-                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.BASS,RecordSource.BANDE_SON)==null){
+                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.BASS,recordSource)==null){
                         songsViewHolder.setButtonActivable(false,bassBtn);
-                    }
-                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.TENOR,RecordSource.BANDE_SON)==null){
+                    }else{songsViewHolder.setColorButton(false,bassBtn);}
+                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.TENOR,recordSource)==null){
                         songsViewHolder.setButtonActivable(false,tenorBtn);
-                    }
-                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.ALTO,RecordSource.BANDE_SON)==null){
+                    }else{songsViewHolder.setColorButton(false,tenorBtn);}
+                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.ALTO,recordSource)==null){
                         songsViewHolder.setButtonActivable(false,altoBtn);
-                    }
-                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,RecordSource.BANDE_SON)==null){
+                    }else{songsViewHolder.setColorButton(false,altoBtn);}
+                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,recordSource)==null){
                         songsViewHolder.setButtonActivable(false,sopranoBtn);
-                    }
+                    }else{songsViewHolder.setColorButton(false,sopranoBtn);}
                     return;
                 }else if(pupitre==Pupitre.BASS){
                     songsViewHolder.setButtonActivable(false,tuttiBtn);
                     songsViewHolder.setButtonActivable(true,bassBtn);
                     songsViewHolder.setColorButton(true,bassBtn);
                     pupitres.set(position,Pupitre.BASS);
-                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.TENOR,RecordSource.BANDE_SON)==null){
+                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.TENOR,recordSource)==null){
                         songsViewHolder.setButtonActivable(false,tenorBtn);
-                    }
-                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.ALTO,RecordSource.BANDE_SON)==null){
+                    }else{songsViewHolder.setColorButton(false,tenorBtn);}
+                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.ALTO,recordSource)==null){
                         songsViewHolder.setButtonActivable(false,altoBtn);
-                    }
-                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,RecordSource.BANDE_SON)==null){
+                    }else{songsViewHolder.setColorButton(false,altoBtn);}
+                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,recordSource)==null){
                         songsViewHolder.setButtonActivable(false,sopranoBtn);
-                    }
+                    }else{songsViewHolder.setColorButton(false,sopranoBtn);}
                     return;
                 }else if(pupitre==Pupitre.TENOR){
                     songsViewHolder.setButtonActivable(false,tuttiBtn,bassBtn);
                     songsViewHolder.setButtonActivable(true,tenorBtn);
                     songsViewHolder.setColorButton(true,tenorBtn);
                     pupitres.set(position,Pupitre.TENOR);
-                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.ALTO,RecordSource.BANDE_SON)==null){
+                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.ALTO,recordSource)==null){
                         songsViewHolder.setButtonActivable(false,altoBtn);
-                    }
-                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,RecordSource.BANDE_SON)==null){
+                    }else{songsViewHolder.setColorButton(false,altoBtn);}
+                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,recordSource)==null){
                         songsViewHolder.setButtonActivable(false,sopranoBtn);
-                    }
+                    }else{songsViewHolder.setColorButton(false,sopranoBtn);}
                     return;
                 }else if(pupitre==Pupitre.ALTO){
+                    Log.d(TAG, "setActivableBtn: D");
                     songsViewHolder.setButtonActivable(false,tuttiBtn,bassBtn,tenorBtn);
                     songsViewHolder.setButtonActivable(true,altoBtn);
                     songsViewHolder.setColorButton(true,altoBtn);
                     pupitres.set(position,Pupitre.ALTO);
-                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,RecordSource.BANDE_SON)==null){
+                    if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,recordSource)==null){
                         songsViewHolder.setButtonActivable(false,sopranoBtn);
-                    }
+                    }else{songsViewHolder.setColorButton(false,sopranoBtn);}
                     return;
                 }else if(pupitre==Pupitre.SOPRANO){
                     songsViewHolder.setButtonActivable(false,tuttiBtn,bassBtn,tenorBtn,altoBtn);
@@ -351,31 +361,31 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
                 }
 
              }
-        }else if(songsLive.size()!=0){
-                songsViewHolder.setButtonActivable(true,liveBtn);
-                songsViewHolder.setColorButton(true,liveBtn);
-                sources.set(position,RecordSource.LIVE);
+        }else if(songsSecondSource.size()!=0){
+                songsViewHolder.setButtonActivable(true,secondBtn);
+                songsViewHolder.setColorButton(true,secondBtn);
+                sources.set(position,secondSource);
 
-                for (Song songLive: songsLive) {
+                for (Song secondSourceSong: songsSecondSource) {
 
-                    Pupitre pupitre = songLive.getPupitre();
+                    Pupitre pupitre = secondSourceSong.getPupitre();
 
                     if(pupitre==Pupitre.TUTTI){
                         songsViewHolder.setButtonActivable(true,tuttiBtn);
                         songsViewHolder.setColorButton(true,tuttiBtn);
                         pupitres.set(position,Pupitre.TUTTI);
-                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.BASS,RecordSource.LIVE)==null){
+                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.BASS,secondSource)==null){
                             songsViewHolder.setButtonActivable(false,bassBtn);
-                        }
-                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.TENOR,RecordSource.LIVE)==null){
+                        }else{songsViewHolder.setColorButton(false,bassBtn);}
+                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.TENOR,secondSource)==null){
                             songsViewHolder.setButtonActivable(false,tenorBtn);
-                        }
-                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.ALTO,RecordSource.LIVE)==null){
+                        }else{songsViewHolder.setColorButton(false,tenorBtn);}
+                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.ALTO,secondSource)==null){
                             songsViewHolder.setButtonActivable(false,altoBtn);
-                        }
-                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,RecordSource.LIVE)==null){
+                        }else{songsViewHolder.setColorButton(false,altoBtn);}
+                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,secondSource)==null){
                             songsViewHolder.setButtonActivable(false,sopranoBtn);
-                        }
+                        }else{songsViewHolder.setColorButton(false,sopranoBtn);}
 
                         return;
                     }else if(pupitre==Pupitre.BASS){
@@ -383,36 +393,36 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
                         songsViewHolder.setButtonActivable(true,bassBtn);
                         songsViewHolder.setColorButton(true,bassBtn);
                         pupitres.set(position,Pupitre.BASS);
-                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.TENOR,RecordSource.LIVE)==null){
+                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.TENOR,secondSource)==null){
                             songsViewHolder.setButtonActivable(false,tenorBtn);
-                        }
-                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.ALTO,RecordSource.LIVE)==null){
+                        }else{songsViewHolder.setColorButton(false,tenorBtn);}
+                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.ALTO,secondSource)==null){
                             songsViewHolder.setButtonActivable(false,altoBtn);
-                        }
-                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,RecordSource.LIVE)==null){
+                        }else{songsViewHolder.setColorButton(false,altoBtn);}
+                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,secondSource)==null){
                             songsViewHolder.setButtonActivable(false,sopranoBtn);
-                        }
+                        }else{songsViewHolder.setColorButton(false,sopranoBtn);}
                         return;
                     }else if(pupitre==Pupitre.TENOR){
                         songsViewHolder.setButtonActivable(false,tuttiBtn,bassBtn);
                         songsViewHolder.setButtonActivable(true,tenorBtn);
                         songsViewHolder.setColorButton(true,tenorBtn);
                         pupitres.set(position,Pupitre.TENOR);
-                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.ALTO,RecordSource.LIVE)==null){
+                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.ALTO,secondSource)==null){
                             songsViewHolder.setButtonActivable(false,altoBtn);
-                        }
-                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,RecordSource.LIVE)==null){
+                        }else{songsViewHolder.setColorButton(false,altoBtn);}
+                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,secondSource)==null){
                             songsViewHolder.setButtonActivable(false,sopranoBtn);
-                        }
+                        }else{songsViewHolder.setColorButton(false,sopranoBtn);}
                         return;
                     }else if(pupitre==Pupitre.ALTO){
                         songsViewHolder.setButtonActivable(false,tuttiBtn,bassBtn,tenorBtn);
                         songsViewHolder.setButtonActivable(true,altoBtn);
                         songsViewHolder.setColorButton(true,altoBtn);
                         pupitres.set(position,Pupitre.ALTO);
-                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,RecordSource.LIVE)==null){
+                        if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,secondSource)==null){
                             songsViewHolder.setButtonActivable(false,sopranoBtn);
-                        }
+                        }else{songsViewHolder.setColorButton(false,sopranoBtn);}
                         return;
                     }else if(pupitre==Pupitre.SOPRANO){
                         songsViewHolder.setButtonActivable(false,tuttiBtn,bassBtn,tenorBtn,altoBtn);
@@ -425,6 +435,12 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
             }
 
+    }
+
+    private void resetButton(SongsViewHolder songsViewHolder) {
+
+        songsViewHolder.setButtonActivable(true,bsBtn,liveBtn,tuttiBtn,bassBtn,tenorBtn,altoBtn,sopranoBtn);
+        songsViewHolder.setGreyButton(true, bsBtn,liveBtn,tuttiBtn,bassBtn,tenorBtn,altoBtn,sopranoBtn);
     }
 
 
@@ -541,6 +557,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
                 songsViewHolder.setColorButton(true,mainBtn);
                 songsViewHolder.setColorButton(false,secondBtn,thirdBtn,fourthBtn,fifthBtn);
+                //songsViewHolder.setColorButton(false,secondBtn,thirdBtn,fourthBtn,fifthBtn);
 
                 if(mainBtn==songsViewHolder.getTuttiBtn()){ pupitres.set(position,Pupitre.TUTTI);
 
@@ -569,10 +586,18 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
                 songsViewHolder.setColorButton(true,mainBtn);
                 songsViewHolder.setColorButton(false,secondBtn);
 
-                if(mainBtn==songsViewHolder.getBsBtn()){ sources.set(position,RecordSource.BANDE_SON);
+                if(mainBtn==songsViewHolder.getBsBtn()){
+                    sources.set(position,RecordSource.BANDE_SON);
+                    Log.d(TAG, "onClick: ResourceButtonA" + sources.get(position));
+                    setActivableBtn(songsViewHolder,RecordSource.BANDE_SON,position);
 
-                }else if(mainBtn==songsViewHolder.getLiveBtn()){ sources.set(position,RecordSource.LIVE);
+                    
 
+                }else if(mainBtn==songsViewHolder.getLiveBtn()){
+                    sources.set(position,RecordSource.LIVE);
+                    Log.d(TAG, "onClick: ResourceButtonB" + sources.get(position));
+                    setActivableBtn(songsViewHolder,RecordSource.LIVE,position);
+                    
                 }else{ sources.set(position,RecordSource.NA);
                 }
 
