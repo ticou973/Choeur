@@ -52,8 +52,8 @@ public class MainActivity extends AppCompatActivity {
 
         SourceSong sourceSong1 = new SourceSong("Menuet","Krieger",90,R.drawable.hand,"");
         SourceSong sourceSong2 = new SourceSong("Concerto","Van Den BudenMayer",270,R.drawable.water,"");
-        SourceSong sourceSong3 = new SourceSong("variation bwv988","GoldBerg",150,R.drawable.yinyang,"");
-        SourceSong sourceSong4 = new SourceSong("tempête en mer","Vivaldi",90,R.drawable.hand,"");
+        SourceSong sourceSong3 = new SourceSong("Variation bwv988","GoldBerg",150,R.drawable.yinyang,"");
+        SourceSong sourceSong4 = new SourceSong("Tempête en mer","Vivaldi",90,R.drawable.hand,"");
         SourceSong sourceSong5 = new SourceSong("Agnus Dei","Zbigniew Preisner",192,R.drawable.yinyang,"");
         SourceSong sourceSong6 = new SourceSong("L'eau","Jeanne Cherhal",190,R.drawable.water,"");
 
