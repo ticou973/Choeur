@@ -109,38 +109,38 @@
 
             <ImageView
                 android:id="@+id/play_image"
-                android:layout_width="64dp"
-                android:layout_height="67dp"
-                android:layout_marginTop="72dp"
+                android:layout_width="57dp"
+                android:layout_height="57dp"
+                android:layout_marginTop="80dp"
                 android:layout_marginEnd="8dp"
                 android:elevation="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.513"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_playgreyicon" />
+                app:srcCompat="@drawable/ic_play_orange" />
 
             <ImageView
                 android:id="@+id/stopSongs"
-                android:layout_width="64dp"
-                android:layout_height="67dp"
-                android:layout_marginTop="72dp"
+                android:layout_width="57dp"
+                android:layout_height="57dp"
+                android:layout_marginTop="80dp"
                 android:layout_marginEnd="16dp"
                 android:elevation="5dp"
                 app:layout_constraintEnd_toStartOf="@+id/play_image"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_stopgrey" />
+                app:srcCompat="@drawable/ic_stop_orange" />
 
             <ImageView
                 android:id="@+id/recordSongs"
-                android:layout_width="64dp"
-                android:layout_height="67dp"
+                android:layout_width="57dp"
+                android:layout_height="57dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="72dp"
+                android:layout_marginTop="80dp"
                 android:elevation="5dp"
                 app:layout_constraintStart_toEndOf="@+id/play_image"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_recordgrey" />
+                app:srcCompat="@drawable/ic_record_orange" />
 
             <ImageView
                 android:id="@+id/iv_songs"
@@ -161,7 +161,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:fontFamily="@font/roboto"
-                android:padding="0dp"
+                android:paddingTop="0dp"
                 android:text="@string/groupe"
                 android:textColor="@color/primaryTextColor"
                 android:textSize="18sp"
@@ -177,7 +177,7 @@
                 android:layout_marginEnd="8dp"
                 android:fontFamily="@font/roboto"
                 android:inputType="textMultiLine"
-                android:padding="0dp"
+                android:paddingBottom="0dp"
                 android:text="@string/titre"
                 android:textColor="@color/primaryTextColor"
                 android:textSize="24sp"

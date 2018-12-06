@@ -50,25 +50,30 @@ public class MainActivity extends AppCompatActivity {
 
         choeurDataBase.songsDao().deleteAll();
 
-        SourceSong sourceSong1 = new SourceSong("Menuet","Krieger",90,R.drawable.hand,"");
-        SourceSong sourceSong2 = new SourceSong("Concerto","Van Den BudenMayer",270,R.drawable.water,"");
-        SourceSong sourceSong3 = new SourceSong("Variation bwv988","GoldBerg",150,R.drawable.yinyang,"");
-        SourceSong sourceSong4 = new SourceSong("Tempête en mer","Vivaldi",90,R.drawable.hand,"");
-        SourceSong sourceSong5 = new SourceSong("Agnus Dei","Zbigniew Preisner",192,R.drawable.yinyang,"");
-        SourceSong sourceSong6 = new SourceSong("L'eau","Jeanne Cherhal",190,R.drawable.water,"");
+        SourceSong sourceSong1 = new SourceSong("Des hommes pareils","Francis Cabrel",321,R.drawable.hommes_pareils,"");
+        SourceSong sourceSong2 = new SourceSong("L'un pour l'autre","Maurane",266,R.drawable.yinyang,"");
+        SourceSong sourceSong3 = new SourceSong("L'eau","GoldBerg",143,R.drawable.water,"");
+        SourceSong sourceSong4 = new SourceSong("Le tissu","Jeanne Cherhal",236,R.drawable.femme_tissu,"");
+        SourceSong sourceSong5 = new SourceSong("Papaoutai","Stromae",232,R.drawable.papa,"");
+        SourceSong sourceSong6 = new SourceSong("Recitation 11","Georges Aperghis",243,R.drawable.pyramide_texte,"");
+        SourceSong sourceSong7 = new SourceSong("North Star","Philip Glas",160,R.drawable.etoile,"");
 
-        Song song1 = new Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.TUTTI,R.raw.menuett_krieger);
-        Song song2 = new  Song(sourceSong2,RecordSource.LIVE,Pupitre.ALTO,R.raw.van_den_budenmayer_concerto);
-        Song song3 = new  Song(sourceSong3,RecordSource.LIVE,Pupitre.SOPRANO,R.raw.goldberg_variation_bwv988);
-        Song song4 = new  Song(sourceSong4,RecordSource.BANDE_SON,Pupitre.ALTO,R.raw.vivaldi_tempete_en_mer);
-        Song song5 = new  Song(sourceSong5,RecordSource.LIVE,Pupitre.TENOR,R.raw.zbigniew_preisner_agnus_dei);
-        Song song6 = new Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.TENOR,R.raw.menuett_krieger);
-        Song song7 = new  Song(sourceSong1,RecordSource.LIVE,Pupitre.ALTO,R.raw.menuett_krieger);
-        Song song8 = new  Song(sourceSong1,RecordSource.LIVE,Pupitre.SOPRANO,R.raw.menuett_krieger);
-        Song song9 = new  Song(sourceSong4,RecordSource.BANDE_SON,Pupitre.BASS,R.raw.vivaldi_tempete_en_mer);
-        Song song10 = new  Song(sourceSong5,RecordSource.LIVE,Pupitre.TUTTI,R.raw.zbigniew_preisner_agnus_dei);
+        Song song1 = new Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.TUTTI,R.raw.des_hommes_pareils_tutti);
+        Song song2 = new  Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.BASS,R.raw.des_hommes_pareils_basse);
+        Song song3 = new  Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.TENOR,R.raw.des_hommes_pareils_tenor);
+        Song song4 = new  Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.ALTO,R.raw.des_hommes_pareils_alto);
+        Song song5 = new  Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.SOPRANO,R.raw.des_hommes_pareils_soprano);
+        Song song6 = new Song(sourceSong2,RecordSource.BANDE_SON,Pupitre.BASS,R.raw.l_un_pour_l_autre_basse);
+        Song song7 = new  Song(sourceSong2,RecordSource.BANDE_SON,Pupitre.TENOR,R.raw.l_un_pour_l_autre_tenor);
+        Song song8 = new  Song(sourceSong2,RecordSource.BANDE_SON,Pupitre.ALTO,R.raw.l_un_pour_l_autre_alto);
+        Song song9 = new  Song(sourceSong2,RecordSource.BANDE_SON,Pupitre.SOPRANO,R.raw.l_un_pour_l_autre_soprano);
+        Song song10 = new  Song(sourceSong3,RecordSource.BANDE_SON,Pupitre.TUTTI,R.raw.l_eau_tutti);
+        Song song11 = new  Song(sourceSong4,RecordSource.BANDE_SON,Pupitre.BASS,R.raw.le_tissu_basse);
+        Song song12 = new  Song(sourceSong4,RecordSource.BANDE_SON,Pupitre.TENOR,R.raw.le_tissu_tenor);
+        Song song13 = new  Song(sourceSong4,RecordSource.BANDE_SON,Pupitre.ALTO,R.raw.le_tissu_alto);
+        Song song14 = new  Song(sourceSong4,RecordSource.BANDE_SON,Pupitre.SOPRANO,R.raw.le_tissu_soprano);
 
-        choeurDataBase.songsDao().insertSongs(song1,song2,song3,song4,song5,song6,song7,song8,song9,song10);
+        choeurDataBase.songsDao().insertSongs(song1,song2,song3,song4,song5,song6,song7,song8,song9,song10,song11,song12,song13,song14);
 
         songs.add(sourceSong1);
         songs.add(sourceSong2);
@@ -76,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         songs.add(sourceSong4);
         songs.add(sourceSong5);
         songs.add(sourceSong6);
+        songs.add(sourceSong7);
 
 
     }

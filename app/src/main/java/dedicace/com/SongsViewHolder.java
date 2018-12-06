@@ -73,15 +73,15 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
         for (Button button: buttons) {
 
             if(focus) {
-                red = 255;
-                green = 235;
-                blue = 59;
+                red = 249;
+                green = 191;
+                blue = 45;
                 button.setAlpha(1.0f);
 
             }else{
-                red = 128;
-                green = 226;
-                blue = 126;
+                red = 255;
+                green = 241;
+                blue = 99;
                 button.setAlpha(0.5f);
             }
 
