@@ -212,6 +212,10 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 setColorButton(false,liveBtn);
                 source=RecordSource.BANDE_SON;
                 setActivableBtn(source);
+                isFirstTime=true;
+                if(mPlayerAdapter!=null) {
+                    mPlayerAdapter.reset();
+                }
 
                 break;
 
@@ -220,41 +224,70 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 setColorButton(false,bsBtn);
                 source=RecordSource.LIVE;
                 setActivableBtn(source);
+                isFirstTime=true;
+
+                if(mPlayerAdapter!=null) {
+                    mPlayerAdapter.reset();
+                }
+
                 break;
 
             case R.id.btn_tutti:
                 setColorButton(true,tuttiBtn);
                 setColorButton(false,bassBtn,tenorBtn,altoBtn,sopranoBtn);
                 pupitre=Pupitre.TUTTI;
+                isFirstTime=true;
+                if(mPlayerAdapter!=null) {
+                    mPlayerAdapter.reset();
+                }
 
                 break;
 
             case R.id.btn_bass:
                 setColorButton(true,bassBtn);
                 setColorButton(false,tuttiBtn,tenorBtn,altoBtn,sopranoBtn);
+                //setActivableBtn(source);
                 pupitre=Pupitre.BASS;
+                isFirstTime=true;
+                if(mPlayerAdapter!=null) {
+                    mPlayerAdapter.reset();
+                }
                 break;
 
             case R.id.btn_tenor:
                 setColorButton(true,tenorBtn);
                 setColorButton(false,tuttiBtn,bassBtn,altoBtn,sopranoBtn);
                 pupitre=Pupitre.TENOR;
+                isFirstTime=true;
+                if(mPlayerAdapter!=null) {
+                    mPlayerAdapter.reset();
+                }
                 break;
 
             case R.id.btn_alto:
                 setColorButton(true,altoBtn);
                 setColorButton(false,tuttiBtn,bassBtn,tenorBtn,sopranoBtn);
                 pupitre=Pupitre.ALTO;
+                isFirstTime=true;
+                if(mPlayerAdapter!=null) {
+                    mPlayerAdapter.reset();
+                }
                 break;
 
             case R.id.btn_soprano:
                 setColorButton(true,sopranoBtn);
                 setColorButton(false,tuttiBtn,bassBtn,tenorBtn,altoBtn);
                 pupitre=Pupitre.SOPRANO;
+                isFirstTime=true;
+                if(mPlayerAdapter!=null) {
+                    mPlayerAdapter.reset();
+                }
                 break;
 
             case R.id.play_image:
-                setPlayListener();
+                if(mPlayerAdapter==null ||!mPlayerAdapter.isPlaying()) {
+                    setPlayListener();
+                }
                 break;
 
             case R.id.recordSongs:
