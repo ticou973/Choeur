@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
         SourceSong sourceSong1 = new SourceSong("Des hommes pareils","Francis Cabrel",321,R.drawable.hommes_pareils,"");
         SourceSong sourceSong2 = new SourceSong("L'un pour l'autre","Maurane",266,R.drawable.yinyang,"");
-        SourceSong sourceSong3 = new SourceSong("L'eau","GoldBerg",143,R.drawable.water,"");
+        SourceSong sourceSong3 = new SourceSong("L'eau","Jeanne Cherhal",143,R.drawable.water,"");
         SourceSong sourceSong4 = new SourceSong("Le tissu","Jeanne Cherhal",236,R.drawable.femme_tissu,"");
         SourceSong sourceSong5 = new SourceSong("Papaoutai","Stromae",232,R.drawable.papa,"");
         SourceSong sourceSong6 = new SourceSong("Recitation 11","Georges Aperghis",243,R.drawable.pyramide_texte,"");

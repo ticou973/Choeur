@@ -285,9 +285,9 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 break;
 
             case R.id.play_image:
-                if(mPlayerAdapter==null ||!mPlayerAdapter.isPlaying()) {
+
                     setPlayListener();
-                }
+
                 break;
 
             case R.id.recordSongs:
@@ -509,6 +509,7 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
         if(choeurSongs.size()==0){
             Log.d(TAG, "verifyExistingSongs: A");
             setButtonActivable(false,bsBtn,liveBtn,tuttiBtn,bassBtn,tenorBtn,altoBtn,sopranoBtn);
+            seekBar.setEnabled(false);
 
         }else{
 
@@ -563,7 +564,11 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
 
     private void setStopListener() {
 
-        mPlayerAdapter.reset();
+        if(mPlayerAdapter!=null) {
+
+            mPlayerAdapter.reset();
+
+        }
 
     }
 
