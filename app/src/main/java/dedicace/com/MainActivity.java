@@ -5,11 +5,12 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener{
 
     private  RecyclerView recyclerView;
     private SongsAdapter songsAdapter;
@@ -62,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         Song song2 = new  Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.BASS,R.raw.des_hommes_pareils_basse);
         Song song3 = new  Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.TENOR,R.raw.des_hommes_pareils_tenor);
         Song song4 = new  Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.ALTO,R.raw.des_hommes_pareils_alto);
-        Song song5 = new  Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.SOPRANO,R.raw.des_hommes_pareils_soprano);
+        Song song5 = new  Song(sourceSong1,RecordSource.LIVE,Pupitre.SOPRANO,R.raw.des_hommes_pareils_soprano);
         Song song6 = new Song(sourceSong2,RecordSource.BANDE_SON,Pupitre.BASS,R.raw.l_un_pour_l_autre_basse);
         Song song7 = new  Song(sourceSong2,RecordSource.BANDE_SON,Pupitre.TENOR,R.raw.l_un_pour_l_autre_tenor);
         Song song8 = new  Song(sourceSong2,RecordSource.BANDE_SON,Pupitre.ALTO,R.raw.l_un_pour_l_autre_alto);
@@ -83,6 +84,13 @@ public class MainActivity extends AppCompatActivity {
         songs.add(sourceSong6);
         songs.add(sourceSong7);
 
+
+    }
+
+    @Override
+    public void OnClickedItem(int clickedItem) {
+
+        Toast.makeText(this, "Item cliqué "+clickedItem, Toast.LENGTH_SHORT).show();
 
     }
 }
