@@ -108,6 +108,41 @@
             android:layout_height="match_parent">
 
             <ImageView
+                android:id="@+id/play_image"
+                android:layout_width="64dp"
+                android:layout_height="67dp"
+                android:layout_marginTop="72dp"
+                android:layout_marginEnd="8dp"
+                android:elevation="5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.513"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_playgreyicon" />
+
+            <ImageView
+                android:id="@+id/stopSongs"
+                android:layout_width="64dp"
+                android:layout_height="67dp"
+                android:layout_marginTop="72dp"
+                android:layout_marginEnd="16dp"
+                android:elevation="5dp"
+                app:layout_constraintEnd_toStartOf="@+id/play_image"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_stopgrey" />
+
+            <ImageView
+                android:id="@+id/recordSongs"
+                android:layout_width="64dp"
+                android:layout_height="67dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="72dp"
+                android:elevation="5dp"
+                app:layout_constraintStart_toEndOf="@+id/play_image"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_recordgrey" />
+
+            <ImageView
                 android:id="@+id/iv_songs"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -151,41 +186,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:id="@+id/play_image"
-                android:layout_width="64dp"
-                android:layout_height="67dp"
-                android:layout_marginTop="72dp"
-                android:layout_marginEnd="8dp"
-                android:elevation="5dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.513"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_playgreyicon" />
-
-            <ImageView
-                android:id="@+id/stopSongs"
-                android:layout_width="64dp"
-                android:layout_height="67dp"
-                android:layout_marginTop="72dp"
-                android:layout_marginEnd="16dp"
-                android:elevation="5dp"
-                app:layout_constraintEnd_toStartOf="@+id/play_image"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_stopgrey" />
-
-            <ImageView
-                android:id="@+id/recordSongs"
-                android:layout_width="64dp"
-                android:layout_height="67dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="72dp"
-                android:elevation="5dp"
-                app:layout_constraintStart_toEndOf="@+id/play_image"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_recordgrey" />
-
             <SeekBar
                 android:id="@+id/seekBar"
                 android:layout_width="0dp"
@@ -201,6 +201,7 @@
                 android:id="@+id/btn_live"
                 android:layout_width="65dp"
                 android:layout_height="41dp"
+                android:layout_marginTop="4dp"
                 android:layout_marginEnd="8dp"
                 android:elevation="2dp"
                 android:fontFamily="@font/roboto"
@@ -208,8 +209,8 @@
                 android:textAllCaps="false"
                 android:textColor="@color/primaryTextColor"
                 android:textSize="18sp"
-                app:layout_constraintBaseline_toBaselineOf="@+id/tv_titre"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <Button
                 android:id="@+id/btn_bs"
