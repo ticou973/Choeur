@@ -30,7 +30,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
     }
 
     public interface ListemClickedListener {
-        void OnClickedItem(int clickedItem);
+        void OnClickedItem(String titre, String message);
     }
 
     @NonNull

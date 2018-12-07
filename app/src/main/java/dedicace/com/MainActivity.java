@@ -16,6 +16,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private SongsAdapter songsAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private List<SourceSong> songs = new ArrayList<>();
+    private Toast mToast;
 
     public static AppDataBase choeurDataBase;
 
@@ -83,14 +84,17 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         songs.add(sourceSong5);
         songs.add(sourceSong6);
         songs.add(sourceSong7);
-
-
     }
 
     @Override
-    public void OnClickedItem(int clickedItem) {
+    public void OnClickedItem(String titre, String message) {
 
-        Toast.makeText(this, "Item cliqué "+clickedItem, Toast.LENGTH_SHORT).show();
+        if(mToast!=null){
+            mToast.cancel();
+        }
+
+        mToast=Toast.makeText(this, message +"-"+titre, Toast.LENGTH_SHORT);
+        mToast.show();
 
     }
 }

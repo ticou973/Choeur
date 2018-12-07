@@ -27,6 +27,7 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
     private List<Song> choeurSongs;
     private boolean isFirstTime=true;
     private boolean mUserIsSeeking = false;
+    private String message;
 
     private PlayerAdapter mPlayerAdapter;
 
@@ -203,16 +204,17 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
     public void onClick(View view) {
 
         int clickedPosition = getAdapterPosition();
-        mlistItemClickedListener.OnClickedItem(clickedPosition);
 
         switch (view.getId()){
 
             case R.id.btn_bs :
-                setColorButton(true,bsBtn);
-                setColorButton(false,liveBtn);
+                //setColorButton(false,liveBtn);
                 source=RecordSource.BANDE_SON;
+                pupitre=Pupitre.NA;
                 setActivableBtn(source);
+                setColorButton(true,bsBtn);
                 isFirstTime=true;
+                message="Bande Son";
                 if(mPlayerAdapter!=null) {
                     mPlayerAdapter.reset();
                 }
@@ -220,11 +222,14 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 break;
 
             case R.id.btn_live:
-                setColorButton(true,liveBtn);
-                setColorButton(false,bsBtn);
+
+                //setColorButton(false,bsBtn);
                 source=RecordSource.LIVE;
+                pupitre=Pupitre.NA;
                 setActivableBtn(source);
+                setColorButton(true,liveBtn);
                 isFirstTime=true;
+                message="Live";
 
                 if(mPlayerAdapter!=null) {
                     mPlayerAdapter.reset();
@@ -233,10 +238,11 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 break;
 
             case R.id.btn_tutti:
-                setColorButton(true,tuttiBtn);
-                setColorButton(false,bassBtn,tenorBtn,altoBtn,sopranoBtn);
                 pupitre=Pupitre.TUTTI;
+                setActivableBtn(source);
+                setColorButton(true,tuttiBtn);
                 isFirstTime=true;
+                message="Tutti";
                 if(mPlayerAdapter!=null) {
                     mPlayerAdapter.reset();
                 }
@@ -244,41 +250,44 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 break;
 
             case R.id.btn_bass:
-                setColorButton(true,bassBtn);
-                setColorButton(false,tuttiBtn,tenorBtn,altoBtn,sopranoBtn);
-                //setActivableBtn(source);
                 pupitre=Pupitre.BASS;
+                setActivableBtn(source);
+                setColorButton(true,bassBtn);
                 isFirstTime=true;
+                message="Basse";
                 if(mPlayerAdapter!=null) {
                     mPlayerAdapter.reset();
                 }
                 break;
 
             case R.id.btn_tenor:
-                setColorButton(true,tenorBtn);
-                setColorButton(false,tuttiBtn,bassBtn,altoBtn,sopranoBtn);
                 pupitre=Pupitre.TENOR;
+                setActivableBtn(source);
+                setColorButton(true,tenorBtn);
                 isFirstTime=true;
+                message="Tenor";
                 if(mPlayerAdapter!=null) {
                     mPlayerAdapter.reset();
                 }
                 break;
 
             case R.id.btn_alto:
-                setColorButton(true,altoBtn);
-                setColorButton(false,tuttiBtn,bassBtn,tenorBtn,sopranoBtn);
                 pupitre=Pupitre.ALTO;
+                setActivableBtn(source);
+                setColorButton(true,altoBtn);
                 isFirstTime=true;
+                message="Alto";
                 if(mPlayerAdapter!=null) {
                     mPlayerAdapter.reset();
                 }
                 break;
 
             case R.id.btn_soprano:
-                setColorButton(true,sopranoBtn);
-                setColorButton(false,tuttiBtn,bassBtn,tenorBtn,altoBtn);
                 pupitre=Pupitre.SOPRANO;
+                setActivableBtn(source);
+                setColorButton(true,sopranoBtn);
                 isFirstTime=true;
+                message="Soprano";
                 if(mPlayerAdapter!=null) {
                     mPlayerAdapter.reset();
                 }
@@ -300,6 +309,9 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 break;
         }
 
+        String titreText=sourceSong.getTitre();
+
+        mlistItemClickedListener.OnClickedItem(titreText,message);
 
     }
 
@@ -359,8 +371,11 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
 
                 if(tempPupitre==Pupitre.TUTTI){
                     setButtonActivable(true,tuttiBtn);
-                    setColorButton(true,tuttiBtn);
-                    pupitre=Pupitre.TUTTI;
+                    if(pupitre==Pupitre.NA||pupitre==Pupitre.TUTTI){
+                        setColorButton(true,tuttiBtn);
+                        pupitre=Pupitre.TUTTI;
+                    }else setColorButton(false,tuttiBtn);
+
                     if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.BASS,mainSource)==null){
                         setButtonActivable(false,bassBtn);
                     }else{setColorButton(false,bassBtn);}
@@ -377,8 +392,11 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 }else if(tempPupitre==Pupitre.BASS){
                     setButtonActivable(false,tuttiBtn);
                     setButtonActivable(true,bassBtn);
-                    setColorButton(true,bassBtn);
-                    pupitre=Pupitre.BASS;
+                    if(pupitre==Pupitre.NA||pupitre==Pupitre.BASS){
+                        setColorButton(true,bassBtn);
+                        pupitre=Pupitre.BASS;
+                    }else setColorButton(false,bassBtn);
+
                     if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.TENOR,mainSource)==null){
                         setButtonActivable(false,tenorBtn);
                     }else{setColorButton(false,tenorBtn);}
@@ -392,8 +410,10 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 }else if(tempPupitre==Pupitre.TENOR){
                     setButtonActivable(false,tuttiBtn,bassBtn);
                     setButtonActivable(true,tenorBtn);
-                    setColorButton(true,tenorBtn);
-                    pupitre=Pupitre.TENOR;
+                    if(pupitre==Pupitre.NA||pupitre==Pupitre.TENOR){
+                        setColorButton(true,tenorBtn);
+                        pupitre=Pupitre.TENOR;
+                    }else setColorButton(false,tenorBtn);
                     if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.ALTO,mainSource)==null){
                         setButtonActivable(false,altoBtn);
                     }else{setColorButton(false,altoBtn);}
@@ -405,8 +425,10 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
 
                     setButtonActivable(false,tuttiBtn,bassBtn,tenorBtn);
                     setButtonActivable(true,altoBtn);
-                    setColorButton(true,altoBtn);
-                    pupitre=Pupitre.ALTO;
+                    if(pupitre==Pupitre.NA||pupitre==Pupitre.ALTO){
+                        setColorButton(true,altoBtn);
+                        pupitre=Pupitre.ALTO;
+                    }else setColorButton(false,altoBtn);
                     if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,mainSource)==null){
                         setButtonActivable(false,sopranoBtn);
                     }else{setColorButton(false,sopranoBtn);}
@@ -415,8 +437,10 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                     Log.d(TAG, "setActivableBtn: G");
                     setButtonActivable(false,tuttiBtn,bassBtn,tenorBtn,altoBtn);
                     setButtonActivable(true,sopranoBtn);
-                    setColorButton(true,sopranoBtn);
-                    pupitre=Pupitre.SOPRANO;
+                    if(pupitre==Pupitre.NA||pupitre==Pupitre.SOPRANO){
+                        setColorButton(true,sopranoBtn);
+                        pupitre=Pupitre.SOPRANO;
+                    }else setColorButton(false,sopranoBtn);
                     return;
                 }
 
@@ -428,12 +452,14 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
 
             for (Song secondSourceSong: songsSecondSource) {
 
-                Pupitre pupitre = secondSourceSong.getPupitre();
+                Pupitre tempPupitre = secondSourceSong.getPupitre();
 
-                if(pupitre==Pupitre.TUTTI){
+                if(tempPupitre==Pupitre.TUTTI){
                     setButtonActivable(true,tuttiBtn);
-                    setColorButton(true,tuttiBtn);
-                    pupitre=Pupitre.TUTTI;
+                    if(pupitre==Pupitre.NA||pupitre==Pupitre.TUTTI){
+                        setColorButton(true,tuttiBtn);
+                        pupitre=Pupitre.TUTTI;
+                    }else setColorButton(false,tuttiBtn);
                     if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.BASS,secondSource)==null){
                         setButtonActivable(false,bassBtn);
                     }else{setColorButton(false,bassBtn);}
@@ -448,11 +474,13 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                     }else{setColorButton(false,sopranoBtn);}
 
                     return;
-                }else if(pupitre==Pupitre.BASS){
+                }else if(tempPupitre==Pupitre.BASS){
                     setButtonActivable(false,tuttiBtn);
                     setButtonActivable(true,bassBtn);
-                    setColorButton(true,bassBtn);
-                    pupitre=Pupitre.BASS;
+                    if(pupitre==Pupitre.NA||pupitre==Pupitre.BASS){
+                        setColorButton(true,bassBtn);
+                        pupitre=Pupitre.BASS;
+                    }else setColorButton(false,bassBtn);
                     if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.TENOR,secondSource)==null){
                         setButtonActivable(false,tenorBtn);
                     }else{setColorButton(false,tenorBtn);}
@@ -463,11 +491,13 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                         setButtonActivable(false,sopranoBtn);
                     }else{setColorButton(false,sopranoBtn);}
                     return;
-                }else if(pupitre==Pupitre.TENOR){
+                }else if(tempPupitre==Pupitre.TENOR){
                     setButtonActivable(false,tuttiBtn,bassBtn);
                     setButtonActivable(true,tenorBtn);
-                    setColorButton(true,tenorBtn);
-                    pupitre=Pupitre.TENOR;
+                    if(pupitre==Pupitre.NA||pupitre==Pupitre.TENOR){
+                        setColorButton(true,tenorBtn);
+                        pupitre=Pupitre.TENOR;
+                    }else setColorButton(false,tenorBtn);
                     if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.ALTO,secondSource)==null){
                         setButtonActivable(false,altoBtn);
                     }else{setColorButton(false,altoBtn);}
@@ -475,20 +505,24 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                         setButtonActivable(false,sopranoBtn);
                     }else{setColorButton(false,sopranoBtn);}
                     return;
-                }else if(pupitre==Pupitre.ALTO){
+                }else if(tempPupitre==Pupitre.ALTO){
                     setButtonActivable(false,tuttiBtn,bassBtn,tenorBtn);
                     setButtonActivable(true,altoBtn);
-                    setColorButton(true,altoBtn);
-                    pupitre=Pupitre.ALTO;
+                    if(pupitre==Pupitre.NA||pupitre==Pupitre.ALTO){
+                        setColorButton(true,altoBtn);
+                        pupitre=Pupitre.ALTO;
+                    }else setColorButton(false,altoBtn);
                     if(MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(titre,Pupitre.SOPRANO,secondSource)==null){
                         setButtonActivable(false,sopranoBtn);
                     }else{setColorButton(false,sopranoBtn);}
                     return;
-                }else if(pupitre==Pupitre.SOPRANO){
+                }else if(tempPupitre==Pupitre.SOPRANO){
                     setButtonActivable(false,tuttiBtn,bassBtn,tenorBtn,altoBtn);
                     setButtonActivable(true,sopranoBtn);
-                    setColorButton(true,sopranoBtn);
-                    pupitre=Pupitre.SOPRANO;
+                    if(pupitre==Pupitre.NA||pupitre==Pupitre.SOPRANO){
+                        setColorButton(true,sopranoBtn);
+                        pupitre=Pupitre.SOPRANO;
+                    }else setColorButton(false,sopranoBtn);
                     return;
                 }
             }
