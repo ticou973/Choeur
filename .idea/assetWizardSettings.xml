@@ -18,12 +18,23 @@
                                 <PersistentState>
                                   <option name="children">
                                     <map>
+                                      <entry key="foregroundClipArt">
+                                        <value>
+                                          <PersistentState>
+                                            <option name="values">
+                                              <map>
+                                                <entry key="trimmed" value="true" />
+                                              </map>
+                                            </option>
+                                          </PersistentState>
+                                        </value>
+                                      </entry>
                                       <entry key="foregroundImage">
                                         <value>
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="scalingPercent" value="124" />
+                                                <entry key="scalingPercent" value="68" />
                                                 <entry key="trimmed" value="true" />
                                               </map>
                                             </option>
@@ -35,9 +46,14 @@
                                   <option name="values">
                                     <map>
                                       <entry key="backgroundAssetType" value="COLOR" />
-                                      <entry key="backgroundColor" value="aab5ff" />
-                                      <entry key="foregroundImage" value="$USER_HOME$/Downloads/Dedicace/Logo_Dedicace.png" />
-                                      <entry key="foregroundLayerName" value="ic_launcher_foreground_dedicace" />
+                                      <entry key="backgroundColor" value="fbc02d" />
+                                      <entry key="backgroundLayerName" value="ic_equalizer3_36dp" />
+                                      <entry key="foregroundImage" value="$USER_HOME$/Downloads/android-UniversalMusicPlayerandroid-UniversalMusicPlayer-f3154af7ac972ee9b7b1fd32ca3c935e02268a18/mobile/src/main/res/drawable-xxxhdpi/ic_equalizer2_white_36dp.png" />
+                                      <entry key="foregroundLayerName" value="ic_equalizer3fg_white_36dp" />
+                                      <entry key="legacyIconShape" value="CIRCLE" />
+                                      <entry key="outputName" value="ic_equalizer3_white_36dp" />
+                                      <entry key="previewDensity" value="XXXHIGH" />
+                                      <entry key="webIconShape" value="CIRCLE" />
                                     </map>
                                   </option>
                                 </PersistentState>

@@ -1,7 +1,9 @@
 package dedicace.com;
 
 import android.content.Context;
+import android.graphics.drawable.AnimationDrawable;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -203,8 +205,6 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
     @Override
     public void onClick(View view) {
 
-        int clickedPosition = getAdapterPosition();
-
         switch (view.getId()){
 
             case R.id.btn_bs :
@@ -294,17 +294,18 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 break;
 
             case R.id.play_image:
-
+                    message="Lecture";
                     setPlayListener();
-
                 break;
 
             case R.id.recordSongs:
+                message="Enregistrement";
                 setRecordListener();
 
                 break;
 
             case R.id.stopSongs:
+                message="Arrêt";
                 setStopListener();
                 break;
         }
@@ -582,9 +583,19 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
 
                     if(!mPlayerAdapter.isPlaying()) {
 
+
+                        AnimationDrawable animation = (AnimationDrawable)
+                                ContextCompat.getDrawable((Context) mlistItemClickedListener, R.drawable.ic_equalizer_white_36dp);
+                        //DrawableCompat.setTintList(animation, sColorStatePlaying);
+                        animation.start();
+
+                        playSongs.setImageDrawable(animation);
+
                         mPlayerAdapter.play();
 
                     }else {
+
+                        playSongs.setImageResource(R.drawable.ic_pause_orange);
                         mPlayerAdapter.pause();
                     }
                 }
@@ -599,6 +610,8 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
     private void setStopListener() {
 
         if(mPlayerAdapter!=null) {
+
+            playSongs.setImageResource(R.drawable.ic_play_orange);
 
             mPlayerAdapter.reset();
 
