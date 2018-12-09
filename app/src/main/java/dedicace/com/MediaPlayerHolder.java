@@ -41,6 +41,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     private ScheduledExecutorService mExecutor;
     private Runnable mSeekbarPositionUpdateTask;
     private int i=0;
+    private int duration;
 
     public MediaPlayerHolder(Context context) {
         mContext = context.getApplicationContext();
@@ -257,7 +258,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
             if (resetUIPlaybackPosition && mPlaybackInfoListener != null) {
                 Log.d(SongsAdapter.TAG, "stopUpdatingCallbackWithPosition: ");
                 mPlaybackInfoListener.onPositionChanged(0);
-                mPlaybackInfoListener.onTimeChanged();
+
             }
         }
         i=0;
@@ -269,19 +270,13 @@ public final class MediaPlayerHolder implements PlayerAdapter {
             if (mPlaybackInfoListener != null) {
                 mPlaybackInfoListener.onPositionChanged(currentPosition);
 
-                if(currentPosition>=mMediaPlayer.getDuration()){
-                    stopUpdatingCallbackWithPosition(true);
-
-                    Log.d(SongsAdapter.TAG, "updateProgressCallbackTask: ");
-
-                }
             }
         }
     }
 
     @Override
     public void initializeProgressCallback() {
-        final int duration = mMediaPlayer.getDuration();
+        duration = mMediaPlayer.getDuration();
         Log.d(SongsAdapter.TAG, "initializeProgressCallback: "+ duration);
         if (mPlaybackInfoListener != null) {
             mPlaybackInfoListener.onDurationChanged(duration);
@@ -290,5 +285,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         }
     }
 
-
+    public int getDuration() {
+        return duration;
+    }
 }

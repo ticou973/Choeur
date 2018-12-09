@@ -34,12 +34,11 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         initData();
 
         recyclerView = findViewById(R.id.recyclerview_media_item);
-        songsAdapter =new SongsAdapter(songs,this,recordPupitre);
+        songsAdapter =new SongsAdapter(songs,this);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(songsAdapter);
-
     }
 
     private void initData() {

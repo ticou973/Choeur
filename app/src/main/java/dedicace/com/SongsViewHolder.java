@@ -40,6 +40,7 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
     private boolean isRunning=false;
 
 
+
     private PlayerAdapter mPlayerAdapter;
 
 
@@ -67,10 +68,8 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
 
         mlistItemClickedListener=listener;
 
-        Log.d(TAG, "SongsViewHolder: A "+recordPupitre+" "+ getAdapterPosition());
-
         if (recordPupitre!=Pupitre.NA){
-            Log.d(TAG, "SongsViewHolderB: "+ recordPupitre);
+
         }
 
         bsBtn.setOnClickListener(this);
@@ -86,11 +85,16 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
 
         chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             public void onChronometerTick(Chronometer cArg) {
+
                 long t = SystemClock.elapsedRealtime() - cArg.getBase();
                 if(t>=600000) {
                     cArg.setText(DateFormat.format("mm:ss", t));
                 }else{
                     cArg.setText(DateFormat.format("m:ss", t));
+                }
+
+                if(t>=mPlayerAdapter.getDuration()){
+                    setStopListener();
                 }
             }
         });
@@ -542,7 +546,6 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
     }
 
     public void isFirstTime(){
-
         if(isFirstTime) {
             //Gestion de la seekBar
             initializeSeekbar();
@@ -557,27 +560,19 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 int resIdToPlay = mPlayerAdapter.convertResStringToResourcesRaw(resStrToPlay);
 
                 mPlayerAdapter.prepareMediaPlayer((Context) mlistItemClickedListener, resIdToPlay);
-
                 isFirstTime = false;
             }else{
                 setTotalTime(0);
             }
         }
-
     }
-
-
-
 
     //Méthodes pour les boutons de controle du mediaplayer et mediarecorder
     private void setPlayListener() {
-
-
-                if(pupitre==Pupitre.NA||source==RecordSource.NA){
+        if(pupitre==Pupitre.NA||source==RecordSource.NA){
 
                     Log.d(TAG, "setPlayListener: "+ getAdapterPosition());
-
-                }else{
+        }else{
 
                     //todo voir si à enlever car au dessus
                     if(isFirstTime) {
@@ -612,7 +607,6 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                         setChronometerPause();
                     }
                 }
-
     }
 
     private void setRecordListener() {
@@ -620,6 +614,12 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
             mlistItemClickedListener.OnDialogRecord(getAdapterPosition());
             Log.d(TAG, "setRecordListener: ");
         }
+    }
+
+    public void setRecord(Pupitre recordPupitre){
+
+        Log.d(TAG, "setRecord: c'est parti !"+ recordPupitre);
+
     }
 
 
@@ -647,7 +647,6 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         if (fromUser) {
                             userSelectedPosition = progress;
-                            Log.d(TAG, "onProgressChanged: "+progress);
                             chronometer.setText(DateFormat.format("m:ss", progress));
                             lastPause=progress;
 
@@ -705,8 +704,6 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
         chronometer.setText(DateFormat.format("m:ss", t));
 
     }
-
-
 
     public class PlaybackListener extends PlaybackInfoListener {
 

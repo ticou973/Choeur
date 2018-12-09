@@ -28,4 +28,6 @@ public interface PlayerAdapter {
     String convertResourcesRawToString(int resId);
 
     int convertResStringToResourcesRaw(String resStr);
+
+    int getDuration();
 }

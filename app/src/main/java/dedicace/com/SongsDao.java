@@ -26,6 +26,9 @@ public interface SongsDao {
     @Query("SELECT * FROM song WHERE (titre IN (:titre)) AND (source_enregistrement IN (:source)) ORDER BY pupitre ASC ")
     List<Song> getSongOrderedByPupitre(String titre, RecordSource source);
 
+    @Query("SELECT * FROM song ORDER BY songId DESC LIMIT 1")
+    Song getLastSong();
+
 
 
 
