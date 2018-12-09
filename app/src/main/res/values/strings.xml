@@ -3,4 +3,7 @@
     <string name="logo_d_dicace">logo dédicace</string>
     <string name="groupe">Groupe</string>
     <string name="titre">Titre</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

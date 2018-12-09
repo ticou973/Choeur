@@ -18,6 +18,7 @@ package dedicace.com;
 
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.util.Log;
 
 import java.util.concurrent.Executors;
@@ -34,10 +35,12 @@ public final class MediaPlayerHolder implements PlayerAdapter {
 
     private Context mContext;
     private MediaPlayer mMediaPlayer;
+    private MediaRecorder mMediaRecorder;
     private int mResourceId;
     private PlaybackInfoListener mPlaybackInfoListener;
     private ScheduledExecutorService mExecutor;
     private Runnable mSeekbarPositionUpdateTask;
+    private int i=0;
 
     public MediaPlayerHolder(Context context) {
         mContext = context.getApplicationContext();
@@ -54,11 +57,11 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         Log.d(SongsAdapter.TAG, "initializeMediaPlayer: ");
         if (mMediaPlayer == null) {
             mMediaPlayer = new MediaPlayer();
+
             mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     stopUpdatingCallbackWithPosition(true);
-
                     Log.d(SongsAdapter.TAG, "onCompletion: ");
 
                     //todo voir si on peut supprimer le playbackinfo
@@ -92,6 +95,69 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         initializeProgressCallback();
     }
 
+    @Override
+    public void record() {
+
+    }
+
+    @Override
+    public String convertResourcesRawToString(int resId) {
+
+        return null;
+    }
+
+    @Override
+    public int convertResStringToResourcesRaw(String resStr) {
+
+        int resId=0;
+        switch (resStr){
+
+            case "R.raw.des_hommes_pareils_tutti":
+                resId=R.raw.des_hommes_pareils_tutti;
+                break;
+            case "R.raw.des_hommes_pareils_basse":
+                resId=R.raw.des_hommes_pareils_basse;
+                break;
+            case "R.raw.des_hommes_pareils_tenor":
+                resId=R.raw.des_hommes_pareils_tenor;
+                break;
+            case "R.raw.des_hommes_pareils_alto":
+                resId=R.raw.des_hommes_pareils_alto;
+                break;
+            case "R.raw.des_hommes_pareils_soprano":
+                resId=R.raw.des_hommes_pareils_soprano;
+                break;
+            case "R.raw.l_un_pour_l_autre_basse":
+                resId=R.raw.l_un_pour_l_autre_basse;
+                break;
+            case "R.raw.l_un_pour_l_autre_tenor":
+                resId=R.raw.l_un_pour_l_autre_tenor;
+                break;
+            case "R.raw.l_un_pour_l_autre_alto":
+                resId=R.raw.l_un_pour_l_autre_alto;
+                break;
+            case "R.raw.l_un_pour_l_autre_soprano":
+                resId=R.raw.l_un_pour_l_autre_soprano;
+                break;
+            case "R.raw.l_eau_tutti":
+                resId=R.raw.l_eau_tutti;
+                break;
+            case "R.raw.le_tissu_basse":
+                resId=R.raw.le_tissu_basse;
+                break;
+            case "R.raw.le_tissu_tenor":
+                resId=R.raw.le_tissu_tenor;
+                break;
+            case "R.raw.le_tissu_alto":
+                resId=R.raw.le_tissu_alto;
+                break;
+            case "R.raw.le_tissu_soprano":
+                resId=R.raw.le_tissu_soprano;
+                break;
+
+        }
+        return resId;
+    }
 
 
     @Override
@@ -117,6 +183,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     public void play() {
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
             mMediaPlayer.start();
+            mMediaPlayer.setScreenOnWhilePlaying(true);
 
             if (mPlaybackInfoListener != null) {
                 mPlaybackInfoListener.onStateChanged(PlaybackInfoListener.State.PLAYING);
@@ -168,6 +235,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
                 @Override
                 public void run() {
                     updateProgressCallbackTask();
+
                 }
             };
         }
@@ -185,10 +253,14 @@ public final class MediaPlayerHolder implements PlayerAdapter {
             mExecutor.shutdownNow();
             mExecutor = null;
             mSeekbarPositionUpdateTask = null;
+            Log.d(SongsAdapter.TAG, "stopUpdatingCallbackWithPosition: ");
             if (resetUIPlaybackPosition && mPlaybackInfoListener != null) {
+                Log.d(SongsAdapter.TAG, "stopUpdatingCallbackWithPosition: ");
                 mPlaybackInfoListener.onPositionChanged(0);
+                mPlaybackInfoListener.onTimeChanged();
             }
         }
+        i=0;
     }
 
     private void updateProgressCallbackTask() {
@@ -196,6 +268,13 @@ public final class MediaPlayerHolder implements PlayerAdapter {
             int currentPosition = mMediaPlayer.getCurrentPosition();
             if (mPlaybackInfoListener != null) {
                 mPlaybackInfoListener.onPositionChanged(currentPosition);
+
+                if(currentPosition>=mMediaPlayer.getDuration()){
+                    stopUpdatingCallbackWithPosition(true);
+
+                    Log.d(SongsAdapter.TAG, "updateProgressCallbackTask: ");
+
+                }
             }
         }
     }
@@ -205,8 +284,6 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         final int duration = mMediaPlayer.getDuration();
         Log.d(SongsAdapter.TAG, "initializeProgressCallback: "+ duration);
         if (mPlaybackInfoListener != null) {
-
-
             mPlaybackInfoListener.onDurationChanged(duration);
             mPlaybackInfoListener.onPositionChanged(0);
 

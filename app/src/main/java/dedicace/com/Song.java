@@ -21,14 +21,14 @@ public class Song {
     Pupitre pupitre;
 
     @ColumnInfo(name = "fichier_mp3")
-    private int songResId;
+    private String songPath;
 
 
-    public Song(SourceSong sourceSong, RecordSource recordSource, Pupitre pupitre, int songResId) {
+    public Song(SourceSong sourceSong, RecordSource recordSource, Pupitre pupitre, String songPath) {
         this.sourceSong = sourceSong;
         this.recordSource = recordSource;
         this.pupitre = pupitre;
-        this.songResId = songResId;
+        this.songPath = songPath;
     }
 
     public int getSongId() {
@@ -47,12 +47,12 @@ public class Song {
         this.sourceSong = sourceSong;
     }
 
-    public int getSongResId() {
-        return songResId;
+    public String getSongPath() {
+        return songPath;
     }
 
-    public void setSongResId(int songResId) {
-        this.songResId = songResId;
+    public void setSongPath(String songPath) {
+        this.songPath = songPath;
     }
 
     public RecordSource getRecordSource() {

@@ -23,5 +23,9 @@ public interface PlayerAdapter {
 
     void prepareMediaPlayer(Context context, int songResId);
 
+    void record();
 
+    String convertResourcesRawToString(int resId);
+
+    int convertResStringToResourcesRaw(String resStr);
 }

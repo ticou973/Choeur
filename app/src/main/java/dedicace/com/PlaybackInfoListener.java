@@ -74,4 +74,8 @@ public abstract class PlaybackInfoListener {
 
     void onPlaybackCompleted() {
     }
+
+    void onTimeChanged(){
+
+    }
 }

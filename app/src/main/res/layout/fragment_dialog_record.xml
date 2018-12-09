@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".DialogRecordFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <RadioGroup
+        android:id="@+id/rg_pupitres"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RadioButton
+            android:id="@+id/tutti_rbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/roboto"
+            android:text="Tutti"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="18sp" />
+
+        <RadioButton
+            android:id="@+id/bass_rbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/roboto"
+            android:text="Basse"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="18sp" />
+
+        <RadioButton
+            android:id="@+id/tenor_rbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/roboto"
+            android:text="Tenor"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="18sp" />
+
+        <RadioButton
+            android:id="@+id/alto_rbtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/roboto"
+            android:text="Alto"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="18sp" />
+
+        <RadioButton
+            android:id="@+id/soprano_rbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/roboto"
+            android:text="Soprano"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="18sp" />
+    </RadioGroup>
+</android.support.constraint.ConstraintLayout>
