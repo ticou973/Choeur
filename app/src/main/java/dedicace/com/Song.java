@@ -23,7 +23,7 @@ public class Song {
     @ColumnInfo(name = "fichier_mp3")
     private String songPath;
 
-
+//todo gérer lorsque le mediaplayer est lancé à 2 items différents
     public Song(SourceSong sourceSong, RecordSource recordSource, Pupitre pupitre, String songPath) {
         this.sourceSong = sourceSong;
         this.recordSource = recordSource;

@@ -19,8 +19,12 @@ package dedicace.com;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.os.Environment;
+import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -37,11 +41,13 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     private MediaPlayer mMediaPlayer;
     private MediaRecorder mMediaRecorder;
     private int mResourceId;
+    private String mResourceStr;
     private PlaybackInfoListener mPlaybackInfoListener;
     private ScheduledExecutorService mExecutor;
     private Runnable mSeekbarPositionUpdateTask;
     private int i=0;
     private int duration;
+    private String pathSave="";
 
     public MediaPlayerHolder(Context context) {
         mContext = context.getApplicationContext();
@@ -55,9 +61,10 @@ public final class MediaPlayerHolder implements PlayerAdapter {
      * not the constructor.
      */
     private void initializeMediaPlayer() {
-        Log.d(SongsAdapter.TAG, "initializeMediaPlayer: ");
+        Log.d(SongsAdapter.TAG, "MPH initializeMediaPlayer: ");
         if (mMediaPlayer == null) {
             mMediaPlayer = new MediaPlayer();
+            Log.d(SongsAdapter.TAG, "MPH initializeMediaPlayer: new MP");
 
             mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
@@ -83,22 +90,62 @@ public final class MediaPlayerHolder implements PlayerAdapter {
 
     // Implements PlaybackControl.
     @Override
-    public void prepareMediaPlayer(Context context, int songResId) {
+    public void prepareMediaPlayer(Context context, String resStrToPlay) {
 
         mContext=context;
-        mResourceId =songResId;
+        mResourceStr =resStrToPlay;
+        mResourceId = convertResStringToResourcesRaw(mResourceStr);
         initializeMediaPlayer();
+        //setupMediaRecorder();
 
-        mMediaPlayer=MediaPlayer.create(mContext,songResId);
+        if(TextUtils.substring(resStrToPlay,0,5).equals("R.raw")){
 
-        Log.d(SongsAdapter.TAG, "prepareMediaPlayer: ");
+            Log.d(SongsAdapter.TAG, "prepareMediaPlayer: Raw "+TextUtils.substring(resStrToPlay,0,5));
+
+            mMediaPlayer=MediaPlayer.create(mContext,mResourceId);
+        }else{
+
+            try {
+                Log.d(SongsAdapter.TAG, "prepareMediaPlayerA: Intern Memory");
+                mMediaPlayer.setDataSource(resStrToPlay);
+                mMediaPlayer.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Log.d(SongsAdapter.TAG, "prepareMediaPlayerB: ");
 
         initializeProgressCallback();
     }
 
     @Override
-    public void record() {
+    public String record(String songNamePupitre) {
+        pathSave = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
+                UUID.randomUUID() + ".3gp";
+        setupMediaRecorder();
 
+        Log.d(SongsAdapter.TAG, "MPH record: "+ pathSave);
+
+        try {
+            Log.d(SongsAdapter.TAG, "MPH record: ");
+            mMediaRecorder.prepare();
+            mMediaRecorder.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Log.d(SongsAdapter.TAG, "MPH record: ");
+        return pathSave;
+    }
+
+    @Override
+    public void stopRecord() {
+        Log.d(SongsAdapter.TAG, "MPH stopRecord: ");
+        if(mMediaRecorder!=null) {
+            mMediaRecorder.stop();
+        }else{
+            Log.d(SongsAdapter.TAG, "MPH stopRecord: Mediaplayer null ");
+        }
     }
 
     @Override
@@ -179,7 +226,6 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     }
 
 
-
     @Override
     public void play() {
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
@@ -198,7 +244,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         if (mMediaPlayer != null) {
 
             mMediaPlayer.reset();
-            prepareMediaPlayer(mContext,mResourceId);
+            prepareMediaPlayer(mContext,mResourceStr);
             if (mPlaybackInfoListener != null) {
                 mPlaybackInfoListener.onStateChanged(PlaybackInfoListener.State.RESET);
             }
@@ -285,7 +331,19 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         }
     }
 
+    @Override
     public int getDuration() {
+        MediaPlayer tempMediaplayer= new MediaPlayer();
+
         return duration;
+    }
+
+    private void setupMediaRecorder() {
+        mMediaRecorder = new MediaRecorder();
+        Log.d(SongsAdapter.TAG, "MPH setupMediaRecorder: "+mMediaRecorder);
+        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        mMediaRecorder.setOutputFile(pathSave);
     }
 }

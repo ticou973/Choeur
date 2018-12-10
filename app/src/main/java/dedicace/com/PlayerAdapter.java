@@ -21,9 +21,11 @@ public interface PlayerAdapter {
 
     void seekTo(int position);
 
-    void prepareMediaPlayer(Context context, int songResId);
+    void prepareMediaPlayer(Context context, String resStrToPlay);
 
-    void record();
+    String record(String songNamePupitre);
+
+    void stopRecord();
 
     String convertResourcesRawToString(int resId);
 

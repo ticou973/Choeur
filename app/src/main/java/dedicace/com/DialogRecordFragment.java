@@ -24,8 +24,9 @@ public class DialogRecordFragment extends DialogFragment {
         // Required empty public constructor
     }
 
+
     public interface DialogRecordFragmentListener {
-        void onDialogPositiveClick(DialogFragment dialog,Pupitre pupitre, int position);
+        void onDialogPositiveClick(DialogFragment dialog,Pupitre pupitre);
         void onDialogNegativeClick(DialogFragment dialog);
     }
 
@@ -36,8 +37,6 @@ public class DialogRecordFragment extends DialogFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
-        position=getArguments().getInt("onDialogRecord");
 
         // This makes sure that the container activity has implemented
         // the callback interface. If not, it throws an exception
@@ -76,7 +75,7 @@ public class DialogRecordFragment extends DialogFragment {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
 
-                Log.d(SongsAdapter.TAG, "onCheckedChanged:A "+pupitre+" "+position);
+                Log.d(SongsAdapter.TAG, "DRF onCheckedChanged:A "+pupitre+" "+position);
 
                 switch (i){
                     case R.id.tutti_rbtn:
@@ -98,7 +97,7 @@ public class DialogRecordFragment extends DialogFragment {
             }
         });
 
-        Log.d(SongsAdapter.TAG, "onCreateDialog: "+pupitre);
+        Log.d(SongsAdapter.TAG, "DRF onCreateDialog: "+pupitre);
 
         builder.setMessage("Veuillez choisir un pupitre pour l'enregistrement de votre morceau :");
 
@@ -110,7 +109,7 @@ public class DialogRecordFragment extends DialogFragment {
         builder.setPositiveButton("Enregistrer", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // Send the positive button event back to the host activity
-                mListener.onDialogPositiveClick(DialogRecordFragment.this,pupitre,position);
+                mListener.onDialogPositiveClick(DialogRecordFragment.this,pupitre);
             }
         })
                 .setNegativeButton("Annuler", new DialogInterface.OnClickListener() {

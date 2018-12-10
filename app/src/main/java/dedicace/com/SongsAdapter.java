@@ -33,14 +33,15 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
     public interface ListemClickedListener {
         void OnClickedItem(String titre, String message);
-        void OnDialogRecord(int position);
+        void OnDialogRecord(int position, SongsViewHolder songsViewHolder);
+        void OnRequestPermission();
     }
 
     @NonNull
     @Override
-    public SongsViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int position) {
+    public SongsViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_songs, viewGroup, false);
-        Log.d(TAG, "onCreateViewHolder: "+position+" ");
+        Log.d(TAG, "onCreateViewHolder: ");
 
         SongsViewHolder songsViewHolder = new SongsViewHolder(view,mlistemClickedListener);
         return songsViewHolder;
@@ -50,23 +51,12 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull final SongsViewHolder songsViewHolder, final int position) {
 
+        Log.d(TAG, "SA onBindViewHolderA: ");
         //Gestion des datas de la SourceSong
         initDataSourceSong(songsViewHolder, position);
-        VerifyAndLaunchRecord(songsViewHolder);
+        songsViewHolder.verifyExistingSongs(RecordSource.BANDE_SON);
+        songsViewHolder.setResourceToMediaPlayer();
 
-        songsViewHolder.verifyExistingSongs();
-        songsViewHolder.isFirstTime();
-    }
-
-    private void VerifyAndLaunchRecord(SongsViewHolder songsViewHolder) {
-        Song song = MainActivity.choeurDataBase.songsDao().getLastSong();
-        Pupitre pupitre = song.getPupitre();
-        RecordSource recordSource = song.getRecordSource();
-        String songPath = song.getSongPath();
-
-        if(recordSource==RecordSource.LIVE&&songPath.equals("NA")){
-            songsViewHolder.setRecord(pupitre);
-        }
     }
 
     @Override
@@ -86,7 +76,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         songsViewHolder.setChronometer(SystemClock.elapsedRealtime());
         SourceSong song = songs.get(position);
 
-        Log.d(TAG, "initDataSourceSong: "+song.getTitre());
+        Log.d(TAG, "initDataSourceSong: "+song.getTitre()+" "+position);
         songsViewHolder.setSourceSong(song);
     }
 

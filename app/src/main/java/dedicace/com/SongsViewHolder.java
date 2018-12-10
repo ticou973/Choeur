@@ -20,7 +20,7 @@ import java.util.List;
 
 import static android.graphics.Color.rgb;
 
-class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,MainActivity.OnPositiveClickListener {
 
     private TextView titre, groupe;
     private ImageView imageSong, playSongs,stopSongs,recordSongs;
@@ -38,13 +38,17 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
     private Chronometer chronometer;
     private long lastPause;
     private boolean isRunning=false;
+    private boolean isRecording = false;
+    private AnimationDrawable animation;
 
+    private String pathSave="";
 
 
     private PlayerAdapter mPlayerAdapter;
-
-
     private SongsAdapter.ListemClickedListener mlistItemClickedListener;
+
+    //todo prévoir d'effacer les chansons que l'on a soit même enregistré (long click et menu)
+    //todo
 
     public SongsViewHolder(@NonNull View itemView, SongsAdapter.ListemClickedListener listener) {
         super(itemView);
@@ -67,10 +71,6 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
         chronometer=itemView.findViewById(R.id.chronometre);
 
         mlistItemClickedListener=listener;
-
-        if (recordPupitre!=Pupitre.NA){
-
-        }
 
         bsBtn.setOnClickListener(this);
         liveBtn.setOnClickListener(this);
@@ -98,6 +98,12 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 }
             }
         });
+
+        isFirstTime();
+        Log.d(TAG, "SongsViewHolder: "+mPlayerAdapter);
+
+        animation = (AnimationDrawable) ContextCompat.getDrawable((Context) mlistItemClickedListener, R.drawable.ic_equalizer_white_36dp);
+        animation.start();
     }
 
 
@@ -188,10 +194,6 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
         return seekBar;
     }
 
-    public void setRecordPupitre(Pupitre recordPupitre) {
-        this.recordPupitre = recordPupitre;
-    }
-
     public void setTotalTime(int totalTimeMillis) {
         SimpleDateFormat simpleDateFormat;
 
@@ -222,6 +224,7 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 setColorButton(true,bsBtn);
                 isFirstTime=true;
                 message="Bande Son";
+                //setResourceToMediaPlayer();
                 if(mPlayerAdapter!=null) {
                     setStopListener();
                 }
@@ -235,6 +238,7 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 setColorButton(true,liveBtn);
                 isFirstTime=true;
                 message="Live";
+                //setResourceToMediaPlayer();
 
                 if(mPlayerAdapter!=null) {
                     setStopListener();
@@ -251,7 +255,7 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 if(mPlayerAdapter!=null) {
                     setStopListener();
                 }
-
+                //setResourceToMediaPlayer();
                 break;
 
             case R.id.btn_bass:
@@ -260,6 +264,8 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 setColorButton(true,bassBtn);
                 isFirstTime=true;
                 message="Basse";
+
+                //setResourceToMediaPlayer();
                 if(mPlayerAdapter!=null) {
                     setStopListener();
                 }
@@ -271,6 +277,8 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 setColorButton(true,tenorBtn);
                 isFirstTime=true;
                 message="Tenor";
+
+                //setResourceToMediaPlayer();
                 if(mPlayerAdapter!=null) {
                     setStopListener();
                 }
@@ -282,6 +290,8 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 setColorButton(true,altoBtn);
                 isFirstTime=true;
                 message="Alto";
+
+                //setResourceToMediaPlayer();
                 if(mPlayerAdapter!=null) {
                     setStopListener();
                 }
@@ -293,18 +303,24 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
                 setColorButton(true,sopranoBtn);
                 isFirstTime=true;
                 message="Soprano";
+
+               // setResourceToMediaPlayer();
                 if(mPlayerAdapter!=null) {
                     setStopListener();
                 }
                 break;
 
             case R.id.play_image:
-                    message="Lecture";
+                if(!isRecording) {
+                    message = "Lecture";
                     setPlayListener();
+                }
                 break;
 
             case R.id.recordSongs:
-                message="Enregistrement";
+                if(!mPlayerAdapter.isPlaying()) {
+                    message = "Enregistrement";
+                }
                 setRecordListener();
 
                 break;
@@ -531,7 +547,7 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
         setGreyButton(true, bsBtn,liveBtn,tuttiBtn,bassBtn,tenorBtn,altoBtn,sopranoBtn);
     }
 
-    public void verifyExistingSongs() {
+    public void verifyExistingSongs(RecordSource source) {
 
         choeurSongs = MainActivity.choeurDataBase.songsDao().getSongsBySourceSong(sourceSong.getTitre());
 
@@ -539,29 +555,47 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
 
             setButtonActivable(false,bsBtn,liveBtn,tuttiBtn,bassBtn,tenorBtn,altoBtn,sopranoBtn);
             seekBar.setEnabled(false);
-
         }else{
-            setActivableBtn(RecordSource.BANDE_SON); }
-
+            Log.d(TAG, "SVH verifyExistingSongs: ");
+            setActivableBtn(source); }
     }
+
+    //todo vérifier utilité doublon is First Time
+
 
     public void isFirstTime(){
         if(isFirstTime) {
-            //Gestion de la seekBar
-            initializeSeekbar();
-
             //PlayBackController
             initializePlaybackController();
 
-            //Fournit et parépare le Mediaplayer
-            Song songToPlay = MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(sourceSong.getTitre(),pupitre,source);
-            if(songToPlay!=null) {
-                String resStrToPlay = songToPlay.getSongPath();
-                int resIdToPlay = mPlayerAdapter.convertResStringToResourcesRaw(resStrToPlay);
+            //Gestion de la seekBar
+            initializeSeekbar();
+        }
+    }
 
-                mPlayerAdapter.prepareMediaPlayer((Context) mlistItemClickedListener, resIdToPlay);
+    private void setTempDuration(){
+
+        Song songToPlay = MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(sourceSong.getTitre(), pupitre, source);
+        if (songToPlay != null) {
+            Log.d(TAG, "SVH setResourceToMediaPlayer: " + pupitre + source);
+            String resStrToPlay = songToPlay.getSongPath();
+            mPlayerAdapter.prepareMediaPlayer((Context) mlistItemClickedListener, resStrToPlay);
+        } else {
+            setTotalTime(0);
+        }
+
+    }
+
+    public void setResourceToMediaPlayer(){
+        //Fournit et prépare le Mediaplayer
+        if(isFirstTime) {
+            Song songToPlay = MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(sourceSong.getTitre(), pupitre, source);
+            if (songToPlay != null) {
+                Log.d(TAG, "SVH setResourceToMediaPlayer: " + pupitre + source);
+                String resStrToPlay = songToPlay.getSongPath();
+                mPlayerAdapter.prepareMediaPlayer((Context) mlistItemClickedListener, resStrToPlay);
                 isFirstTime = false;
-            }else{
+            } else {
                 setTotalTime(0);
             }
         }
@@ -571,37 +605,34 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
     private void setPlayListener() {
         if(pupitre==Pupitre.NA||source==RecordSource.NA){
 
-                    Log.d(TAG, "setPlayListener: "+ getAdapterPosition());
+
         }else{
 
                     //todo voir si à enlever car au dessus
                     if(isFirstTime) {
-
                         //Gestion de la seekBar
                         initializeSeekbar();
+                        Log.d(TAG, "SVH setPlayListener: isFirst Time");
 
+                        Log.d(TAG, "setPlayListener: A");
                         //PlayBackController
                         initializePlaybackController();
 
                         //Fournit et parépare le Mediaplayer
                         Song songToPlay = MainActivity.choeurDataBase.songsDao().getSongsByTitrePupitreSource(sourceSong.getTitre(),pupitre,source);
                         String resStrToPlay = songToPlay.getSongPath();
-                        int resIdToPlay= mPlayerAdapter.convertResStringToResourcesRaw(resStrToPlay);
 
-                        mPlayerAdapter.prepareMediaPlayer((Context) mlistItemClickedListener, resIdToPlay);
-
+                        mPlayerAdapter.prepareMediaPlayer((Context) mlistItemClickedListener, resStrToPlay);
                         isFirstTime=false;
                     }
 
-                    if(!mPlayerAdapter.isPlaying()) {
-                        AnimationDrawable animation = (AnimationDrawable) ContextCompat.getDrawable((Context) mlistItemClickedListener, R.drawable.ic_equalizer_white_36dp);
-                        animation.start();
+                    if(!mPlayerAdapter.isPlaying()&&!isRecording) {
 
                         playSongs.setImageDrawable(animation);
                         mPlayerAdapter.play();
                         setChronometerStart();
 
-                    }else {
+                    }else if(mPlayerAdapter.isPlaying()&&!isRecording){
                         playSongs.setImageResource(R.drawable.ic_pause_orange);
                         mPlayerAdapter.pause();
                         setChronometerPause();
@@ -610,24 +641,67 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
     }
 
     private void setRecordListener() {
-        if (mlistItemClickedListener != null) {
-            mlistItemClickedListener.OnDialogRecord(getAdapterPosition());
-            Log.d(TAG, "setRecordListener: ");
+        if(!isRecording&&!mPlayerAdapter.isPlaying()) {
+            if (mlistItemClickedListener != null) {
+                mlistItemClickedListener.OnDialogRecord(getAdapterPosition(),this);
+                Log.d(TAG, "SVH setRecordListener: ");
+            }
+
+        }else if(isRecording&&!mPlayerAdapter.isPlaying()){
+            /*mPlayerAdapter.stopRecord();
+            recordSongs.setImageResource(R.drawable.ic_record_orange);
+            Log.d(TAG, "SVH setRecordListener: StopRecord");
+            isRecording=false;
+            verifyExistingSongs();*/
         }
     }
 
-    public void setRecord(Pupitre recordPupitre){
+    public void setRecord(){
 
-        Log.d(TAG, "setRecord: c'est parti !"+ recordPupitre);
+        recordSongs.setImageDrawable(animation);
 
+        isRecording=true;
+        if (mlistItemClickedListener != null) {
+            mlistItemClickedListener.OnRequestPermission();
+        }
+
+        Song songToRecord =MainActivity.choeurDataBase.songsDao().getLastSong();
+        recordPupitre = songToRecord.getPupitre();
+        String recordSongName = songToRecord.getSourceSong().getTitre();
+        String recordNamePupitre = recordSongName+"_"+recordPupitre.toString();
+
+        Log.d(TAG, "SVH setRecord: c'est parti ! "+ recordPupitre);
+
+        Log.d(TAG, "SVH setRecord: "+mPlayerAdapter);
+
+        pathSave = mPlayerAdapter.record(recordNamePupitre);
+
+        songToRecord.setSongPath(pathSave);
+        Log.d(TAG, "SVH setRecord: "+pathSave);
+        MainActivity.choeurDataBase.songsDao().updateSong(songToRecord);
+
+        String path = MainActivity.choeurDataBase.songsDao().getLastSong().getSongPath();
+
+        Log.d(TAG, "SVH setRecord: "+path);
     }
 
 
     private void setStopListener() {
         if(mPlayerAdapter!=null) {
-            playSongs.setImageResource(R.drawable.ic_play_orange);
-            mPlayerAdapter.reset();
-            setChronometerStop();
+
+            if(isRecording) {
+                mPlayerAdapter.stopRecord();
+                recordSongs.setImageResource(R.drawable.ic_record_orange);
+                Log.d(TAG, "SVH setRecordListener: StopRecord");
+                isRecording=false;
+                verifyExistingSongs(RecordSource.LIVE);
+            }else{
+                playSongs.setImageResource(R.drawable.ic_play_orange);
+                mPlayerAdapter.reset();
+                setChronometerStop();
+
+
+            }
         }
     }
 
@@ -671,8 +745,6 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
 
         mMediaPlayerHolder.setPlaybackInfoListener(new PlaybackListener());
         mPlayerAdapter = mMediaPlayerHolder;
-
-
     }
 
     private void setChronometerStart(){
@@ -703,6 +775,11 @@ class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickLis
         long t = time - chronometer.getBase();
         chronometer.setText(DateFormat.format("m:ss", t));
 
+    }
+
+    @Override
+    public void OnRecord(Pupitre pupitre) {
+       setRecord();
     }
 
     public class PlaybackListener extends PlaybackInfoListener {

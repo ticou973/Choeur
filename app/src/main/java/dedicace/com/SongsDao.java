@@ -4,6 +4,7 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import java.util.List;
 
@@ -29,7 +30,8 @@ public interface SongsDao {
     @Query("SELECT * FROM song ORDER BY songId DESC LIMIT 1")
     Song getLastSong();
 
-
+    @Query("SELECT * FROM song WHERE songId IN (:songId)")
+    Song getSongById(int songId);
 
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -40,6 +42,9 @@ public interface SongsDao {
 
     @Query("DELETE FROM song")
     void deleteAll();
+
+    @Update
+    void updateSong(Song song);
 
 
 }
