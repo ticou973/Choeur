@@ -1,6 +1,7 @@
 package dedicace.com;
 
 import android.arch.persistence.room.Dao;
+import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
@@ -16,6 +17,9 @@ public interface SongsDao {
 
     @Query("SELECT * FROM song WHERE titre IN (:titre)")
     List<Song> getSongsBySourceSong(String titre);
+
+    @Query("SELECT * FROM song WHERE source_enregistrement IN (:source)")
+    List<Song> getSongsBySource(RecordSource source);
 
     @Query("SELECT * FROM song WHERE (titre IN (:titre)) AND (pupitre IN (:pupitre)) AND (source_enregistrement IN (:source))")
     Song getSongsByTitrePupitreSource(String titre, Pupitre pupitre, RecordSource source);
@@ -45,6 +49,9 @@ public interface SongsDao {
 
     @Update
     void updateSong(Song song);
+
+    @Delete
+    void deleteSong(Song song);
 
 
 }

@@ -4,6 +4,12 @@
 
     <item
         android:id="@+id/reset_db"
-        android:title="@string/reset_db"
+        android:title="@string/effacer_tous_les_enregistrements_live"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/reset_song"
+        android:title="@string/effacer_le_dernier_enregistrement"
+        app:showAsAction="never" />
+
 </menu>

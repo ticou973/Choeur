@@ -31,6 +31,8 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
     }
 
+    //todo à voir si bouger interface côté viewHolder
+
     public interface ListemClickedListener {
         void OnClickedItem(String titre, String message);
         void OnDialogRecord(int position, SongsViewHolder songsViewHolder);

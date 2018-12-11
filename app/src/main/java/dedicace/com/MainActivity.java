@@ -4,6 +4,7 @@ import android.Manifest;
 import android.arch.persistence.room.Room;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
@@ -17,6 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,9 +28,10 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private SongsAdapter songsAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private List<SourceSong> songs = new ArrayList<>();
+    private List<Song> recordedSongs = new ArrayList<>();
     private Toast mToast;
     private static final String TAG = "coucou";
-    private SourceSong sourceSong1,sourceSong2,sourceSong3,sourceSong4,sourceSong5,sourceSong6, sourceSong7;
+    private SourceSong sourceSong1,sourceSong2,sourceSong3,sourceSong4,sourceSong5,sourceSong6, sourceSong7, sourceSong8;
     private Pupitre recordPupitre=Pupitre.NA;
     private final int REQUEST_PERMISSION_CODE = 1000;
     private int position;
@@ -68,15 +71,60 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         switch (item.getItemId()){
             case R.id.reset_db:
 
-                choeurDataBase.songsDao().deleteAll();
+                deleteAllRecordedSongs();
 
                 break;
+
+            case R.id.reset_song:
+
+                deleteLastRecordedSong();
+                break;
+
         }
         return super.onOptionsItemSelected(item);
     }
 
+    private void deleteLastRecordedSong() {
+
+        Song song = MainActivity.choeurDataBase.songsDao().getLastSong();
+
+        if(song.getRecordSource()==RecordSource.LIVE){
+
+            //todo supprimer le fichier physique aussi
+            MainActivity.choeurDataBase.songsDao().deleteSong(song);
+
+            mPositiveClickListener.OndeleteSong();
+
+            String path = song.getSongPath();
+
+            deleteMusicFiles(path);
+
+        }
+    }
+
+    private void deleteAllRecordedSongs(){
+
+        recordedSongs =MainActivity.choeurDataBase.songsDao().getSongsBySource(RecordSource.LIVE);
+
+        if(recordedSongs.size()>0){
+
+            for (Song recordedSong:recordedSongs) {
+
+                //todo supprimer le fichier physique aussi
+                MainActivity.choeurDataBase.songsDao().deleteSong(recordedSong);
+
+                //todo voir pour que les couleurs fonctionnenent
+
+                songsAdapter.notifyDataSetChanged();
+
+                //mPositiveClickListener.OndeleteSong();
+            }
+        }
+    }
+
 
     private void initData() {
+        //todo voir pour les migrations et fallBackTomigration
         choeurDataBase = Room.databaseBuilder(this,AppDataBase.class,"ChoeurDataBase")
                 .allowMainThreadQueries()
                 .fallbackToDestructiveMigration()
@@ -89,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         sourceSong5 = new SourceSong("Papaoutai","Stromae",232,R.drawable.papa,"");
         sourceSong6 = new SourceSong("Recitation 11","Georges Aperghis",243,R.drawable.pyramide_texte,"");
         sourceSong7 = new SourceSong("North Star","Philip Glas",160,R.drawable.etoile,"");
+        sourceSong8 = new SourceSong("Tout va bien","Inconnu",175,R.drawable.hommes_pareils,"");
 
         Song song1 = new Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.TUTTI,"R.raw.des_hommes_pareils_tutti");
         Song song2 = new  Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.BASS,"R.raw.des_hommes_pareils_basse");
@@ -104,16 +153,25 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         Song song12 = new  Song(sourceSong4,RecordSource.BANDE_SON,Pupitre.TENOR,"R.raw.le_tissu_tenor");
         Song song13 = new  Song(sourceSong4,RecordSource.BANDE_SON,Pupitre.ALTO,"R.raw.le_tissu_alto");
         Song song14 = new  Song(sourceSong4,RecordSource.BANDE_SON,Pupitre.SOPRANO,"R.raw.le_tissu_soprano");
+        Song song15 = new  Song(sourceSong8,RecordSource.BANDE_SON,Pupitre.SOPRANO,"R.raw.tout_va_bien_soprano");
+        Song song16 = new  Song(sourceSong8,RecordSource.BANDE_SON,Pupitre.ALTO,"R.raw.tout_va_bien_alto");
+        Song song17 = new  Song(sourceSong8,RecordSource.BANDE_SON,Pupitre.TENOR,"R.raw.tout_va_bien_tenor");
+        Song song18 = new  Song(sourceSong8,RecordSource.BANDE_SON,Pupitre.BASS,"R.raw.tout_va_bien_basse");
 
-        choeurDataBase.songsDao().insertSongs(song1,song2,song3,song4,song5,song6,song7,song8,song9,song10,song11,song12,song13,song14);
+
+
+        choeurDataBase.songsDao().insertSongs(song1,song2,song3,song4,song5,song6,song7,song8,song9,song10,song11,song12,song13,song14,song15,song16,song17,song18);
 
         songs.add(sourceSong1);
         songs.add(sourceSong2);
         songs.add(sourceSong3);
         songs.add(sourceSong4);
+        songs.add(sourceSong8);
         songs.add(sourceSong5);
         songs.add(sourceSong6);
         songs.add(sourceSong7);
+
+
     }
 
     @Override
@@ -195,8 +253,30 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         }
     }
 
+    //todo à renommer
     public interface OnPositiveClickListener {
         void OnRecord(Pupitre pupitre);
+        void OndeleteSong();
+    }
+
+    public File getPublicMusicStorageDir(String titre) {
+        // Get the directory for the user's public pictures directory.
+        File file = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_MUSIC), titre);
+        if (!file.mkdirs()) {
+            Log.e(TAG, "Répertoire non créé");
+        }
+        return file;
+    }
+
+    public void deleteMusicFiles(String path){
+
+        File file = new File(path);
+
+        boolean deletefile = file.delete();
+
+        Log.d(TAG, "deleteMusicFiles: "+deletefile);
+
     }
 
 

@@ -22,6 +22,7 @@ import android.media.MediaRecorder;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -48,6 +49,8 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     private int i=0;
     private int duration;
     private String pathSave="";
+
+    //todo voir quand mettre les release du mediaplayer et mediarecorder(voir doc de ref)
 
     public MediaPlayerHolder(Context context) {
         mContext = context.getApplicationContext();
@@ -106,7 +109,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         }else{
 
             try {
-                Log.d(SongsAdapter.TAG, "prepareMediaPlayerA: Intern Memory");
+                Log.d(SongsAdapter.TAG, "prepareMediaPlayerA: Internal Memory");
                 mMediaPlayer.setDataSource(resStrToPlay);
                 mMediaPlayer.prepare();
             } catch (IOException e) {
@@ -121,6 +124,8 @@ public final class MediaPlayerHolder implements PlayerAdapter {
 
     @Override
     public String record(String songNamePupitre) {
+
+        if(isExternalStorageWritable()){
         pathSave = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
                 UUID.randomUUID() + ".3gp";
         setupMediaRecorder();
@@ -135,6 +140,12 @@ public final class MediaPlayerHolder implements PlayerAdapter {
             e.printStackTrace();
         }
         Log.d(SongsAdapter.TAG, "MPH record: ");
+        }
+
+        else{
+            Toast.makeText(mContext, "Vous n'avez pas de mémoire externe disponible", Toast.LENGTH_SHORT).show();
+        }
+
         return pathSave;
     }
 
@@ -203,6 +214,23 @@ public final class MediaPlayerHolder implements PlayerAdapter {
                 resId=R.raw.le_tissu_soprano;
                 break;
 
+            case "R.raw.tout_va_bien_soprano":
+                resId=R.raw.tout_va_bien_soprano;
+                break;
+
+            case "R.raw.tout_va_bien_alto":
+                resId=R.raw.tout_va_bien_alto;
+                break;
+
+            case "R.raw.tout_va_bien_tenor":
+                resId=R.raw.tout_va_bien_tenor;
+                break;
+
+            case "R.raw.tout_va_bien_basse":
+                resId=R.raw.tout_va_bien_basse;
+                break;
+
+
         }
         return resId;
     }
@@ -230,6 +258,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     public void play() {
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
             mMediaPlayer.start();
+            //todo vérifier l'utilité de la méthode suivante
             mMediaPlayer.setScreenOnWhilePlaying(true);
 
             if (mPlaybackInfoListener != null) {
@@ -315,7 +344,6 @@ public final class MediaPlayerHolder implements PlayerAdapter {
             int currentPosition = mMediaPlayer.getCurrentPosition();
             if (mPlaybackInfoListener != null) {
                 mPlaybackInfoListener.onPositionChanged(currentPosition);
-
             }
         }
     }
@@ -327,13 +355,11 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         if (mPlaybackInfoListener != null) {
             mPlaybackInfoListener.onDurationChanged(duration);
             mPlaybackInfoListener.onPositionChanged(0);
-
         }
     }
 
     @Override
     public int getDuration() {
-        MediaPlayer tempMediaplayer= new MediaPlayer();
 
         return duration;
     }
@@ -345,5 +371,14 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
         mMediaRecorder.setOutputFile(pathSave);
+    }
+
+    /* Checks if external storage is available for read and write */
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
     }
 }

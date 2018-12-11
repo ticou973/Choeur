@@ -547,6 +547,9 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         setGreyButton(true, bsBtn,liveBtn,tuttiBtn,bassBtn,tenorBtn,altoBtn,sopranoBtn);
     }
 
+    //todo voir pourquoi alto et soprano ne fonctionne pas en couleur pleine
+
+
     public void verifyExistingSongs(RecordSource source) {
 
         choeurSongs = MainActivity.choeurDataBase.songsDao().getSongsBySourceSong(sourceSong.getTitre());
@@ -603,8 +606,8 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     //Méthodes pour les boutons de controle du mediaplayer et mediarecorder
     private void setPlayListener() {
+        //todo voir pour la vérification de la présence de la SD pour lecture du LIVE
         if(pupitre==Pupitre.NA||source==RecordSource.NA){
-
 
         }else{
 
@@ -676,13 +679,16 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         pathSave = mPlayerAdapter.record(recordNamePupitre);
 
-        songToRecord.setSongPath(pathSave);
-        Log.d(TAG, "SVH setRecord: "+pathSave);
-        MainActivity.choeurDataBase.songsDao().updateSong(songToRecord);
+        if(pathSave.equals("")) {
 
-        String path = MainActivity.choeurDataBase.songsDao().getLastSong().getSongPath();
+            Log.d(TAG, "setRecord: pb de mémoire externe");
 
-        Log.d(TAG, "SVH setRecord: "+path);
+        }else{
+            songToRecord.setSongPath(pathSave);
+            Log.d(TAG, "SVH setRecord: " + pathSave);
+            MainActivity.choeurDataBase.songsDao().updateSong(songToRecord);
+        }
+
     }
 
 
@@ -780,6 +786,12 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     @Override
     public void OnRecord(Pupitre pupitre) {
        setRecord();
+    }
+
+    @Override
+    public void OndeleteSong() {
+
+        verifyExistingSongs(RecordSource.LIVE);
     }
 
     public class PlaybackListener extends PlaybackInfoListener {
