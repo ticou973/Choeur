@@ -1,0 +1,728 @@
+package dedicace.com.ui;
+
+import android.content.Context;
+import android.graphics.drawable.AnimationDrawable;
+import android.os.SystemClock;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.RecyclerView;
+import android.text.format.DateFormat;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Chronometer;
+import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+import dedicace.com.AppExecutors;
+import dedicace.com.R;
+import dedicace.com.data.database.Pupitre;
+import dedicace.com.data.database.RecordSource;
+import dedicace.com.data.database.Song;
+import dedicace.com.data.database.SourceSong;
+
+import static android.graphics.Color.rgb;
+
+public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,MainActivity.OnPositiveClickListener {
+
+    //Element UI
+    private TextView titre, groupe;
+    private ImageView imageSong, playSongs,stopSongs,recordSongs;
+    private Button bsBtn, liveBtn, tuttiBtn, bassBtn, tenorBtn, altoBtn, sopranoBtn, mainBtn, secondBtn, thirdBtn, fourthBtn, fifthBtn;
+    private SeekBar seekBar;
+    private TextView totalTime;
+    private Chronometer chronometer;
+    private AnimationDrawable animation;
+
+    //Element des songs
+    private Pupitre pupitre=Pupitre.NA;
+    private RecordSource source=RecordSource.NA, secondSource;
+    private SourceSong sourceSong = new SourceSong();
+    private List<Song> songsMainSource=new ArrayList<>(), songsSecondSource=new ArrayList<>(), songsTitreSecondSource=new ArrayList<>();
+    private Song songTitreBassMainSource=new Song(), songTitreTenorMainSource=new Song(), songTitreAltoMainSource=new Song(), songTitreSopranoMainSource=new Song(), songTitreBassSecondSource=new Song()
+            , songTitreTenorSecondSource= new Song(), songTitreAltoSecondSource=new Song(), songTitreSopranoSecondSource= new Song(), songToPlay = new Song(), songToRecord = new Song();
+
+    private ArrayList pupitreSourceButton = new ArrayList();
+
+    //Mediaplayer
+    private PlayerAdapter mPlayerAdapter;
+
+    //Utils
+    private final static String TAG = "coucou";
+    private boolean isFirstTime=true;
+    private AppExecutors mExecutors;
+    private SongsAdapter.ListemClickedListener mlistItemClickedListener;
+    private boolean mUserIsSeeking = false;
+    private boolean isRunning=false;
+    private boolean isRecording = false;
+    private String message;
+    private long lastPause;
+    private Context context;
+
+
+    //todo prévoir d'effacer les chansons que l'on a soit même enregistré (long click et menu)
+    //todo voir pour suppprimer le listener
+
+    public SongsViewHolder(@NonNull View itemView, SongsAdapter.ListemClickedListener listener, Context context) {
+        super(itemView);
+
+        titre = itemView.findViewById(R.id.tv_titre);
+        groupe = itemView.findViewById(R.id.tv_groupe);
+        imageSong =itemView.findViewById(R.id.iv_songs);
+        playSongs=itemView.findViewById(R.id.play_image);
+        stopSongs=itemView.findViewById(R.id.stopSongs);
+        recordSongs =itemView.findViewById(R.id.recordSongs);
+        bsBtn=itemView.findViewById(R.id.btn_bs);
+        liveBtn=itemView.findViewById(R.id.btn_live);
+        tuttiBtn=itemView.findViewById(R.id.btn_tutti);
+        bassBtn=itemView.findViewById(R.id.btn_bass);
+        tenorBtn=itemView.findViewById(R.id.btn_tenor);
+        altoBtn=itemView.findViewById(R.id.btn_alto);
+        sopranoBtn=itemView.findViewById(R.id.btn_soprano);
+        seekBar=itemView.findViewById(R.id.seekBar);
+        totalTime=itemView.findViewById(R.id.total_time);
+        chronometer=itemView.findViewById(R.id.chronometre);
+
+        this.context=context;
+        mlistItemClickedListener=listener;
+
+        bsBtn.setOnClickListener(this);
+        liveBtn.setOnClickListener(this);
+        tuttiBtn.setOnClickListener(this);
+        bassBtn.setOnClickListener(this);
+        tenorBtn.setOnClickListener(this);
+        altoBtn.setOnClickListener(this);
+        sopranoBtn.setOnClickListener(this);
+        playSongs.setOnClickListener(this);
+        recordSongs.setOnClickListener(this);
+        stopSongs.setOnClickListener(this);
+
+        /*chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
+            public void onChronometerTick(Chronometer cArg) {
+                long t = SystemClock.elapsedRealtime() - cArg.getBase();
+                if(t>=600000) {
+                    cArg.setText(DateFormat.format("mm:ss", t));
+                }else{
+                    cArg.setText(DateFormat.format("m:ss", t));
+                }
+                if(t>=mPlayerAdapter.getDuration()){
+                    setStopListener();
+                }
+            }
+        });*/
+
+        isFirstTime();
+        Log.d(TAG, "SVH SongsViewHolder: "+ mPlayerAdapter);
+
+        animation = (AnimationDrawable) ContextCompat.getDrawable((Context) mlistItemClickedListener, R.drawable.ic_equalizer_white_36dp);
+       //todo vérifier la place d'animation start à cet endroit
+        animation.start();
+
+        initPupitreSourceButton();
+
+        //todo à enlever ?
+        mExecutors = AppExecutors.getInstance();
+    }
+
+    private void initPupitreSourceButton() {
+        pupitreSourceButton.add(Pupitre.TUTTI);
+        pupitreSourceButton.add(tuttiBtn);
+        pupitreSourceButton.add(Pupitre.BASS);
+        pupitreSourceButton.add(bassBtn);
+        pupitreSourceButton.add(Pupitre.TENOR);
+        pupitreSourceButton.add(tenorBtn);
+        pupitreSourceButton.add(Pupitre.ALTO);
+        pupitreSourceButton.add(altoBtn);
+        pupitreSourceButton.add(Pupitre.SOPRANO);
+        pupitreSourceButton.add(sopranoBtn);
+        pupitreSourceButton.add(RecordSource.BANDE_SON);
+        pupitreSourceButton.add(bsBtn);
+        pupitreSourceButton.add(RecordSource.LIVE);
+        pupitreSourceButton.add(liveBtn);
+    }
+
+    /**Méthode d'initialisation du MediaPlayer et
+     * de la Seekbar
+     */
+
+    //todo vérifier utilité doublon is First Time
+    public void isFirstTime(){
+        if(isFirstTime) {
+            //PlayBackController
+            initializePlaybackController();
+            //Gestion de la seekBar
+            initializeSeekbar();
+        }
+    }
+
+    private void initializePlaybackController() {
+        //todo voir comment récupérer plutôt le context de l'application
+        MediaPlayerHolder mMediaPlayerHolder = new MediaPlayerHolder((Context) mlistItemClickedListener);
+
+        mMediaPlayerHolder.setPlaybackInfoListener(new PlaybackListener());
+        mPlayerAdapter = mMediaPlayerHolder;
+    }
+
+    private void initializeSeekbar() {
+        seekBar.setOnSeekBarChangeListener(
+                new SeekBar.OnSeekBarChangeListener() {
+                    int userSelectedPosition = 0;
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                        mUserIsSeeking = true;
+                        setChronometerPause();
+                    }
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        if (fromUser) {
+                            userSelectedPosition = progress;
+                            chronometer.setText(DateFormat.format("m:ss", progress));
+                            lastPause=progress;
+                        }
+                    }
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                        mUserIsSeeking = false;
+                        mPlayerAdapter.seekTo(userSelectedPosition);
+                        if(mPlayerAdapter.isPlaying()){
+                            setChronometerStart();
+                        }
+                    }
+                });
+    }
+
+    /**Méthodes pour l'apparence des boutons de RecordSource
+     * ou de pupitres
+     */
+
+    public void setSongToPlay(Song songToPlay) {
+        if(pupitre != Pupitre.NA&&source !=RecordSource.NA) {
+           setSongRecorded(songToPlay);
+        }
+
+        this.songToPlay=songToPlay;
+        pupitre = songToPlay.getPupitre();
+        source = songToPlay.getRecordSource();
+        setCurrentSongActive(source, pupitre);
+    }
+
+    public void setCurrentSongActive(RecordSource recordSource, Pupitre pupitre){
+        int pupitreIndex=pupitreSourceButton.indexOf(pupitre);
+        int recordSourceIndex = pupitreSourceButton.indexOf(recordSource);
+        setColorButton(true,(Button) pupitreSourceButton.get(pupitreIndex+1));
+        setColorButton(true,(Button) pupitreSourceButton.get(recordSourceIndex+1));
+    }
+
+    public void setSongRecorded(Song...recordedLocalSongs){
+        for (Song song:recordedLocalSongs) {
+            RecordSource recordSourceRecorded = song.getRecordSource();
+            Pupitre pupitrerecorded = song.getPupitre();
+
+            if(recordSourceRecorded!=source ) {
+                setSourcesOnPhoneVisible(recordSourceRecorded);
+            }
+            if(pupitrerecorded!=pupitre){
+                setPupitresLoadedOnPhoneVisible(pupitrerecorded);
+            }
+        }
+    }
+
+    public void setSourcesOnPhoneVisible(RecordSource... recordSources){
+        for (RecordSource recordSource:recordSources) {
+            int recordSourceIndex = pupitreSourceButton.indexOf(recordSource);
+            setColorButton(false,(Button) pupitreSourceButton.get(recordSourceIndex+1));
+        }
+    }
+
+    public void setPupitresLoadedOnPhoneVisible(Pupitre... pupitres){
+        for (Pupitre pupitre: pupitres) {
+            int pupitreIndex=pupitreSourceButton.indexOf(pupitre);
+            setColorButton(false,(Button) pupitreSourceButton.get(pupitreIndex+1));
+        }
+    }
+
+    public void setSongCloudRecorded(Song... recordedCloudSongs){
+        for (Song song:recordedCloudSongs) {
+            RecordSource recordSourceRecorded = song.getRecordSource();
+            Pupitre pupitrerecorded = song.getPupitre();
+            if(recordSourceRecorded!=source ) {
+                setSourcesOnCloudVisible(recordSourceRecorded);
+            }
+            if(pupitrerecorded!=pupitre){
+                setPupitresLoadedOnCloudVisible(pupitrerecorded);            }
+        }
+    }
+
+    public void setSourcesOnCloudVisible(RecordSource... recordSources){
+        for (RecordSource recordSource:recordSources) {
+            int recordSourceIndex = pupitreSourceButton.indexOf(recordSource);
+            setGreyButton(true,(Button) pupitreSourceButton.get(recordSourceIndex+1));
+        }
+    }
+
+    public void setPupitresLoadedOnCloudVisible(Pupitre... pupitres){
+        for (Pupitre pupitre: pupitres) {
+            int pupitreIndex=pupitreSourceButton.indexOf(pupitre);
+            setGreyButton(true,(Button) pupitreSourceButton.get(pupitreIndex+1));
+        }
+    }
+
+    public void setSongNotRecorded(Song... notRecordedSongs){
+        for (Song song:notRecordedSongs) {
+            RecordSource recordSourceRecorded = song.getRecordSource();
+            Pupitre pupitrerecorded = song.getPupitre();
+            if(recordSourceRecorded!=source ) {
+                setRecordSourceInvisible(recordSourceRecorded);
+            }
+            if(pupitrerecorded!=pupitre){
+                setPupitreInvisible(pupitrerecorded);
+            }
+        }
+    }
+
+    public void setRecordSourceInvisible(RecordSource...recordSources){
+        for (RecordSource recordSource:recordSources) {
+            int recordSourceIndex = pupitreSourceButton.indexOf(recordSource);
+            Button button = (Button) pupitreSourceButton.get(recordSourceIndex+1);
+            setGreyButton(false,button);
+            button.setEnabled(false);
+        }
+    }
+
+    public void setPupitreInvisible(Pupitre...pupitres){
+        for (Pupitre pupitre: pupitres) {
+            int pupitreIndex=pupitreSourceButton.indexOf(pupitre);
+            Button button = (Button) (Button) pupitreSourceButton.get(pupitreIndex+1);
+            setGreyButton(false,button);
+            button.setEnabled(false);
+        }
+    }
+
+    public void setColorButton(boolean focus, Button... buttons) {
+        int red, green, blue;
+        for (Button button: buttons) {
+            if(focus) {
+                red = 249;
+                green = 191;
+                blue = 45;
+                button.setAlpha(1.0f);
+
+            }else{
+                red = 255;
+                green = 241;
+                blue = 99;
+                button.setAlpha(0.5f);
+            }
+            button.setBackgroundColor(rgb(red,green,blue));
+        }
+    }
+
+    public void setGreyButton(boolean focus, Button... buttons){
+        int red, green, blue;
+        for (Button button: buttons) {
+            red = 224;
+            green = 224;
+            blue = 224;
+
+            if(focus) { button.setAlpha(1.0f);
+
+            }else{ button.setAlpha(0.3f); }
+            button.setBackgroundColor(rgb(red,green,blue));
+        }
+    }
+
+    public void setButtonActivable(boolean activable, Button... buttons){
+        for (Button button: buttons) {
+            if(activable){
+                button.setAlpha(1.0f);
+                button.setEnabled(true);
+
+            }else{
+                button.setAlpha(0.3f);
+                button.setEnabled(false);
+                setGreyButton(false,button);
+            }
+        }
+    }
+
+
+    /** Gestion des clicks sur tous les boutons de l'interface
+     *
+     * @param view
+     */
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            //todo faire les 2 cas suivants dès que le système de fichiers est au point
+            case R.id.btn_bs :
+                source=RecordSource.BANDE_SON;
+                //pupitre=Pupitre.NA;
+                isFirstTime=true;
+                message="Bande Son";
+                setResourceToMediaPlayer();
+                if(mPlayerAdapter!=null) {
+                    setStopListener();
+                }
+                break;
+
+            case R.id.btn_live:
+                source=RecordSource.LIVE;
+                //pupitre=Pupitre.NA;
+                isFirstTime=true;
+                message="Live";
+                setResourceToMediaPlayer();
+
+                if(mPlayerAdapter!=null) {
+                    setStopListener();
+                }
+                break;
+
+            case R.id.btn_tutti:
+                setPupitresLoadedOnPhoneVisible(pupitre);
+                pupitre=Pupitre.TUTTI;
+                setCurrentSongActive(source,pupitre);
+                isFirstTime=true;
+                message="Tutti";
+                if(mPlayerAdapter!=null) {
+                    setStopListener();
+                }
+                setResourceToMediaPlayer();
+                break;
+
+            case R.id.btn_bass:
+                setPupitresLoadedOnPhoneVisible(pupitre);
+                pupitre=Pupitre.BASS;
+                setCurrentSongActive(source,pupitre);
+                isFirstTime=true;
+                message="Basse";
+                setResourceToMediaPlayer();
+                if(mPlayerAdapter!=null) {
+                    setStopListener();
+                }
+                break;
+
+            case R.id.btn_tenor:
+                setPupitresLoadedOnPhoneVisible(pupitre);
+                pupitre=Pupitre.TENOR;
+                setCurrentSongActive(source,pupitre);
+                isFirstTime=true;
+                message="Tenor";
+                setResourceToMediaPlayer();
+                if(mPlayerAdapter!=null) {
+                    setStopListener();
+                }
+                break;
+
+            case R.id.btn_alto:
+                setPupitresLoadedOnPhoneVisible(pupitre);
+                pupitre=Pupitre.ALTO;
+                setCurrentSongActive(source,pupitre);
+                isFirstTime=true;
+                message="Alto";
+                setResourceToMediaPlayer();
+                if(mPlayerAdapter!=null) {
+                    setStopListener();
+                }
+                break;
+
+            case R.id.btn_soprano:
+                setPupitresLoadedOnPhoneVisible(pupitre);
+                pupitre=Pupitre.SOPRANO;
+                setCurrentSongActive(source,pupitre);
+                isFirstTime=true;
+                message="Soprano";
+                setResourceToMediaPlayer();
+                if(mPlayerAdapter!=null) {
+                    setStopListener();
+                }
+                break;
+
+            case R.id.play_image:
+                if(!isRecording) {
+                    message = "Lecture";
+                    setPlayListener();
+                }
+                break;
+
+            case R.id.recordSongs:
+                if(!mPlayerAdapter.isPlaying()) {
+                    message = "Enregistrement";
+                }
+               // setRecordListener();
+                break;
+
+            case R.id.stopSongs:
+                message="Arrêt";
+                setStopListener();
+                break;
+        }
+        String titreText=sourceSong.getTitre();
+        mlistItemClickedListener.OnClickedItem(titreText,message);
+    }
+
+    public void setResourceToMediaPlayer(){
+        //Fournit et prépare le Mediaplayer
+        if(isFirstTime) {
+            //Gestion de la seekBar
+            initializeSeekbar();
+            //PlayBackController
+            initializePlaybackController();
+
+            if(songToPlay.getPupitre()!=pupitre||songToPlay.getRecordSource()!=source){
+                songToPlay = mlistItemClickedListener.OnPlaySong();
+            }
+
+            if (songToPlay != null) {
+                String resStrToPlay = songToPlay.getSongPath();
+                try {
+                    mPlayerAdapter.prepareMediaPlayer(context, resStrToPlay);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                isFirstTime = false;
+
+            } else {
+                setTotalTime(0);
+            }
+        }
+    }
+
+    //Méthodes pour les boutons de controle du mediaplayer et mediarecorder
+    private void setPlayListener() {
+        //todo voir pour la vérification de la présence de la SD pour lecture du LIVE
+        if(pupitre==Pupitre.NA||source==RecordSource.NA){
+            Toast.makeText((Context) mlistItemClickedListener, "Il manque la chanson demandée !", Toast.LENGTH_SHORT).show();
+        }else{
+                    if(isFirstTime) {
+                        //Fournit et parépare le Mediaplayer
+                        setResourceToMediaPlayer();
+                    }
+                    if(!mPlayerAdapter.isPlaying()&&!isRecording) {
+                        playSongs.setImageDrawable(animation);
+                        mPlayerAdapter.play();
+                        setChronometerStart();
+
+                    }else if(mPlayerAdapter.isPlaying()&&!isRecording){
+                        playSongs.setImageResource(R.drawable.ic_pause_orange);
+                        mPlayerAdapter.pause();
+                        setChronometerPause();
+                    }
+                }
+    }
+
+    /*private void setRecordListener() {
+        if(!isRecording&&!mPlayerAdapter.isPlaying()) {
+            if (mlistItemClickedListener != null) {
+                mlistItemClickedListener.OnDialogRecord(getAdapterPosition(),this);
+                Log.d(TAG, "SVH setRecordListener: ");
+            }
+
+        }else if(isRecording&&!mPlayerAdapter.isPlaying()){
+            /*mPlayerAdapter.stopRecord();
+            recordSongs.setImageResource(R.drawable.ic_record_orange);
+            Log.d(TAG, "SVH setRecordListener: StopRecord");
+            isRecording=false;
+            verifyExistingSongs();
+        }
+    }*/
+
+    /*public void setRecord(){
+
+        recordSongs.setImageDrawable(animation);
+
+        isRecording=true;
+        if (mlistItemClickedListener != null) {
+            mlistItemClickedListener.OnRequestPermission();
+        }
+
+        mExecutors.diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                songToRecord =MainActivity.choeurDataBase.songsDao().getLastSong();
+
+            }
+        });
+
+        recordPupitre = songToRecord.getPupitre();
+        String recordSongName = songToRecord.getSourceSong().getTitre();
+        String recordNamePupitre = recordSongName+"_"+recordPupitre.toString();
+
+        Log.d(TAG, "SVH setRecord: c'est parti ! "+ recordPupitre);
+
+        Log.d(TAG, "SVH setRecord: "+mPlayerAdapter);
+
+        pathSave = mPlayerAdapter.record(recordNamePupitre);
+
+        if(pathSave.equals("")) {
+
+            Log.d(TAG, "setRecord: pb de mémoire externe");
+
+        }else{
+            songToRecord.setSongPath(pathSave);
+            Log.d(TAG, "SVH setRecord: " + pathSave);
+
+            mExecutors.diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    MainActivity.choeurDataBase.songsDao().updateSong(songToRecord);
+                }
+            });
+        }
+    }*/
+
+    private void setStopListener() {
+        if(mPlayerAdapter!=null) {
+
+            if(isRecording) {
+                mPlayerAdapter.stopRecord();
+                recordSongs.setImageResource(R.drawable.ic_record_orange);
+                Log.d(TAG, "SVH setRecordListener: StopRecord");
+                isRecording=false;
+               // verifyExistingSongs(RecordSource.LIVE);
+            }else{
+                playSongs.setImageResource(R.drawable.ic_play_orange);
+                try {
+                    mPlayerAdapter.reset();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                setChronometerStop();
+            }
+        }
+    }
+
+    /**
+     * Gestion du chronomètre
+     */
+
+    public void setChronometer(long time){
+        long t = time - chronometer.getBase();
+        chronometer.setText(DateFormat.format("m:ss", t));
+    }
+
+    private void setChronometerStart(){
+        if(!isRunning){
+            chronometer.setBase(SystemClock.elapsedRealtime()-lastPause);
+            chronometer.start();
+            isRunning=true;
+        }
+    }
+
+    private void setChronometerPause(){
+        if(isRunning){
+            chronometer.stop();
+            lastPause=SystemClock.elapsedRealtime()-chronometer.getBase();
+            isRunning=false;
+        }
+    }
+
+    private void setChronometerStop(){
+        chronometer.stop();
+        chronometer.setBase(SystemClock.elapsedRealtime());
+        chronometer.setText(DateFormat.format("m:ss", 0));
+        lastPause =0;
+        isRunning=false;
+    }
+
+    public void setTotalTime(int totalTimeMillis) {
+        SimpleDateFormat simpleDateFormat;
+
+        if(totalTimeMillis>=600000){
+
+            simpleDateFormat = new SimpleDateFormat("mm:ss");
+
+        }else{
+            simpleDateFormat = new SimpleDateFormat("m:ss");
+        }
+        String totalTimeSong = simpleDateFormat.format(totalTimeMillis);
+        this.totalTime.setText(totalTimeSong);
+    }
+
+
+    @Override
+    public void OnRecord(Pupitre pupitre) {
+      // setRecord();
+    }
+
+    @Override
+    public void OndeleteSong() {
+
+       // verifyExistingSongs(RecordSource.LIVE);
+    }
+
+    /**
+     * Getter et setters
+     */
+
+    public void setTitre(String titre){ this.titre.setText(titre); }
+
+    public void setGroupe(String groupe){ this.groupe.setText(groupe); }
+
+    public ImageView getStopSongs() {
+        return stopSongs;
+    }
+
+    public ImageView getImageSong() {
+        return imageSong;
+    }
+
+    public ImageView getRecordSongs() {
+        return recordSongs;
+    }
+
+    public SeekBar getSeekBar() {
+        return seekBar;
+    }
+
+    public void setSourceSong(SourceSong sourceSong) {
+        this.sourceSong = sourceSong;
+    }
+
+
+    /** Interface pour communiquer avec la classe MediaPLayer
+     */
+    public class PlaybackListener extends PlaybackInfoListener {
+
+        public PlaybackListener(){
+        }
+
+        @Override
+        public void onDurationChanged(int duration) {
+            seekBar.setMax(duration);
+            setTotalTime(duration);
+        }
+
+        @Override
+        public void onPositionChanged(int position) {
+            if (!mUserIsSeeking) {
+                seekBar.setProgress(position);
+            }
+        }
+
+        @Override
+        public void onStateChanged(@State int state) {
+            String stateToString = PlaybackInfoListener.convertStateToString(state);
+            Log.d(TAG, String.format("onStateChanged(%s)", stateToString));
+        }
+
+        @Override
+        public void onPlaybackCompleted() {
+        }
+
+        @Override
+        void onTimeChanged() {
+            setStopListener();
+            setChronometerStop();
+        }
+
+    }
+}

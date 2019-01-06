@@ -1,0 +1,33 @@
+package dedicace.com.utilities;
+
+import android.content.Context;
+
+import dedicace.com.AppExecutors;
+import dedicace.com.data.ChoraleRepository;
+import dedicace.com.data.database.AppDataBase;
+import dedicace.com.data.networkdatabase.ChoraleNetWorkDataSource;
+import dedicace.com.ui.MainActivityViewModelFactory;
+
+public class InjectorUtils {
+
+    public static ChoraleRepository provideRepository(Context context) {
+        AppDataBase database = AppDataBase.getInstance(context.getApplicationContext());
+        AppExecutors executors = AppExecutors.getInstance();
+        ChoraleNetWorkDataSource networkDataSource =
+                ChoraleNetWorkDataSource.getInstance(context.getApplicationContext(), executors);
+        return ChoraleRepository.getInstance(database.songsDao(), database.sourceSongDao(),networkDataSource, executors);
+    }
+
+    public static ChoraleNetWorkDataSource provideNetworkDataSource(Context context) {
+        // This call to provide repository is necessary if the app starts from a service - in this
+        // case the repository will not exist unless it is specifically created.
+        provideRepository(context.getApplicationContext());
+        AppExecutors executors = AppExecutors.getInstance();
+        return ChoraleNetWorkDataSource.getInstance(context.getApplicationContext(), executors);
+    }
+
+    public static MainActivityViewModelFactory provideViewModelFactory(Context context) {
+        ChoraleRepository repository = provideRepository(context.getApplicationContext());
+        return new MainActivityViewModelFactory(repository);
+    }
+}
