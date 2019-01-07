@@ -2,6 +2,8 @@ package dedicace.com.data.database;
 
 import android.arch.persistence.room.TypeConverter;
 
+import java.util.Date;
+
 public class Converters {
 
     @TypeConverter
@@ -93,5 +95,15 @@ public class Converters {
         }
         return RecordSource.NA;
 
+    }
+
+    @TypeConverter
+    public static Date toDate(Long timestamp) {
+        return timestamp == null ? null : new Date(timestamp);
+    }
+
+    @TypeConverter
+    public static Long toTimestamp(Date date) {
+        return date == null ? null : date.getTime();
     }
 }

@@ -6,6 +6,8 @@ import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
+import java.util.Date;
+
 @Entity(indices = {@Index(value = {"titre"},
         unique = true)})
 public class SourceSong {
@@ -27,22 +29,27 @@ public class SourceSong {
     @ColumnInfo(name = "original_song")
     private String baseUrlOriginalSong;
 
+    @ColumnInfo(name = "update_phone")
+    private Date updatePhone;
+
     @Ignore
-    public SourceSong(String titre, String groupe, int duration, int bgSong, String baseUrlOriginalSong) {
+    public SourceSong(String titre, String groupe, int duration, int bgSong, String baseUrlOriginalSong, Date updatePhone) {
         this.titre = titre;
         this.groupe = groupe;
         this.duration = duration;
         this.bgSong = bgSong;
         this.baseUrlOriginalSong = baseUrlOriginalSong;
+        this.updatePhone=updatePhone;
     }
 
-    public SourceSong(int sourceSongId, String titre, String groupe, int duration, int bgSong, String baseUrlOriginalSong) {
+    public SourceSong(int sourceSongId, String titre, String groupe, int duration, int bgSong, String baseUrlOriginalSong,Date updatePhone) {
         this.sourceSongId = sourceSongId;
         this.titre = titre;
         this.groupe = groupe;
         this.duration = duration;
         this.bgSong = bgSong;
         this.baseUrlOriginalSong = baseUrlOriginalSong;
+        this.updatePhone=updatePhone;
     }
 
     @Ignore
@@ -96,4 +103,11 @@ public class SourceSong {
         return sourceSongId;
     }
 
+    public Date getUpdatePhone() {
+        return updatePhone;
+    }
+
+    public void setUpdatePhone(Date updatePhone) {
+        this.updatePhone = updatePhone;
+    }
 }

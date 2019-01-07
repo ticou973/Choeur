@@ -5,9 +5,11 @@ import android.arch.lifecycle.Observer;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import dedicace.com.AppExecutors;
+import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SongsDao;
 import dedicace.com.data.database.SourceSong;
@@ -29,6 +31,12 @@ public class ChoraleRepository {
 
     private LiveData<List<SourceSong>> sourceSongs;
     private  List<Song> songs;
+    private Song firstSongPlayed;
+    private List<List<RecordSource>> RecordSources=new ArrayList<>();
+    private List<RecordSource> recordToPlays=new ArrayList<>();
+    private List<Song> songToPlays=new ArrayList<>();
+    private List<List<Song>> SongOnPhones= new ArrayList<>();
+    private List<List<Song>> SongOnClouds=new ArrayList<>();
 
     private ChoraleRepository(SongsDao songsDao, SourceSongDao sourceSongDao,
                               final ChoraleNetWorkDataSource choraleNetworkDataSource,
@@ -39,41 +47,59 @@ public class ChoraleRepository {
         mChoraleNetworkDataSource = choraleNetworkDataSource;
         mExecutors = executors;
 
-        /*LiveData<List<Song>> networkDataSongs = mChoraleNetworkDataSource.getCurrentSongs();
-        networkDataSongs.observeForever(new Observer<List<Song>>() {
-            @Override
-            public void onChanged(@Nullable final List<Song> songs) {
-                mExecutors.diskIO().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Insert our new weather data into Sunshine's database
-
-                        Log.d(SongsAdapter.TAG, "run: Songs dans la database");
-                        mSongDao.bulkInsert(songs);
-
-                        Log.d(SongsAdapter.TAG, "run :"+mSongDao.getLastSong().getSourceSongTitre());
-                    }
-                });
-            }
-        });*/
-
-        LiveData<List<SourceSong>> networkDataSourceSongs = mChoraleNetworkDataSource.getSourceSongs();
+        final LiveData<List<SourceSong>> networkDataSourceSongs = mChoraleNetworkDataSource.getSourceSongs();
         networkDataSourceSongs.observeForever(new Observer<List<SourceSong>>() {
             @Override
             public void onChanged(@Nullable final List<SourceSong> sourceSongs) {
                 Log.d("coucou", "Repository: observers ");
+                songs = choraleNetworkDataSource.getSongs();
                 mExecutors.diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
                         Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database avant");
                         mSourceDao.bulkInsert(sourceSongs);
-                        Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database après");
+                        mSongDao.bulkInsert(songs);
+                        Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database après A"+sourceSongs.size()+" "+songs.size());
+
+                        if(sourceSongs!=null) {
+
+                            for (SourceSong sourceSong : sourceSongs) {
+                                String titre = sourceSong.getTitre();
+                                RecordSources.add(getRecordSources(titre));
+                            }
+
+                            Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database après B "+RecordSources.size());
+
+                            for (List<RecordSource> recordSources: RecordSources) {
+                                recordToPlays.add(getRecordSource(recordSources));
+                            }
+
+                            Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database après C "+recordToPlays.size());
+
+                            for (SourceSong sourceSong:sourceSongs) {
+                                String titre = sourceSong.getTitre();
+                                int indexSourceSong = sourceSongs.indexOf(sourceSong);
+
+                                RecordSource recordToPlay = recordToPlays.get(indexSourceSong);
+                                Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database après D "+recordToPlay);
+                                songToPlays.add(getFirstSongPlayed(titre,recordToPlay));
+                                Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database après E "+songToPlays.size());
+
+                                SongOnPhones.add(getSongsOnPhone(titre,recordToPlay));
+
+                                Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database après F "+SongOnPhones.size());
+                                SongOnClouds.add(getSongsOnCloud(titre,recordToPlay));
+
+                                Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database après G "+SongOnClouds.size());
+                            }
+                        }
                     }
                 });
-
             }
         });
     }
+
+
 
     public synchronized static ChoraleRepository getInstance(
             SongsDao songsDao, SourceSongDao sourceSongDao,ChoraleNetWorkDataSource choraleNetworkDataSource,
@@ -129,11 +155,109 @@ public class ChoraleRepository {
         return sourceSongs;
     }
 
-    public LiveData<List<Song>> getSongs() {
-        //initializeData();
+    public List<Song> getSongs() {
         Log.d(SongsAdapter.TAG, "getSongs: repository ");
         return  mSongDao.getAllSongs();
     }
+
+
+
+    private RecordSource getRecordSource(List<RecordSource> recordSources) {
+        RecordSource source =RecordSource.NA;
+
+        if(recordSources.size()==2){
+            source=RecordSource.BANDE_SON;
+        }else if(recordSources.size()==1){
+            if(recordSources.get(0)==RecordSource.BANDE_SON){
+                source=RecordSource.BANDE_SON;
+            }else if(recordSources.get(0)==RecordSource.LIVE){
+                source=RecordSource.LIVE;
+            }
+        }else if(recordSources.size()==0){
+            source = RecordSource.NA;
+        }
+
+        return source;
+    }
+
+    public List<RecordSource> getRecordSources(String titre) {
+
+        List<RecordSource> sources= new ArrayList<>();
+
+        List<Song> listBS;
+        List<Song> listLIVE;
+
+        listBS = mSongDao.getSongsBySourceTitre(RecordSource.BANDE_SON,titre);
+        listLIVE=mSongDao.getSongsBySourceTitre(RecordSource.LIVE,titre);
+
+        if(listBS.size()!=0&&listLIVE.size()!=0){
+            sources.add(RecordSource.BANDE_SON);
+            sources.add(RecordSource.LIVE);
+        }else if(listBS.size()==0&&listLIVE.size()!=0){
+            sources.add(RecordSource.LIVE);
+        }else if(listBS.size()!=0&&listLIVE.size()==0){
+            sources.add(RecordSource.BANDE_SON);
+        }else{
+            sources.add(RecordSource.NA);
+        }
+        return sources;
+    }
+
+    public List<List<RecordSource>> getRecordSources() {
+        return RecordSources;
+    }
+
+    public Song getFirstSongPlayed(String titre, RecordSource recordSource) {
+
+        List<Song> listOrderByPupitre;
+
+        listOrderByPupitre= mSongDao.getSongOrderedByPupitre(titre,recordSource);
+
+        if(recordSource!=RecordSource.NA) {
+            firstSongPlayed = listOrderByPupitre.get(0);
+        }else{
+            firstSongPlayed = null;
+        }
+
+        return firstSongPlayed;
+    }
+
+    public List<Song> getSongToPlays() {
+        return songToPlays;
+    }
+
+    public List<List<Song>> getSongsOnPhones(){
+
+       return SongOnPhones;
+    }
+
+    public List<Song> getSongsOnPhone(String titre, RecordSource source){
+
+        List<Song> listSongsOnPhone;
+
+        listSongsOnPhone=mSongDao.getSongsOnPhone(titre,source);
+
+        return listSongsOnPhone;
+
+    }
+
+
+    public List<List<Song>> getSongsOnClouds(){
+
+        return SongOnClouds;
+    }
+
+    public List<Song> getSongsOnCloud(String titre, RecordSource source){
+
+        List<Song> listSongsOnCloud;
+
+        listSongsOnCloud=mSongDao.getSongsOnCloud(titre,source);
+
+        return listSongsOnCloud;
+
+    }
+
+
 }
 
 

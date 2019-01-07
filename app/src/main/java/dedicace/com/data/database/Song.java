@@ -7,6 +7,8 @@ import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
+import java.util.Date;
+
 @Entity(foreignKeys = @ForeignKey(entity = SourceSong.class,
         parentColumns = "titre",
         childColumns = "titre_song"),indices = {@Index(value = {"titre_song"})})
@@ -22,30 +24,36 @@ public class Song {
     private RecordSource recordSource;
 
     @ColumnInfo(name = "pupitre")
-    Pupitre pupitre;
+    private Pupitre pupitre;
 
     @ColumnInfo(name = "fichier_mp3")
     private String songPath;
 
+    @ColumnInfo(name ="update_phone")
+    private Date updatePhone;
+
+
 //todo gérer lorsque le mediaplayer est lancé à 2 items différents
     @Ignore
-    public Song(String sourceSongTitre, RecordSource recordSource, Pupitre pupitre, String songPath) {
+    public Song(String sourceSongTitre, RecordSource recordSource, Pupitre pupitre, String songPath, Date updatePhone) {
         this.sourceSongTitre = sourceSongTitre;
         this.recordSource = recordSource;
         this.pupitre = pupitre;
         this.songPath = songPath;
+        this.updatePhone=updatePhone;
     }
 
     @Ignore
     public Song() {
     }
 
-    public Song(int songId, String sourceSongTitre, RecordSource recordSource, Pupitre pupitre, String songPath) {
+    public Song(int songId, String sourceSongTitre, RecordSource recordSource, Pupitre pupitre, String songPath, Date updatePhone) {
         this.songId = songId;
         this.sourceSongTitre = sourceSongTitre;
         this.recordSource = recordSource;
         this.pupitre = pupitre;
         this.songPath = songPath;
+        this.updatePhone=updatePhone;
     }
 
     public int getSongId() {
@@ -86,5 +94,17 @@ public class Song {
 
     public void setSourceSongId(int sourceSongId) {
         this.sourceSongTitre = sourceSongTitre;
+    }
+
+    public void setSourceSongTitre(String sourceSongTitre) {
+        this.sourceSongTitre = sourceSongTitre;
+    }
+
+    public Date getUpdatePhone() {
+        return updatePhone;
+    }
+
+    public void setUpdatePhone(Date updatePhone) {
+        this.updatePhone = updatePhone;
     }
 }

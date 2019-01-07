@@ -14,26 +14,31 @@ import java.util.List;
 
 import dedicace.com.R;
 import dedicace.com.data.database.Pupitre;
+import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
 
 public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
     private List<SourceSong> sourceSongs;
-    private List<Song> songsEssai;
-    private List<Song> mSongs;
     private Context context;
-    private Pupitre recordPupitre=Pupitre.NA;
 
     public static final String TAG = "coucou";
 
     public ListemClickedListener mlistemClickedListener;
 
     private SourceSong sourceSong;
+    private List<RecordSource> recordSources;
+    private List<List<RecordSource>> RecordSources= new ArrayList<>();
+    private RecordSource recordSource;
+    private List<Song> songToPlays= new ArrayList<>();
+    private String titre;
     private Song songToPlay;
     private List<Song> songOnPhoneRecorded= new ArrayList<>();
-    private List<Song> songOnCloudRecorded;
-    private List<Song> songNotRecorded;
+    private List<Song> songOnCloudRecorded= new ArrayList<>();
+    private List<List<Song>> songOnPhones= new ArrayList<>();
+    private List<List<Song>> songOnClouds= new ArrayList<>();
+
 
 
     //todo voir si il faut envoyer dans le constructeur les songs
@@ -52,10 +57,11 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         void OnClickedItem(String titre, String message);
         void OnDialogRecord(int position, SongsViewHolder songsViewHolder);
         void OnRequestPermission();
-        Song OnPlaySong();
+        Song OnPlaySong(SourceSong sourceSong, Pupitre pupitre, RecordSource source);
+        Song OnPlayFirstSong(String titre, RecordSource recordSource);
         List<Song> OnListRecordedSongsOnPhone();
         List<Song> OnListRecordedSongsOnCloud();
-        List<Song> OnListNotRecordedSong();
+
     }
 
     @NonNull
@@ -109,65 +115,40 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         Log.d(TAG, "initDataSourceSong: "+sourceSong.getTitre()+" "+position);
         songsViewHolder.setSourceSong(sourceSong);
 
+        initRecordSongs(songsViewHolder,sourceSong,position);
+
         //initalisation des songs de la sourceSongs
-        initDataSongs(songsViewHolder,sourceSong);
+        if(recordSource!=RecordSource.NA) {
+            initDataSongs(songsViewHolder, sourceSong,position);
+        }
     }
 
-    private void initDataSongs(SongsViewHolder songsViewHolder,SourceSong sourceSong) {
+    private void initRecordSongs(SongsViewHolder songsViewHolder,SourceSong sourceSong, int position) {
+        recordSources=RecordSources.get(position);
+        songsViewHolder.setRecordSource(recordSources);
+        recordSource=songsViewHolder.getSource();
+    }
+
+    private void initDataSongs(SongsViewHolder songsViewHolder,SourceSong sourceSong,int position) {
         Log.d(TAG, "initDataSongs: SA");
-        songToPlay=mlistemClickedListener.OnPlaySong();
-        Log.d(TAG, "initDataSongs: plyaSong choisi");
-
-        songOnPhoneRecorded = mlistemClickedListener.OnListRecordedSongsOnPhone();
+        songToPlay = songToPlays.get(position);
+        songOnPhoneRecorded = songOnPhones.get(position);
         Song[] songsPhone = songOnPhoneRecorded.toArray(new Song[0]);
-
-        songOnCloudRecorded = mlistemClickedListener.OnListRecordedSongsOnCloud();
+        songOnCloudRecorded = songOnClouds.get(position);
         Song[] songsCloud = songOnCloudRecorded.toArray(new Song[0]);
 
-        songNotRecorded = mlistemClickedListener.OnListNotRecordedSong();
-        Song[] songsNotRecorded = songNotRecorded.toArray(new Song[0]);
-
-
-        /*Song songToPlay = songsEssai.get(0);
-        Song songOnPhoneRecorded = songsEssai.get(1);
-        Song songOnCloudRecorded = songsEssai.get(2);
-        Song songNotRecorded = songsEssai.get(3);*/
-
-       /* for (SourceSong source: sourceSongs) {
-
-            Log.d(TAG, "run MA: "+source.getSourceSongId());
-
-        }
-        //récupération de la liste des song par sourcesong
-        for (Song song: songsEssai){
-
-            Log.d(TAG, "initDataSongs:"+song.getSourceSongId());
-            Log.d(TAG, "initDataSongs:"+sourceSong.getSourceSongId());
-
-            if(song.getSourceSongId()==sourceSongs.indexOf(sourceSong)){
-
-                Log.d(TAG, "initDataSongs: songsbysource");
-                songsBysourceSong.add(song);
-            }
-        }
-
-        Log.d(TAG, "initDataSongs: "+songsBysourceSong.size());
-
-        if(songsBysourceSong==null){
-            songToPlay = null;
-        }else{
-           songToPlay = songsBysourceSong.get(0);
-        }*/
-
-        songsViewHolder.setSongToPlay(songToPlay);
         songsViewHolder.setSongRecorded(songsPhone);
+        songsViewHolder.setSongToPlay(songToPlay);
         songsViewHolder.setSongCloudRecorded(songsCloud);
-        songsViewHolder.setSongNotRecorded(songsNotRecorded);
     }
 
 
-    public void swapSongs(final List<SourceSong> sources) {
+    public void swapSongs(final List<SourceSong> sources, List<List<RecordSource>> recordSources, List<Song> songToPlays, List<List<Song>> songOnPhones, List<List<Song>> songOnClouds) {
         Log.d("coucou", "swapSongs: SongAdapter");
+        this.RecordSources=recordSources;
+        this.songToPlays=songToPlays;
+        this.songOnPhones=songOnPhones;
+        this.songOnClouds=songOnClouds;
 
         if(sourceSongs==null){
             Log.d("coucou", "swapForecast: cas null ");

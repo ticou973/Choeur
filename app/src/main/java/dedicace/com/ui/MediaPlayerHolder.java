@@ -94,6 +94,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     }
 
     // Implements PlaybackControl.
+    //todo voir comment installer dès le départ le fichier pour l'accueil avec getFilesDir.
     @Override
     public void prepareMediaPlayer(Context context, String resStrToPlay) throws IOException {
         mContext=context;

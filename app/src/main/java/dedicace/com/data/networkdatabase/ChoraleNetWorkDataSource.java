@@ -76,6 +76,9 @@ public class ChoraleNetWorkDataSource {
         return mDownloaderSourceSongs;
     }
 
+    public List<Song> getSongs() {
+        return songs;
+    }
 
     public void startFetchSongsService() {
         Intent intentToFetch = new Intent(mContext, ChoraleSyncIntentService.class);
@@ -107,9 +110,9 @@ public class ChoraleNetWorkDataSource {
             }
         });
 
-        sourceSong1 = new SourceSong("Des hommes pareils","Francis Cabrel",321,R.drawable.hand,"");
-        sourceSong2 = new SourceSong("L'un pour l'autre","Maurane",266,R.drawable.yinyang,"");
-        sourceSong7 = new SourceSong("North Star","Philip Glas",160,R.drawable.etoile,"");
+        sourceSong1 = new SourceSong("Des hommes pareils","Francis Cabrel",321,R.drawable.hand,"",null);
+        sourceSong2 = new SourceSong("L'un pour l'autre","Maurane",266,R.drawable.yinyang,"",null);
+        sourceSong7 = new SourceSong("North Star","Philip Glas",160,R.drawable.etoile,"",null);
 
         sourceSongs.add(sourceSong1);
         sourceSongs.add(sourceSong2);
@@ -120,13 +123,13 @@ public class ChoraleNetWorkDataSource {
         String titreSourceSong2 = sourceSong2.getTitre();
         String titreSourceSong7 = sourceSong7.getTitre();
 
-        song2 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.BASS,"des_hommes_pareils_basse");
-        song3 = new Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.TENOR,"des_hommes_pareils_tenor");
-        song4 = new Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.ALTO,"des_hommes_pareils_alto");
-        song5 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.SOPRANO,"des_hommes_pareils_soprano");
-        song6 = new Song(titreSourceSong2,RecordSource.BANDE_SON,Pupitre.BASS,"l_un_pour_l_autre_basse");
+        song2 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.BASS,"des_hommes_pareils_basse",null);
+        song3 = new Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.TENOR,"des_hommes_pareils_tenor",null);
+        song4 = new Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.ALTO,"des_hommes_pareils_alto",null);
+        song5 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.SOPRANO,"des_hommes_pareils_soprano",null);
+        song6 = new Song(titreSourceSong2,RecordSource.BANDE_SON,Pupitre.BASS,"l_un_pour_l_autre_basse",null);
 
-        songs.add(song3);
+        //songs.add(song3);
         songs.add(song4);
         songs.add(song2);
         songs.add(song5);

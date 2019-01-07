@@ -1,6 +1,5 @@
 package dedicace.com.data.database;
 
-import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -14,13 +13,22 @@ import java.util.List;
 public interface SongsDao {
 
     @Query("SELECT * FROM song")
-    LiveData<List<Song>> getAllSongs();
+    List<Song> getAllSongs();
+
+    @Query("SELECT * FROM song WHERE (titre_song IN (:titre)) AND (source_enregistrement IN (:recordSource) AND (update_phone NOT null))")
+    List<Song> getSongsOnPhone(String titre, RecordSource recordSource);
+
+    @Query("SELECT * FROM song WHERE (titre_song IN (:titre)) AND (source_enregistrement IN (:recordSource) AND (update_phone IS null))")
+    List<Song> getSongsOnCloud(String titre, RecordSource recordSource);
 
     @Query("SELECT * FROM song WHERE titre_song IN (:titre)")
     List<Song> getSongsBySourceSong(String titre);
 
     @Query("SELECT * FROM song WHERE source_enregistrement IN (:source)")
     List<Song> getSongsBySource(RecordSource source);
+
+    @Query("SELECT * FROM song WHERE (source_enregistrement IN (:source)) AND (titre_song IN (:titre))")
+    List<Song> getSongsBySourceTitre(RecordSource source, String titre);
 
     @Query("SELECT * FROM song WHERE (titre_song IN (:titre)) AND (pupitre IN (:pupitre)) AND (source_enregistrement IN (:source))")
     Song getSongsByTitrePupitreSource(String titre, Pupitre pupitre, RecordSource source);

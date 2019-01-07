@@ -6,7 +6,6 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -68,9 +67,12 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     //todo à retirer seuelement pour les tests
     LiveData<List<SourceSong>> sourceSongs;
     List<SourceSong> sourceSongList = new ArrayList<>();
-    List<Song> songsEssai = new ArrayList<>();
-    Song song3, song4, song6, song5,song2;
+    Song song3, song4, song6, song5,song2, firstSongPlayed;
     SourceSong sourceSong1, sourceSong2,sourceSong7;
+    List<List<RecordSource>> recordSources= new ArrayList<>();
+    List<Song> songToPlays= new ArrayList<>();
+    private List<List<Song>> songOnPhones= new ArrayList<>();
+    private List<List<Song>> songOnClouds= new ArrayList<>();
 
 
     //todo vérifier si extras dans des intents avec HasExtras
@@ -100,7 +102,12 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             @Override
             public void onChanged(@Nullable List<SourceSong> sourceSongs) {
                 Log.d("coucou", "MainActivity: observers");
-                songsAdapter.swapSongs(sourceSongs);
+                recordSources =mViewModel.getRecordSources();
+                songToPlays =mViewModel.getSongToPlays();
+                songOnPhones=mViewModel.getSongOnPhones();
+                songOnClouds=mViewModel.getSongOnClouds();
+
+                songsAdapter.swapSongs(sourceSongs,recordSources,songToPlays,songOnPhones,songOnClouds);
 
                 if(sourceSongs!=null){
                     Log.d("coucou", "onCreate: observers " + sourceSongs.size());
@@ -119,41 +126,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                     showLoading();
                     Log.d("coucou", "onCreate: showLoading");
                 }
-
             }
         });
-        /*mViewModel.getChoeurSongs().observe(this, new Observer<List<Song>>() {
-            @Override
-            public void onChanged(@Nullable final List<Song> songs) {
-
-                songsAdapter.swapSongs(songs, sourceSongList);
-
-                //sourceSongs= mViewModel.getChoeurSourceSongs();
-
-                mExecutors.mainThread().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(sourceSongs.getValue()!=null) {
-                            songsAdapter.swapSongs(songs, sourceSongs.getValue());
-                            Log.d(TAG, "onChanged:B  "+sourceSongs.getValue().get(0).getTitre());
-                        }
-                    }
-                });
-
-                if(sourceSongs!=null) {
-                    songsAdapter.swapSongs(songs, sourceSongs.getValue());
-                    Log.d(TAG, "onChanged: B"+sourceSongs.toString());
-                }
-
-                if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
-                recyclerView.smoothScrollToPosition(mPosition);
-
-                // Show the weather list or the loading screen based on whether the forecast data exists
-                // and is loaded
-                if (songs != null && songs.size() != 0) showSongsDataView();
-                else showLoading();
-            }
-        });*/
     }
 
     private void initData() {
@@ -162,11 +136,11 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         String titreSourceSong2 = "L'un pour l'autre";
         String titreSourceSong7 = "North Star";
 
-        song2 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.BASS,"des_hommes_pareils_basse");
-        song3 = new Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.TENOR,"des_hommes_pareils_tenor");
-        song4 = new Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.ALTO,"des_hommes_pareils_alto");
-        song5 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.SOPRANO,"des_hommes_pareils_soprano");
-        song6 = new Song(titreSourceSong2,RecordSource.BANDE_SON,Pupitre.BASS,"l_un_pour_l_autre_basse");
+        song2 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.BASS,"des_hommes_pareils_basse",null);
+        song3 = new Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.TENOR,"des_hommes_pareils_tenor",null);
+        song4 = new Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.ALTO,"des_hommes_pareils_alto",null);
+        song5 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.SOPRANO,"des_hommes_pareils_soprano",null);
+        song6 = new Song(titreSourceSong2,RecordSource.BANDE_SON,Pupitre.BASS,"l_un_pour_l_autre_basse",null);
 
         songs.add(song3);
         songs.add(song4);
@@ -200,6 +174,12 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         // Finally, show the loading indicator
         mLoadingIndicator.setVisibility(View.VISIBLE);
     }
+
+    /**
+     * Gestion du menu avec Options
+     * @param menu
+     * @return
+     */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -278,6 +258,18 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         });
     }
 
+    public void deleteMusicFiles(final String path){
+        mExecutors.diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+
+                File file = new File(path);
+                boolean deletefile = file.delete();
+                Log.d(TAG, "deleteMusicFiles: "+deletefile);
+            }
+        });
+    }
+
 
     /**
      * Méthode passée dans le listener dans l'adapter
@@ -295,12 +287,22 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         mToast.show();
     }
 
-    @Override
-    public Song OnPlaySong() {
-       // todo à faire avec le viewModel
-        Song songToPlay = song3;
 
-        return songToPlay;
+    @Override
+    public Song OnPlaySong(SourceSong sourceSong, Pupitre pupitre, RecordSource source) {
+        return song3;
+    }
+
+    @Override
+    public Song OnPlayFirstSong(final String titre, final RecordSource recordSource) {
+        mExecutors.diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+               firstSongPlayed= mViewModel.getFirstSong(titre,recordSource);
+            }
+        });
+
+        return firstSongPlayed;
     }
 
     @Override
@@ -322,14 +324,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         return cloudSongs;
     }
 
-    @Override
-    public List<Song> OnListNotRecordedSong() {
 
-        List<Song> notRecordedSongs = new ArrayList<>();
-        notRecordedSongs.add(song5);
-
-        return notRecordedSongs;
-    }
 
     @Override
     public void OnDialogRecord(int position, SongsViewHolder songsViewHolder) {
@@ -375,7 +370,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         }
     }
 
-
     private void requestPermission() {
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.RECORD_AUDIO},
@@ -408,35 +402,12 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         }
     }
 
+
     //todo à renommer
     public interface OnPositiveClickListener {
         void OnRecord(Pupitre pupitre);
         void OndeleteSong();
     }
-
-    public File getPublicMusicStorageDir(String titre) {
-        // Get the directory for the user's public pictures directory.
-        File file = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_MUSIC), titre);
-        if (!file.mkdirs()) {
-            Log.e(TAG, "Répertoire non créé");
-        }
-        return file;
-    }
-
-    public void deleteMusicFiles(final String path){
-        mExecutors.diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-
-                File file = new File(path);
-                boolean deletefile = file.delete();
-                Log.d(TAG, "deleteMusicFiles: "+deletefile);
-            }
-        });
-    }
-
-
 
 
 
