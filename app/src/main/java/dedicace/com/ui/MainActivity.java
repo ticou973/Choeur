@@ -4,6 +4,7 @@ import android.Manifest;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -22,8 +23,12 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import dedicace.com.AppExecutors;
@@ -54,16 +59,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private final int REQUEST_PERMISSION_CODE = 1000;
     private int position;
 
-    private OnPositiveClickListener mPositiveClickListener;
-    private SongsViewHolder songsViewHolder;
-
-    public static AppDataBase choeurDataBase;
-    private AppExecutors mExecutors;
-
-    private MainActivityViewModel mViewModel;
-    private  MainActivityViewModelFactory mfactory;
-
-
     //todo à retirer seuelement pour les tests
     LiveData<List<SourceSong>> sourceSongs;
     List<SourceSong> sourceSongList = new ArrayList<>();
@@ -74,6 +69,21 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private List<List<Song>> songOnPhones= new ArrayList<>();
     private List<List<Song>> songOnClouds= new ArrayList<>();
 
+    //ViewModel
+    private MainActivityViewModel mViewModel;
+    private  MainActivityViewModelFactory mfactory;
+
+    //Firebase
+    private FirebaseAuth mAuth;
+    private String current_user_id;
+
+    //Utils
+    private OnPositiveClickListener mPositiveClickListener;
+    public static AppDataBase choeurDataBase;
+    private AppExecutors mExecutors;
+
+
+
 
     //todo vérifier si extras dans des intents avec HasExtras
     @Override
@@ -82,52 +92,138 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         setContentView(R.layout.activity_main);
         Log.d("coucou", "MA onCreate: ");
 
-        mLoadingIndicator = findViewById(R.id.pb_loading_indicator);
-        recyclerView = findViewById(R.id.recyclerview_media_item);
-        songsAdapter =new SongsAdapter(this, this);
-        layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setAdapter(songsAdapter);
+        //Firebase
+        mAuth = FirebaseAuth.getInstance();
 
-        initData();
+        if(mAuth.getCurrentUser() != null) {
+            //UI
+            mLoadingIndicator = findViewById(R.id.pb_loading_indicator);
+            recyclerView = findViewById(R.id.recyclerview_media_item);
+            songsAdapter = new SongsAdapter(this, this);
+            layoutManager = new LinearLayoutManager(this);
+            recyclerView.setLayoutManager(layoutManager);
+            recyclerView.setHasFixedSize(true);
+            recyclerView.setAdapter(songsAdapter);
 
-        mExecutors =AppExecutors.getInstance();
+            //Songs
+            initData();
 
-        mfactory = InjectorUtils.provideViewModelFactory(this.getApplicationContext());
-        Log.d("coucou", "onCreate: fin de la factoy");
-        mViewModel = ViewModelProviders.of(this,mfactory).get(MainActivityViewModel.class);
-        Log.d("coucou", "onCreate: fin du viewModel");
-        mViewModel.getChoeurSourceSongs().observe(this, new Observer<List<SourceSong>>() {
-            @Override
-            public void onChanged(@Nullable List<SourceSong> sourceSongs) {
-                Log.d("coucou", "MainActivity: observers");
-                recordSources =mViewModel.getRecordSources();
-                songToPlays =mViewModel.getSongToPlays();
-                songOnPhones=mViewModel.getSongOnPhones();
-                songOnClouds=mViewModel.getSongOnClouds();
+            mExecutors = AppExecutors.getInstance();
 
-                songsAdapter.swapSongs(sourceSongs,recordSources,songToPlays,songOnPhones,songOnClouds);
+            mfactory = InjectorUtils.provideViewModelFactory(this.getApplicationContext());
+            Log.d("coucou", "onCreate: fin de la factoy");
+            mViewModel = ViewModelProviders.of(this, mfactory).get(MainActivityViewModel.class);
+            Log.d("coucou", "onCreate: fin du viewModel");
+            mViewModel.getChoeurSourceSongs().observe(this, new Observer<List<SourceSong>>() {
+                @Override
+                public void onChanged(@Nullable List<SourceSong> sourceSongs) {
+                    Log.d("coucou", "MainActivity: observers");
 
-                if(sourceSongs!=null){
-                    Log.d("coucou", "onCreate: observers " + sourceSongs.size());
+                    //getElementsToplaysSongs();
+
+                    //todo gérer le cas où l'on a que des chansons live sur Phone mais tout de même des chansons onCloud. pour l'instant btn disabled. voir télécharger via le menu
+                    Log.d(TAG, "onChanged: RecordSources " + recordSources.size());
+                    Log.d(TAG, "onChanged: songToplays " + songToPlays.size());
+                    Log.d(TAG, "onChanged: songOnPhones " + songOnPhones.size());
+                    Log.d(TAG, "onChanged: songOnClouds " + songOnClouds.size());
+
+                    for (List<RecordSource> sources : recordSources) {
+                        for (RecordSource source : sources) {
+                            Log.d(TAG, "onChanged: A " + source + " " + sources.size());
+                        }
+                    }
+
+                    for (Song song : songToPlays) {
+                        if (song != null) {
+                            Log.d(TAG, "onChanged: B " + song + "  " + song.getSourceSongTitre() + " " + song.getRecordSource() + " " + song.getPupitre());
+                        } else {
+                            Log.d(TAG, "onChanged: B pas de chanson " + song);
+                        }
+                    }
+
+                    for (List<Song> songs : songOnPhones) {
+
+                        for (Song song : songs) {
+                            if (song != null) {
+                                Log.d(TAG, "onChanged: C " + song.getSourceSongTitre() + " " + song.getRecordSource() + " " + song.getPupitre());
+                            } else {
+                                Log.d(TAG, "onChanged: C pas de chanson sur le Phone");
+                            }
+                        }
+                    }
+
+                    for (List<Song> songs : songOnClouds) {
+                        for (Song song : songs) {
+                            if (song != null) {
+                                Log.d(TAG, "onChanged: D " + song.getSourceSongTitre() + " " + song.getRecordSource() + " " + song.getPupitre());
+                            } else {
+                                Log.d(TAG, "onChanged: D pas de chanson non enregistrée");
+                            }
+                        }
+                    }
+
+                    songsAdapter.swapSongs(sourceSongs, recordSources, songToPlays, songOnPhones, songOnClouds);
+
+                    if (sourceSongs != null) {
+                        Log.d("coucou", "onCreate: observers " + sourceSongs.size());
+                    }
+                    if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
+                    recyclerView.smoothScrollToPosition(mPosition);
+
+                    Log.d("coucou", "onCreate: observers - mposition " + mPosition);
+                    // Show the weather list or the loading screen based on whether the forecast data exists
+                    // and is loaded
+                    if (songs != null && songs.size() != 0) {
+                        showSongsDataView();
+                        Log.d("coucou", "onCreate: showDataView");
+                    } else {
+                        showLoading();
+                        Log.d("coucou", "onCreate: showLoading");
+                    }
                 }
-                if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
-                recyclerView.smoothScrollToPosition(mPosition);
+            });
+        }
+    }
 
-                Log.d("coucou", "onCreate: observers - mposition "+ mPosition);
-                // Show the weather list or the loading screen based on whether the forecast data exists
-                // and is loaded
-                if (songs != null && songs.size() != 0) {
-                    showSongsDataView();
-                    Log.d("coucou", "onCreate: showDataView");
-                }
-                else {
-                    showLoading();
-                    Log.d("coucou", "onCreate: showLoading");
-                }
-            }
-        });
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(currentUser == null){
+            sendToLogin();
+        } else {
+            //todo à compléter
+            current_user_id = mAuth.getCurrentUser().getUid();
+
+        }
+    }
+
+    private void sendToLogin() {
+
+        Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+        startActivity(loginIntent);
+        finish();
+    }
+
+    private void logOut() {
+        mAuth.signOut();
+        sendToLogin();
+    }
+
+    private void getElementsToplaysSongs() {
+
+        List<Object> listElements = new ArrayList();
+        listElements=mViewModel.getListElements();
+
+        recordSources= (List<List<RecordSource>>) listElements.get(0);
+        songOnPhones= (List<List<Song>>) listElements.get(1);
+        songToPlays = (List<Song>) listElements.get(2);
+        songOnClouds= (List<List<Song>>) listElements.get(3);
+        /*recordSources =mViewModel.getRecordSources();
+        songOnPhones=mViewModel.getSongOnPhones();
+        songToPlays =mViewModel.getSongToPlays();
+        songOnClouds=mViewModel.getSongOnClouds();*/
+
     }
 
     private void initData() {
@@ -136,17 +232,57 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         String titreSourceSong2 = "L'un pour l'autre";
         String titreSourceSong7 = "North Star";
 
+        Date date = new Date(System.currentTimeMillis());
+
         song2 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.BASS,"des_hommes_pareils_basse",null);
-        song3 = new Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.TENOR,"des_hommes_pareils_tenor",null);
-        song4 = new Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.ALTO,"des_hommes_pareils_alto",null);
-        song5 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.SOPRANO,"des_hommes_pareils_soprano",null);
-        song6 = new Song(titreSourceSong2,RecordSource.BANDE_SON,Pupitre.BASS,"l_un_pour_l_autre_basse",null);
+        song3 = new Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.TENOR,"des_hommes_pareils_tenor",date);
+        song4 = new Song(titreSourceSong1,RecordSource.LIVE,Pupitre.ALTO,"des_hommes_pareils_alto",date);
+        song5 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.SOPRANO,"des_hommes_pareils_soprano",date);
+        song6 = new Song(titreSourceSong2,RecordSource.LIVE,Pupitre.BASS,"l_un_pour_l_autre_basse",null);
 
         songs.add(song3);
         songs.add(song4);
         songs.add(song2);
         songs.add(song5);
         songs.add(song6);
+
+        List<RecordSource>  recordSources1 = new ArrayList<>();
+        List<RecordSource>  recordSources2 = new ArrayList<>();
+        List<RecordSource>  recordSources3 = new ArrayList<>();
+        recordSources1.add(RecordSource.BANDE_SON);
+        recordSources1.add(RecordSource.LIVE);
+        recordSources2.add(RecordSource.LIVE);
+        recordSources3.add(RecordSource.NA);
+        recordSources.add(recordSources1);
+        recordSources.add(recordSources2);
+        recordSources.add(recordSources3);
+
+        List<Song> songs1 = new ArrayList<>();
+        List<Song> songs2 = new ArrayList<>();
+        List<Song> songs3 = new ArrayList<>();
+        songs1.add(song3);
+        songs1.add(song5);
+        songs2.add(null);
+        songs3.add(null);
+        songOnPhones.add(songs1);
+        songOnPhones.add(songs2);
+        songOnPhones.add(songs3);
+
+        List<Song> songs4 = new ArrayList<>();
+        List<Song> songs5 = new ArrayList<>();
+        List<Song> songs6 = new ArrayList<>();
+        songs4.add(song2);
+        songs5.add(song6);
+        songs6.add(null);
+        songOnClouds.add(songs4);
+        songOnClouds.add(songs5);
+        songOnClouds.add(songs6);
+
+        songToPlays.add(song3);
+        songToPlays.add(null);
+        songToPlays.add(null);
+
+
     }
 
     /**
@@ -201,6 +337,10 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             case R.id.reset_song:
 
                 deleteLastRecordedSong();
+                break;
+
+            case R.id.log_out:
+                logOut();
                 break;
 
         }
@@ -348,8 +488,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 mPositiveClickListener.OnRecord(pupitre);
             }
         });
-
-
     }
 
 

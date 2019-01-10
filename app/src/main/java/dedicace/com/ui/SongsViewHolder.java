@@ -229,11 +229,13 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                 source=RecordSource.BANDE_SON;
             }else if(recordSources.get(0)==RecordSource.LIVE){
                 source=RecordSource.LIVE;
+            }else if(recordSources.get(0)==RecordSource.NA){
+                source=RecordSource.NA;
             }
-        }else if(recordSources.size()==0){
-            source = RecordSource.NA;
         }
-        setCurrentSourceActive(source);
+        if(source!=RecordSource.NA) {
+            setCurrentSourceActive(source);
+        }
     }
 
     private void setCurrentSourceActive(RecordSource source) {
@@ -253,8 +255,10 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
            setSongRecorded(songToPlay);
         }
         this.songToPlay=songToPlay;
-        pupitre = songToPlay.getPupitre();
-        setCurrentSongActive(pupitre);
+        if(songToPlay!=null) {
+            pupitre = songToPlay.getPupitre();
+            setCurrentSongActive(pupitre);
+        }
     }
 
     public void setCurrentSongActive(Pupitre pupitre){
@@ -264,14 +268,16 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     public void setSongRecorded(Song...recordedLocalSongs){
         for (Song song:recordedLocalSongs) {
-            RecordSource recordSourceRecorded = song.getRecordSource();
-            Pupitre pupitrerecorded = song.getPupitre();
+            //RecordSource recordSourceRecorded = song.getRecordSource();
+            if(song!=null) {
+                Pupitre pupitrerecorded = song.getPupitre();
 
-            if(recordSourceRecorded!=source ) {
+            /*if(recordSourceRecorded!=source ) {
                 setSourcesOnPhoneVisible(recordSourceRecorded);
-            }
-            if(pupitrerecorded!=pupitre){
-                setPupitresLoadedOnPhoneVisible(pupitrerecorded);
+            }*/
+                if (pupitrerecorded != pupitre) {
+                    setPupitresLoadedOnPhoneVisible(pupitrerecorded);
+                }
             }
         }
     }
@@ -294,9 +300,9 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         for (Song song:recordedCloudSongs) {
             RecordSource recordSourceRecorded = song.getRecordSource();
             Pupitre pupitrerecorded = song.getPupitre();
-            if(recordSourceRecorded!=source ) {
+            /*if(recordSourceRecorded!=source ) {
                 setSourcesOnCloudVisible(recordSourceRecorded);
-            }
+            }*/
             if(pupitrerecorded!=pupitre){
                 setPupitresLoadedOnCloudVisible(pupitrerecorded);            }
         }
@@ -383,30 +389,14 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         switch (view.getId()){
             //todo faire les 2 cas suivants dès que le système de fichiers est au point
             case R.id.btn_bs :
-                source=RecordSource.BANDE_SON;
-                //pupitre=Pupitre.NA;
-                isFirstTime=true;
-                message="Bande Son";
-                setResourceToMediaPlayer();
-                if(mPlayerAdapter!=null) {
-                    setStopListener();
-                }
+                handleClickSource(RecordSource.BANDE_SON,bsBtn);
                 break;
 
             case R.id.btn_live:
-                source=RecordSource.LIVE;
-                //pupitre=Pupitre.NA;
-                isFirstTime=true;
-                message="Live";
-                setResourceToMediaPlayer();
-
-                if(mPlayerAdapter!=null) {
-                    setStopListener();
-                }
+                handleClickSource(RecordSource.LIVE,liveBtn);
                 break;
 
             case R.id.btn_tutti:
-
                 handleClickPupitre(Pupitre.TUTTI,tuttiBtn);
                 break;
 
@@ -447,6 +437,25 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         }
         String titreText=sourceSong.getTitre();
         mlistItemClickedListener.OnClickedItem(titreText,message);
+    }
+
+    private void handleClickSource(RecordSource recordSource, Button button) {
+
+        if(button.getAlpha()==1.0f||button.getAlpha()==0.5f) {
+            Log.d(TAG, "handleClickSource: ");
+            setSourceActivable(source);
+            source=recordSource;
+            setCurrentSourceActive(source);
+            isFirstTime = true;
+            message= source.toString();
+            if (mPlayerAdapter != null) {
+                setStopListener();
+            }
+            setResourceToMediaPlayer();
+
+        }else{
+            message = source.toString() +" non chargé";
+        }
     }
 
     private void handleClickPupitre(Pupitre pupitre, Button button) {
@@ -519,11 +528,11 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             //PlayBackController
             initializePlaybackController();
 
-            if(songToPlay.getPupitre()!=pupitre||songToPlay.getRecordSource()!=source){
-                songToPlay = mlistItemClickedListener.OnPlaySong(sourceSong,pupitre,source);
-            }
-
             if (songToPlay != null) {
+                if(songToPlay.getPupitre()!=pupitre||songToPlay.getRecordSource()!=source){
+                    songToPlay = mlistItemClickedListener.OnPlaySong(sourceSong,pupitre,source);
+                }
+
                 String resStrToPlay = songToPlay.getSongPath();
                 try {
                     mPlayerAdapter.prepareMediaPlayer(context, resStrToPlay);

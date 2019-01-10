@@ -8,6 +8,8 @@ import android.arch.persistence.room.PrimaryKey;
 
 import java.util.Date;
 
+//todo mettre un contructeur avec les éléments de firebase
+
 @Entity(indices = {@Index(value = {"titre"},
         unique = true)})
 public class SourceSong {
@@ -24,22 +26,26 @@ public class SourceSong {
     private int duration;
 
     @ColumnInfo(name = "background")
-    private int bgSong;
+    private int background;
 
     @ColumnInfo(name = "original_song")
-    private String baseUrlOriginalSong;
+    private String original_song;
 
     @ColumnInfo(name = "update_phone")
-    private Date updatePhone;
+    private Date update_phone;
+
+    //todo à voir comment compléter et faire un constructeur
+    @ColumnInfo(name = "maj")
+    private Date maj;
 
     @Ignore
     public SourceSong(String titre, String groupe, int duration, int bgSong, String baseUrlOriginalSong, Date updatePhone) {
         this.titre = titre;
         this.groupe = groupe;
         this.duration = duration;
-        this.bgSong = bgSong;
-        this.baseUrlOriginalSong = baseUrlOriginalSong;
-        this.updatePhone=updatePhone;
+        this.background = bgSong;
+        this.original_song = baseUrlOriginalSong;
+        this.update_phone=updatePhone;
     }
 
     public SourceSong(int sourceSongId, String titre, String groupe, int duration, int bgSong, String baseUrlOriginalSong,Date updatePhone) {
@@ -47,17 +53,15 @@ public class SourceSong {
         this.titre = titre;
         this.groupe = groupe;
         this.duration = duration;
-        this.bgSong = bgSong;
-        this.baseUrlOriginalSong = baseUrlOriginalSong;
-        this.updatePhone=updatePhone;
+        this.background = bgSong;
+        this.original_song = baseUrlOriginalSong;
+        this.update_phone=updatePhone;
     }
 
     @Ignore
     public SourceSong(){
 
     }
-
-
 
     public String getTitre() {
         return titre;
@@ -83,20 +87,21 @@ public class SourceSong {
         this.duration = duration;
     }
 
+
     public int getBgSong() {
-        return bgSong;
+        return background;
     }
 
     public void setBgSong(int bgSong) {
-        this.bgSong = bgSong;
+        this.background = bgSong;
     }
 
     public String getBaseUrlOriginalSong() {
-        return baseUrlOriginalSong;
+        return original_song;
     }
 
     public void setBaseUrlOriginalSong(String baseUrlOriginalSong) {
-        this.baseUrlOriginalSong = baseUrlOriginalSong;
+        this.original_song = baseUrlOriginalSong;
     }
 
     public int getSourceSongId() {
@@ -104,10 +109,10 @@ public class SourceSong {
     }
 
     public Date getUpdatePhone() {
-        return updatePhone;
+        return update_phone;
     }
 
     public void setUpdatePhone(Date updatePhone) {
-        this.updatePhone = updatePhone;
+        this.update_phone = updatePhone;
     }
 }

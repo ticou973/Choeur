@@ -2,7 +2,6 @@ package dedicace.com.ui;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,8 +37,6 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
     private List<Song> songOnCloudRecorded= new ArrayList<>();
     private List<List<Song>> songOnPhones= new ArrayList<>();
     private List<List<Song>> songOnClouds= new ArrayList<>();
-
-
 
     //todo voir si il faut envoyer dans le constructeur les songs
     public SongsAdapter(Context context, ListemClickedListener handler ) {
@@ -89,10 +86,10 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
     @Override
     public int getItemCount() {
         if(null==sourceSongs) {
-            Log.d("coucou", "getItemCount: 0");
+           // Log.d("coucou", "getItemCount: 0");
             return 0;
         }else{
-            Log.d("coucou", "getItemCount: "+sourceSongs.size());
+           // Log.d("coucou", "getItemCount: "+sourceSongs.size());
         }
         return sourceSongs.size();
     }
@@ -114,7 +111,6 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
         Log.d(TAG, "initDataSourceSong: "+sourceSong.getTitre()+" "+position);
         songsViewHolder.setSourceSong(sourceSong);
-
         initRecordSongs(songsViewHolder,sourceSong,position);
 
         //initalisation des songs de la sourceSongs
@@ -124,6 +120,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
     }
 
     private void initRecordSongs(SongsViewHolder songsViewHolder,SourceSong sourceSong, int position) {
+        Log.d(TAG, "initRecordSongs: "+position);
         recordSources=RecordSources.get(position);
         songsViewHolder.setRecordSource(recordSources);
         recordSource=songsViewHolder.getSource();
@@ -131,63 +128,32 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
     private void initDataSongs(SongsViewHolder songsViewHolder,SourceSong sourceSong,int position) {
         Log.d(TAG, "initDataSongs: SA");
-        songToPlay = songToPlays.get(position);
+
         songOnPhoneRecorded = songOnPhones.get(position);
         Song[] songsPhone = songOnPhoneRecorded.toArray(new Song[0]);
         songOnCloudRecorded = songOnClouds.get(position);
         Song[] songsCloud = songOnCloudRecorded.toArray(new Song[0]);
 
         songsViewHolder.setSongRecorded(songsPhone);
-        songsViewHolder.setSongToPlay(songToPlay);
+
+        if(songsPhone.length!=0) {
+            songToPlay = songToPlays.get(position);
+            songsViewHolder.setSongToPlay(songToPlay);
+        }
         songsViewHolder.setSongCloudRecorded(songsCloud);
     }
 
 
     public void swapSongs(final List<SourceSong> sources, List<List<RecordSource>> recordSources, List<Song> songToPlays, List<List<Song>> songOnPhones, List<List<Song>> songOnClouds) {
         Log.d("coucou", "swapSongs: SongAdapter");
+        sourceSongs=sources;
         this.RecordSources=recordSources;
         this.songToPlays=songToPlays;
         this.songOnPhones=songOnPhones;
         this.songOnClouds=songOnClouds;
+        notifyDataSetChanged();
 
-        if(sourceSongs==null){
-            Log.d("coucou", "swapForecast: cas null ");
-            sourceSongs=sources;
-            notifyDataSetChanged();
-        }else{
-            Log.d("coucou", "swapForecast: cas non null ");
+    //todo voir si utile le diffResult cf evernote
 
-            DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-                @Override
-                public int getOldListSize() {
-                    return sourceSongs.size();
-                }
-
-                @Override
-                public int getNewListSize() {
-                    return sources.size();
-                }
-
-                @Override
-                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                    return sourceSongs.get(oldItemPosition).getSourceSongId() ==
-                            sources.get(newItemPosition).getSourceSongId();
-                }
-
-                //todo à véridier les conditions nécessaires puis revoir les init datas
-                @Override
-                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                    SourceSong newSong = sources.get(newItemPosition);
-                    SourceSong oldSong = sourceSongs.get(oldItemPosition);
-                    return newSong.getSourceSongId() == oldSong.getSourceSongId()
-                            && newSong.getTitre().equals(oldSong.getTitre())
-                            && newSong.getGroupe().equals(oldSong.getGroupe());
-
-                }
-            });
-            sourceSongs = sources;
-            result.dispatchUpdatesTo(this);
-            Log.d(TAG, "swapSongs: fin dispatch SA");
-        }
     }
 }

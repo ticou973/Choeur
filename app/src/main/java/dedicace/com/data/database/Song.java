@@ -18,7 +18,7 @@ public class Song {
     private int songId;
 
     @ColumnInfo (name ="titre_song")
-    private String sourceSongTitre;
+    private String titre_song;
 
     @ColumnInfo(name = "source_enregistrement")
     private RecordSource recordSource;
@@ -36,7 +36,7 @@ public class Song {
 //todo gérer lorsque le mediaplayer est lancé à 2 items différents
     @Ignore
     public Song(String sourceSongTitre, RecordSource recordSource, Pupitre pupitre, String songPath, Date updatePhone) {
-        this.sourceSongTitre = sourceSongTitre;
+        this.titre_song = sourceSongTitre;
         this.recordSource = recordSource;
         this.pupitre = pupitre;
         this.songPath = songPath;
@@ -49,7 +49,7 @@ public class Song {
 
     public Song(int songId, String sourceSongTitre, RecordSource recordSource, Pupitre pupitre, String songPath, Date updatePhone) {
         this.songId = songId;
-        this.sourceSongTitre = sourceSongTitre;
+        this.titre_song = sourceSongTitre;
         this.recordSource = recordSource;
         this.pupitre = pupitre;
         this.songPath = songPath;
@@ -89,15 +89,11 @@ public class Song {
     }
 
     public String getSourceSongTitre() {
-        return sourceSongTitre;
-    }
-
-    public void setSourceSongId(int sourceSongId) {
-        this.sourceSongTitre = sourceSongTitre;
+        return titre_song;
     }
 
     public void setSourceSongTitre(String sourceSongTitre) {
-        this.sourceSongTitre = sourceSongTitre;
+        this.titre_song = sourceSongTitre;
     }
 
     public Date getUpdatePhone() {

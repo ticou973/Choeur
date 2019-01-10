@@ -21,6 +21,7 @@ public class MainActivityViewModel extends ViewModel {
     private List<Song> songToPlays=new ArrayList<>();
     private List<List<Song>> songOnPhones= new ArrayList<>();
     private List<List<Song>> songOnClouds= new ArrayList<>();
+    private List<Object> listElements = new ArrayList<>();
 
     public MainActivityViewModel(ChoraleRepository repository) {
         Log.d(SongsAdapter.TAG, "MainActivityViewModel: avant");
@@ -43,7 +44,7 @@ public class MainActivityViewModel extends ViewModel {
 
     public Song getFirstSong(String titre, RecordSource recordSource) {
 
-        firstSong = mRepository.getFirstSongPlayed(titre,recordSource);
+        //firstSong = mRepository.getFirstSongPlayed(titre,recordSource);
         return firstSong;
     }
 
@@ -65,5 +66,10 @@ public class MainActivityViewModel extends ViewModel {
     public List<List<Song>> getSongOnClouds() {
         songOnClouds=mRepository.getSongsOnClouds();
         return songOnClouds;
+    }
+
+    public List<Object> getListElements() {
+        listElements=mRepository.getListElements();
+        return listElements;
     }
 }

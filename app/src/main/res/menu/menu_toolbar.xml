@@ -12,4 +12,9 @@
         android:title="@string/effacer_le_dernier_enregistrement"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/log_out"
+        android:title="@string/se_déconnecter"
+        app:showAsAction="never" />
+
 </menu>

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import dedicace.com.AppExecutors;
@@ -45,7 +46,6 @@ public class ChoraleNetWorkDataSource {
         //mDownloadedSongs = new MutableLiveData<>();
         mDownloaderSourceSongs = new MutableLiveData<>();
         Log.d("coucou", "NetworkDataSource: constructor ");
-
 
     }
 
@@ -123,13 +123,15 @@ public class ChoraleNetWorkDataSource {
         String titreSourceSong2 = sourceSong2.getTitre();
         String titreSourceSong7 = sourceSong7.getTitre();
 
-        song2 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.BASS,"des_hommes_pareils_basse",null);
-        song3 = new Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.TENOR,"des_hommes_pareils_tenor",null);
-        song4 = new Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.ALTO,"des_hommes_pareils_alto",null);
-        song5 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.SOPRANO,"des_hommes_pareils_soprano",null);
-        song6 = new Song(titreSourceSong2,RecordSource.BANDE_SON,Pupitre.BASS,"l_un_pour_l_autre_basse",null);
+        Date date = new Date(System.currentTimeMillis());
 
-        //songs.add(song3);
+        song2 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.BASS,"des_hommes_pareils_basse",null);
+        song3 = new Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.TENOR,"des_hommes_pareils_tenor",date);
+        song4 = new Song(titreSourceSong1,RecordSource.LIVE,Pupitre.ALTO,"des_hommes_pareils_alto",date);
+        song5 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.SOPRANO,"des_hommes_pareils_soprano",date);
+        song6 = new Song(titreSourceSong2,RecordSource.LIVE,Pupitre.BASS,"l_un_pour_l_autre_basse",null);
+
+        songs.add(song3);
         songs.add(song4);
         songs.add(song2);
         songs.add(song5);
