@@ -12,6 +12,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -54,8 +55,8 @@ public class ChoraleNetWorkDataSource {
     private List<SourceSong> listDownLoadImages;
     private List<Song> listDownloadMp3;
     private List<Song> oldSongs = new ArrayList<>();
-    List<Song> songs = new ArrayList<>();
-    Song song3, song4, song6, song5, song2;
+    private List<Song> songs = new ArrayList<>();
+    private Song song3, song4, song6, song5, song2;
     private SourceSong sourceSong1, sourceSong2, sourceSong3, sourceSong4, sourceSong5, sourceSong6, sourceSong7, sourceSong8;
     private Pupitre recordPupitre = Pupitre.NA;
     private String titre;
@@ -64,6 +65,9 @@ public class ChoraleNetWorkDataSource {
     private FirebaseFirestore db;
     private FirebaseStorage mStorage;
     private StorageReference mStorageRef;
+    private String current_user_id;
+    private Pupitre pupitreUser;
+    private FirebaseAuth mAuth;
 
     private final static String BASEURI = "storage/emulated/0/Android/data/dedicace.com/files/";
 
@@ -75,7 +79,10 @@ public class ChoraleNetWorkDataSource {
         Log.d("coucou", "NetworkDataSource: constructor ");
         db = FirebaseFirestore.getInstance();
         mStorage = FirebaseStorage.getInstance();
-        Log.d("coucou", "ChoraleNetWorkDataSource: ref de storage et db ");
+        Log.d("coucou", "ChoraleNetWorkDataSource: ref de storage et db");
+        mAuth=FirebaseAuth.getInstance();
+        current_user_id=mAuth.getCurrentUser().getUid();
+        Log.d("coucou", "ChoraleNetWorkDataSource: "+current_user_id);
     }
 
     /**
@@ -128,7 +135,7 @@ public class ChoraleNetWorkDataSource {
                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                     if (task.isSuccessful()) {
                                         for (QueryDocumentSnapshot document : task.getResult()) {
-                                            Log.d("coucou", document.getId() + " => " + document.getData().get("maj"));
+                                            Log.d("coucou", "deb Oncomplete"+document.getId() + " => " + document.getData().get("maj"));
                                             //todo voir comment écrire une seule ligne avec ToObject
 
                                             String titre, groupe, baseUrlOriginalSong, urlCloudBackground;
@@ -142,7 +149,7 @@ public class ChoraleNetWorkDataSource {
                                             maj = (Date) document.getData().get("maj");
                                             urlCloudBackground = (String) document.getData().get("background");
 
-                                            Log.d("coucou", "onComplete: " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
+                                            Log.d("coucou", "onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
                                             SourceSong sourceSong = new SourceSong(titre, groupe, duration, urlCloudBackground, baseUrlOriginalSong, new Date(System.currentTimeMillis()));
                                             sourceSongs.add(sourceSong);
                                         }
@@ -162,15 +169,15 @@ public class ChoraleNetWorkDataSource {
                                         for (QueryDocumentSnapshot document : task.getResult()) {
                                             Log.d("coucou", document.getId() + " => " + document.getData().get("pupitre"));
 
-                                            String pupitre, recordSource, urlMp3;
-                                            Date maj;
+                                            final String pupitre, recordSource, urlMp3;
+                                            final Date maj;
 
                                             pupitre = (String) document.getData().get("pupitre");
 
-                                            Pupitre pupitreObj = SongsUtilities.converttoPupitre(pupitre);
+                                            final Pupitre pupitreObj = SongsUtilities.converttoPupitre(pupitre);
 
                                             recordSource = (String) document.getData().get("recordSource");
-                                            RecordSource sourceObj = SongsUtilities.convertToRecordSource(recordSource);
+                                            final RecordSource sourceObj = SongsUtilities.convertToRecordSource(recordSource);
 
                                             urlMp3 = (String) document.getData().get("songPath");
 
@@ -183,26 +190,31 @@ public class ChoraleNetWorkDataSource {
 
                                                     if (task.isSuccessful()) {
                                                         titre = (String) task.getResult().get("titre");
+                                                        Log.d("coucou", "onComplete:B Songs " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
+                                                        Song song = new Song(titre, sourceObj, pupitreObj, new Date(System.currentTimeMillis()), urlMp3);
+                                                        songs.add(song);
+
+                                                        downloadMp3();
+
+                                                        Log.d(SongsAdapter.TAG, "fetchSongs: " + sourceSongs.get(0).getTitre());
+                                                        mDownloaderSourceSongs.postValue(sourceSongs);
+                                                        Log.d("coucou", "fetchSongs: après post");
 
                                                     } else {
                                                         Log.w("coucou", "Error getting documents.", task.getException());
                                                     }
                                                 }
                                             });
-                                            Log.d("coucou", "onComplete: " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
-                                            Song song = new Song(titre, sourceObj, pupitreObj, new Date(System.currentTimeMillis()), urlMp3);
-                                            songs.add(song);
+
                                         }
-                                        downloadMp3();
+
                                     } else {
                                         Log.w("coucou", "Error getting documents.", task.getException());
                                     }
                                 }
                             });
 
-                    Log.d(SongsAdapter.TAG, "fetchSongs: " + sourceSongs.get(0).getTitre());
-                    mDownloaderSourceSongs.postValue(sourceSongs);
-                    Log.d("coucou", "fetchSongs: après post");
+
 
                 } catch (Exception e) {
                     // Server probably invalid
@@ -217,7 +229,7 @@ public class ChoraleNetWorkDataSource {
         listDownLoadImages = getListDownloadBgImages();
 
         if (listDownLoadImages != null) {
-            uploadOnPhoneBgImages(listDownLoadImages);
+            //uploadOnPhoneBgImages(listDownLoadImages);
         } else {
             Log.d("coucou", "downloadBgImage: pas d'images de Background à sauvegarder");
         }
@@ -290,7 +302,7 @@ public class ChoraleNetWorkDataSource {
     private void downloadMp3() {
         listDownloadMp3 = getListDownloadMp3();
         if (listDownloadMp3 != null) {
-            uploadOnPhoneMp3(listDownloadMp3);
+            //uploadOnPhoneMp3(listDownloadMp3);
         }else {
             Log.d("coucou", "downloadMP3: pas d'images de fichiers audio à sauvegarder");
         }
@@ -299,26 +311,60 @@ public class ChoraleNetWorkDataSource {
 
     private List<Song> getListDownloadMp3() {
 
-        List<Song> tempList = new ArrayList<>();
-        int i;
+        final List<Song> tempList = new ArrayList<>();
 
-        //todo ajouter le pupitre du user pour filtrer
-        for (Song newSong : songs) {
-            i = 0;
-            for (Song oldSong : oldSongs) {
 
-                if (oldSong.getSourceSongTitre() == newSong.getSourceSongTitre() && oldSong.getPupitre() == newSong.getPupitre() && oldSong.getRecordSource() == newSong.getRecordSource() && oldSong.getUrlCloudMp3() != newSong.getUrlCloudMp3()) {
-                    tempList.add(newSong);
-                }
+        Log.d("coucou", "getListDownloadMp3: "+current_user_id);
 
-                if ((newSong.getSourceSongTitre() != newSong.getSourceSongTitre()) || (oldSong.getSourceSongTitre() == newSong.getSourceSongTitre() && oldSong.getPupitre() != newSong.getPupitre())||(oldSong.getSourceSongTitre()==newSong.getSourceSongTitre()&&oldSong.getRecordSource()!=newSong.getRecordSource())) {
-                    i++;
+        db.collection("users").document(current_user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()){
+
+                    String pupitreStr = (String) task.getResult().get("pupitre");
+
+                    Log.d("coucou", "onComplete: "+pupitreStr);
+
+                    pupitreUser =SongsUtilities.converttoPupitre(pupitreStr);
+
+                    Log.d("coucou", "getListDownloadMp3: "+pupitreUser);
+                    Log.d("coucou", "getListDownloadMp3: "+songs.size());
+                    Log.d("coucou", "getListDownloadMp3: "+oldSongs.size());
+
+
+                    //todo tri sur le pupitre plus tard il faudra être capable de s'adapter aux préférences
+                    //todo préparer une page de setUp pour mettre les infos complémentaires sur le user comme son pupitre
+
+                    for (Song newSong : songs) {
+                        int i = 0;
+                        Log.d("coucou", "onComplete: newsongs"+ newSong.getSourceSongTitre()+" " + newSong.getRecordSource()+" "+newSong.getPupitre() );
+                        if(newSong.getPupitre()==pupitreUser) {
+                            for (Song oldSong : oldSongs) {
+
+                                Log.d("coucou", "onComplete:  oldsong"+oldSong.getSourceSongTitre()+" "+oldSong.getRecordSource()+" "+oldSong.getPupitre());
+                                if (oldSong.getSourceSongTitre() == newSong.getSourceSongTitre() && oldSong.getPupitre() == newSong.getPupitre() && oldSong.getRecordSource() == newSong.getRecordSource() && oldSong.getUrlCloudMp3() != newSong.getUrlCloudMp3()) {
+                                    tempList.add(newSong);
+                                    Log.d("coucou", "onComplete:premier if ");
+                                }
+
+                                if ((newSong.getSourceSongTitre() != newSong.getSourceSongTitre()) || (oldSong.getSourceSongTitre() == newSong.getSourceSongTitre() && oldSong.getPupitre() != newSong.getPupitre()) || (oldSong.getSourceSongTitre() == newSong.getSourceSongTitre() && oldSong.getRecordSource() != newSong.getRecordSource())) {
+                                    i++;
+                                    Log.d("coucou", "onComplete:deuxième if "+i+" "+ oldSongs.size());
+                                }
+
+                            }
+                            if (i == oldSongs.size()) {
+                                tempList.add(newSong);
+                            }
+                        }
+                    }
+                    Log.d("coucou", "getListDownloadMp3: "+tempList.size());
+
+                }else{
+                    Log.d("coucou", "onComplete: erreur de récupération du pupitre");
                 }
             }
-            if (i == oldSourcesSongs.size()) {
-                tempList.add(newSong);
-            }
-        }
+        });
 
         return tempList;
     }

@@ -75,15 +75,12 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     //Firebase
     private FirebaseAuth mAuth;
-    private String current_user_id;
+    public static String current_user_id;
 
     //Utils
     private OnPositiveClickListener mPositiveClickListener;
     public static AppDataBase choeurDataBase;
     private AppExecutors mExecutors;
-
-
-
 
     //todo vérifier si extras dans des intents avec HasExtras
     @Override
@@ -91,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d("coucou", "MA onCreate: ");
+
 
         //Firebase
         mAuth = FirebaseAuth.getInstance();
@@ -189,12 +187,31 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     protected void onStart() {
         super.onStart();
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        Log.d("coucou", "onCreate: AStart "+ current_user_id);
+
+
         if(currentUser == null){
             sendToLogin();
+
+            Log.d("coucou", "onCreate:BStart "+ current_user_id);
         } else {
             //todo à compléter
-            current_user_id = mAuth.getCurrentUser().getUid();
 
+            Log.d(TAG, "onStart: currentusernonnull");
+
+            current_user_id = mAuth.getCurrentUser().getUid();
+            Log.d("coucou", "onStart C: "+ current_user_id);
+
+        }
+    }
+
+    //todo mettre des conditions pour rester logger entre 2 utilisations (à conserver ?)
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mAuth!=null) {
+            mAuth.signOut();
+            mAuth = null;
         }
     }
 

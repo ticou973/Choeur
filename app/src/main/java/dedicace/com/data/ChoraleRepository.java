@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dedicace.com.AppExecutors;
+import dedicace.com.R;
+import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SongsDao;
@@ -107,9 +109,18 @@ public class ChoraleRepository {
             @Override
             public void run() {
                 if (isFetchNeeded()) {
+
+
+                    //todo à retirer
+
+                    final SourceSong sourceSong1 = new SourceSong("Des hommes pareils","Francis Cabrel",321,R.drawable.hand,"",null);
+                    final Song song5 = new  Song("Des hommes pareils",RecordSource.BANDE_SON,Pupitre.SOPRANO,"des_hommes_pareils_soprano",null);
+                    mSourceDao.insertSourceSong(sourceSong1);
+                    mSongDao.insertSong(song5);
+
                     oldSourcesSongs=mSourceDao.getAllSources();
                     oldSongs=mSongDao.getAllSongs();
-                    Log.d("coucou", "run is Fetch initialize date : ");
+                    Log.d("coucou", "run is Fetch initialize date : "+oldSourcesSongs.size()+oldSongs.size());
 
                     mChoraleNetworkDataSource.setOldSourceSongs(oldSourcesSongs);
                     mChoraleNetworkDataSource.setOldSongs(oldSongs);
