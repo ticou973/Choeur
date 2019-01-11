@@ -21,7 +21,6 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
-import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -30,6 +29,8 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import dedicace.com.utilities.StorageUtilities;
 
 /**
  * Exposes the functionality of the {@link MediaPlayer} and implements the {@link PlayerAdapter}
@@ -117,9 +118,9 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     @Override
     public String record(String songNamePupitre) {
 
-        if(isExternalStorageWritable()){
-        pathSave = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
-                UUID.randomUUID() + ".3gp";
+        if(StorageUtilities.isExternalStorageWritable()){
+        pathSave = StorageUtilities.getExternalPath(UUID.randomUUID().toString(),"3gp");
+
         setupMediaRecorder();
 
         Log.d(SongsAdapter.TAG, "MPH record: "+ pathSave);
@@ -287,14 +288,6 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         mMediaRecorder.setOutputFile(pathSave);
     }
 
-    /* Checks if external storage is available for read and write */
-    public boolean isExternalStorageWritable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
-    }
 
     //todo voir quand release le mediaplayer
 }

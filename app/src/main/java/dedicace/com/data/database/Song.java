@@ -18,7 +18,7 @@ public class Song {
     private int songId;
 
     @ColumnInfo (name ="titre_song")
-    private String titre_song;
+    private String sourceSongTitre;
 
     @ColumnInfo(name = "source_enregistrement")
     private RecordSource recordSource;
@@ -29,14 +29,20 @@ public class Song {
     @ColumnInfo(name = "fichier_mp3")
     private String songPath;
 
+    @ColumnInfo(name = "url_cloud_mp3")
+    private String urlCloudMp3;
+
     @ColumnInfo(name ="update_phone")
     private Date updatePhone;
+
+    @ColumnInfo(name = "update_mp3")
+    private Date updatePhoneMp3;
 
 
 //todo gérer lorsque le mediaplayer est lancé à 2 items différents
     @Ignore
     public Song(String sourceSongTitre, RecordSource recordSource, Pupitre pupitre, String songPath, Date updatePhone) {
-        this.titre_song = sourceSongTitre;
+        this.sourceSongTitre = sourceSongTitre;
         this.recordSource = recordSource;
         this.pupitre = pupitre;
         this.songPath = songPath;
@@ -47,13 +53,25 @@ public class Song {
     public Song() {
     }
 
-    public Song(int songId, String sourceSongTitre, RecordSource recordSource, Pupitre pupitre, String songPath, Date updatePhone) {
+    public Song(int songId, String sourceSongTitre, RecordSource recordSource, Pupitre pupitre, String songPath, String urlCloudMp3, Date updatePhone, Date updatePhoneMp3) {
         this.songId = songId;
-        this.titre_song = sourceSongTitre;
+        this.sourceSongTitre = sourceSongTitre;
         this.recordSource = recordSource;
         this.pupitre = pupitre;
+        //todo voir pour renommer celuilà songLocalPath
         this.songPath = songPath;
         this.updatePhone=updatePhone;
+        this.updatePhoneMp3=updatePhoneMp3;
+        this.urlCloudMp3=urlCloudMp3;
+    }
+
+    @Ignore
+    public Song(String sourceSongTitre, RecordSource recordSource, Pupitre pupitre, Date updatePhone, String urlCloudMp3) {
+        this.sourceSongTitre = sourceSongTitre;
+        this.recordSource = recordSource;
+        this.pupitre = pupitre;
+        this.updatePhone = updatePhone;
+        this.urlCloudMp3 =urlCloudMp3;
     }
 
     public int getSongId() {
@@ -89,11 +107,15 @@ public class Song {
     }
 
     public String getSourceSongTitre() {
-        return titre_song;
+        return sourceSongTitre;
+    }
+
+    public void setSourceSongId(int sourceSongId) {
+        this.sourceSongTitre = sourceSongTitre;
     }
 
     public void setSourceSongTitre(String sourceSongTitre) {
-        this.titre_song = sourceSongTitre;
+        this.sourceSongTitre = sourceSongTitre;
     }
 
     public Date getUpdatePhone() {
@@ -102,5 +124,21 @@ public class Song {
 
     public void setUpdatePhone(Date updatePhone) {
         this.updatePhone = updatePhone;
+    }
+
+    public Date getUpdatePhoneMp3() {
+        return updatePhoneMp3;
+    }
+
+    public void setUpdatePhoneMp3(Date updatePhoneMp3) {
+        this.updatePhoneMp3 = updatePhoneMp3;
+    }
+
+    public String getUrlCloudMp3() {
+        return urlCloudMp3;
+    }
+
+    public void setUrlCloudMp3(String urlCloudMp3) {
+        this.urlCloudMp3 = urlCloudMp3;
     }
 }

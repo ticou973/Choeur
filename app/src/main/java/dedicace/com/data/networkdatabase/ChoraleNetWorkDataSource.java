@@ -4,41 +4,68 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import dedicace.com.AppExecutors;
-import dedicace.com.R;
 import dedicace.com.data.database.AppDataBase;
 import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
 import dedicace.com.ui.SongsAdapter;
+import dedicace.com.utilities.SongsUtilities;
 
 public class ChoraleNetWorkDataSource {
 
     // For Singleton instantiation
     private static final Object LOCK = new Object();
-    private static final String LOG_TAG = "coucou" ;
+    private static final String LOG_TAG = "coucou";
     private static ChoraleNetWorkDataSource sInstance;
     private final Context mContext;
 
-    // LiveData storing the latest downloaded weather forecasts
+    //Utils
     private AppExecutors mExecutors;
-    // LiveData storing the latest downloaded weather forecasts
-    //private final MutableLiveData<List<Song>> mDownloadedSongs;
-    private final MutableLiveData<List<SourceSong>> mDownloaderSourceSongs;
-
     public static AppDataBase choeurDataBase;
-    List<SourceSong> sourceSongs = new ArrayList<>();
+
+    //Songs
+    private final MutableLiveData<List<SourceSong>> mDownloaderSourceSongs;
+    private List<SourceSong> sourceSongs = new ArrayList<>();
+    private List<SourceSong> oldSourcesSongs = new ArrayList<>();
+    private List<SourceSong> listDownLoadImages;
+    private List<Song> listDownloadMp3;
+    private List<Song> oldSongs = new ArrayList<>();
     List<Song> songs = new ArrayList<>();
-    Song song3, song4, song6, song5,song2;
-    private SourceSong sourceSong1,sourceSong2,sourceSong3,sourceSong4,sourceSong5,sourceSong6, sourceSong7, sourceSong8;
-    private Pupitre recordPupitre=Pupitre.NA;
+    Song song3, song4, song6, song5, song2;
+    private SourceSong sourceSong1, sourceSong2, sourceSong3, sourceSong4, sourceSong5, sourceSong6, sourceSong7, sourceSong8;
+    private Pupitre recordPupitre = Pupitre.NA;
+    private String titre;
+
+    //DB
+    private FirebaseFirestore db;
+    private FirebaseStorage mStorage;
+    private StorageReference mStorageRef;
+
+    private final static String BASEURI = "storage/emulated/0/Android/data/dedicace.com/files/";
 
     private ChoraleNetWorkDataSource(Context context, AppExecutors executors) {
         mContext = context;
@@ -46,7 +73,9 @@ public class ChoraleNetWorkDataSource {
         //mDownloadedSongs = new MutableLiveData<>();
         mDownloaderSourceSongs = new MutableLiveData<>();
         Log.d("coucou", "NetworkDataSource: constructor ");
-
+        db = FirebaseFirestore.getInstance();
+        mStorage = FirebaseStorage.getInstance();
+        Log.d("coucou", "ChoraleNetWorkDataSource: ref de storage et db ");
     }
 
     /**
@@ -65,11 +94,6 @@ public class ChoraleNetWorkDataSource {
         return sInstance;
     }
 
-   /* public LiveData<List<Song>> getCurrentSongs() {
-
-        Log.d(SongsAdapter.TAG, "getCurrentSongs: ");
-        return mDownloadedSongs;
-    }*/
 
     public LiveData<List<SourceSong>> getSourceSongs() {
         Log.d("coucou", "network getSourceSongs: ");
@@ -90,148 +114,264 @@ public class ChoraleNetWorkDataSource {
 
     public void fetchSongs() {
         Log.d("coucou", "network fetch started: ");
-        initData();
-        Log.d(SongsAdapter.TAG, "fetchSongs: " + sourceSongs.get(0).getTitre());
-        mDownloaderSourceSongs.postValue(sourceSongs);
-        Log.d("coucou", "fetchSongs: après post");
-        //mDownloadedSongs.postValue(songs);
-    }
+        //initData();
 
-    private void initData() {
-        Log.d("coucou", "initData: ");
-        choeurDataBase = AppDataBase.getInstance(mContext);
-        //todo voir pour les migrations et fallBackTomigration
-        mExecutors=AppExecutors.getInstance();
-        mExecutors.diskIO().execute(new Runnable() {
+        mExecutors.networkIO().execute(new Runnable() {
             @Override
             public void run() {
-                choeurDataBase.songsDao().deleteAll();
-                choeurDataBase.sourceSongDao().deleteAll();
+
+                try {
+                    db.collection("sourceSongs")
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    if (task.isSuccessful()) {
+                                        for (QueryDocumentSnapshot document : task.getResult()) {
+                                            Log.d("coucou", document.getId() + " => " + document.getData().get("maj"));
+                                            //todo voir comment écrire une seule ligne avec ToObject
+
+                                            String titre, groupe, baseUrlOriginalSong, urlCloudBackground;
+                                            Date maj;
+                                            int duration;
+
+                                            titre = (String) document.getData().get("titre");
+                                            groupe = (String) document.getData().get("groupe");
+                                            duration = ((Long) document.getData().get("duration")).intValue();
+                                            baseUrlOriginalSong = (String) document.getData().get("original_song");
+                                            maj = (Date) document.getData().get("maj");
+                                            urlCloudBackground = (String) document.getData().get("background");
+
+                                            Log.d("coucou", "onComplete: " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
+                                            SourceSong sourceSong = new SourceSong(titre, groupe, duration, urlCloudBackground, baseUrlOriginalSong, new Date(System.currentTimeMillis()));
+                                            sourceSongs.add(sourceSong);
+                                        }
+                                        downloadBgImage();
+                                    } else {
+                                        Log.w("coucou", "Error getting documents.", task.getException());
+                                    }
+                                }
+                            });
+
+                    db.collection("songs")
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    if (task.isSuccessful()) {
+                                        for (QueryDocumentSnapshot document : task.getResult()) {
+                                            Log.d("coucou", document.getId() + " => " + document.getData().get("pupitre"));
+
+                                            String pupitre, recordSource, urlMp3;
+                                            Date maj;
+
+                                            pupitre = (String) document.getData().get("pupitre");
+
+                                            Pupitre pupitreObj = SongsUtilities.converttoPupitre(pupitre);
+
+                                            recordSource = (String) document.getData().get("recordSource");
+                                            RecordSource sourceObj = SongsUtilities.convertToRecordSource(recordSource);
+
+                                            urlMp3 = (String) document.getData().get("songPath");
+
+                                            maj = (Date) document.getData().get("maj");
+
+                                            DocumentReference titreRef = (DocumentReference) document.getData().get("titre_song");
+                                            titreRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                                                    if (task.isSuccessful()) {
+                                                        titre = (String) task.getResult().get("titre");
+
+                                                    } else {
+                                                        Log.w("coucou", "Error getting documents.", task.getException());
+                                                    }
+                                                }
+                                            });
+                                            Log.d("coucou", "onComplete: " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
+                                            Song song = new Song(titre, sourceObj, pupitreObj, new Date(System.currentTimeMillis()), urlMp3);
+                                            songs.add(song);
+                                        }
+                                        downloadMp3();
+                                    } else {
+                                        Log.w("coucou", "Error getting documents.", task.getException());
+                                    }
+                                }
+                            });
+
+                    Log.d(SongsAdapter.TAG, "fetchSongs: " + sourceSongs.get(0).getTitre());
+                    mDownloaderSourceSongs.postValue(sourceSongs);
+                    Log.d("coucou", "fetchSongs: après post");
+
+                } catch (Exception e) {
+                    // Server probably invalid
+                    e.printStackTrace();
+                }
             }
         });
+    }
 
-        sourceSong1 = new SourceSong("Des hommes pareils","Francis Cabrel",321,R.drawable.hand,"",null);
-        sourceSong2 = new SourceSong("L'un pour l'autre","Maurane",266,R.drawable.yinyang,"",null);
-        sourceSong7 = new SourceSong("North Star","Philip Glas",160,R.drawable.etoile,"",null);
+    private void downloadBgImage() {
 
-        sourceSongs.add(sourceSong1);
-        sourceSongs.add(sourceSong2);
-        sourceSongs.add(sourceSong7);
+        listDownLoadImages = getListDownloadBgImages();
 
+        if (listDownLoadImages != null) {
+            uploadOnPhoneBgImages(listDownLoadImages);
+        } else {
+            Log.d("coucou", "downloadBgImage: pas d'images de Background à sauvegarder");
+        }
+    }
 
-        String titreSourceSong1 = sourceSong1.getTitre();
-        String titreSourceSong2 = sourceSong2.getTitre();
-        String titreSourceSong7 = sourceSong7.getTitre();
+    private List<SourceSong> getListDownloadBgImages() {
+        List<SourceSong> tempList = new ArrayList<>();
+        int i;
 
-        Date date = new Date(System.currentTimeMillis());
+        for (SourceSong newSource : sourceSongs) {
+            i = 0;
+            for (SourceSong oldSource : oldSourcesSongs) {
 
-        song2 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.BASS,"des_hommes_pareils_basse",null);
-        song3 = new Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.TENOR,"des_hommes_pareils_tenor",date);
-        song4 = new Song(titreSourceSong1,RecordSource.LIVE,Pupitre.ALTO,"des_hommes_pareils_alto",date);
-        song5 = new  Song(titreSourceSong1,RecordSource.BANDE_SON,Pupitre.SOPRANO,"des_hommes_pareils_soprano",date);
-        song6 = new Song(titreSourceSong2,RecordSource.LIVE,Pupitre.BASS,"l_un_pour_l_autre_basse",null);
+                if (oldSource.getTitre() == newSource.getTitre() && oldSource.getUrlCloudBackground() != newSource.getUrlCloudBackground()) {
 
-        songs.add(song3);
-        songs.add(song4);
-        songs.add(song2);
-        songs.add(song5);
-        songs.add(song6);
-        // choeurDataBase.songsDao().bulkInsert(songsEssai);
-
-       /* mExecutors.diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                choeurDataBase.songsDao().deleteAll();
-                choeurDataBase.sourceSongDao().deleteAll();
-
-                sourceSong1 = new SourceSong("Des hommes pareils","Francis Cabrel",321,R.drawable.hand,"");
-                sourceSong2 = new SourceSong("L'un pour l'autre","Maurane",266,R.drawable.yinyang,"");
-                sourceSong7 = new SourceSong("North Star","Philip Glas",160,R.drawable.etoile,"");
-
-                sourceSongs.add(sourceSong1);
-                sourceSongs.add(sourceSong2);
-                sourceSongs.add(sourceSong7);
-                choeurDataBase.sourceSongDao().bulkInsert(sourceSongs);
-
-                List<SourceSong> sourceEssai = choeurDataBase.sourceSongDao().getAllSourceSongs();
-                for (SourceSong source: sourceEssai) {
-
-                    Log.d(TAG, "run MA: " + source.getTitre()+" "+source.getSourceSongId());
-
+                    tempList.add(newSource);
                 }
-                int intSourceSong1 = choeurDataBase.sourceSongDao().getSourceSongByTitre("Des hommes pareils").getSourceSongId();
-                int intSourceSong7 = choeurDataBase.sourceSongDao().getSourceSongByTitre("North Star").getSourceSongId();
-                int intSourceSong2 = choeurDataBase.sourceSongDao().getSourceSongByTitre("L'un pour l'autre").getSourceSongId();
 
-                Log.d(TAG, "run: MA1 "+ intSourceSong1);
-                Log.d(TAG, "run: MA1 " + intSourceSong2);
-                Log.d(TAG, "run: MA1 " + intSourceSong7);
-
-
-                song3 = new Song(intSourceSong1,RecordSource.BANDE_SON,Pupitre.TENOR,"R.raw.des_hommes_pareils_tenor");
-                song4 = new Song(intSourceSong1,RecordSource.BANDE_SON,Pupitre.ALTO,"R.raw.des_hommes_pareils_alto");
-                song6 = new Song(intSourceSong2,RecordSource.BANDE_SON,Pupitre.BASS,"R.raw.l_un_pour_l_autre_basse");
-
-                songsEssai.add(song3);
-                songsEssai.add(song4);
-                songsEssai.add(song6);
-                choeurDataBase.songsDao().bulkInsert(songsEssai);
-
-                List<Song> songsA = choeurDataBase.songsDao().getAllSongs();
-                Log.d(TAG, "run: MA2 " + songsA.get(0).getSourceSongId());
-                Log.d(TAG, "run: MA2 " + songsA.get(1).getSourceSongId());
-                Log.d(TAG, "run: MA2 " + songsA.get(2).getSourceSongId());
-
+                if (newSource.getTitre() != oldSource.getTitre()) {
+                    i++;
+                }
             }
-        });*/
 
-        /*
-
-        mExecutors.diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                sourceSong1 = new SourceSong("Des hommes pareils","Francis Cabrel",321,R.drawable.hand,"");
-                sourceSong2 = new SourceSong("L'un pour l'autre","Maurane",266,R.drawable.yinyang,"");
-                sourceSong3 = new SourceSong("L'eau","Jeanne Cherhal",143,R.drawable.water,"");
-                sourceSong4 = new SourceSong("Le tissu","Jeanne Cherhal",236,R.drawable.femme_tissu,"");
-                sourceSong5 = new SourceSong("Papaoutai","Stromae",232,R.drawable.papa,"");
-                sourceSong6 = new SourceSong("Recitation 11","Georges Aperghis",243,R.drawable.pyramide_texte,"");
-                sourceSong7 = new SourceSong("North Star","Philip Glas",160,R.drawable.etoile,"");
-                sourceSong8 = new SourceSong("Tout va bien","Inconnu",175,R.drawable.hommes_pareils,"");
-
-                Song song1 = new Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.TUTTI,"R.raw.des_hommes_pareils_tutti");
-                Song song2 = new  Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.BASS,"R.raw.des_hommes_pareils_basse");
-                Song song3 = new  Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.TENOR,"R.raw.des_hommes_pareils_tenor");
-                Song song4 = new  Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.ALTO,"R.raw.des_hommes_pareils_alto");
-                Song song5 = new  Song(sourceSong1,RecordSource.BANDE_SON,Pupitre.SOPRANO,"R.raw.des_hommes_pareils_soprano");
-                Song song6 = new Song(sourceSong2,RecordSource.BANDE_SON,Pupitre.BASS,"R.raw.l_un_pour_l_autre_basse");
-                Song song7 = new  Song(sourceSong2,RecordSource.BANDE_SON,Pupitre.TENOR,"R.raw.l_un_pour_l_autre_tenor");
-                Song song8 = new  Song(sourceSong2,RecordSource.BANDE_SON,Pupitre.ALTO,"R.raw.l_un_pour_l_autre_alto");
-                Song song9 = new  Song(sourceSong2,RecordSource.BANDE_SON,Pupitre.SOPRANO,"R.raw.l_un_pour_l_autre_soprano");
-                Song song10 = new  Song(sourceSong3,RecordSource.BANDE_SON,Pupitre.TUTTI,"R.raw.l_eau_tutti");
-                Song song11 = new  Song(sourceSong4,RecordSource.BANDE_SON,Pupitre.BASS,"R.raw.le_tissu_basse");
-                Song song12 = new  Song(sourceSong4,RecordSource.BANDE_SON,Pupitre.TENOR,"R.raw.le_tissu_tenor");
-                Song song13 = new  Song(sourceSong4,RecordSource.BANDE_SON,Pupitre.ALTO,"R.raw.le_tissu_alto");
-                Song song14 = new  Song(sourceSong4,RecordSource.BANDE_SON,Pupitre.SOPRANO,"R.raw.le_tissu_soprano");
-                Song song15 = new  Song(sourceSong8,RecordSource.BANDE_SON,Pupitre.SOPRANO,"R.raw.tout_va_bien_soprano");
-                Song song16 = new  Song(sourceSong8,RecordSource.BANDE_SON,Pupitre.ALTO,"R.raw.tout_va_bien_alto");
-                Song song17 = new  Song(sourceSong8,RecordSource.BANDE_SON,Pupitre.TENOR,"R.raw.tout_va_bien_tenor");
-                Song song18 = new  Song(sourceSong8,RecordSource.BANDE_SON,Pupitre.BASS,"R.raw.tout_va_bien_basse");
-
-                songs.add(sourceSong1);
-                songs.add(sourceSong2);
-                songs.add(sourceSong3);
-                songs.add(sourceSong4);
-                songs.add(sourceSong8);
-                songs.add(sourceSong5);
-                songs.add(sourceSong6);
-                songs.add(sourceSong7);
-                choeurDataBase.songsDao().insertSongs(song1,song2,song3,song4,song5,song6,song7,song8,song9,song10,song11,song12,song13,song14,song15,song16,song17,song18);
+            if (i == oldSourcesSongs.size()) {
+                tempList.add(newSource);
             }
-        });*/
+        }
+
+        return tempList;
+    }
+
+    private void uploadOnPhoneBgImages(List<SourceSong> sources) {
+
+        for (SourceSong source : sources) {
+
+            String cloudPath = source.getUrlCloudBackground();
+
+            String nom = mStorage.getReference().child("songs/photos_background/").getName();
+
+            mStorageRef = mStorage.getReferenceFromUrl(cloudPath);
+
+            String filename = mStorageRef.getName();
+
+            File localFile = null;
+            localFile = new File(mContext.getFilesDir(), filename);
+
+            Log.d("coucou", "uploadOnPhoneBgImages: " + localFile.getParent() + " " + filename + " " + nom + " " + localFile.getPath() + " " + localFile.getAbsolutePath());
+
+            mStorageRef.getFile(localFile)
+                    .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            // Successfully downloaded data to local file
+
+                            Toast.makeText(mContext, "Vos images de fond sont enregistrées sur votre téléphone", Toast.LENGTH_LONG).show();
+                            // ...
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle failed download
+                    // ...
+                    Toast.makeText(mContext, "Il y a eu un problème de téléchargement, veuillez réessayer plus tard...", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
+    }
+
+    private void downloadMp3() {
+        listDownloadMp3 = getListDownloadMp3();
+        if (listDownloadMp3 != null) {
+            uploadOnPhoneMp3(listDownloadMp3);
+        }else {
+            Log.d("coucou", "downloadMP3: pas d'images de fichiers audio à sauvegarder");
+        }
+    }
+
+
+    private List<Song> getListDownloadMp3() {
+
+        List<Song> tempList = new ArrayList<>();
+        int i;
+
+        //todo ajouter le pupitre du user pour filtrer
+        for (Song newSong : songs) {
+            i = 0;
+            for (Song oldSong : oldSongs) {
+
+                if (oldSong.getSourceSongTitre() == newSong.getSourceSongTitre() && oldSong.getPupitre() == newSong.getPupitre() && oldSong.getRecordSource() == newSong.getRecordSource() && oldSong.getUrlCloudMp3() != newSong.getUrlCloudMp3()) {
+                    tempList.add(newSong);
+                }
+
+                if ((newSong.getSourceSongTitre() != newSong.getSourceSongTitre()) || (oldSong.getSourceSongTitre() == newSong.getSourceSongTitre() && oldSong.getPupitre() != newSong.getPupitre())||(oldSong.getSourceSongTitre()==newSong.getSourceSongTitre()&&oldSong.getRecordSource()!=newSong.getRecordSource())) {
+                    i++;
+                }
+            }
+            if (i == oldSourcesSongs.size()) {
+                tempList.add(newSong);
+            }
+        }
+
+        return tempList;
+    }
+
+    private void uploadOnPhoneMp3(List<Song> listMp3) {
+
+        for (Song song : listMp3) {
+
+            String cloudPath = song.getUrlCloudMp3();
+
+            //todo retirer car inutile idem au dessus
+            String nom = mStorage.getReference().child("songs/fichier_mp3/").getName();
+
+            mStorageRef = mStorage.getReferenceFromUrl(cloudPath);
+
+            String filename = mStorageRef.getName();
+
+            File localFile = null;
+            localFile = new File(mContext.getFilesDir(), filename);
+
+            Log.d("coucou", "uploadOnPhoneMp3: " + localFile.getParent() + " " + filename + " " + nom + " " + localFile.getPath() + " " + localFile.getAbsolutePath()+" "+ mContext.getFilesDir());
+
+            mStorageRef.getFile(localFile)
+                    .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            // Successfully downloaded data to local file
+
+                            Toast.makeText(mContext, "Vos chants sont enregistrés sur votre téléphone", Toast.LENGTH_LONG).show();
+                            // ...
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle failed download
+                    // ...
+                    Toast.makeText(mContext, "Il y a eu un problème de téléchargement, veuillez réessayer plus tard...", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
+
 
     }
 
 
+    public void setOldSourceSongs(List<SourceSong> oldSourcesSongs) {
+        this.oldSourcesSongs = oldSourcesSongs;
+    }
 
+    public void setOldSongs(List<Song> oldSongs) {
+        this.oldSongs = oldSongs;
+    }
 }
+
+

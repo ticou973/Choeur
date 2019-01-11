@@ -26,36 +26,48 @@ public class SourceSong {
     private int duration;
 
     @ColumnInfo(name = "background")
-    private int background;
+    private int bgSong;
+
+    @ColumnInfo(name = "url_cloud_background")
+    private String urlCloudBackground;
 
     @ColumnInfo(name = "original_song")
-    private String original_song;
+    private String baseUrlOriginalSong;
 
     @ColumnInfo(name = "update_phone")
-    private Date update_phone;
+    private Date updatePhone;
 
-    //todo à voir comment compléter et faire un constructeur
-    @ColumnInfo(name = "maj")
-    private Date maj;
 
     @Ignore
     public SourceSong(String titre, String groupe, int duration, int bgSong, String baseUrlOriginalSong, Date updatePhone) {
         this.titre = titre;
         this.groupe = groupe;
         this.duration = duration;
-        this.background = bgSong;
-        this.original_song = baseUrlOriginalSong;
-        this.update_phone=updatePhone;
+        this.bgSong = bgSong;
+        this.baseUrlOriginalSong = baseUrlOriginalSong;
+        this.updatePhone=updatePhone;
     }
 
-    public SourceSong(int sourceSongId, String titre, String groupe, int duration, int bgSong, String baseUrlOriginalSong,Date updatePhone) {
+    public SourceSong(int sourceSongId, String titre, String groupe, int duration, int bgSong, String urlCloudBackground, String baseUrlOriginalSong,Date updatePhone) {
         this.sourceSongId = sourceSongId;
         this.titre = titre;
         this.groupe = groupe;
         this.duration = duration;
-        this.background = bgSong;
-        this.original_song = baseUrlOriginalSong;
-        this.update_phone=updatePhone;
+        this.bgSong = bgSong;
+        this.baseUrlOriginalSong = baseUrlOriginalSong;
+        this.updatePhone=updatePhone;
+        this.urlCloudBackground=urlCloudBackground;
+
+    }
+
+    @Ignore
+    public SourceSong(String titre, String groupe, int duration, String urlCloudBackground, String baseUrlOriginalSong, Date updatePhone) {
+        this.titre = titre;
+        this.groupe = groupe;
+        this.duration = duration;
+        this.baseUrlOriginalSong = baseUrlOriginalSong;
+        this.updatePhone = updatePhone;
+        this.urlCloudBackground=urlCloudBackground;
     }
 
     @Ignore
@@ -87,21 +99,20 @@ public class SourceSong {
         this.duration = duration;
     }
 
-
     public int getBgSong() {
-        return background;
+        return bgSong;
     }
 
     public void setBgSong(int bgSong) {
-        this.background = bgSong;
+        this.bgSong = bgSong;
     }
 
     public String getBaseUrlOriginalSong() {
-        return original_song;
+        return baseUrlOriginalSong;
     }
 
     public void setBaseUrlOriginalSong(String baseUrlOriginalSong) {
-        this.original_song = baseUrlOriginalSong;
+        this.baseUrlOriginalSong = baseUrlOriginalSong;
     }
 
     public int getSourceSongId() {
@@ -109,10 +120,18 @@ public class SourceSong {
     }
 
     public Date getUpdatePhone() {
-        return update_phone;
+        return updatePhone;
     }
 
     public void setUpdatePhone(Date updatePhone) {
-        this.update_phone = updatePhone;
+        this.updatePhone = updatePhone;
+    }
+
+    public String getUrlCloudBackground() {
+        return urlCloudBackground;
+    }
+
+    public void setUrlCloudBackground(String urlCloudBackground) {
+        this.urlCloudBackground = urlCloudBackground;
     }
 }

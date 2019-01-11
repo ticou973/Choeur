@@ -30,7 +30,9 @@ public class ChoraleRepository {
     private boolean mInitialized = false;
 
     private LiveData<List<SourceSong>> sourceSongs;
+    private List<SourceSong> oldSourcesSongs = new ArrayList<>();
     private  List<Song> songs;
+    private List<Song> oldSongs = new ArrayList<>();
     private Song firstSongPlayed;
     private List<List<RecordSource>> RecordSources=new ArrayList<>();
     private List<RecordSource> recordToPlays=new ArrayList<>();
@@ -105,7 +107,14 @@ public class ChoraleRepository {
             @Override
             public void run() {
                 if (isFetchNeeded()) {
+                    oldSourcesSongs=mSourceDao.getAllSources();
+                    oldSongs=mSongDao.getAllSongs();
+                    Log.d("coucou", "run is Fetch initialize date : ");
+
+                    mChoraleNetworkDataSource.setOldSourceSongs(oldSourcesSongs);
+                    mChoraleNetworkDataSource.setOldSongs(oldSongs);
                     startFetchSongsService();
+
                 }
             }
         });

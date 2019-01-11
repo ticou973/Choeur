@@ -13,6 +13,9 @@ public interface SourceSongDao {
     @Query("SELECT * FROM sourcesong")
     LiveData<List<SourceSong>> getAllSourceSongs();
 
+    @Query("SELECT * FROM sourcesong")
+    List<SourceSong> getAllSources();
+
     @Query("SELECT * FROM sourcesong WHERE titre in (:titre)")
     SourceSong getSourceSongByTitre(String titre);
 
