@@ -22,12 +22,14 @@ import dedicace.com.R;
 
 public class LoginActivity extends AppCompatActivity {
 
+    //ui
     private EditText loginEmailText;
     private EditText loginPassText;
     private Button loginBtn;
-
-    private FirebaseAuth mAuth;
     private ProgressBar loginProgress;
+
+    //Firebase
+    private FirebaseAuth mAuth;
     public static String current_user_id;
 
     //todo gérer si 2 personnes se loggent sur un même tel
@@ -59,7 +61,6 @@ public class LoginActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<AuthResult> task) {
 
                             if(task.isSuccessful()){
-
                                 FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
                                 current_user_id = currentUser.getUid();
                                 Log.d("coucou", "onComplete Login: "+current_user_id);
@@ -67,22 +68,15 @@ public class LoginActivity extends AppCompatActivity {
                                 sendToMain();
 
                             } else {
-
                                 String errorMessage = task.getException().getMessage();
                                 Toast.makeText(LoginActivity.this, "Error : " + errorMessage, Toast.LENGTH_LONG).show();
-
-
                             }
-
                             loginProgress.setVisibility(View.INVISIBLE);
-
                         }
                     });
                 }
             }
         });
-
-
     }
 
     @Override
@@ -90,11 +84,8 @@ public class LoginActivity extends AppCompatActivity {
         super.onStart();
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
-
         if(currentUser != null){
-
             sendToMain();
-
         }
     }
 

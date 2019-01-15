@@ -187,13 +187,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     protected void onStart() {
         super.onStart();
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        Log.d("coucou", "onCreate: AStart "+ current_user_id);
+        Log.d("coucou", "onCreate: A Start "+ current_user_id);
 
 
         if(currentUser == null){
             sendToLogin();
 
-            Log.d("coucou", "onCreate:BStart "+ current_user_id);
+            Log.d("coucou", "onCreate:B Start "+ current_user_id);
         } else {
             //todo à compléter
 
