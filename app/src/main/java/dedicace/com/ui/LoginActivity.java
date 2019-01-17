@@ -32,6 +32,7 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     public static String current_user_id;
 
+
     //todo gérer si 2 personnes se loggent sur un même tel
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +45,7 @@ public class LoginActivity extends AppCompatActivity {
         loginPassText = findViewById(R.id.reg_confirm_pass);
         loginBtn = findViewById(R.id.login_btn);
         loginProgress = findViewById(R.id.login_progress);
+        Log.d("coucou", "Login onCreate: ");
 
 
         loginBtn.setOnClickListener(new View.OnClickListener() {

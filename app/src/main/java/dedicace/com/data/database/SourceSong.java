@@ -24,7 +24,7 @@ public class SourceSong {
 
     @ColumnInfo(name = "duration")
     private int duration;
-
+//todo à retirer dès que inutile
     @ColumnInfo(name = "background")
     private int bgSong;
 

@@ -22,22 +22,22 @@ public class MainActivityViewModel extends ViewModel {
     private List<List<Song>> songOnPhones= new ArrayList<>();
     private List<List<Song>> songOnClouds= new ArrayList<>();
     private List<Object> listElements = new ArrayList<>();
+    private String currentPupitreStr;
 
     public MainActivityViewModel(ChoraleRepository repository) {
         Log.d(SongsAdapter.TAG, "MainActivityViewModel: avant");
         mRepository = repository;
-        Log.d(SongsAdapter.TAG, "MainActivityViewModel: ");
         choeurSourceSongs = mRepository.getSourceSongs();
-        Log.d(SongsAdapter.TAG, "MainActivityViewModel: ");
+        Log.d(SongsAdapter.TAG, "MainActivityViewModel: fin");
     }
 
 
     public LiveData<List<SourceSong>> getChoeurSourceSongs() {
 
-        Log.d(SongsAdapter.TAG, "getChoeurSourceSongs: ");
+        Log.d(SongsAdapter.TAG, "MAVM getChoeurSourceSongs: ");
 
         if(choeurSourceSongs!=null){
-            Log.d(SongsAdapter.TAG, "getChoeurSourceSongs: non null");
+            Log.d(SongsAdapter.TAG, "MAVM getChoeurSourceSongs: non null "+choeurSourceSongs.getValue());
         }
         return choeurSourceSongs;
     }
@@ -72,4 +72,11 @@ public class MainActivityViewModel extends ViewModel {
         listElements=mRepository.getListElements();
         return listElements;
     }
+
+    public String getCurrentPupitreStr() {
+        currentPupitreStr=mRepository.getCurrentPupitreStr();
+        return currentPupitreStr;
+    }
 }
+
+

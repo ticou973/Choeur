@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dedicace.com.AppExecutors;
-import dedicace.com.R;
-import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SongsDao;
@@ -45,11 +43,12 @@ public class ChoraleRepository {
     private List<Song> listOrderByPupitre=new ArrayList<>();
     private List<Object> listElements = new ArrayList<>();
     private List<SourceSong> sourceSongs1;
+    private String currentPupitreStr;
 
     private ChoraleRepository(SongsDao songsDao, SourceSongDao sourceSongDao,
                               final ChoraleNetWorkDataSource choraleNetworkDataSource,
                               AppExecutors executors) {
-        Log.d("coucou", "Repository: constructor");
+        Log.d(LOG_TAG, "Repository: constructor");
         mSongDao = songsDao;
         mSourceDao=sourceSongDao;
         mChoraleNetworkDataSource = choraleNetworkDataSource;
@@ -60,45 +59,44 @@ public class ChoraleRepository {
             @Override
             public void onChanged(@Nullable final List<SourceSong> sourceSongs) {
                 sourceSongs1=sourceSongs;
-                Log.d("coucou", "Repository: observers ");
+                Log.d(LOG_TAG, "Repository: observers ");
                 songs = choraleNetworkDataSource.getSongs();
+
                 mExecutors.diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
-                        Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database avant");
+                        Log.d(SongsAdapter.TAG, "CR run-exec: sourceSongs dans la database avant");
                         mSourceDao.bulkInsert(sourceSongs);
                         mSongDao.bulkInsert(songs);
-                        Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database après A "+sourceSongs.size()+" "+songs.size());
+                        Log.d(SongsAdapter.TAG, "CR run-exec: sourceSongs dans la database après A "+sourceSongs.size()+" "+songs.size());
                     }
                 });
             }
         });
     }
 
-    public synchronized static ChoraleRepository getInstance(
-            SongsDao songsDao, SourceSongDao sourceSongDao,ChoraleNetWorkDataSource choraleNetworkDataSource,
-            AppExecutors executors) {
-        Log.d(LOG_TAG, "Getting the repository");
-        Log.d("coucou", "getInstance: repository");
+    public synchronized static ChoraleRepository getInstance(SongsDao songsDao, SourceSongDao sourceSongDao,ChoraleNetWorkDataSource choraleNetworkDataSource, AppExecutors executors) {
+
+        Log.d(LOG_TAG, "CR getInstance: repository");
         if (sInstance == null) {
             synchronized (LOCK) {
                 sInstance = new ChoraleRepository(songsDao, sourceSongDao,choraleNetworkDataSource,
                         executors);
-                Log.d(LOG_TAG, "Made new repository");
-                Log.d("coucou", "getInstance: new repository");
+
+                Log.d(LOG_TAG, "CR getInstance: new repository");
             }
         }
         return sInstance;
     }
 
     private void startFetchSongsService() {
-        Log.d("coucou", "repo startService: début");
+        Log.d(LOG_TAG, "CR repo startService: début");
         mChoraleNetworkDataSource.startFetchSongsService();
-        Log.d("coucou", "repo startService: fin ");
+        Log.d(LOG_TAG, "CR repo startService: fin ");
     }
 
     public synchronized void initializeData() {
-        Log.d("coucou", "initializeData: repository isfetchneeded");
+        Log.d(LOG_TAG, "CR initializeData: repository isfetchneeded");
 
         // Only perform initialization once per app lifetime. If initialization has already been
         // performed, we have nothing to do in this method.
@@ -110,21 +108,23 @@ public class ChoraleRepository {
             public void run() {
                 if (isFetchNeeded()) {
 
-
+                    /*
                     //todo à retirer
-
                     final SourceSong sourceSong1 = new SourceSong("Des hommes pareils","Francis Cabrel",321,R.drawable.hand,"",null);
                     final Song song5 = new  Song("Des hommes pareils",RecordSource.BANDE_SON,Pupitre.SOPRANO,"des_hommes_pareils_soprano",null);
                     mSourceDao.insertSourceSong(sourceSong1);
                     mSongDao.insertSong(song5);
+                    Log.d(LOG_TAG, "CR run-exec : après insertion des éléments song et source song ");
 
                     oldSourcesSongs=mSourceDao.getAllSources();
                     oldSongs=mSongDao.getAllSongs();
-                    Log.d("coucou", "run is Fetch initialize date : "+oldSourcesSongs.size()+oldSongs.size());
+                    Log.d(LOG_TAG, "CR-exec run is Fetch initialize data : "+oldSourcesSongs.size()+" "+oldSongs.size());
 
                     mChoraleNetworkDataSource.setOldSourceSongs(oldSourcesSongs);
                     mChoraleNetworkDataSource.setOldSongs(oldSongs);
+                    */
                     startFetchSongsService();
+                    currentPupitreStr=getCurrentPupitreStr();
 
                 }
             }
@@ -132,20 +132,21 @@ public class ChoraleRepository {
     }
 
     private boolean isFetchNeeded() {
-        Log.d("coucou", "isFetchNeeded: ");
+        Log.d(LOG_TAG, "CR isFetchNeeded: ");
         return true;
     }
 
     public LiveData<List<SourceSong>> getSourceSongs() {
-        Log.d("coucou", "getSourceSongs: avant initialized data");
+        Log.d(LOG_TAG, "CR getSourceSongs: avant initialized data");
         initializeData();
-        Log.d(SongsAdapter.TAG, "getSourceSongs: repository ");
+        Log.d(SongsAdapter.TAG, "CR getSourceSongs: repository ");
         sourceSongs = mSourceDao.getAllSourceSongs();
+        Log.d(SongsAdapter.TAG, "CR getSourceSongs: repository "+sourceSongs.getValue());
         return sourceSongs;
     }
 
     public List<Song> getSongs() {
-        Log.d(SongsAdapter.TAG, "getSongs: repository ");
+        Log.d(SongsAdapter.TAG, "CR getSongs: repository ");
         return  mSongDao.getAllSongs();
     }
 
@@ -205,9 +206,9 @@ public class ChoraleRepository {
         }
 
         if (firstSongPlayed != null) {
-            Log.d("coucou", "getFirstSongPlayed: " + firstSongPlayed.getSourceSongTitre());
+            Log.d(LOG_TAG, "CR getFirstSongPlayed: " + firstSongPlayed.getSourceSongTitre());
         }else{
-            Log.d("coucou", "getFirstSongPlayed: pas de chanson");
+            Log.d(LOG_TAG, "CR getFirstSongPlayed: pas de chanson");
         }
 
         return firstSongPlayed;
@@ -257,13 +258,13 @@ public class ChoraleRepository {
                         String titre = sourceSong.getTitre();
                         RecordSources.add(getRecordSources(titre));
                     }
-                    Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database après B "+RecordSources.size());
+                    Log.d(SongsAdapter.TAG, "CR run: sourceSongs dans la database après B "+RecordSources.size());
 
                     for (List<RecordSource> recordSources: RecordSources) {
                         recordToPlays.add(getRecordSource(recordSources));
                     }
 
-                    Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database après C "+recordToPlays.size());
+                    Log.d(SongsAdapter.TAG, "CR run: sourceSongs dans la database après C "+recordToPlays.size());
 
                     for (SourceSong sourceSong:sourceSongs1) {
                         String titre = sourceSong.getTitre();
@@ -271,17 +272,17 @@ public class ChoraleRepository {
 
                         //todo voir le cas particulier de la song principale qui n'est pas chargée sur le téléphone
                         RecordSource recordToPlay = recordToPlays.get(indexSourceSong);
-                        Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database après D "+recordToPlay);
+                        Log.d(SongsAdapter.TAG, "CR run: sourceSongs dans la database après D "+recordToPlay);
 
                         SongOnPhones.add(getSongsOnPhone(titre,recordToPlay));
 
                         // songToPlays.add(getFirstSongPlayed(titre,recordToPlay));
                         //songToPlays.add(firstSongPlayed);
 
-                        Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database après E "+SongOnPhones.size());
+                        Log.d(SongsAdapter.TAG, "CR run: sourceSongs dans la database après E "+SongOnPhones.size());
 
                         SongOnClouds.add(getSongsOnCloud(titre,recordToPlay));
-                        Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database après G "+SongOnClouds.size());
+                        Log.d(SongsAdapter.TAG, "CR run: sourceSongs dans la database après G "+SongOnClouds.size());
 
                     }
 
@@ -292,7 +293,7 @@ public class ChoraleRepository {
                             songToPlays.add(null);
                         }
                     }
-                    Log.d(SongsAdapter.TAG, "run: sourceSongs dans la database après Fin "+songToPlays.size());
+                    Log.d(SongsAdapter.TAG, "CR run: sourceSongs dans la database après Fin "+songToPlays.size());
                 }
             }
         });
@@ -303,6 +304,12 @@ public class ChoraleRepository {
         listElements.add(SongOnClouds);
 
         return listElements;
+    }
+
+    public String getCurrentPupitreStr() {
+
+        currentPupitreStr=mChoraleNetworkDataSource.getCurrentPupitreStr();
+        return currentPupitreStr;
     }
 }
 

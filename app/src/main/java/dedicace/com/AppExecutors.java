@@ -15,11 +15,13 @@ public class AppExecutors {
     private final Executor diskIO;
     private final Executor mainThread;
     private final Executor networkIO;
+    private final Executor storageIO;
 
-    private AppExecutors(Executor diskIO, Executor networkIO, Executor mainThread) {
+    private AppExecutors(Executor diskIO, Executor networkIO, Executor mainThread, Executor storageIO) {
         this.diskIO = diskIO;
         this.networkIO = networkIO;
         this.mainThread = mainThread;
+        this.storageIO=storageIO;
     }
 
     public static AppExecutors getInstance() {
@@ -27,8 +29,9 @@ public class AppExecutors {
             synchronized (LOCK) {
                 //todo vérifier le changement à 2 thread sur Disk
                 sInstance = new AppExecutors(Executors.newSingleThreadExecutor(),
-                        Executors.newFixedThreadPool(3),
-                        new MainThreadExecutor());
+                        Executors.newSingleThreadExecutor(),
+                        new MainThreadExecutor(),
+                        Executors.newSingleThreadExecutor());
             }
         }
         return sInstance;
@@ -45,6 +48,13 @@ public class AppExecutors {
     public Executor networkIO() {
         return networkIO;
     }
+
+    public Executor storageIO() {
+        return storageIO;
+    }
+
+
+
 
     private static class MainThreadExecutor implements Executor {
         private Handler mainThreadHandler = new Handler(Looper.getMainLooper());

@@ -2,6 +2,7 @@ package dedicace.com.ui;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
+import android.util.Log;
 
 import dedicace.com.data.ChoraleRepository;
 
@@ -11,6 +12,7 @@ public class MainActivityViewModelFactory extends ViewModelProvider.NewInstanceF
 
     public MainActivityViewModelFactory(ChoraleRepository repository) {
         this.mRepository = repository;
+        Log.d("coucou", "MainActivityViewModelFactory: constructor");
     }
 
     @Override

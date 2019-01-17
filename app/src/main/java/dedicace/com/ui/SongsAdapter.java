@@ -80,7 +80,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         //Gestion des datas de la SourceSong
         initDataSourceSong(songsViewHolder, position);
         //songsViewHolder.verifyExistingSongs(RecordSource.BANDE_SON);
-        songsViewHolder.setResourceToMediaPlayer();
+//        songsViewHolder.setResourceToMediaPlayer();
     }
 
     @Override
@@ -111,11 +111,11 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
         Log.d(TAG, "initDataSourceSong: "+sourceSong.getTitre()+" "+position);
         songsViewHolder.setSourceSong(sourceSong);
-        initRecordSongs(songsViewHolder,sourceSong,position);
+       // initRecordSongs(songsViewHolder,sourceSong,position);
 
         //initalisation des songs de la sourceSongs
         if(recordSource!=RecordSource.NA) {
-            initDataSongs(songsViewHolder, sourceSong,position);
+          //  initDataSongs(songsViewHolder, sourceSong,position);
         }
     }
 
