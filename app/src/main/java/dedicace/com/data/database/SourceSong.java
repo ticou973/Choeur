@@ -28,6 +28,9 @@ public class SourceSong {
     @ColumnInfo(name = "background")
     private int bgSong;
 
+    @ColumnInfo(name="image_background")
+    private String background;
+
     @ColumnInfo(name = "url_cloud_background")
     private String urlCloudBackground;
 
@@ -48,7 +51,7 @@ public class SourceSong {
         this.updatePhone=updatePhone;
     }
 
-    public SourceSong(int sourceSongId, String titre, String groupe, int duration, int bgSong, String urlCloudBackground, String baseUrlOriginalSong,Date updatePhone) {
+    public SourceSong(int sourceSongId, String titre, String groupe, int duration, int bgSong, String background, String urlCloudBackground, String baseUrlOriginalSong,Date updatePhone) {
         this.sourceSongId = sourceSongId;
         this.titre = titre;
         this.groupe = groupe;
@@ -57,6 +60,7 @@ public class SourceSong {
         this.baseUrlOriginalSong = baseUrlOriginalSong;
         this.updatePhone=updatePhone;
         this.urlCloudBackground=urlCloudBackground;
+        this.background=background;
 
     }
 
@@ -133,5 +137,13 @@ public class SourceSong {
 
     public void setUrlCloudBackground(String urlCloudBackground) {
         this.urlCloudBackground = urlCloudBackground;
+    }
+
+    public String getBackground() {
+        return background;
+    }
+
+    public void setBackground(String background) {
+        this.background = background;
     }
 }

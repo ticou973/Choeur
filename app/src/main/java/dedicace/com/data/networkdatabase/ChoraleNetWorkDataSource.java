@@ -90,7 +90,8 @@ public class ChoraleNetWorkDataSource {
     private FirebaseAuth mAuth;
 
     //Local Storage
-    File localFile = null;
+    File localFileMp3;
+    File localFileImage;
 
     private final static String BASEURI = "storage/emulated/0/Android/data/dedicace.com/files/";
 
@@ -207,9 +208,9 @@ public class ChoraleNetWorkDataSource {
                                                         Log.d(LOG_TAG, "NDS-exec : onComplete:B Songs " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
                                                         Song song = new Song(titre, sourceObj, pupitreObj, new Date(System.currentTimeMillis()), urlMp3);
                                                         songs.add(song);
-
                                                     }
 
+                                                    //todo à vérifier surement inutile maintenant
                                                     Message message = Message.obtain();
                                                     message.obj="OK";
                                                     handler.sendMessage(message);
@@ -236,6 +237,7 @@ public class ChoraleNetWorkDataSource {
 
     }
 
+    //todo faire des download qu'avec wifi ou suivant préférences
     public void downloadBgImage() {
 
         listDownLoadImages = getListDownloadBgImages();
@@ -286,11 +288,14 @@ public class ChoraleNetWorkDataSource {
             String cloudPath = source.getUrlCloudBackground();
             mStorageRef = mStorage.getReferenceFromUrl(cloudPath);
             String filename = mStorageRef.getName();
-            localFile = new File(mContext.getFilesDir(), filename);
+            localFileImage = new File(mContext.getFilesDir(), filename);
+            String pathImage = localFileImage.getAbsolutePath();
+            //todo ajouter pathimage à la place de bgSong int
+            source.setBackground(pathImage);
 
-            Log.d(LOG_TAG, "NDS uploadOnPhoneBgImages: " + localFile.getParent() + " " + filename + " " + localFile.getPath() + " " + localFile.getAbsolutePath());
+            Log.d(LOG_TAG, "NDS uploadOnPhoneBgImages: " + localFileImage.getParent() + " " + filename + " " + localFileImage.getPath() + " " + localFileImage.getAbsolutePath());
 
-            mStorageRef.getFile(localFile)
+            mStorageRef.getFile(localFileImage)
                     .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
@@ -326,9 +331,8 @@ public class ChoraleNetWorkDataSource {
     private List<Song> getListDownloadMp3() {
 
         final List<Song> tempList = new ArrayList<>();
-        //todo à retirer
-        //oldSongs();
-        //A retirer dès que préférences mises
+
+        //todo A retirer dès que préférences mises
         pupitreToUpload.add(pupitreUser);
 
         Log.d(LOG_TAG, "NDS getListDownloadMp3: "+current_user_id);
@@ -361,7 +365,6 @@ public class ChoraleNetWorkDataSource {
                                 i++;
                                 Log.d(LOG_TAG, "NDS onComplete:deuxième if " + i + " " + oldSongs.size());
                             }
-
                         }
                         if (i == oldSongs.size()) {
                             tempList.add(newSong);
@@ -390,13 +393,15 @@ public class ChoraleNetWorkDataSource {
             mStorageRef = mStorage.getReferenceFromUrl(cloudPath);
 
             String filename = mStorageRef.getName();
-            File localFile = null;
+
             //todo essayer de mettre un dossier sons.mp3
-            localFile = new File(mContext.getFilesDir(), filename);
+            localFileMp3 = new File(mContext.getFilesDir(), filename);
+            String pathLocalMp3 = localFileMp3.getAbsolutePath();
+            song.setSongPath(pathLocalMp3);
+            song.setUpdatePhoneMp3(new Date(System.currentTimeMillis()));
+            Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: " + localFileMp3.getParent() + " " + filename + " " + localFileMp3.getPath() + " " + localFileMp3.getAbsolutePath()+" "+ mContext.getFilesDir());
 
-            Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: " + localFile.getParent() + " " + filename + " " + localFile.getPath() + " " + localFile.getAbsolutePath()+" "+ mContext.getFilesDir());
-
-            mStorageRef.getFile(localFile)
+            mStorageRef.getFile(localFileMp3)
                     .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
@@ -455,6 +460,14 @@ public class ChoraleNetWorkDataSource {
         });
 
         return currentPupitreStr;
+    }
+
+    public File getLocalFileMp3() {
+        return localFileMp3;
+    }
+
+    public File getLocalFileImage() {
+        return localFileImage;
     }
 }
 

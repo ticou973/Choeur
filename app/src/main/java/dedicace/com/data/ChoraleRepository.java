@@ -45,6 +45,8 @@ public class ChoraleRepository {
     private List<SourceSong> sourceSongs1;
     private String currentPupitreStr;
 
+
+
     private ChoraleRepository(SongsDao songsDao, SourceSongDao sourceSongDao,
                               final ChoraleNetWorkDataSource choraleNetworkDataSource,
                               AppExecutors executors) {
@@ -61,6 +63,8 @@ public class ChoraleRepository {
                 sourceSongs1=sourceSongs;
                 Log.d(LOG_TAG, "Repository: observers ");
                 songs = choraleNetworkDataSource.getSongs();
+
+
 
                 mExecutors.diskIO().execute(new Runnable() {
                     @Override
@@ -107,25 +111,8 @@ public class ChoraleRepository {
             @Override
             public void run() {
                 if (isFetchNeeded()) {
-
-                    /*
-                    //todo à retirer
-                    final SourceSong sourceSong1 = new SourceSong("Des hommes pareils","Francis Cabrel",321,R.drawable.hand,"",null);
-                    final Song song5 = new  Song("Des hommes pareils",RecordSource.BANDE_SON,Pupitre.SOPRANO,"des_hommes_pareils_soprano",null);
-                    mSourceDao.insertSourceSong(sourceSong1);
-                    mSongDao.insertSong(song5);
-                    Log.d(LOG_TAG, "CR run-exec : après insertion des éléments song et source song ");
-
-                    oldSourcesSongs=mSourceDao.getAllSources();
-                    oldSongs=mSongDao.getAllSongs();
-                    Log.d(LOG_TAG, "CR-exec run is Fetch initialize data : "+oldSourcesSongs.size()+" "+oldSongs.size());
-
-                    mChoraleNetworkDataSource.setOldSourceSongs(oldSourcesSongs);
-                    mChoraleNetworkDataSource.setOldSongs(oldSongs);
-                    */
-                    startFetchSongsService();
                     currentPupitreStr=getCurrentPupitreStr();
-
+                    startFetchSongsService();
                 }
             }
         });

@@ -32,9 +32,11 @@ public class Song {
     @ColumnInfo(name = "url_cloud_mp3")
     private String urlCloudMp3;
 
+    //date de la bdd song
     @ColumnInfo(name ="update_phone")
     private Date updatePhone;
 
+    //date de la maj du mp3 sur tel
     @ColumnInfo(name = "update_mp3")
     private Date updatePhoneMp3;
 
