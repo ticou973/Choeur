@@ -5,6 +5,7 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import java.util.List;
 
@@ -27,4 +28,7 @@ public interface SourceSongDao {
 
     @Query("DELETE FROM sourcesong")
     void deleteAll();
+
+    @Update
+    void updateSourceSong(SourceSong sourceSong);
 }

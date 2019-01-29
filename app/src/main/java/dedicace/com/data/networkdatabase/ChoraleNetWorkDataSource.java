@@ -42,7 +42,7 @@ public class ChoraleNetWorkDataSource {
 
     // For Singleton instantiation
     private static final Object LOCK = new Object();
-    private static final String LOG_TAG = "coucou1";
+    private static final String LOG_TAG = "coucou";
     private static ChoraleNetWorkDataSource sInstance;
     private final Context mContext;
 
@@ -81,6 +81,17 @@ public class ChoraleNetWorkDataSource {
     private String currentPupitreStr;
     private List<Pupitre> pupitreToUpload = new ArrayList<>();
 
+    //calculSongs
+    private List<List<RecordSource>> RecordSources=new ArrayList<>();
+    private List<List<Song>> SongOnPhones= new ArrayList<>();
+    private List<List<Song>> SongOnClouds=new ArrayList<>();
+    private List<RecordSource> recordToPlays=new ArrayList<>();
+    private List<Song> songToPlays=new ArrayList<>();
+    private List<Object> listElements = new ArrayList<>();
+    private List<Song> listSongsOnPhone= new ArrayList<>();
+
+
+
     //DB
     private FirebaseFirestore db;
     private FirebaseStorage mStorage;
@@ -101,14 +112,13 @@ public class ChoraleNetWorkDataSource {
         mContext = context;
         mExecutors = executors;
         mDownloaderSourceSongs = new MutableLiveData<>();
-        Log.d(LOG_TAG, "NetworkDataSource: constructor ");
+        Log.d(LOG_TAG, "NetworkDataSource: constructor " + mDownloaderSourceSongs);
         db = FirebaseFirestore.getInstance();
         mStorage = FirebaseStorage.getInstance();
-        Log.d(LOG_TAG, "ChoraleNetWorkDataSource: ref de storage et db");
+        Log.d(LOG_TAG, "NDS ChoraleNetWorkDataSource: constructor ref de storage et db");
         mAuth=FirebaseAuth.getInstance();
         current_user_id=mAuth.getCurrentUser().getUid();
-        Log.d(LOG_TAG, "ChoraleNetWorkDataSource: "+current_user_id);
-
+        Log.d(LOG_TAG, "NDS ChoraleNetWorkDataSource: constructor "+ current_user_id);
         workerThread = new WorkerThread();
     }
 
@@ -129,7 +139,7 @@ public class ChoraleNetWorkDataSource {
 
 
     public LiveData<List<SourceSong>> getSourceSongs() {
-        Log.d(LOG_TAG, "NDS network getSourceSongs: ");
+        Log.d(LOG_TAG, "NDS network getSourceSongs: "+mDownloaderSourceSongs);
         return mDownloaderSourceSongs;
     }
 
@@ -138,14 +148,15 @@ public class ChoraleNetWorkDataSource {
     }
 
     public void startFetchSongsService() {
+        Log.d(LOG_TAG, "NDS startFetchSongsService: début");
         Intent intentToFetch = new Intent(mContext, ChoraleSyncIntentService.class);
         mContext.startService(intentToFetch);
         Log.d(LOG_TAG, "NDS Service created");
-
     }
 
+
     public void fetchSongs() {
-        Log.d(LOG_TAG, "NDS network fetch started: ");
+        Log.d(LOG_TAG, "NDS network fetch started: "+Thread.currentThread().getName());
 
         try {
             db.collection("sourceSongs")
@@ -153,6 +164,7 @@ public class ChoraleNetWorkDataSource {
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            Log.d(LOG_TAG, "NDS onComplete: sourceSongs "+Thread.currentThread().getName());
                             if (task.isSuccessful()) {
                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                     Log.d(LOG_TAG, "NDS-exec deb Oncomplete"+document.getId() + " => " + document.getData().get("maj"));
@@ -174,7 +186,7 @@ public class ChoraleNetWorkDataSource {
                                     sourceSongs.add(sourceSong);
                                 }
 
-                                Log.d(LOG_TAG, "NDS-exec fetchSongs: après post");
+                                Log.d(LOG_TAG, "NDS-exec fetchSourceSongs: après fetch");
                             } else {
                                 Log.w(LOG_TAG, "NDS-exec Error getting documents.", task.getException());
                             }
@@ -185,6 +197,7 @@ public class ChoraleNetWorkDataSource {
                                         .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                             @Override
                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                Log.d(LOG_TAG, "NDS onComplete: Songs "+Thread.currentThread().getName());
                                                 if (task.isSuccessful()) {
                                                     for (QueryDocumentSnapshot document : task.getResult()) {
                                                         Log.d(LOG_TAG, "NDS-exec " + document.getId() + " => " + document.getData().get("pupitre"));
@@ -209,15 +222,11 @@ public class ChoraleNetWorkDataSource {
                                                         Song song = new Song(titre, sourceObj, pupitreObj, new Date(System.currentTimeMillis()), urlMp3);
                                                         songs.add(song);
                                                     }
-
+                                                    Log.d(LOG_TAG, "NDS-exec onComplete: avant post "+songs);
                                                     //todo à vérifier surement inutile maintenant
                                                     Message message = Message.obtain();
                                                     message.obj="OK";
                                                     handler.sendMessage(message);
-
-                                                    Log.d(LOG_TAG, "NDS-exec onComplete: avant post");
-
-
                                                 } else {
                                                     Log.w(LOG_TAG, "NDS-exec Error getting documents.", task.getException());
                                                 }
@@ -227,6 +236,7 @@ public class ChoraleNetWorkDataSource {
                                 // Server probably invalid
                                 e.printStackTrace();
                             }
+
                         }
                     });
 
@@ -334,12 +344,13 @@ public class ChoraleNetWorkDataSource {
 
         //todo A retirer dès que préférences mises
         pupitreToUpload.add(pupitreUser);
+        pupitreToUpload.add(Pupitre.ALTO);
 
-        Log.d(LOG_TAG, "NDS getListDownloadMp3: "+current_user_id);
-        Log.d(LOG_TAG, "NDS getListDownloadMp3: "+songs.size());
-        Log.d(LOG_TAG, "NDS getListDownloadMp3: "+oldSongs.size());
-        Log.d(LOG_TAG, "NDS getListDownloadMp3: "+currentPupitreStr);
-        Log.d(LOG_TAG, "NDS getListDownloadMp3: "+pupitreUser);
+        Log.d(LOG_TAG, "NDS getListDownloadMp3 user: "+current_user_id);
+        Log.d(LOG_TAG, "NDS getListDownloadMp3 songs: "+songs.size());
+        Log.d(LOG_TAG, "NDS getListDownloadMp3 oldsongs: "+oldSongs.size());
+        Log.d(LOG_TAG, "NDS getListDownloadMp3 currentpupitre: "+currentPupitreStr);
+        Log.d(LOG_TAG, "NDS getListDownloadMp3: pupitreUser "+pupitreUser);
 
         for (Song newSong : songs) {
             int i = 0;
@@ -349,10 +360,10 @@ public class ChoraleNetWorkDataSource {
 
             for(Pupitre pupitre: pupitreToUpload) {
                 if (newSong.getPupitre() == pupitre) {
-                    Log.d(LOG_TAG, "getListDownloadMp3: test pupitre passé " + oldSongs.size() + " " + oldSongs);
+                    Log.d(LOG_TAG, "NDS getListDownloadMp3: test pupitre passé " + oldSongs.size() + " " + oldSongs);
 
                     if (oldSongs.size() != 0) {
-                        Log.d(LOG_TAG, "getListDownloadMp3: test olsong non null passé");
+                        Log.d(LOG_TAG, "NDS getListDownloadMp3: test olsong non null passé");
                         for (Song oldSong : oldSongs) {
 
                             Log.d(LOG_TAG, "NDS onComplete:  oldsong" + oldSong.getSourceSongTitre() + " " + oldSong.getRecordSource() + " " + oldSong.getPupitre());
@@ -399,7 +410,7 @@ public class ChoraleNetWorkDataSource {
             String pathLocalMp3 = localFileMp3.getAbsolutePath();
             song.setSongPath(pathLocalMp3);
             song.setUpdatePhoneMp3(new Date(System.currentTimeMillis()));
-            Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: " + localFileMp3.getParent() + " " + filename + " " + localFileMp3.getPath() + " " + localFileMp3.getAbsolutePath()+" "+ mContext.getFilesDir());
+            Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: " + localFileMp3.getParent() + " " + filename + " " + localFileMp3.getPath() + " " + localFileMp3.getAbsolutePath()+" "+ mContext.getFilesDir()+" "+Thread.currentThread().getName());
 
             mStorageRef.getFile(localFileMp3)
                     .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
@@ -446,12 +457,13 @@ public class ChoraleNetWorkDataSource {
         db.collection("users").document(current_user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                Log.d(LOG_TAG, "NDS getCurrentPupitre onComplete: "+Thread.currentThread().getName());
                 if(task.isSuccessful()){
 
                     currentPupitreStr = (String) task.getResult().get("pupitre");
                     pupitreUser=SongsUtilities.converttoPupitre(currentPupitreStr);
 
-                    Log.d(LOG_TAG, "NDS getListDownloadMp3: "+currentPupitreStr);
+                    Log.d(LOG_TAG, "NDS getCurrentPupitre "+currentPupitreStr);
 
                 }else{
                     Log.d(LOG_TAG, "NDS onComplete: erreur de récupération du pupitre");
@@ -462,13 +474,6 @@ public class ChoraleNetWorkDataSource {
         return currentPupitreStr;
     }
 
-    public File getLocalFileMp3() {
-        return localFileMp3;
-    }
-
-    public File getLocalFileImage() {
-        return localFileImage;
-    }
 }
 
 

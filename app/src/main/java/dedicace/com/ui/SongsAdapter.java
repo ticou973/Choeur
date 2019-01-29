@@ -41,7 +41,6 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
     //todo voir si il faut envoyer dans le constructeur les songs
     public SongsAdapter(Context context, ListemClickedListener handler ) {
         this.context = context;
-
         //todo voir si à enlever ?
         mlistemClickedListener=handler;
         Log.d(TAG, "SA SongsAdapter: ");
@@ -58,6 +57,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         Song OnPlayFirstSong(String titre, RecordSource recordSource);
         List<Song> OnListRecordedSongsOnPhone();
         List<Song> OnListRecordedSongsOnCloud();
+
 
     }
 
@@ -80,7 +80,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         //Gestion des datas de la SourceSong
         initDataSourceSong(songsViewHolder, position);
         //songsViewHolder.verifyExistingSongs(RecordSource.BANDE_SON);
-//        songsViewHolder.setResourceToMediaPlayer();
+        songsViewHolder.setResourceToMediaPlayer();
     }
 
     @Override
@@ -102,7 +102,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         songsViewHolder.setTitre(sourceSongs.get(position).getTitre());
         songsViewHolder.setGroupe(sourceSongs.get(position).getGroupe());
         GlideApp.with(context)
-                .load(sourceSongs.get(position).getBgSong())
+                .load(sourceSongs.get(position).getBackground())
                 .centerCrop() // scale to fill the ImageView and crop any extra
                 .into(songsViewHolder.getImageSong());
         //todo voir si mettre 0 ou SystemClock.elapsedRealtime()
@@ -111,11 +111,11 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
         Log.d(TAG, "initDataSourceSong: "+sourceSong.getTitre()+" "+position);
         songsViewHolder.setSourceSong(sourceSong);
-       // initRecordSongs(songsViewHolder,sourceSong,position);
+        initRecordSongs(songsViewHolder,sourceSong,position);
 
         //initalisation des songs de la sourceSongs
         if(recordSource!=RecordSource.NA) {
-          //  initDataSongs(songsViewHolder, sourceSong,position);
+            initDataSongs(songsViewHolder, sourceSong,position);
         }
     }
 
@@ -123,7 +123,17 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         Log.d(TAG, "initRecordSongs: "+position);
         recordSources=RecordSources.get(position);
         songsViewHolder.setRecordSource(recordSources);
+        getFirstRecordSong();
+
         recordSource=songsViewHolder.getSource();
+
+
+    }
+
+    //todo vérifier utilité ?
+    private void getFirstRecordSong() {
+
+
     }
 
     private void initDataSongs(SongsViewHolder songsViewHolder,SourceSong sourceSong,int position) {
@@ -145,7 +155,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
 
     public void swapSongs(final List<SourceSong> sources, List<List<RecordSource>> recordSources, List<Song> songToPlays, List<List<Song>> songOnPhones, List<List<Song>> songOnClouds) {
-        Log.d("coucou", "swapSongs: SongAdapter");
+        Log.d("coucou", "swapSongs: SongAdapter "+sources+"\n"+recordSources+"\n"+ songToPlays+"\n"+ songOnPhones+"\n"+ songOnClouds);
         sourceSongs=sources;
         this.RecordSources=recordSources;
         this.songToPlays=songToPlays;

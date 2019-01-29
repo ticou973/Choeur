@@ -1,9 +1,21 @@
 package dedicace.com.utilities;
 
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
+import dedicace.com.data.database.Song;
+import dedicace.com.data.database.SongsDao;
+import dedicace.com.data.database.SourceSong;
+import dedicace.com.ui.SongsAdapter;
 
 public class SongsUtilities {
+    private static List<List<RecordSource>> RecordSources = new ArrayList<>();
+    private static SongsDao mSongDao;
+
 
     public static RecordSource convertToRecordSource (String codeRecord) {
 
@@ -52,6 +64,38 @@ public class SongsUtilities {
     }
 
 
+    public static List<List<RecordSource>> getRecordSources(List<SourceSong> sourceSongs, SongsDao songsDao){
+        mSongDao=songsDao;
+        if(sourceSongs!=null){
+            for (SourceSong sourceSong : sourceSongs) {
+                String titre = sourceSong.getTitre();
+                RecordSources.add(getRecordSources(titre));
+            }
+            Log.d(SongsAdapter.TAG, "CR run: sourceSongs dans la database après B "+RecordSources.size());
+        }
+        return RecordSources;
+    }
 
+    public static List<RecordSource> getRecordSources(String titre) {
 
+        List<RecordSource> sources= new ArrayList<>();
+
+        List<Song> listBS;
+        List<Song> listLIVE;
+
+        listBS = mSongDao.getSongsBySourceTitre(RecordSource.BANDE_SON,titre);
+        listLIVE=mSongDao.getSongsBySourceTitre(RecordSource.LIVE,titre);
+
+        if(listBS.size()!=0&&listLIVE.size()!=0){
+            sources.add(RecordSource.BANDE_SON);
+            sources.add(RecordSource.LIVE);
+        }else if(listBS.size()==0&&listLIVE.size()!=0){
+            sources.add(RecordSource.LIVE);
+        }else if(listBS.size()!=0&&listLIVE.size()==0){
+            sources.add(RecordSource.BANDE_SON);
+        }else{
+            sources.add(RecordSource.NA);
+        }
+        return sources;
+    }
 }

@@ -113,7 +113,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         setButtonActivable(false, bsBtn,liveBtn,tuttiBtn,bassBtn,tenorBtn,altoBtn,sopranoBtn);
 
-        /*chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
+        chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             public void onChronometerTick(Chronometer cArg) {
                 long t = SystemClock.elapsedRealtime() - cArg.getBase();
                 if(t>=600000) {
@@ -121,12 +121,14 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                 }else{
                     cArg.setText(DateFormat.format("m:ss", t));
                 }
+
                 if(t>=mPlayerAdapter.getDuration()){
                     setStopListener();
                 }
             }
-        });*/
+        });
 
+        //créé le player pour chque viewHolder
         isFirstTime();
         Log.d(TAG, "SVH SongsViewHolder: "+ mPlayerAdapter);
 
@@ -656,8 +658,12 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
      */
 
     public void setChronometer(long time){
+        //todo vérifier car cela me semble compliqué pour mettre à 0
+        Log.d(TAG, "setChronometer: "+time+chronometer.getBase());
         long t = time - chronometer.getBase();
-        chronometer.setText(DateFormat.format("m:ss", t));
+        chronometer.setText(DateFormat.format("m:ss", time));
+
+        Log.d(TAG, "setChronometer: "+DateFormat.format("m:ss", t));
     }
 
     private void setChronometerStart(){

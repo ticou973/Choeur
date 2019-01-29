@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dedicace.com.data.ChoraleRepository;
+import dedicace.com.data.database.ListSongs;
 import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
@@ -23,12 +24,14 @@ public class MainActivityViewModel extends ViewModel {
     private List<List<Song>> songOnClouds= new ArrayList<>();
     private List<Object> listElements = new ArrayList<>();
     private String currentPupitreStr;
+    private List<Song> songs;
+    private ListSongs listSongs;
 
     public MainActivityViewModel(ChoraleRepository repository) {
-        Log.d(SongsAdapter.TAG, "MainActivityViewModel: avant");
+        Log.d(SongsAdapter.TAG, "MainActivityViewModel: avant "+choeurSourceSongs);
         mRepository = repository;
         choeurSourceSongs = mRepository.getSourceSongs();
-        Log.d(SongsAdapter.TAG, "MainActivityViewModel: fin");
+        Log.d(SongsAdapter.TAG, "MainActivityViewModel: fin "+ choeurSourceSongs);
     }
 
 
@@ -37,7 +40,7 @@ public class MainActivityViewModel extends ViewModel {
         Log.d(SongsAdapter.TAG, "MAVM getChoeurSourceSongs: ");
 
         if(choeurSourceSongs!=null){
-            Log.d(SongsAdapter.TAG, "MAVM getChoeurSourceSongs: non null "+choeurSourceSongs.getValue());
+            Log.d(SongsAdapter.TAG, "MAVM getChoeurSourceSongs: non null "+choeurSourceSongs.getValue()+choeurSourceSongs);
         }
         return choeurSourceSongs;
     }
@@ -49,33 +52,57 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     public List<List<RecordSource>> getRecordSources() {
-        recordSources = mRepository.getRecordSources();
+        recordSources = mRepository.getRecordSourcesA();
+        Log.d("coucou", "MAVM getRecordSources: " + recordSources);
         return recordSources;
     }
 
     public List<Song> getSongToPlays() {
-        songToPlays=mRepository.getSongToPlays();
+        songToPlays=mRepository.getSongToPlaysA();
+        Log.d("coucou", "MAVM getSongToPlays: " + songToPlays);
         return songToPlays;
     }
 
     public List<List<Song>> getSongOnPhones() {
-        songOnPhones=mRepository.getSongsOnPhones();
+        songOnPhones=mRepository.getSongsOnPhonesA();
+        Log.d("coucou", "MAVM getSongOnPhones: " + songOnPhones);
         return songOnPhones;
     }
 
     public List<List<Song>> getSongOnClouds() {
-        songOnClouds=mRepository.getSongsOnClouds();
+        songOnClouds=mRepository.getSongsOnCloudsA();
+        Log.d("coucou", "MAVM getSongsOnCloud: " + songOnClouds);
         return songOnClouds;
     }
 
+    //todo à retirer ?
     public List<Object> getListElements() {
-        listElements=mRepository.getListElements();
+        listElements=mRepository.getElements();
         return listElements;
     }
 
     public String getCurrentPupitreStr() {
         currentPupitreStr=mRepository.getCurrentPupitreStr();
         return currentPupitreStr;
+    }
+
+    public List<Song> getAllSongs() {
+
+        songs = mRepository.getSongs();
+
+        return songs;
+    }
+
+    public Thread getCurrentThread() {
+        Thread currentThread = mRepository.getCurrentThread();
+        return currentThread;
+    }
+
+    public ListSongs getListSongs() {
+
+        listSongs=mRepository.getListSongs();
+
+        return listSongs;
     }
 }
 

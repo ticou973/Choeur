@@ -33,8 +33,11 @@ public interface SongsDao {
     @Query("SELECT * FROM song WHERE (titre_song IN (:titre)) AND (source_enregistrement IN (:source))")
     List<Song> getSongsByTitreSource(String titre, RecordSource source);
 
-    @Query("SELECT * FROM song WHERE (titre_song IN (:titre)) AND (source_enregistrement IN (:recordSource) AND (update_phone NOT null)) ORDER BY pupitre ASC")
+    @Query("SELECT * FROM song WHERE (titre_song IN (:titre)) AND (source_enregistrement IN (:recordSource) AND (fichier_mp3 NOT null)) ORDER BY pupitre ASC")
     List<Song> getSongsOnPhone(String titre, RecordSource recordSource);
+
+    @Query("SELECT * FROM song WHERE (titre_song IN (:titre)) AND (source_enregistrement IN (:recordSource) AND (update_phone NOT null)) ORDER BY pupitre ASC")
+    List<Song> getSongsOnPhoneA(String titre, RecordSource recordSource);
 
     @Query("SELECT * FROM song WHERE (titre_song IN (:titre)) AND (source_enregistrement IN (:source)) ORDER BY pupitre ASC ")
     List<Song> getSongOrderedByPupitre(String titre, RecordSource source);
