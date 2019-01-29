@@ -46,9 +46,9 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private RecordSource source=RecordSource.NA, secondSource;
     private List<RecordSource> recordSources= new ArrayList<>();
     private SourceSong sourceSong = new SourceSong();
-    private List<Song> songsMainSource=new ArrayList<>(), songsSecondSource=new ArrayList<>(), songsTitreSecondSource=new ArrayList<>();
-    private Song songTitreBassMainSource=new Song(), songTitreTenorMainSource=new Song(), songTitreAltoMainSource=new Song(), songTitreSopranoMainSource=new Song(), songTitreBassSecondSource=new Song()
-            , songTitreTenorSecondSource= new Song(), songTitreAltoSecondSource=new Song(), songTitreSopranoSecondSource= new Song(), songToPlay, songToRecord = new Song();
+    private Song songToPlay;
+    private List<Song> songOnPhoneRecorded= new ArrayList<>();
+    private List<Song> songOnCloudRecorded= new ArrayList<>();
 
     private ArrayList pupitreSourceButton = new ArrayList();
 
@@ -66,6 +66,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private String message;
     private long lastPause;
     private Context context;
+    private boolean pause = false;
 
 
     //todo prévoir d'effacer les chansons que l'on a soit même enregistré (long click et menu)
@@ -449,9 +450,12 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             setSourceActivable(source);
             source=recordSource;
             setCurrentSourceActive(source);
+
+            HandleListSongs(recordSource,button);
+
             isFirstTime = true;
             message= source.toString();
-            if (mPlayerAdapter != null) {
+            if (mPlayerAdapter != null&&(mPlayerAdapter.isPlaying()||pause)) {
                 setStopListener();
             }
             setResourceToMediaPlayer();
@@ -460,6 +464,42 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             message = source.toString() +" non chargé";
         }
     }
+
+    private void HandleListSongs(RecordSource recordSource, Button button) {
+
+        Log.d(TAG, "SVH HandleListSongs début");
+
+        Song[] songsPhone, songsCloud;
+
+        songOnCloudRecorded = mlistItemClickedListener.OnListRecordedSongsOnCloud(sourceSong,recordSource);
+
+        if(songOnCloudRecorded!=null) {
+            songsCloud = songOnCloudRecorded.toArray(new Song[0]);
+        }else{
+            songsCloud = new Song[0];
+        }
+
+        setSongCloudRecorded(songsCloud);
+
+        Log.d(TAG, "SVH HandleListSongs "+ songsCloud.length);
+
+        songOnPhoneRecorded = mlistItemClickedListener.OnListRecordedSongsOnPhone();
+        if(songOnPhoneRecorded!=null) {
+            songsPhone = songOnPhoneRecorded.toArray(new Song[0]);
+        }else{
+            songsPhone = new Song[0];
+        }
+        setSongRecorded(songsPhone);
+
+        Log.d(TAG, "SA initDataSongs: songsPhone "+ songsPhone.length);
+
+        if(songsPhone.length!=0) {
+            songToPlay = mlistItemClickedListener.OnPlayFirstSong(sourceSong,recordSource);
+            setSongToPlay(songToPlay);
+        }
+
+    }
+
 
     private void handleClickPupitre(Pupitre pupitre, Button button) {
 
@@ -470,7 +510,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             setCurrentSongActive(pupitre);
             isFirstTime = true;
             message = pupitre.toString();
-            if (mPlayerAdapter != null&&mPlayerAdapter.isPlaying()) {
+            if (mPlayerAdapter != null&&(mPlayerAdapter.isPlaying()||pause)) {
                 Log.d(TAG, "SVH handleClickPupitre: setStopListener");
                 setStopListener();
             }
@@ -567,11 +607,13 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                     }
                     if(!mPlayerAdapter.isPlaying()&&!isRecording) {
                         playSongs.setImageDrawable(animation);
+                        pause=false;
                         mPlayerAdapter.play();
                         setChronometerStart();
 
                     }else if(mPlayerAdapter.isPlaying()&&!isRecording){
                         playSongs.setImageResource(R.drawable.ic_pause_orange);
+                        pause = true;
                         mPlayerAdapter.pause();
                         setChronometerPause();
                     }

@@ -54,9 +54,9 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         void OnDialogRecord(int position, SongsViewHolder songsViewHolder);
         void OnRequestPermission();
         Song OnPlaySong(SourceSong sourceSong, Pupitre pupitre, RecordSource source);
-        Song OnPlayFirstSong(String titre, RecordSource recordSource);
-        List<Song> OnListRecordedSongsOnPhone();
-        List<Song> OnListRecordedSongsOnCloud();
+        Song OnPlayFirstSong(SourceSong sourceSong, RecordSource recordSource);
+        List<Song> OnListRecordedSongsOnPhone(SourceSong sourceSong,RecordSource recordSource);
+        List<Song> OnListRecordedSongsOnCloud(SourceSong sourceSong,RecordSource recordSource);
 
 
     }

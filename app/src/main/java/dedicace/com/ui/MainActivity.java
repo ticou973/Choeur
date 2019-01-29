@@ -509,33 +509,46 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     }
 
     @Override
-    public Song OnPlayFirstSong(final String titre, final RecordSource recordSource) {
-        mExecutors.diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-               firstSongPlayed= mViewModel.getFirstSong(titre,recordSource);
-            }
-        });
+    public Song OnPlayFirstSong(final SourceSong sourceSong, final RecordSource recordSource) {
+
+        int indexSourceSong = sourceSongList.indexOf(sourceSong);
+
+        if(recordSource ==RecordSource.BANDE_SON) {
+            firstSongPlayed=SongOnPhonesBS.get(indexSourceSong).get(0);
+        }else if(recordSource ==RecordSource.LIVE) {
+            firstSongPlayed=SongOnPhonesLive.get(indexSourceSong).get(0);
+        }
 
         return firstSongPlayed;
     }
 
     @Override
-    public List<Song> OnListRecordedSongsOnPhone() {
+    public List<Song> OnListRecordedSongsOnPhone(SourceSong sourceSong,RecordSource recordSource) {
 
         List<Song> phoneSongs = new ArrayList<>();
-        phoneSongs.add(song2);
 
+        int indexSourceSong = sourceSongList.indexOf(sourceSong);
 
+        if(recordSource==RecordSource.BANDE_SON){
+            phoneSongs=SongOnPhonesBS.get(indexSourceSong);
+
+        }else if(recordSource==RecordSource.LIVE){
+
+            phoneSongs=SongOnPhonesLive.get(indexSourceSong);
+        }
         return phoneSongs;
     }
 
     @Override
-    public List<Song> OnListRecordedSongsOnCloud() {
+    public List<Song> OnListRecordedSongsOnCloud(SourceSong sourceSong,RecordSource recordSource) {
 
         List<Song> cloudSongs = new ArrayList<>();
-        cloudSongs.add(song4);
+        int indexSourceSong = sourceSongList.indexOf(sourceSong);
 
+        if(recordSource==RecordSource.BANDE_SON){
+
+            cloudSongs=songOnClouds.get(indexSourceSong);
+        }
         return cloudSongs;
     }
 
