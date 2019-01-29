@@ -100,16 +100,22 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     public void prepareMediaPlayer(Context context, String resStrToPlay) throws IOException {
         mContext=context;
         mResourceStr =resStrToPlay;
-        //mResourceId = convertResStringToResourcesRaw(mResourceStr);
         initializeMediaPlayer();
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mMediaPlayer.setScreenOnWhilePlaying(true);
         //todo modifier avec le bon uribase
         String path4 = BASEURI + mResourceStr + ".mp3";
 
-        mMediaPlayer =MediaPlayer.create(mContext,Uri.parse(path4));
+        //mMediaPlayer =MediaPlayer.create(mContext,Uri.parse(resStrToPlay));
+
+        Uri path = Uri.parse(resStrToPlay);
+
+        mMediaPlayer.setDataSource(resStrToPlay);
+        mMediaPlayer.prepare();
+
         //setupMediaRecorder();
 
-        Log.d(SongsAdapter.TAG, "prepareMediaPlayerB: "+resStrToPlay);
+        Log.d(SongsAdapter.TAG, "prepareMediaPlayer B: "+resStrToPlay);
 
         //todo penser à créer les dossiers pour les songs
         initializeProgressCallback();
@@ -266,7 +272,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     @Override
     public void initializeProgressCallback() {
         duration = mMediaPlayer.getDuration();
-        Log.d(SongsAdapter.TAG, "initializeProgressCallback: "+ duration);
+        Log.d(SongsAdapter.TAG, "MPH initializeProgressCallback: "+ duration);
         if (mPlaybackInfoListener != null) {
             mPlaybackInfoListener.onDurationChanged(duration);
             mPlaybackInfoListener.onPositionChanged(0);

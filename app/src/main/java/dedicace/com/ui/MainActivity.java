@@ -60,18 +60,21 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private int position;
     private ListSongs listSongs;
 
+
     private Thread currentThread;
 
 
     //todo à retirer seuelement pour les tests
-    LiveData<List<SourceSong>> sourceSongs;
-    List<SourceSong> sourceSongList = new ArrayList<>();
+    private LiveData<List<SourceSong>> sourceSongs;
+    private List<SourceSong> sourceSongList = new ArrayList<>();
     Song song3, song4, song6, song5,song2, firstSongPlayed;
     SourceSong sourceSong1, sourceSong2,sourceSong7;
-    List<List<RecordSource>> recordSources;
-    List<Song> songToPlays;
+    private List<List<RecordSource>> recordSources;
+    private List<Song> songToPlays;
     private List<List<Song>> songOnPhones;
     private List<List<Song>> songOnClouds;
+    private List<List<Song>> SongOnPhonesLive= new ArrayList<>();
+    private List<List<Song>> SongOnPhonesBS= new ArrayList<>();
     private Pupitre currentPupitre;
     private String currentPupitreStr;
 
@@ -130,13 +133,14 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 @Override
                 public void onChanged(@Nullable List<SourceSong> sourceSongs) {
 
+                    sourceSongList=sourceSongs;
+
                     Log.d(TAG, "MA onChanged: Alerte, ça bouge dans le coin !" + sourceSongs + " " + mViewModel.getChoeurSourceSongs() + " " + Thread.currentThread().getName());
 
                     currentThread = mViewModel.getCurrentThread();
 
-                   /* if (sourceSongs != null && sourceSongs.size() != 0) {
+                    if (sourceSongs != null && sourceSongs.size() != 0) {
 
-                        Thread currentThread = mViewModel.getCurrentThread();
                         Log.d(TAG, "MA onChanged: currentThread "+currentThread);
                         try {
                             currentThread.join();
@@ -146,12 +150,10 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                         }
 
                         Log.d("coucou", "MA onCreate: Thread fini");
-                    }*/
+                    }
 
-
+                    showLoading();
                     getListSongs();
-
-                    //getSongElements();
 
                     // partieAux(sourceSongs);
 
@@ -186,33 +188,27 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             songOnPhones = listSongs.getSongsOnPhonesA(currentThread);
             Log.d(TAG, "MA getSongElements songOnphones: " + songOnPhones);
             Log.d(TAG, "MA getListSongs: avant recordResources");
-            recordSources = listSongs.getRecordSourcesA(currentThread);
+            recordSources = listSongs.getRecordSourcesA();
             Log.d(TAG, "MA getSongElements recordsources: " + recordSources);
 
-            songToPlays = listSongs.getSongToPlaysA(currentThread);
+            songToPlays = listSongs.getSongToPlaysA();
             Log.d(TAG, "MA getListSongs: juste après"+songToPlays);
             if (songToPlays.size() > 1) {
-                Log.d(TAG, "MA getSongElements songToplays: " + songToPlays + " " + songToPlays.get(0).getSourceSongTitre() + " " + songToPlays.get(0).getPupitre() + " " + songToPlays.get(1).getSourceSongTitre() + " " + songToPlays.get(1).getPupitre());
+      //          Log.d(TAG, "MA getSongElements songToplays: " + songToPlays + " " + songToPlays.get(0).getSourceSongTitre() + " " + songToPlays.get(0).getPupitre() + " " + songToPlays.get(1).getSourceSongTitre() + " " + songToPlays.get(1).getPupitre());
             }
-            songOnClouds = listSongs.getSongsOnCloudsA(currentThread);
-
+            songOnClouds = listSongs.getSongsOnCloudsA();
             Log.d(TAG, "MA getSongElements songOnclouds: " + songOnClouds);
+
+
+            SongOnPhonesBS=listSongs.getSongOnPhoneBSA();
+            Log.d(TAG, "MA getSongElements getSongOnPhoneBSA: " + SongOnPhonesBS);
+
+            SongOnPhonesLive = listSongs.getSongOnPhoneLiveA();
+            Log.d(TAG, "MA getSongElements getSongOnPhoneLiveA: " + SongOnPhonesLive);
+
         }else{
             Log.d(TAG, "getListSongs: est null "+listSongs);
         }
-    }
-
-    private void getSongElements() {
-        recordSources=mViewModel.getRecordSources();
-        Log.d(TAG, "MA getSongElements recordsources: "+recordSources);
-        songToPlays=mViewModel.getSongToPlays();
-        if(songToPlays.size()>1) {
-            Log.d(TAG, "MA getSongElements songToplays: " + songToPlays + " " + songToPlays.get(0).getSourceSongTitre() + " " + songToPlays.get(0).getPupitre() + " "+ songToPlays.get(1).getSourceSongTitre()+" "+ songToPlays.get(1).getPupitre());
-        }
-        songOnPhones=mViewModel.getSongOnPhones();
-        Log.d(TAG, "MA getSongElements songOnphones: "+songOnPhones);
-        songOnClouds=mViewModel.getSongOnClouds();
-        Log.d(TAG, "MA getSongElements songOnclouds: "+songOnClouds);
     }
 
 
@@ -487,7 +483,29 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     @Override
     public Song OnPlaySong(SourceSong sourceSong, Pupitre pupitre, RecordSource source) {
-        return song3;
+        Log.d(TAG, "MA OnPlaySong: au secours");
+
+        Song songToPlay = null;
+
+        int indexSourceSong = sourceSongList.indexOf(sourceSong);
+
+        if(source ==RecordSource.BANDE_SON) {
+            for (Song song : SongOnPhonesBS.get(indexSourceSong)) {
+                if (song.getPupitre() == pupitre && song.getRecordSource() == source) {
+                    songToPlay = song;
+                }
+            }
+        }else if(source ==RecordSource.LIVE) {
+            for (Song song : SongOnPhonesLive.get(indexSourceSong)) {
+                if (song.getPupitre() == pupitre && song.getRecordSource() == source) {
+                    songToPlay = song;
+                }
+            }
+        }
+
+        Log.d(TAG, "MA OnPlaySong: "+ songToPlay.getRecordSource()+" "+songToPlay.getPupitre()+" "+songToPlay.getSourceSongTitre());
+
+        return songToPlay;
     }
 
     @Override

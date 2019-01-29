@@ -50,6 +50,8 @@ public class ChoraleNetWorkDataSource {
     private AppExecutors mExecutors;
     public static AppDataBase choeurDataBase;
     private WorkerThread workerThread;
+
+    //todo remplacer par un join ?
     private Handler handler = new Handler(Looper.getMainLooper()){
         @Override
         public void handleMessage(Message msg) {
@@ -326,9 +328,9 @@ public class ChoraleNetWorkDataSource {
     }
 
     public void downloadMp3() {
-        Log.d(LOG_TAG, "downloadMp3: avant get"+listDownloadMp3);
+        Log.d(LOG_TAG, "NDS downloadMp3: avant get"+listDownloadMp3);
         listDownloadMp3 = getListDownloadMp3();
-        Log.d(LOG_TAG, "downloadMp3: après get"+listDownloadMp3);
+        Log.d(LOG_TAG, "NDS downloadMp3: après get"+listDownloadMp3);
         if (listDownloadMp3 != null) {
             Log.d(LOG_TAG, "NDS : uploadMP3 "+ listDownloadMp3.size());
             uploadOnPhoneMp3(listDownloadMp3);
@@ -346,6 +348,8 @@ public class ChoraleNetWorkDataSource {
         pupitreToUpload.add(pupitreUser);
         pupitreToUpload.add(Pupitre.ALTO);
 
+        //todo ajouter les oldsongs ici toujours égales à 0
+
         Log.d(LOG_TAG, "NDS getListDownloadMp3 user: "+current_user_id);
         Log.d(LOG_TAG, "NDS getListDownloadMp3 songs: "+songs.size());
         Log.d(LOG_TAG, "NDS getListDownloadMp3 oldsongs: "+oldSongs.size());
@@ -354,7 +358,7 @@ public class ChoraleNetWorkDataSource {
 
         for (Song newSong : songs) {
             int i = 0;
-            Log.d(LOG_TAG, "NDS onComplete: newsongs"+ newSong.getSourceSongTitre()+" " + newSong.getRecordSource()+" "+newSong.getPupitre() );
+            Log.d(LOG_TAG, "NDS onComplete: newsongs "+ newSong.getSourceSongTitre()+" " + newSong.getRecordSource()+" "+newSong.getPupitre() );
             //todo tri sur le pupitre plus tard il faudra être capable de s'adapter aux préférences.faire une liste des pupitres à enregistrer
             //todo préparer une page de setUp pour mettre les infos complémentaires sur le user comme son pupitre
 
@@ -388,8 +392,6 @@ public class ChoraleNetWorkDataSource {
             }
         }
         Log.d(LOG_TAG, "NDS getListDownloadMp3: "+tempList.size());
-
-
 
         return tempList;
     }

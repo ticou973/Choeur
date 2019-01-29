@@ -76,10 +76,9 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull final SongsViewHolder songsViewHolder, final int position) {
 
-        Log.d(TAG, "SA onBindViewHolderA: ");
+        Log.d(TAG, "SA onBindViewHolder: ");
         //Gestion des datas de la SourceSong
         initDataSourceSong(songsViewHolder, position);
-        //songsViewHolder.verifyExistingSongs(RecordSource.BANDE_SON);
         songsViewHolder.setResourceToMediaPlayer();
     }
 
@@ -97,7 +96,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
 
     //Autres méthodes
     private void initDataSourceSong(SongsViewHolder songsViewHolder, int position) {
-        Log.d(TAG, "initDataSourceSong: SA");
+        Log.d(TAG, "SA initDataSourceSong: SA");
         //initialisation de la sourceSong
         songsViewHolder.setTitre(sourceSongs.get(position).getTitre());
         songsViewHolder.setGroupe(sourceSongs.get(position).getGroupe());
@@ -109,7 +108,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         songsViewHolder.setChronometer(0);
         sourceSong = sourceSongs.get(position);
 
-        Log.d(TAG, "initDataSourceSong: "+sourceSong.getTitre()+" "+position);
+        Log.d(TAG, "SA initDataSourceSong: "+sourceSong.getTitre()+" "+position);
         songsViewHolder.setSourceSong(sourceSong);
         initRecordSongs(songsViewHolder,sourceSong,position);
 
@@ -120,42 +119,70 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
     }
 
     private void initRecordSongs(SongsViewHolder songsViewHolder,SourceSong sourceSong, int position) {
-        Log.d(TAG, "initRecordSongs: "+position);
+        Log.d(TAG, "SA initRecordSongs: "+position);
         recordSources=RecordSources.get(position);
         songsViewHolder.setRecordSource(recordSources);
-        getFirstRecordSong();
 
+        //dans le sens à recordToPlay
         recordSource=songsViewHolder.getSource();
-
-
-    }
-
-    //todo vérifier utilité ?
-    private void getFirstRecordSong() {
-
-
     }
 
     private void initDataSongs(SongsViewHolder songsViewHolder,SourceSong sourceSong,int position) {
-        Log.d(TAG, "initDataSongs: SA");
+        Log.d(TAG, "SA initDataSongs: ");
+
+        Song[] songsPhone, songsCloud;
+
+        songOnCloudRecorded = songOnClouds.get(position);
+        if(songOnCloudRecorded!=null) {
+            songsCloud = songOnCloudRecorded.toArray(new Song[0]);
+        }else{
+            songsCloud = new Song[0];
+        }
+
+        songsViewHolder.setSongCloudRecorded(songsCloud);
+        Log.d(TAG, "SA initDataSongs: songsCloud "+ songsCloud.length);
 
         songOnPhoneRecorded = songOnPhones.get(position);
-        Song[] songsPhone = songOnPhoneRecorded.toArray(new Song[0]);
-        songOnCloudRecorded = songOnClouds.get(position);
-        Song[] songsCloud = songOnCloudRecorded.toArray(new Song[0]);
-
+        if(songOnPhoneRecorded!=null) {
+            songsPhone = songOnPhoneRecorded.toArray(new Song[0]);
+        }else{
+            songsPhone = new Song[0];
+        }
         songsViewHolder.setSongRecorded(songsPhone);
+
+        Log.d(TAG, "SA initDataSongs: songsPhone "+ songsPhone.length);
 
         if(songsPhone.length!=0) {
             songToPlay = songToPlays.get(position);
             songsViewHolder.setSongToPlay(songToPlay);
         }
-        songsViewHolder.setSongCloudRecorded(songsCloud);
     }
 
 
     public void swapSongs(final List<SourceSong> sources, List<List<RecordSource>> recordSources, List<Song> songToPlays, List<List<Song>> songOnPhones, List<List<Song>> songOnClouds) {
-        Log.d("coucou", "swapSongs: SongAdapter "+sources+"\n"+recordSources+"\n"+ songToPlays+"\n"+ songOnPhones+"\n"+ songOnClouds);
+        Log.d("coucou", "swapSongs: SongAdapter \n"+sources+"\n"+recordSources+"\n"+ songToPlays+"\n"+ songOnPhones+"\n"+ songOnClouds);
+        if(songToPlays.get(0)!=null){
+            Log.d(TAG, "SA swapSongs: songToplays 1 "+songToPlays.get(0).getSourceSongTitre()+" "+songToPlays.get(0).getPupitre());
+        }
+        if(songToPlays.get(1)!=null){
+            Log.d(TAG, "SA swapSongs: songToplays 2 "+songToPlays.get(1).getSourceSongTitre()+" "+songToPlays.get(1).getPupitre());
+        }
+        if(songOnPhones.get(1)!=null){
+            Log.d(TAG, "SA swapSongs: songOnPhones 1 "+songOnPhones.get(1).get(0).getSourceSongTitre()+" "+songOnPhones.get(1).get(0).getPupitre());
+        }
+        if(songToPlays.get(1)!=null){
+            Log.d(TAG, "SA swapSongs: songOnPhones 2 "+songOnPhones.get(1).get(1).getSourceSongTitre()+" "+songOnPhones.get(1).get(1).getPupitre());
+        }
+
+        if(songOnClouds.get(0)!=null){
+            Log.d(TAG, "SA swapSongs: songOnClouds 1 "+songOnClouds.get(0).get(0).getSourceSongTitre()+" "+songOnClouds.get(0).get(0).getPupitre());
+        }
+        if(songOnClouds.get(1)!=null){
+            Log.d(TAG, "SA swapSongs: songOnClouds 2 "+songOnClouds.get(1).get(0).getSourceSongTitre()+" "+songOnClouds.get(1).get(0).getPupitre());
+        }
+        if(songOnClouds.get(1)!=null){
+            Log.d(TAG, "SA swapSongs: songOnClouds 3 "+songOnClouds.get(1).get(1).getSourceSongTitre()+" "+songOnClouds.get(1).get(1).getPupitre());
+        }
         sourceSongs=sources;
         this.RecordSources=recordSources;
         this.songToPlays=songToPlays;
