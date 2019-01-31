@@ -28,6 +28,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import dedicace.com.AppExecutors;
@@ -552,6 +553,11 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         return cloudSongs;
     }
 
+    @Override
+    public void OnSaveRecordSong(Song song) {
+        mViewModel.setRecordSongInAppDb(song);
+
+    }
 
 
     @Override
@@ -566,16 +572,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog, final Pupitre pupitre) {
-        mExecutors.diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "MA onDialogPositiveClick: enregistrer " + pupitre+ " "+ position);
-               // Song recordSong = new Song(songs.get(position),RecordSource.LIVE,pupitre,"NA");
-              //  choeurDataBase.songsDao().insertSong(recordSong);
-                // songsAdapter.notifyItemChanged(position);
-                mPositiveClickListener.OnRecord(pupitre);
-            }
-        });
+        Log.d(TAG, "MA onDialogPositiveClick: enregistrer " + pupitre+ " "+ position);
+        // Song recordSong = new Song(songs.get(position),RecordSource.LIVE,pupitre,"NA");
+        //  choeurDataBase.songsDao().insertSong(recordSong);
+        // songsAdapter.notifyItemChanged(position);
+        Song song = new Song(sourceSongList.get(position).getTitre(),RecordSource.LIVE,pupitre,new Date(System.currentTimeMillis()),new Date(System.currentTimeMillis()));
+
+        mPositiveClickListener.OnRecord(song);
     }
 
 
@@ -631,7 +634,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     //todo à renommer
     public interface OnPositiveClickListener {
-        void OnRecord(Pupitre pupitre);
+        void OnRecord(Song song);
         void OndeleteSong();
     }
 }

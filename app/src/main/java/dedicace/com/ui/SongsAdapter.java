@@ -17,7 +17,7 @@ import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
 
-public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
+public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
 
     private List<SourceSong> sourceSongs;
     private Context context;
@@ -57,6 +57,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder> {
         Song OnPlayFirstSong(SourceSong sourceSong, RecordSource recordSource);
         List<Song> OnListRecordedSongsOnPhone(SourceSong sourceSong,RecordSource recordSource);
         List<Song> OnListRecordedSongsOnCloud(SourceSong sourceSong,RecordSource recordSource);
+        void OnSaveRecordSong(Song song);
 
 
     }

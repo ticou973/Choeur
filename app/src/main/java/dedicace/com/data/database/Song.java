@@ -55,6 +55,15 @@ public class Song {
     public Song() {
     }
 
+    @Ignore
+    public Song(String sourceSongTitre, RecordSource recordSource, Pupitre pupitre, Date updatePhone, Date updatePhoneMp3) {
+        this.sourceSongTitre = sourceSongTitre;
+        this.recordSource = recordSource;
+        this.pupitre = pupitre;
+        this.updatePhone = updatePhone;
+        this.updatePhoneMp3 = updatePhoneMp3;
+    }
+
     public Song(int songId, String sourceSongTitre, RecordSource recordSource, Pupitre pupitre, String songPath, String urlCloudMp3, Date updatePhone, Date updatePhoneMp3) {
         this.songId = songId;
         this.sourceSongTitre = sourceSongTitre;

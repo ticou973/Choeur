@@ -641,6 +641,21 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             recordSongs.setImageResource(R.drawable.ic_record_orange);
             Log.d(TAG, "SVH setRecordListener: StopRecord");
             isRecording=false;
+
+
+            //RecordSource UI
+            setCurrentSourceActive(RecordSource.LIVE);
+
+            if(source==RecordSource.BANDE_SON){
+                setSourceActivable(source);
+            }
+
+            //pupitre UI
+            setCurrentSongActive(recordPupitre);
+            if(source==RecordSource.LIVE){
+              setPupitresLoadedOnPhoneVisible(pupitre);
+            }
+
             //verifyExistingSongs();
         }
     }
@@ -654,13 +669,6 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             mlistItemClickedListener.OnRequestPermission();
         }
 
-        mExecutors.diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                songToRecord =MainActivity.choeurDataBase.songsDao().getLastSong();
-
-            }
-        });
 
         recordPupitre = songToRecord.getPupitre();
         String recordSongName = songToRecord.getSourceSongTitre();
@@ -679,13 +687,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         }else{
             songToRecord.setSongPath(pathSave);
             Log.d(TAG, "SVH setRecord: " + pathSave);
-
-            mExecutors.diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    MainActivity.choeurDataBase.songsDao().updateSong(songToRecord);
-                }
-            });
+            mlistItemClickedListener.OnSaveRecordSong(songToRecord);
         }
     }
 
@@ -765,8 +767,9 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
 
     @Override
-    public void OnRecord(Pupitre pupitre) {
-      // setRecord();
+    public void OnRecord(Song song) {
+        songToRecord=song;
+        setRecord();
     }
 
     @Override

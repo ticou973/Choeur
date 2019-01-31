@@ -269,6 +269,12 @@ public class ChoraleRepository {
 
         return listSongs;
     }
+
+    public void setRecordSongInAppDb(Song song) {
+
+        mSongDao.insertSong(song);
+
+    }
 }
 
 

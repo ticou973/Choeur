@@ -9,6 +9,7 @@ import java.util.List;
 
 import dedicace.com.data.ChoraleRepository;
 import dedicace.com.data.database.ListSongs;
+import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
@@ -104,6 +105,12 @@ public class MainActivityViewModel extends ViewModel {
 
         return listSongs;
     }
+
+    public void setRecordSongInAppDb(Song song) {
+        mRepository.setRecordSongInAppDb(song);
+    }
+
+
 }
 
 

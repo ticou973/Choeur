@@ -24,7 +24,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -142,7 +141,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     public String record(String songNamePupitre) {
 
         if(StorageUtilities.isExternalStorageWritable()){
-        pathSave = StorageUtilities.getExternalPath(UUID.randomUUID().toString(),"3gp");
+        pathSave = StorageUtilities.getExternalPath(songNamePupitre,"3gp");
 
         setupMediaRecorder();
 
