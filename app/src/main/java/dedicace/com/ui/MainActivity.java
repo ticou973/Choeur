@@ -117,13 +117,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             mExecutors = AppExecutors.getInstance();
 
             mfactory = InjectorUtils.provideViewModelFactory(this.getApplicationContext());
-            Log.d("coucou", "onCreate: fin de la factory");
+            Log.d("coucou", "MA onCreate: fin de la factory");
             mViewModel = ViewModelProviders.of(this, mfactory).get(MainActivityViewModel.class);
-            Log.d("coucou", "onCreate: fin du viewModel");
+            Log.d("coucou", "MA onCreate: fin du viewModel");
 
             //todo faire une condition au niveau du repository suivant que l'on connait ou non le currentpupitre (1ère fois ou non)
             //currentPupitre = SongsUtilities.converttoPupitre(getCurrentPupitreStr());
-            Log.d(TAG, "onCreate: "+ currentPupitre);
+            Log.d(TAG, "MA onCreate: "+ currentPupitre);
 
             sourceSongs =mViewModel.getChoeurSourceSongs();
 

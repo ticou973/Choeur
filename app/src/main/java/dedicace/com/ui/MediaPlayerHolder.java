@@ -20,7 +20,6 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -43,7 +42,6 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     private Context mContext;
     private MediaPlayer mMediaPlayer;
     private MediaRecorder mMediaRecorder;
-    private int mResourceId;
     private String mResourceStr;
     private PlaybackInfoListener mPlaybackInfoListener;
     private ScheduledExecutorService mExecutor;
@@ -51,8 +49,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     private int i=0;
     private int duration;
     private String pathSave="";
-    private final static String BASEURI = "storage/emulated/0/Android/data/dedicace.com/files/";
-    private final static String BASEURI2 = "storage/emulated/0/DedicaceAdmin/";
+
 
 
     //todo voir quand mettre les release du mediaplayer et mediarecorder(voir doc de ref)
@@ -69,15 +66,16 @@ public final class MediaPlayerHolder implements PlayerAdapter {
      * not the constructor.
      */
     private void initializeMediaPlayer() {
-        Log.d(SongsAdapter.TAG, "MPH initializeMediaPlayer: ");
+        Log.d(SongsAdapter.TAG, "MPH initializeMediaPlayer: avant création "+mMediaPlayer);
         if (mMediaPlayer == null) {
             mMediaPlayer = new MediaPlayer();
+            Log.d(SongsAdapter.TAG, "MPH initializeMediaPlayer: après création"+mMediaPlayer);
 
             mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     stopUpdatingCallbackWithPosition(true);
-                    Log.d(SongsAdapter.TAG, "onCompletion: ");
+                    Log.d(SongsAdapter.TAG, "MPH onCompletion: ");
 
                     //todo voir si on peut supprimer le playbackinfo
 
@@ -87,6 +85,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
                     }
                 }
             });
+
         }
     }
 
@@ -98,27 +97,45 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     //todo voir comment installer dès le départ le fichier pour l'accueil avec getFilesDir.
     @Override
     public void prepareMediaPlayer(Context context, String resStrToPlay) throws IOException {
+        Log.d("coucou", "MPH prepareMediaPlayer: ");
         mContext=context;
         mResourceStr =resStrToPlay;
         initializeMediaPlayer();
+
+
+
+        try {
+            mMediaPlayer.setDataSource(resStrToPlay);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        Log.d("coucou", "MPH prepareMediaPlayer: SetData done ! ");
+
+
+        mMediaPlayer.setOnPreparedListener(mediaPlayer -> {
+            Log.d("coucou", "MPH prepareMediaPlayer: On prepared juste avant la duration");
+            duration = mediaPlayer.getDuration();
+
+        });
+
+        Log.d("coucou", "prepareMediaPlayer: avant prepare ! ");
+
+        try {
+            mMediaPlayer.prepare();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mMediaPlayer.setScreenOnWhilePlaying(true);
-        //todo modifier avec le bon uribase
-        String path4 = BASEURI + mResourceStr + ".mp3";
-
-        //mMediaPlayer =MediaPlayer.create(mContext,Uri.parse(resStrToPlay));
-
-        Uri path = Uri.parse(resStrToPlay);
-
-        mMediaPlayer.setDataSource(resStrToPlay);
-        mMediaPlayer.prepare();
 
         //setupMediaRecorder();
 
-        Log.d(SongsAdapter.TAG, "prepareMediaPlayer B: "+resStrToPlay);
+        Log.d(SongsAdapter.TAG, "MPH prepareMediaPlayer B: "+resStrToPlay);
 
         //todo penser à créer les dossiers pour les songs
+
         initializeProgressCallback();
+
     }
 
     @Override
@@ -177,10 +194,9 @@ public final class MediaPlayerHolder implements PlayerAdapter {
 
     @Override
     public void play() {
+        Log.d("coucou", "MPH play: avant");
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
             mMediaPlayer.start();
-            //todo vérifier l'utilité de la méthode suivante
-            mMediaPlayer.setScreenOnWhilePlaying(true);
 
             if (mPlaybackInfoListener != null) {
                 mPlaybackInfoListener.onStateChanged(PlaybackInfoListener.State.PLAYING);
@@ -271,7 +287,8 @@ public final class MediaPlayerHolder implements PlayerAdapter {
 
     @Override
     public void initializeProgressCallback() {
-        duration = mMediaPlayer.getDuration();
+       // duration = mMediaPlayer.getDuration();
+
         Log.d(SongsAdapter.TAG, "MPH initializeProgressCallback: "+ duration);
         if (mPlaybackInfoListener != null) {
             mPlaybackInfoListener.onDurationChanged(duration);

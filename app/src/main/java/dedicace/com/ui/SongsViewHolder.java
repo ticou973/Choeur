@@ -17,7 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,6 +66,9 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private long lastPause;
     private Context context;
     private boolean pause = false;
+    private Song songToRecord;
+    private Pupitre recordPupitre;
+    private String pathSave;
 
 
     //todo prévoir d'effacer les chansons que l'on a soit même enregistré (long click et menu)
@@ -141,6 +143,8 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         //todo à enlever ?
         mExecutors = AppExecutors.getInstance();
+
+        totalTime.setText(DateFormat.format("m:ss",0));
     }
 
 
@@ -431,7 +435,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                 if(!mPlayerAdapter.isPlaying()) {
                     message = "Enregistrement";
                 }
-               // setRecordListener();
+                setRecordListener();
                 break;
 
             case R.id.stopSongs:
@@ -469,6 +473,8 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         Log.d(TAG, "SVH HandleListSongs début");
 
+        setButtonActivable(false,tuttiBtn,bassBtn,tenorBtn,altoBtn,sopranoBtn);
+
         Song[] songsPhone, songsCloud;
 
         songOnCloudRecorded = mlistItemClickedListener.OnListRecordedSongsOnCloud(sourceSong,recordSource);
@@ -483,7 +489,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         Log.d(TAG, "SVH HandleListSongs "+ songsCloud.length);
 
-        songOnPhoneRecorded = mlistItemClickedListener.OnListRecordedSongsOnPhone();
+        songOnPhoneRecorded = mlistItemClickedListener.OnListRecordedSongsOnPhone(sourceSong,recordSource);
         if(songOnPhoneRecorded!=null) {
             songsPhone = songOnPhoneRecorded.toArray(new Song[0]);
         }else{
@@ -566,7 +572,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
      */
 
     public void setResourceToMediaPlayer(){
-        Log.d(TAG, "SVH setResourceToMediaPlayer: début "+songToPlay+" "+ pupitre);
+        Log.d(TAG, "SVH setResourceToMediaPlayer: début "+songToPlay+" "+ pupitre+" "+isFirstTime);
         //Fournit et prépare le Mediaplayer
         if(isFirstTime) {
             //Gestion de la seekBar
@@ -588,7 +594,6 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                     e.printStackTrace();
                 }
                 isFirstTime = false;
-
             } else {
                 setTotalTime(0);
             }
@@ -601,17 +606,21 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         if(pupitre==Pupitre.NA||source==RecordSource.NA){
             Toast.makeText((Context) mlistItemClickedListener, "Il manque la chanson demandée !", Toast.LENGTH_SHORT).show();
         }else{
+            Log.d(TAG, "SVH setPlayListener: avant firstTime "+isFirstTime );
                     if(isFirstTime) {
+                        Log.d(TAG, "SVH setPlayListener: si firstTime" );
                         //Fournit et parépare le Mediaplayer
                         setResourceToMediaPlayer();
                     }
                     if(!mPlayerAdapter.isPlaying()&&!isRecording) {
+                        Log.d(TAG, "SVH setPlayListener: avec animation playing" );
                         playSongs.setImageDrawable(animation);
                         pause=false;
                         mPlayerAdapter.play();
                         setChronometerStart();
 
                     }else if(mPlayerAdapter.isPlaying()&&!isRecording){
+                        Log.d(TAG, "SVH setPlayListener: pause" );
                         playSongs.setImageResource(R.drawable.ic_pause_orange);
                         pause = true;
                         mPlayerAdapter.pause();
@@ -620,7 +629,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                 }
     }
 
-    /*private void setRecordListener() {
+    private void setRecordListener() {
         if(!isRecording&&!mPlayerAdapter.isPlaying()) {
             if (mlistItemClickedListener != null) {
                 mlistItemClickedListener.OnDialogRecord(getAdapterPosition(),this);
@@ -628,15 +637,15 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             }
 
         }else if(isRecording&&!mPlayerAdapter.isPlaying()){
-            /*mPlayerAdapter.stopRecord();
+            mPlayerAdapter.stopRecord();
             recordSongs.setImageResource(R.drawable.ic_record_orange);
             Log.d(TAG, "SVH setRecordListener: StopRecord");
             isRecording=false;
-            verifyExistingSongs();
+            //verifyExistingSongs();
         }
-    }*/
+    }
 
-    /*public void setRecord(){
+    public void setRecord(){
 
         recordSongs.setImageDrawable(animation);
 
@@ -654,7 +663,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         });
 
         recordPupitre = songToRecord.getPupitre();
-        String recordSongName = songToRecord.getSourceSong().getTitre();
+        String recordSongName = songToRecord.getSourceSongTitre();
         String recordNamePupitre = recordSongName+"_"+recordPupitre.toString();
 
         Log.d(TAG, "SVH setRecord: c'est parti ! "+ recordPupitre);
@@ -678,7 +687,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                 }
             });
         }
-    }*/
+    }
 
     private void setStopListener() {
         if(mPlayerAdapter!=null) {
@@ -689,7 +698,6 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                 recordSongs.setImageResource(R.drawable.ic_record_orange);
                 Log.d(TAG, "SVH setRecordListener: StopRecord");
                 isRecording=false;
-               // verifyExistingSongs(RecordSource.LIVE);
             }else{
                 Log.d(TAG, "SVH setStopListener: not recording but playing");
                 playSongs.setImageResource(R.drawable.ic_play_orange);
@@ -718,6 +726,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     private void setChronometerStart(){
         if(!isRunning){
+            Log.d(TAG, "SVH setChronometerStart: démarrage");
             chronometer.setBase(SystemClock.elapsedRealtime()-lastPause);
             chronometer.start();
             isRunning=true;
@@ -726,6 +735,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     private void setChronometerPause(){
         if(isRunning){
+            Log.d(TAG, "SVH setChronometerPause: ");
             chronometer.stop();
             lastPause=SystemClock.elapsedRealtime()-chronometer.getBase();
             isRunning=false;
@@ -733,6 +743,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     }
 
     private void setChronometerStop(){
+        Log.d(TAG, "SVH setChronometerStop: ");
         chronometer.stop();
         chronometer.setBase(SystemClock.elapsedRealtime());
         chronometer.setText(DateFormat.format("m:ss", 0));
@@ -741,20 +752,14 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     }
 
     public void setTotalTime(int totalTimeMillis) {
-        SimpleDateFormat simpleDateFormat;
 
         if(totalTimeMillis>=600000){
-
             this.totalTime.setText(DateFormat.format("mm:ss",totalTimeMillis));
 
-           // simpleDateFormat = new SimpleDateFormat("mm:ss");
-
         }else{
-          //  simpleDateFormat = new SimpleDateFormat("m:ss");
+            Log.d(TAG, "SVH setTotalTime: "+DateFormat.format("m:ss",totalTimeMillis));
             this.totalTime.setText(DateFormat.format("m:ss",totalTimeMillis));
         }
-        //todo revoir le format du total
-       // String totalTimeSong = simpleDateFormat.format(totalTimeMillis);
 
     }
 
@@ -807,15 +812,15 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         @Override
         public void onDurationChanged(int duration) {
+            Log.d(TAG, "SVH onDurationChanged: "+duration);
             setTotalTime(duration);
             seekBar.setMax(duration);
-            //todo setTotal Time a des problèmes
-            Log.d(TAG, "SVH onDurationChanged: avant total Time "+ duration);
 
         }
 
         @Override
         public void onPositionChanged(int position) {
+            Log.d(TAG, "SVH onPositionChanged: "+position);
             if (!mUserIsSeeking) {
                 seekBar.setProgress(position);
             }

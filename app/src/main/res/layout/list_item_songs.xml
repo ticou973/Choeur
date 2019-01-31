@@ -135,6 +135,9 @@
                 app:layout_constraintBaseline_toBaselineOf="@+id/chronometre"
                 app:layout_constraintEnd_toEndOf="parent" />
 
+
+
+
             <ImageView
                 android:id="@+id/play_image"
                 android:layout_width="57dp"

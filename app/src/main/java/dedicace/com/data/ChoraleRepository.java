@@ -74,7 +74,7 @@ public class ChoraleRepository {
 
             Log.d(LOG_TAG, "CR Repository: observers Alerte cela bouge !"+sourceSongs1+Thread.currentThread().getName());
             songs = choraleNetworkDataSource.getSongs();
-            Log.d(LOG_TAG, "CR ChoraleRepository LiveData: songsOnCloud " +songs.size());
+            Log.d(LOG_TAG, "CR ChoraleRepository LiveData: songs" +songs.size());
 
             getListSongs(sourceSongs,songs);
 
@@ -132,7 +132,6 @@ public class ChoraleRepository {
 
         t1.start();
 
-        Log.d(LOG_TAG, "CR ChoraleRepository: fin de travail ");
     }
 
     private void getSongToPlaysBs() {
