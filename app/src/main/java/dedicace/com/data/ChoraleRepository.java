@@ -74,7 +74,7 @@ public class ChoraleRepository {
 
             Log.d(LOG_TAG, "CR Repository: observers Alerte cela bouge !"+sourceSongs1+Thread.currentThread().getName());
             songs = choraleNetworkDataSource.getSongs();
-            Log.d(LOG_TAG, "CR ChoraleRepository LiveData: songs" +songs.size());
+            Log.d(LOG_TAG, "CR ChoraleRepository LiveData: songs " +songs.size());
 
             getListSongs(sourceSongs,songs);
 
@@ -102,7 +102,7 @@ public class ChoraleRepository {
 
                 for (SourceSong source:sourceSongsAfterSync
                         ) {
-                    Log.d(LOG_TAG, "CR run: sourcesSONG dans la data "+source.getTitre());
+                    Log.d(LOG_TAG, "CR run: sourcesSONG dans la data : "+source.getTitre());
                 }
 
                 listSongs.getSongOnPhoneBS(sourceSongsAfterSync);
@@ -150,7 +150,18 @@ public class ChoraleRepository {
 
 
     private void synchronisationLocalDataBase(List<SourceSong> sourceSongs) {
-        Log.d(SongsAdapter.TAG, "CR run-exec: sourceSongs dans la database avant "+Thread.currentThread().getName());
+        //todo à retirer dès que cela marche (test)
+        for (SourceSong source:sourceSongs) {
+            List<Song> listBs = mSongDao.getSongsOnPhone(source.getTitre(),RecordSource.BANDE_SON);
+            Log.d(LOG_TAG, "CR synchronisationLocalDataBase: test Database Room "+ listBs.size());
+            if(listBs!=null){
+                for (int i = 0; i <listBs.size() ; i++) {
+                    Log.d(LOG_TAG, "CR getSongOnPhoneBS: listBs songs dans synchronisation "+listBs.get(i).getSourceSongTitre()+" "+listBs.get(i).getPupitre());
+                }
+            }
+        }
+
+        Log.d(SongsAdapter.TAG, "CR run-exec: sourceSongs dans la database avant "+ Thread.currentThread().getName());
         //todo à voir si on change cette Méthode brute pas économique (?) on met à jour les données peu importe si elles existent ou pas.
         mSourceDao.bulkInsert(sourceSongs);
         mSongDao.bulkInsert(songs);
@@ -203,10 +214,10 @@ public class ChoraleRepository {
 
         if (isFetchNeeded()) {
             currentPupitreStr=getCurrentPupitreStr();
-            Log.d(LOG_TAG, "CR run: isFetchNeeded "+ currentPupitreStr);
+            Log.d(LOG_TAG, "CR : isFetchNeeded "+ currentPupitreStr);
             startFetchSongsService();
 
-            Log.d(LOG_TAG, "CR run: isFetchNeeded "+ Thread.currentThread().getName());
+            Log.d(LOG_TAG, "CR : isFetchNeeded "+ Thread.currentThread().getName());
         }
     }
 
@@ -232,6 +243,7 @@ public class ChoraleRepository {
 
 
     public String getCurrentPupitreStr() {
+        Log.d(LOG_TAG, "CR getCurrentPupitreStr: ");
 
         currentPupitreStr=mChoraleNetworkDataSource.getCurrentPupitreStr();
         return currentPupitreStr;
@@ -272,8 +284,12 @@ public class ChoraleRepository {
 
     public void setRecordSongInAppDb(Song song) {
 
-        mSongDao.insertSong(song);
-
+        mExecutors.diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                mSongDao.insertSong(song);
+            }
+        });
     }
 }
 

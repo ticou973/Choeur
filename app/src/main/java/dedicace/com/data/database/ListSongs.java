@@ -73,6 +73,15 @@ public class ListSongs {
         for (SourceSong sourceSong: sourceSongsAfterSync){
             List<Song> listBs = mSongDao.getSongsOnPhone(sourceSong.getTitre(),RecordSource.BANDE_SON);
 
+            Log.d(LOG_TAG, "CR getSongOnPhoneBS: listBS "+ listBs.size());
+
+            if(listBs!=null){
+                for (int i = 0; i <listBs.size() ; i++) {
+                    Log.d(LOG_TAG, "CR getSongOnPhoneBS: listBs songs "+listBs.get(i).getSourceSongTitre()+" "+listBs.get(i).getPupitre());
+                }
+
+            }
+
             if(listBs!=null&&listBs.size()!=0){
                 SongOnPhonesBS.add(listBs);
 

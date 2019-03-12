@@ -674,7 +674,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         String recordSongName = songToRecord.getSourceSongTitre();
         String recordNamePupitre = recordSongName+"_"+recordPupitre.toString();
 
-        Log.d(TAG, "SVH setRecord: c'est parti ! "+ recordPupitre);
+        Log.d(TAG, "SVH setRecord: c'est parti ! "+ recordPupitre+ " "+recordNamePupitre);
 
         Log.d(TAG, "SVH setRecord: "+mPlayerAdapter);
 

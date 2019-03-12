@@ -169,7 +169,7 @@ public class ChoraleNetWorkDataSource {
                             Log.d(LOG_TAG, "NDS onComplete: sourceSongs "+Thread.currentThread().getName());
                             if (task.isSuccessful()) {
                                 for (QueryDocumentSnapshot document : task.getResult()) {
-                                    Log.d(LOG_TAG, "NDS-exec deb Oncomplete"+document.getId() + " => " + document.getData().get("maj"));
+                                    Log.d(LOG_TAG, "NDS-exec deb Oncomplete "+document.getId() + " => " + document.getData().get("maj"));
                                     //todo voir comment écrire une seule ligne avec ToObject
 
                                     String titre, groupe, baseUrlOriginalSong, urlCloudBackground;
@@ -269,8 +269,10 @@ public class ChoraleNetWorkDataSource {
 
         for (SourceSong newSource : sourceSongs) {
             i = 0;
-            Log.d(LOG_TAG, "getListDownloadBgImages: "+ newSource.getUrlCloudBackground());
+            Log.d(LOG_TAG, "NDS getListDownloadBgImages: "+ newSource.getUrlCloudBackground());
+            //todo gérer les oldsourcessongs
             if(oldSourcesSongs.size()!=0) {
+                Log.d(LOG_TAG, "NDS getListDownloadBgImages: il y a des old sources songs");
                 for (SourceSong oldSource : oldSourcesSongs) {
 
                     if (oldSource.getTitre().equals(newSource.getTitre()) && !oldSource.getUrlCloudBackground().equals(newSource.getUrlCloudBackground())) { tempList.add(newSource); }
@@ -286,10 +288,10 @@ public class ChoraleNetWorkDataSource {
             }
         }
 
-        Log.d(LOG_TAG, "getListDownloadBgImages: "+ tempList.size());
+        Log.d(LOG_TAG, "NDS getListDownloadBgImages: "+ tempList.size());
 
         for(SourceSong sourceSong:tempList){
-            Log.d(LOG_TAG, "getListDownloadBgImages: "+sourceSong.getTitre()+" "+sourceSong.getSourceSongId());
+            Log.d(LOG_TAG, "NDS getListDownloadBgImages: "+sourceSong.getTitre()+" "+sourceSong.getSourceSongId());
         }
 
         return tempList;
@@ -328,7 +330,7 @@ public class ChoraleNetWorkDataSource {
     }
 
     public void downloadMp3() {
-        Log.d(LOG_TAG, "NDS downloadMp3: avant get"+listDownloadMp3);
+        Log.d(LOG_TAG, "NDS downloadMp3: avant get "+listDownloadMp3);
         listDownloadMp3 = getListDownloadMp3();
         Log.d(LOG_TAG, "NDS downloadMp3: après get"+listDownloadMp3);
         if (listDownloadMp3 != null) {
@@ -344,7 +346,7 @@ public class ChoraleNetWorkDataSource {
 
         final List<Song> tempList = new ArrayList<>();
 
-        //todo A retirer dès que préférences mises
+        //todo A retirer dès que préférences mises (pour l'instant on ne charge que TENOR et Alto)
         pupitreToUpload.add(pupitreUser);
         pupitreToUpload.add(Pupitre.ALTO);
 
@@ -385,7 +387,7 @@ public class ChoraleNetWorkDataSource {
                             tempList.add(newSong);
                         }
                     } else {
-                        Log.d(LOG_TAG, "getListDownloadMp3: test oldsong null");
+                        Log.d(LOG_TAG, "NDS getListDownloadMp3: test oldsong null");
                         tempList.add(newSong);
                     }
                 }
@@ -398,7 +400,7 @@ public class ChoraleNetWorkDataSource {
 
     private void uploadOnPhoneMp3(List<Song> listMp3) {
 
-        Log.d(LOG_TAG, "uploadOnPhoneMp3: fct upload "+ listMp3.size());
+        Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: fct upload "+ listMp3.size());
 
         for (Song song : listMp3) {
 
@@ -446,6 +448,7 @@ public class ChoraleNetWorkDataSource {
         this.oldSongs = oldSongs;
     }
 
+    //todo gérer les oldSongs
     public void oldSongs(){
         String url = "https://firebasestorage.googleapis.com/v0/b/dedicace-778c9.appspot.com/o/songs%2Ffichier_mp3%2Fzoom%20photo1.mp3?alt=media&token=b06bc1d0-5954-4146-ac82-567b8ebf9770";
         Song song = new  Song("Des hommes pareils",RecordSource.BANDE_SON,Pupitre.TENOR,null,url);

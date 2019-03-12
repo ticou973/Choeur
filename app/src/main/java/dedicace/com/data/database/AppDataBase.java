@@ -21,7 +21,7 @@ public abstract class AppDataBase extends RoomDatabase {
 
     public static AppDataBase getInstance(Context context) {
         Log.d(LOG_TAG, "Getting the database");
-        Log.d("coucou", "getInstance: database");
+        Log.d("coucou", "DB getInstance: database");
         if (sInstance == null) {
             synchronized (LOCK) {
                 sInstance = Room.databaseBuilder(context.getApplicationContext(),
@@ -29,7 +29,7 @@ public abstract class AppDataBase extends RoomDatabase {
                         //todo voir comment supprimer le fallback
                         .fallbackToDestructiveMigration().build();
                 Log.d(LOG_TAG, "Made new database");
-                Log.d("coucou", "getInstance: new database");
+                Log.d("coucou", "DB getInstance: new database");
             }
         }
         return sInstance;

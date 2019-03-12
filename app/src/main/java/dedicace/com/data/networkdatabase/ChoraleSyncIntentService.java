@@ -15,10 +15,10 @@ public class ChoraleSyncIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.d(SongsAdapter.TAG, "Intent service started "+Thread.currentThread().getName());
+        Log.d(SongsAdapter.TAG, "CSIS Intent service started "+Thread.currentThread().getName());
         ChoraleNetWorkDataSource networkDataSource = InjectorUtils.provideNetworkDataSource(this.getApplicationContext());
 
         networkDataSource.fetchSongs();
-        Log.d("coucou", "onHandleIntent: fin du travail "+Thread.currentThread().getName());
+        Log.d("coucou", "CSIS onHandleIntent: fin du travail "+Thread.currentThread().getName());
     }
 }

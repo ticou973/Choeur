@@ -113,9 +113,37 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             recyclerView.setHasFixedSize(true);
             recyclerView.setAdapter(songsAdapter);
 
+            Log.d(TAG, "" +
+                    "onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
+            //todo voir si mettre la permission ici et voir la réponse négative (griser le record) et mettre dans le menu option de redemander
+            //OnRequestPermission();
+
             //initData();
 
             mExecutors = AppExecutors.getInstance();
+
+            //todo à retirer dès que cela marche (test)
+            mExecutors.diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    AppDataBase database = AppDataBase.getInstance(getApplicationContext());
+                    //database.songsDao().deleteAll();
+
+                    List<Song> listBs = database.songsDao().getSongsOnPhone("Des hommes pareils",RecordSource.BANDE_SON);
+                    List<SourceSong> listSS = database.sourceSongDao().getAllSources();
+                    Log.d(TAG, "CR synchronisationLocalDataBase: test Database Room "+ listBs.size()+" "+ listSS.size());
+                    if(listBs!=null){
+                        for (int i = 0; i <listBs.size() ; i++) {
+                            Log.d(TAG, "CR getSongOnPhoneBS: listBs songs dans synchronisation "+listBs.get(i).getSourceSongTitre()+" "+listBs.get(i).getPupitre());
+                        }
+                    }
+                    if(listSS!=null){
+                        for (int i = 0; i <listSS.size() ; i++) {
+                            Log.d(TAG, "CR getSongOnPhoneBS: listBs songs dans synchronisation "+listSS.get(i).getTitre());
+                        }
+                    }
+                }
+            });
 
             mfactory = InjectorUtils.provideViewModelFactory(this.getApplicationContext());
             Log.d("coucou", "MA onCreate: fin de la factory");
@@ -140,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
                     currentThread = mViewModel.getCurrentThread();
 
-                    if (sourceSongs != null && sourceSongs.size() != 0) {
+                    if (sourceSongs != null && sourceSongs.size() != 0&&currentThread!=null) {
 
                         Log.d(TAG, "MA onChanged: currentThread "+currentThread);
                         try {
@@ -208,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             Log.d(TAG, "MA getSongElements getSongOnPhoneLiveA: " + SongOnPhonesLive);
 
         }else{
-            Log.d(TAG, "getListSongs: est null "+listSongs);
+            Log.d(TAG, "MA getListSongs: est null "+listSongs);
         }
     }
 
@@ -594,7 +622,9 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
      */
     @Override
     public void OnRequestPermission() {
+        Log.d(TAG, "MA OnRequestPermission: entrée");
         if(!checkPermissionFromDevice()){
+            Log.d(TAG, "MA OnRequestPermission: request permission");
             requestPermission();
         }
     }
@@ -603,12 +633,14 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.RECORD_AUDIO},
                 REQUEST_PERMISSION_CODE);
+        Log.d(TAG, "MA requestPermission: ");
     }
 
     private boolean checkPermissionFromDevice() {
         int write_external_storage_result = ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE);
         int record_audio_result = ContextCompat.checkSelfPermission(this,Manifest.permission.RECORD_AUDIO);
 
+        Log.d(TAG, "MA checkPermissionFromDevice: "+(write_external_storage_result==PackageManager.PERMISSION_GRANTED &&record_audio_result==PackageManager.PERMISSION_GRANTED));
         return write_external_storage_result==PackageManager.PERMISSION_GRANTED &&record_audio_result==PackageManager.PERMISSION_GRANTED;
 
     }
