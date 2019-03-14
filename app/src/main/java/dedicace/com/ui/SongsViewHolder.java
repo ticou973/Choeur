@@ -132,8 +132,9 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         });
 
         //créé le player pour chaque viewHolder
+        //todo supprimer pour voir l'intérêt de le créer à ce niveau ? A remettre ?
         isFirstTime();
-        Log.d(TAG, "SVH SongsViewHolder: "+ mPlayerAdapter);
+       // Log.d(TAG, "SVH SongsViewHolder: "+ mPlayerAdapter);
 
         animation = (AnimationDrawable) ContextCompat.getDrawable((Context) mlistItemClickedListener, R.drawable.ic_equalizer_white_36dp);
        //todo vérifier la place d'animation start à cet endroit
@@ -161,6 +162,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             initializePlaybackController();
             //Gestion de la seekBar
             initializeSeekbar();
+            isFirstTime=false;
         }
     }
 
@@ -579,6 +581,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             initializeSeekbar();
             //PlayBackController
             initializePlaybackController();
+        }
 
             if (songToPlay != null) {
                 if(songToPlay.getPupitre()!=pupitre||songToPlay.getRecordSource()!=source){
@@ -597,7 +600,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             } else {
                 setTotalTime(0);
             }
-        }
+
     }
 
     //Méthodes pour les boutons de controle du mediaplayer et mediarecorder
@@ -719,7 +722,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     public void setChronometer(long time){
         //todo vérifier car cela me semble compliqué pour mettre à 0
-        Log.d(TAG, "SVH setChronometer: "+time+chronometer.getBase());
+        Log.d(TAG, "SVH setChronometer: "+time+" "+chronometer.getBase());
         long t = time - chronometer.getBase();
         chronometer.setText(DateFormat.format("m:ss", time));
 

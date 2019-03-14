@@ -68,7 +68,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_songs, viewGroup, false);
         Log.d(TAG, "SA onCreateViewHolder: ");
 
-        //todo voir si on ne peut pa déplacer le listener dans viewHolder
+        //todo voir si on ne peut pas déplacer le listener dans viewHolder
         SongsViewHolder songsViewHolder = new SongsViewHolder(view,mlistemClickedListener,context);
         return songsViewHolder;
     }
@@ -161,7 +161,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
 
 
     public void swapSongs(final List<SourceSong> sources, List<List<RecordSource>> recordSources, List<Song> songToPlays, List<List<Song>> songOnPhones, List<List<Song>> songOnClouds) {
-       /* Log.d("coucou", "swapSongs: SongAdapter \n"+sources+"\n"+recordSources+"\n"+ songToPlays+"\n"+ songOnPhones+"\n"+ songOnClouds);
+        Log.d("coucou", "swapSongs: SongAdapter \n"+sources+"\n"+recordSources+"\n"+ songToPlays+"\n"+ songOnPhones+"\n"+ songOnClouds);
         if(songToPlays.get(0)!=null){
             Log.d(TAG, "SA swapSongs: songToplays 1 "+songToPlays.get(0).getSourceSongTitre()+" "+songToPlays.get(0).getPupitre());
         }
@@ -183,7 +183,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         }
         if(songOnClouds.get(1)!=null){
             Log.d(TAG, "SA swapSongs: songOnClouds 3 "+songOnClouds.get(1).get(1).getSourceSongTitre()+" "+songOnClouds.get(1).get(1).getPupitre());
-        }*/
+        }
         sourceSongs=sources;
         this.RecordSources=recordSources;
         this.songToPlays=songToPlays;

@@ -68,7 +68,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         Log.d(SongsAdapter.TAG, "MPH initializeMediaPlayer: avant création "+mMediaPlayer);
         if (mMediaPlayer == null) {
             mMediaPlayer = new MediaPlayer();
-            Log.d(SongsAdapter.TAG, "MPH initializeMediaPlayer: après création"+mMediaPlayer);
+            Log.d(SongsAdapter.TAG, "MPH initializeMediaPlayer: après création "+mMediaPlayer);
 
             mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
@@ -101,8 +101,6 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         mResourceStr =resStrToPlay;
         initializeMediaPlayer();
 
-
-
         try {
             mMediaPlayer.setDataSource(resStrToPlay);
         }catch(Exception e){
@@ -111,19 +109,20 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         Log.d("coucou", "MPH prepareMediaPlayer: SetData done ! ");
 
 
-        mMediaPlayer.setOnPreparedListener(mediaPlayer -> {
-            Log.d("coucou", "MPH prepareMediaPlayer: On prepared juste avant la duration");
-            duration = mediaPlayer.getDuration();
-
-        });
-
-        Log.d("coucou", "prepareMediaPlayer: avant prepare ! ");
+        Log.d("coucou", "MPH prepareMediaPlayer: avant prepare ! ");
 
         try {
             mMediaPlayer.prepare();
         }catch(Exception e){
             e.printStackTrace();
         }
+
+       /* mMediaPlayer.setOnPreparedListener(mediaPlayer -> {
+            Log.d("coucou", "MPH prepareMediaPlayer: On prepared juste avant la duration");
+            duration = mediaPlayer.getDuration();
+
+        });*/
+
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mMediaPlayer.setScreenOnWhilePlaying(true);
 
@@ -286,7 +285,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
 
     @Override
     public void initializeProgressCallback() {
-       // duration = mMediaPlayer.getDuration();
+        duration = mMediaPlayer.getDuration();
 
         Log.d(SongsAdapter.TAG, "MPH initializeProgressCallback: "+ duration);
         if (mPlaybackInfoListener != null) {

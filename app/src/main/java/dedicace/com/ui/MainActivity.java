@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -101,6 +102,9 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         Log.d("coucou", "MA onCreate: "+Thread.currentThread().getName());
 
         //Firebase
+        //todo voir l'intérêt de cette première ligne
+        FirebaseApp.initializeApp(this);
+
         mAuth = FirebaseAuth.getInstance();
 
         if(mAuth.getCurrentUser() != null) {
@@ -116,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             Log.d(TAG, "" +
                     "onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
             //todo voir si mettre la permission ici et voir la réponse négative (griser le record) et mettre dans le menu option de redemander
-            //OnRequestPermission();
+            OnRequestPermission();
 
             //initData();
 
@@ -128,18 +132,19 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 public void run() {
                     AppDataBase database = AppDataBase.getInstance(getApplicationContext());
                     //database.songsDao().deleteAll();
+                    //database.sourceSongDao().deleteAll();
 
                     List<Song> listBs = database.songsDao().getSongsOnPhone("Des hommes pareils",RecordSource.BANDE_SON);
                     List<SourceSong> listSS = database.sourceSongDao().getAllSources();
                     Log.d(TAG, "CR synchronisationLocalDataBase: test Database Room "+ listBs.size()+" "+ listSS.size());
                     if(listBs!=null){
                         for (int i = 0; i <listBs.size() ; i++) {
-                            Log.d(TAG, "CR getSongOnPhoneBS: listBs songs dans synchronisation "+listBs.get(i).getSourceSongTitre()+" "+listBs.get(i).getPupitre());
+                            Log.d(TAG, "CR getSongOnPhoneBS: listBs songs dans synchronisation "+listBs.get(i).getSourceSongTitre()+" "+listBs.get(i).getPupitre()+" "+listBs.get(i).getSongId()+ " "+listBs.get(i).getUpdatePhone()+" "+listBs.get(i).getUpdatePhoneMp3());
                         }
                     }
                     if(listSS!=null){
                         for (int i = 0; i <listSS.size() ; i++) {
-                            Log.d(TAG, "CR getSongOnPhoneBS: listBs songs dans synchronisation "+listSS.get(i).getTitre());
+                            Log.d(TAG, "CR getSongOnPhoneBS: listSS Sourcesongs dans synchronisation "+listSS.get(i).getTitre()+ " "+listSS.get(i).getUpdatePhone());
                         }
                     }
                 }
@@ -343,10 +348,20 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         return mViewModel.getCurrentPupitreStr();
     };
 
-    //todo mettre des conditions pour rester logger entre 2 utilisations (à conserver ?) dans OnDestroy ?
+    //todo mettre des conditions pour rester logger entre 2 utilisations (à conserver ?) dans OnDestroy ? On Stop ?
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if(mAuth!=null) {
+            Log.d(TAG, "onStop: MA logout");
+            mAuth.signOut();
+            mAuth = null;
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
         if(mAuth!=null) {
             Log.d(TAG, "onStop: MA logout");
             mAuth.signOut();

@@ -72,7 +72,7 @@ public class ChoraleRepository {
             //todo vérifier utilité de sourceSongs1
             sourceSongs1=sourceSongs;
 
-            Log.d(LOG_TAG, "CR Repository: observers Alerte cela bouge !"+sourceSongs1+Thread.currentThread().getName());
+            Log.d(LOG_TAG, "CR Repository: observers Alerte cela bouge ! "+sourceSongs1+Thread.currentThread().getName());
             songs = choraleNetworkDataSource.getSongs();
             Log.d(LOG_TAG, "CR ChoraleRepository LiveData: songs " +songs.size());
 
