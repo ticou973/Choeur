@@ -315,7 +315,7 @@ public class ChoraleNetWorkDataSource {
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                             // Successfully downloaded data to local file
                             //todo modifier le texte pour l'utilisateur
-                            Toast.makeText(mContext, "Vos images de fond sont enregistrées sur votre téléphone", Toast.LENGTH_LONG).show();
+                           // Toast.makeText(mContext, "Vos images de fond sont enregistrées sur votre téléphone", Toast.LENGTH_LONG).show();
                             // ...
                         }
                     }).addOnFailureListener(new OnFailureListener() {
@@ -422,7 +422,7 @@ public class ChoraleNetWorkDataSource {
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                             // Successfully downloaded data to local file
 
-                            Toast.makeText(mContext, "Vos chants sont enregistrés sur votre téléphone", Toast.LENGTH_LONG).show();
+                           // Toast.makeText(mContext, "Vos chants sont enregistrés sur votre téléphone", Toast.LENGTH_LONG).show();
 
                             // ...
                         }

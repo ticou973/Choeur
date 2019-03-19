@@ -148,9 +148,6 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         totalTime.setText(DateFormat.format("m:ss",0));
     }
 
-
-
-
     /**Méthode d'initialisation du MediaPlayer et
      * de la Seekbar
      */
@@ -268,6 +265,10 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             pupitre = songToPlay.getPupitre();
             setCurrentSongActive(pupitre);
         }
+    }
+
+    public void setButtonNonActivable(){
+        setButtonActivable(false, bsBtn,liveBtn,tuttiBtn,bassBtn,tenorBtn,altoBtn,sopranoBtn);
     }
 
     public void setCurrentSongActive(Pupitre pupitre){
@@ -786,6 +787,10 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
      */
 
     public void setTitre(String titre){ this.titre.setText(titre); }
+
+    public void setFirstTime(boolean firstTime) {
+        isFirstTime = firstTime;
+    }
 
     public void setGroupe(String groupe){ this.groupe.setText(groupe); }
 

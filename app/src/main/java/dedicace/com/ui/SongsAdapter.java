@@ -116,16 +116,26 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         //initalisation des songs de la sourceSongs
         if(recordSource!=RecordSource.NA) {
             initDataSongs(songsViewHolder, sourceSong,position);
+        }else{
+            //Attention la regéneresence des recyclerview à 10 vues par conséquents on réutilise les instances précédentes.
+
+            Log.d(TAG, "SA initDataSourceSong: null SongToPlays");
+            songsViewHolder.setSongToPlay(null);
+            songsViewHolder.setButtonNonActivable();
+            songsViewHolder.setFirstTime(true);
+            songsViewHolder.isFirstTime();
         }
     }
 
     private void initRecordSongs(SongsViewHolder songsViewHolder,SourceSong sourceSong, int position) {
         Log.d(TAG, "SA initRecordSongs: "+position);
         recordSources=RecordSources.get(position);
+        Log.d(TAG, "SA initRecordSongs: recordSources "+recordSources);
         songsViewHolder.setRecordSource(recordSources);
 
         //dans le sens à recordToPlay
         recordSource=songsViewHolder.getSource();
+        Log.d(TAG, "initRecordSongs: recordSource "+recordSource);
     }
 
     private void initDataSongs(SongsViewHolder songsViewHolder,SourceSong sourceSong,int position) {
@@ -156,6 +166,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         if(songsPhone.length!=0) {
             songToPlay = songToPlays.get(position);
             songsViewHolder.setSongToPlay(songToPlay);
+
         }
     }
 

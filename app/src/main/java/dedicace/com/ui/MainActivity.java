@@ -547,7 +547,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             }
         }
 
-        Log.d(TAG, "MA OnPlaySong: "+ songToPlay.getRecordSource()+" "+songToPlay.getPupitre()+" "+songToPlay.getSourceSongTitre());
+//        Log.d(TAG, "MA OnPlaySong: "+ songToPlay.getRecordSource()+" "+songToPlay.getPupitre()+" "+songToPlay.getSourceSongTitre());
 
         return songToPlay;
     }
