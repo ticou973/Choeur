@@ -13,6 +13,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/parametres"
+        android:title="@string/parametres"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/log_out"
         android:title="@string/se_déconnecter"
         app:showAsAction="never" />

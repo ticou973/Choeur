@@ -92,8 +92,6 @@ public class ChoraleNetWorkDataSource {
     private List<Object> listElements = new ArrayList<>();
     private List<Song> listSongsOnPhone= new ArrayList<>();
 
-
-
     //DB
     private FirebaseFirestore db;
     private FirebaseStorage mStorage;
@@ -101,6 +99,10 @@ public class ChoraleNetWorkDataSource {
     private String current_user_id;
     private Pupitre pupitreUser;
     private FirebaseAuth mAuth;
+
+    private String mCurrentAuthRole;
+    private Date majDateCloudDataBase;
+    private String idChorale;
 
     //Local Storage
     File localFileMp3;
@@ -122,6 +124,42 @@ public class ChoraleNetWorkDataSource {
         current_user_id=mAuth.getCurrentUser().getUid();
         Log.d(LOG_TAG, "NDS ChoraleNetWorkDataSource: constructor "+ current_user_id);
         workerThread = new WorkerThread();
+
+        /*
+        db.collection("users").document(current_user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                Log.d(LOG_TAG, "NDS getCurrentIdChorale onComplete : "+Thread.currentThread().getName());
+                if(task.isSuccessful()){
+
+                    //todo mettre en local
+                    idChorale= (String) task.getResult().get("id_chorale");
+
+                    Log.d(LOG_TAG, "NDS getIdChorale "+idChorale);
+
+
+                }else{
+                    Log.d(LOG_TAG, "NDS onComplete: erreur de récupération du IdChorale");
+                }
+            }
+        });
+
+        db.collection("chorale").document(idChorale).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                Log.d(LOG_TAG, "NDS getLastmaj "+Thread.currentThread().getName());
+                if(task.isSuccessful()){
+
+                    majDateCloudDataBase =(Date) task.getResult().get("maj");
+
+                    Log.d(LOG_TAG, "NDS getLastmaj "+majDateCloudDataBase);
+
+                }else{
+                    Log.d(LOG_TAG, "NDS onComplete: erreur de récupération du majDB");
+                }
+            }
+        });*/
     }
 
     /**
@@ -147,6 +185,10 @@ public class ChoraleNetWorkDataSource {
 
     public List<Song> getSongs() {
         return songs;
+    }
+
+    public Date getMajDateCloudDataBase() {
+        return majDateCloudDataBase;
     }
 
     public void startFetchSongsService() {
@@ -349,6 +391,7 @@ public class ChoraleNetWorkDataSource {
         //todo A retirer dès que préférences mises (pour l'instant on ne charge que TENOR et Alto)
         pupitreToUpload.add(pupitreUser);
         pupitreToUpload.add(Pupitre.ALTO);
+        pupitreToUpload.add(Pupitre.TUTTI);
 
         //todo ajouter les oldsongs ici toujours égales à 0
 
@@ -465,10 +508,14 @@ public class ChoraleNetWorkDataSource {
                 Log.d(LOG_TAG, "NDS getCurrentPupitre onComplete: "+Thread.currentThread().getName());
                 if(task.isSuccessful()){
 
+                    //todo voir comment mettre les rôles en DB local
                     currentPupitreStr = (String) task.getResult().get("pupitre");
                     pupitreUser=SongsUtilities.converttoPupitre(currentPupitreStr);
 
+
                     Log.d(LOG_TAG, "NDS getCurrentPupitre "+currentPupitreStr);
+
+
 
                 }else{
                     Log.d(LOG_TAG, "NDS onComplete: erreur de récupération du pupitre");
@@ -479,6 +526,29 @@ public class ChoraleNetWorkDataSource {
         return currentPupitreStr;
     }
 
+    public String getmCurrentAuthRole() {
+
+        db.collection("users").document(current_user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                Log.d(LOG_TAG, "NDS getCurrentPupitre onComplete: "+Thread.currentThread().getName());
+                if(task.isSuccessful()){
+
+                    //todo voir comment mettre les rôles en DB local
+
+                    mCurrentAuthRole= (String) task.getResult().get("role");
+
+                    Log.d(LOG_TAG, "NDS getCurrentAuthRole "+mCurrentAuthRole);
+
+
+                }else{
+                    Log.d(LOG_TAG, "NDS onComplete: erreur de récupération du role");
+                }
+            }
+        });
+
+        return mCurrentAuthRole;
+    }
 }
 
 

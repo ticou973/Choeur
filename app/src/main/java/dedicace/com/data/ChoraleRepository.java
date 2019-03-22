@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import dedicace.com.AppExecutors;
@@ -54,6 +55,8 @@ public class ChoraleRepository {
     private String currentPupitreStr;
 
     private ListSongs listSongs;
+
+    private String mCurrentAuthRole;
 
 
 
@@ -224,7 +227,10 @@ public class ChoraleRepository {
 
     private boolean isFetchNeeded() {
         //todo à modifier éventuellement sur préférences veut - on regarder si on veut télécharger automatique ou non (à la demande) ou si la dernière date de maj à changer
-        Log.d(LOG_TAG, "CR isFetchNeeded: condition ");
+        Date majCloudDB, majLocalDB;
+        majCloudDB = mChoraleNetworkDataSource.getMajDateCloudDataBase();
+        Log.d(LOG_TAG, "CR isFetchNeeded: condition "+majCloudDB);
+
         return true;
     }
 
@@ -247,6 +253,14 @@ public class ChoraleRepository {
 
         currentPupitreStr=mChoraleNetworkDataSource.getCurrentPupitreStr();
         return currentPupitreStr;
+    }
+
+    public String getCurrentAuthRole(){
+        Log.d(LOG_TAG, "getCurrentAuthRole: ");
+
+        mCurrentAuthRole=mChoraleNetworkDataSource.getmCurrentAuthRole();
+        return mCurrentAuthRole;
+
     }
 
     public List<Object> getElements() {

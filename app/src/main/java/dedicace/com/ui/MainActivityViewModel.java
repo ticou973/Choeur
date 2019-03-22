@@ -9,7 +9,6 @@ import java.util.List;
 
 import dedicace.com.data.ChoraleRepository;
 import dedicace.com.data.database.ListSongs;
-import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
@@ -27,6 +26,8 @@ public class MainActivityViewModel extends ViewModel {
     private String currentPupitreStr;
     private List<Song> songs;
     private ListSongs listSongs;
+
+    private String mCurrentAuthRole;
 
     public MainActivityViewModel(ChoraleRepository repository) {
         Log.d(SongsAdapter.TAG, "MainActivityViewModel: avant "+choeurSourceSongs);
@@ -108,6 +109,15 @@ public class MainActivityViewModel extends ViewModel {
 
     public void setRecordSongInAppDb(Song song) {
         mRepository.setRecordSongInAppDb(song);
+    }
+
+
+    public String getCurrentAuthRole(){
+        Log.d("coucou", "getCurrentAuthRole: ");
+
+        mCurrentAuthRole=mRepository.getCurrentAuthRole();
+        return mCurrentAuthRole;
+
     }
 
 

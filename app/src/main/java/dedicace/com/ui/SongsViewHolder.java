@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import dedicace.com.AppExecutors;
 import dedicace.com.R;
 import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
@@ -42,7 +41,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     //Element des songs
     private Pupitre pupitre=Pupitre.NA;
-    private RecordSource source=RecordSource.NA, secondSource;
+    private RecordSource source=RecordSource.NA;
     private List<RecordSource> recordSources= new ArrayList<>();
     private SourceSong sourceSong = new SourceSong();
     private Song songToPlay;
@@ -57,7 +56,6 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     //Utils
     private final static String TAG = "coucou";
     private boolean isFirstTime=true;
-    private AppExecutors mExecutors;
     private SongsAdapter.ListemClickedListener mlistItemClickedListener;
     private boolean mUserIsSeeking = false;
     private boolean isRunning=false;
@@ -132,7 +130,6 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         });
 
         //créé le player pour chaque viewHolder
-        //todo supprimer pour voir l'intérêt de le créer à ce niveau ? A remettre ?
         isFirstTime();
        // Log.d(TAG, "SVH SongsViewHolder: "+ mPlayerAdapter);
 
@@ -141,9 +138,6 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         animation.start();
 
         initPupitreSourceButton();
-
-        //todo à enlever ?
-        mExecutors = AppExecutors.getInstance();
 
         totalTime.setText(DateFormat.format("m:ss",0));
     }
@@ -220,10 +214,12 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         pupitreSourceButton.add(liveBtn);
     }
 
+    //todo 1.
     public void setSourceSong(SourceSong sourceSong) {
         this.sourceSong = sourceSong;
     }
 
+    //todo 2.
     public void setRecordSource(List<RecordSource> recordSources) {
         this.recordSources = recordSources;
 
@@ -244,14 +240,18 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         }
     }
 
-    private void setCurrentSourceActive(RecordSource source) {
+    public void setSource(RecordSource recordSource){
+        source=recordSource;
+    }
+
+    public void setCurrentSourceActive(RecordSource source) {
         if(source!=RecordSource.NA) {
             int recordSourceIndex = pupitreSourceButton.indexOf(source);
             setColorButton(true, (Button) pupitreSourceButton.get(recordSourceIndex + 1));
         }
     }
 
-    private void setSourceActivable(RecordSource source) {
+    public void setSourceActivable(RecordSource source) {
         int recordSourceIndex = pupitreSourceButton.indexOf(source);
         setColorButton(false,(Button) pupitreSourceButton.get(recordSourceIndex+1));
     }
@@ -278,24 +278,13 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     public void setSongRecorded(Song...recordedLocalSongs){
         for (Song song:recordedLocalSongs) {
-            //RecordSource recordSourceRecorded = song.getRecordSource();
             if(song!=null) {
                 Pupitre pupitrerecorded = song.getPupitre();
 
-            /*if(recordSourceRecorded!=source ) {
-                setSourcesOnPhoneVisible(recordSourceRecorded);
-            }*/
                 if (pupitrerecorded != pupitre) {
                     setPupitresLoadedOnPhoneVisible(pupitrerecorded);
                 }
             }
-        }
-    }
-
-    public void setSourcesOnPhoneVisible(RecordSource... recordSources){
-        for (RecordSource recordSource:recordSources) {
-            int recordSourceIndex = pupitreSourceButton.indexOf(recordSource);
-            setColorButton(false,(Button) pupitreSourceButton.get(recordSourceIndex+1));
         }
     }
 
@@ -308,23 +297,13 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     public void setSongCloudRecorded(Song... recordedCloudSongs){
         for (Song song:recordedCloudSongs) {
-            RecordSource recordSourceRecorded = song.getRecordSource();
             Pupitre pupitrerecorded = song.getPupitre();
-            /*if(recordSourceRecorded!=source ) {
-                setSourcesOnCloudVisible(recordSourceRecorded);
-            }*/
+
             if(pupitrerecorded!=pupitre){
                 setPupitresLoadedOnCloudVisible(pupitrerecorded);            }
         }
     }
 
-    public void setSourcesOnCloudVisible(RecordSource... recordSources){
-        for (RecordSource recordSource:recordSources) {
-            int recordSourceIndex = pupitreSourceButton.indexOf(recordSource);
-            setGreyButton(true,(Button) pupitreSourceButton.get(recordSourceIndex+1));
-
-        }
-    }
 
     public void setPupitresLoadedOnCloudVisible(Pupitre... pupitres){
         for (Pupitre pupitre: pupitres) {
@@ -583,7 +562,6 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             //PlayBackController
             initializePlaybackController();
         }
-
             if (songToPlay != null) {
                 if(songToPlay.getPupitre()!=pupitre||songToPlay.getRecordSource()!=source){
                     Log.d(TAG, "SVH setResourceToMediaPlayer: "+songToPlay.getSourceSongTitre()+songToPlay.getPupitre());
@@ -812,6 +790,10 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     public RecordSource getSource() {
         return source;
+    }
+
+    public ImageView getPlaySongs() {
+        return playSongs;
     }
 
     /** Interface pour communiquer avec la classe MediaPLayer

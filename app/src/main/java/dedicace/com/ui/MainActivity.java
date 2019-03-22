@@ -5,8 +5,10 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -80,6 +82,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private Pupitre currentPupitre;
     private String currentPupitreStr;
 
+
+
     //ViewModel
     private MainActivityViewModel mViewModel;
     private  MainActivityViewModelFactory mfactory;
@@ -88,10 +92,14 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private FirebaseAuth mAuth;
     public static String current_user_id;
 
+    private String mCurrentAuthRole;
+
+
     //Utils
     private OnPositiveClickListener mPositiveClickListener;
     public static AppDataBase choeurDataBase;
     private AppExecutors mExecutors;
+    private SharedPreferences sharedPreferences;
 
 
     //todo vérifier si extras dans des intents avec HasExtras
@@ -119,6 +127,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
             Log.d(TAG, "" +
                     "onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
+
+            setUpSharedPreferences();
             //todo voir si mettre la permission ici et voir la réponse négative (griser le record) et mettre dans le menu option de redemander
             OnRequestPermission();
 
@@ -173,6 +183,9 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
                     currentThread = mViewModel.getCurrentThread();
 
+                    mCurrentAuthRole=mViewModel.getCurrentAuthRole();
+                    Log.d(TAG, "onChanged: AuthRole "+mCurrentAuthRole);
+
                     if (sourceSongs != null && sourceSongs.size() != 0&&currentThread!=null) {
 
                         Log.d(TAG, "MA onChanged: currentThread "+currentThread);
@@ -208,6 +221,12 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 }
             });
         }
+    }
+
+    private void setUpSharedPreferences() {
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
     }
 
     private void getListSongs() {
@@ -346,22 +365,18 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private String getCurrentPupitreStr() {
 
         return mViewModel.getCurrentPupitreStr();
-    };
+    }
+
+    private String getCurrentAuthRole() {
+
+        return mViewModel.getCurrentPupitreStr();
+    }
+
 
     //todo mettre des conditions pour rester logger entre 2 utilisations (à conserver ?) dans OnDestroy ? On Stop ?
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mAuth!=null) {
-            Log.d(TAG, "onStop: MA logout");
-            mAuth.signOut();
-            mAuth = null;
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
         if(mAuth!=null) {
             Log.d(TAG, "onStop: MA logout");
             mAuth.signOut();
@@ -436,12 +451,31 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 deleteLastRecordedSong();
                 break;
 
+            case R.id.parametres:
+
+                //todo faire un if statement à la place du case
+                if(mAuth!=null&&mCurrentAuthRole.equals("Super Admin")){
+                    Toast.makeText(this, "Vous êtes "+mCurrentAuthRole, Toast.LENGTH_SHORT).show();
+                    //todo faire le menu spécial à l'intérieur pour plus tard pour ajouter les songs...
+                    launchSettingsActivity();
+
+                }else{
+
+                    launchSettingsActivity();
+                }
+                break;
+
             case R.id.log_out:
                 logOut();
                 break;
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void launchSettingsActivity() {
+        Intent  startSettingsActivity = new Intent(this, SettingsActivity.class);
+        startActivity(startSettingsActivity);
     }
 
     private void deleteLastRecordedSong() {

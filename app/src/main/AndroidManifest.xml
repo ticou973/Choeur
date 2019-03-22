@@ -16,13 +16,14 @@
         <activity
             android:name=".ui.MainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.LoginActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppThemeLogin"></activity>
+            android:theme="@style/AppThemeLogin" />
         <activity
             android:name=".ui.SplashActivity"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeLogin">
             <intent-filter>
@@ -36,6 +37,14 @@
             android:name=".data.networkdatabase.ChoraleSyncIntentService"
             android:exported="false" />
 
+        <activity android:name=".ui.SettingsActivity"
+            android:label="@string/preferences"
+            android:theme="@style/AppTheme"
+            android:parentActivityName=".ui.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.MainActivity"/>
+        </activity>
     </application>
 
 </manifest>

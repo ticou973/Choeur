@@ -117,11 +117,13 @@ public final class MediaPlayerHolder implements PlayerAdapter {
             e.printStackTrace();
         }
 
-       /* mMediaPlayer.setOnPreparedListener(mediaPlayer -> {
+        //todo stocker la durée de la chanson pour avoir un affichage immédiat
+        mMediaPlayer.setOnPreparedListener(mediaPlayer -> {
             Log.d("coucou", "MPH prepareMediaPlayer: On prepared juste avant la duration");
-            duration = mediaPlayer.getDuration();
+            //duration = mediaPlayer.getDuration();
 
-        });*/
+            initializeProgressCallback();
+        });
 
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mMediaPlayer.setScreenOnWhilePlaying(true);
@@ -132,7 +134,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
 
         //todo penser à créer les dossiers pour les songs
 
-        initializeProgressCallback();
+        //initializeProgressCallback();
 
     }
 
@@ -285,6 +287,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
 
     @Override
     public void initializeProgressCallback() {
+
         duration = mMediaPlayer.getDuration();
 
         Log.d(SongsAdapter.TAG, "MPH initializeProgressCallback: "+ duration);

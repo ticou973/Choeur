@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="pref_pupitre_labels">
+        <item>@string/tutti_label</item>
+        <item>@string/bass_label</item>
+        <item>@string/tenor_label</item>
+        <item>@string/alto_label</item>
+        <item>@string/soprano_label</item>
+    </array>
+
+    <array name="pref_pupitre_values">
+        <item>@string/tutti_value</item>
+        <item>@string/bass_value</item>
+        <item>@string/tenor_value</item>
+        <item>@string/alto_value</item>
+        <item>@string/soprano_value</item>
+    </array>
+</resources>

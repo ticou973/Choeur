@@ -79,21 +79,10 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
 
         Log.d(TAG, "SA onBindViewHolder: ");
         //Gestion des datas de la SourceSong
+        init(songsViewHolder);
         initDataSourceSong(songsViewHolder, position);
         songsViewHolder.setResourceToMediaPlayer();
     }
-
-    @Override
-    public int getItemCount() {
-        if(null==sourceSongs) {
-           // Log.d("coucou", "getItemCount: 0");
-            return 0;
-        }else{
-           // Log.d("coucou", "getItemCount: "+sourceSongs.size());
-        }
-        return sourceSongs.size();
-    }
-
 
     //Autres méthodes
     private void initDataSourceSong(SongsViewHolder songsViewHolder, int position) {
@@ -105,40 +94,49 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
                 .load(sourceSongs.get(position).getBackground())
                 .centerCrop() // scale to fill the ImageView and crop any extra
                 .into(songsViewHolder.getImageSong());
-        //todo voir si mettre 0 ou SystemClock.elapsedRealtime()
+
         songsViewHolder.setChronometer(0);
         sourceSong = sourceSongs.get(position);
 
         Log.d(TAG, "SA initDataSourceSong: "+sourceSong.getTitre()+" "+position);
+
         songsViewHolder.setSourceSong(sourceSong);
-        initRecordSongs(songsViewHolder,sourceSong,position);
+
+
+        initRecordSongs(songsViewHolder,position);
 
         //initalisation des songs de la sourceSongs
         if(recordSource!=RecordSource.NA) {
-            initDataSongs(songsViewHolder, sourceSong,position);
-        }else{
-            //Attention la regéneresence des recyclerview à 10 vues par conséquents on réutilise les instances précédentes.
 
+            initDataSongs(songsViewHolder,position);
+        }
+        else{
+            //Attention la regéneresence des recyclerview à 10 vues par conséquent on réutilise les instances précédentes.
             Log.d(TAG, "SA initDataSourceSong: null SongToPlays");
-            songsViewHolder.setSongToPlay(null);
-            songsViewHolder.setButtonNonActivable();
-            songsViewHolder.setFirstTime(true);
-            songsViewHolder.isFirstTime();
+
         }
     }
 
-    private void initRecordSongs(SongsViewHolder songsViewHolder,SourceSong sourceSong, int position) {
+    private void init(SongsViewHolder songsViewHolder){
+        songsViewHolder.getPlaySongs().setImageResource(R.drawable.ic_play_orange);
+        songsViewHolder.setSongToPlay(null);
+        songsViewHolder.setButtonNonActivable();
+        songsViewHolder.setFirstTime(true);
+        songsViewHolder.isFirstTime();
+    }
+
+    private void initRecordSongs(SongsViewHolder songsViewHolder, int position) {
         Log.d(TAG, "SA initRecordSongs: "+position);
         recordSources=RecordSources.get(position);
         Log.d(TAG, "SA initRecordSongs: recordSources "+recordSources);
-        songsViewHolder.setRecordSource(recordSources);
 
+        songsViewHolder.setRecordSource(recordSources);
         //dans le sens à recordToPlay
         recordSource=songsViewHolder.getSource();
         Log.d(TAG, "initRecordSongs: recordSource "+recordSource);
     }
 
-    private void initDataSongs(SongsViewHolder songsViewHolder,SourceSong sourceSong,int position) {
+    private void initDataSongs(SongsViewHolder songsViewHolder,int position) {
         Log.d(TAG, "SA initDataSongs: ");
 
         Song[] songsPhone, songsCloud;
@@ -165,11 +163,23 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
 
         if(songsPhone.length!=0) {
             songToPlay = songToPlays.get(position);
+
             songsViewHolder.setSongToPlay(songToPlay);
 
         }
     }
 
+
+    /**
+     *
+     * @param sources
+     * @param recordSources
+     * @param songToPlays
+     * @param songOnPhones
+     * @param songOnClouds
+     *
+     * lancement et maj des Songs
+     */
 
     public void swapSongs(final List<SourceSong> sources, List<List<RecordSource>> recordSources, List<Song> songToPlays, List<List<Song>> songOnPhones, List<List<Song>> songOnClouds) {
         Log.d("coucou", "swapSongs: SongAdapter \n"+sources+"\n"+recordSources+"\n"+ songToPlays+"\n"+ songOnPhones+"\n"+ songOnClouds);
@@ -183,7 +193,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
             Log.d(TAG, "SA swapSongs: songOnPhones 1 "+songOnPhones.get(1).get(0).getSourceSongTitre()+" "+songOnPhones.get(1).get(0).getPupitre());
         }
         if(songToPlays.get(1)!=null){
-            Log.d(TAG, "SA swapSongs: songOnPhones 2 "+songOnPhones.get(1).get(1).getSourceSongTitre()+" "+songOnPhones.get(1).get(1).getPupitre());
+//            Log.d(TAG, "SA swapSongs: songOnPhones 2 "+songOnPhones.get(1).get(1).getSourceSongTitre()+" "+songOnPhones.get(1).get(1).getPupitre());
         }
 
         if(songOnClouds.get(0)!=null){
@@ -193,7 +203,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
             Log.d(TAG, "SA swapSongs: songOnClouds 2 "+songOnClouds.get(1).get(0).getSourceSongTitre()+" "+songOnClouds.get(1).get(0).getPupitre());
         }
         if(songOnClouds.get(1)!=null){
-            Log.d(TAG, "SA swapSongs: songOnClouds 3 "+songOnClouds.get(1).get(1).getSourceSongTitre()+" "+songOnClouds.get(1).get(1).getPupitre());
+//            Log.d(TAG, "SA swapSongs: songOnClouds 3 "+songOnClouds.get(1).get(1).getSourceSongTitre()+" "+songOnClouds.get(1).get(1).getPupitre());
         }
         sourceSongs=sources;
         this.RecordSources=recordSources;
@@ -204,5 +214,16 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
 
     //todo voir si utile le diffResult cf evernote
 
+    }
+
+    @Override
+    public int getItemCount() {
+        if(null==sourceSongs) {
+            // Log.d("coucou", "getItemCount: 0");
+            return 0;
+        }else{
+            // Log.d("coucou", "getItemCount: "+sourceSongs.size());
+        }
+        return sourceSongs.size();
     }
 }
