@@ -59,7 +59,6 @@ public class ChoraleRepository {
     private String mCurrentAuthRole;
 
 
-
     private ChoraleRepository(SongsDao songsDao, SourceSongDao sourceSongDao, final ChoraleNetWorkDataSource choraleNetworkDataSource, AppExecutors executors) {
         Log.d(LOG_TAG, "CR Repository: constructor");
         mSongDao = songsDao;
@@ -82,6 +81,20 @@ public class ChoraleRepository {
             getListSongs(sourceSongs,songs);
 
         });
+    }
+
+    public synchronized static ChoraleRepository getInstance(SongsDao songsDao, SourceSongDao sourceSongDao,ChoraleNetWorkDataSource choraleNetworkDataSource, AppExecutors executors) {
+
+        Log.d(LOG_TAG, "CR getInstance: repository");
+        if (sInstance == null) {
+            synchronized (LOCK) {
+                sInstance = new ChoraleRepository(songsDao, sourceSongDao,choraleNetworkDataSource,
+                        executors);
+
+                Log.d(LOG_TAG, "CR getInstance: new repository");
+            }
+        }
+        return sInstance;
     }
 
     private void getListSongs(List<SourceSong> sourceSongs, List<Song> songs) {
@@ -156,7 +169,7 @@ public class ChoraleRepository {
         //todo à retirer dès que cela marche (test)
         for (SourceSong source:sourceSongs) {
             List<Song> listBs = mSongDao.getSongsOnPhone(source.getTitre(),RecordSource.BANDE_SON);
-            Log.d(LOG_TAG, "CR synchronisationLocalDataBase: test Database Room "+ listBs.size());
+            //Log.d(LOG_TAG, "CR synchronisationLocalDataBase: test Database Room "+ listBs.size());
             if(listBs!=null){
                 for (int i = 0; i <listBs.size() ; i++) {
                     Log.d(LOG_TAG, "CR getSongOnPhoneBS: listBs songs dans synchronisation "+listBs.get(i).getSourceSongTitre()+" "+listBs.get(i).getPupitre());
@@ -169,20 +182,6 @@ public class ChoraleRepository {
         mSourceDao.bulkInsert(sourceSongs);
         mSongDao.bulkInsert(songs);
         Log.d(SongsAdapter.TAG, "CR run-exec: sourceSongs dans la database après A "+ sourceSongs.size()+" "+songs.size()+Thread.currentThread().getName());
-    }
-
-    public synchronized static ChoraleRepository getInstance(SongsDao songsDao, SourceSongDao sourceSongDao,ChoraleNetWorkDataSource choraleNetworkDataSource, AppExecutors executors) {
-
-        Log.d(LOG_TAG, "CR getInstance: repository");
-        if (sInstance == null) {
-            synchronized (LOCK) {
-                sInstance = new ChoraleRepository(songsDao, sourceSongDao,choraleNetworkDataSource,
-                        executors);
-
-                Log.d(LOG_TAG, "CR getInstance: new repository");
-            }
-        }
-        return sInstance;
     }
 
     private void startFetchSongsService() {

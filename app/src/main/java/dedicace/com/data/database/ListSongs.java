@@ -52,10 +52,9 @@ public class ListSongs {
                 List<Song> listSongbyTitre = new ArrayList<>();
 
                 for (Song song : songs) {
-
-                    if (song.getSourceSongTitre().equals(sourceSong.getTitre())) {
+                     if (song.getSourceSongTitre().equals(sourceSong.getTitre())) {
                         listSongbyTitre.add(song);
-                    }
+                     }
                 }
                 if(listSongbyTitre.size()!=0) {
                     SongOnClouds.add(listSongbyTitre);
@@ -64,7 +63,7 @@ public class ListSongs {
                 }
             }
 
-        Log.d(LOG_TAG, "CR ChoraleRepository LiveData: ListSongOnCloud "+ SongOnClouds.size()+ " songs "+songs.size()+Thread.currentThread().getName());
+        Log.d(LOG_TAG, "CR ChoraleRepository LiveData: ListSongOnCloud "+ SongOnClouds.size()+ " songs "+songs.size()+" "+SongOnClouds+Thread.currentThread().getName());
     }
 
     public void getSongOnPhoneBS(List<SourceSong> sourceSongsAfterSync) {
@@ -107,7 +106,7 @@ public class ListSongs {
             }
         }
 
-        Log.d(LOG_TAG, "CR ChoraleRepository LiveData après sync Song to Plays BS: "+songToPlaysBs.size()+" "+Thread.currentThread().getName());
+        Log.d(LOG_TAG, "CR ChoraleRepository LiveData après sync Song to Plays BS: "+songToPlaysBs.size()+" "+songToPlaysBs+Thread.currentThread().getName());
     }
 
     public  List<List<RecordSource>> getRecordSources() {
@@ -117,7 +116,7 @@ public class ListSongs {
                     String titre = sourceSong.getTitre();
                     RecordSources.add(getRecordSources(titre));
                 }
-                Log.d(SongsAdapter.TAG, "CR run: RecordSources après B " + RecordSources.size());
+                Log.d(SongsAdapter.TAG, "CR run: RecordSources après B " + RecordSources.size()+" "+RecordSources);
 
         return RecordSources;
     }
@@ -151,7 +150,7 @@ public class ListSongs {
     public List<Song> getSongToPlays() {
         Log.d(LOG_TAG, "CR getSongToPlays: "+Thread.currentThread().getName());
 
-            for (int i = 0; i < RecordSources.size(); i++) {
+          /*  for (int i = 0; i < RecordSources.size(); i++) {
 
                 //todo voir si inutilité d'avoir une list pour recordToPlays puisque local
                 if (RecordSources.get(i).get(0) == RecordSource.NA) {
@@ -163,10 +162,18 @@ public class ListSongs {
                 }
 
                 Log.d(LOG_TAG, "LS CR getSongToPlays: recordToplays "+recordToPlays.get(i));
-                List<Song> listSongs = mSongDao.getSongOrderedByPupitre(sourceSongs.get(i).getTitre(), recordToPlays.get(i));
 
+
+               List<Song> listSongs = mSongDao.getSongOrderedByPupitre(sourceSongs.get(i).getTitre(), recordToPlays.get(i));
 
                 Log.d(LOG_TAG, "LS CR getSongToPlays: listSongs "+listSongs);
+
+                if(i==2){
+                    for (int j = 0; j <listSongs.size() ; j++) {
+                        Log.d(LOG_TAG, "LS CR getSongToPlays: item 2 "+listSongs.get(j).getSourceSongTitre()+" "+listSongs.get(j).getPupitre());
+                    }
+                }
+
                 if (listSongs != null && listSongs.size() != 0&&SongsOnPhones.get(i)!=null) {
                     songToPlays.add(listSongs.get(0));
                 } else {
@@ -174,16 +181,31 @@ public class ListSongs {
                 }
 
 //            Log.d(LOG_TAG, "getSongToPlays: " + songToPlays.get(i).getSourceSongTitre() + " " +songToPlays.get(i).getPupitre() );
-            }
 
-        Log.d(LOG_TAG, "CR getSongToPlays: après calcul "+songToPlays+" "+Thread.currentThread().getName());
+
+            }*/
+
+        for (List<Song> songs:SongsOnPhones) {
+                if(songs!=null){
+                    songToPlays.add(songs.get(0));
+                }else{
+                    songToPlays.add(null);
+                }
+        }
+
+        Log.d(LOG_TAG, "CR getSongToPlays: après calcul "+" "+songToPlays.get(2).getSourceSongTitre()+" "+songToPlays.get(2).getPupitre()+Thread.currentThread().getName()+songToPlays);
         return songToPlays;
     }
 
     public  List<List<Song>> getSongsOnPhones() {
         Log.d(LOG_TAG, "CR getSongsOnPhones: (recordSourcesSize) "+RecordSources.size()+" "+Thread.currentThread().getName());
 
-      // synchronized (SongsOnPhones) {
+
+        /**
+         * ce sont les songs On phones une fois que la RecordSource est déterminée, ce ne sont pas toutes les chansons sur le téléphone.
+         */
+
+        // synchronized (SongsOnPhones) {
 
            for (int i = 0; i < RecordSources.size(); i++) {
 
@@ -206,7 +228,7 @@ public class ListSongs {
       //     SongsOnPhones.notifyAll();
       // }
 
-        Log.d(LOG_TAG, "CR getSongsOnPhones: (SongOnPhones) "+SongsOnPhones.size()+" "+Thread.currentThread().getName());
+        Log.d(LOG_TAG, "CR getSongsOnPhones: (SongOnPhones) "+SongsOnPhones.size()+" "+SongsOnPhones+Thread.currentThread().getName());
 
         return SongsOnPhones;
     }
@@ -228,7 +250,7 @@ public class ListSongs {
                 songToPlaysLive.add(songs.get(0));
             }
         }
-        Log.d(LOG_TAG, "LS CR run initialize Data songToPlaysLive: "+songToPlaysLive.size());
+        Log.d(LOG_TAG, "LS CR run initialize Data songToPlaysLive: "+songToPlaysLive.size()+" "+songToPlaysLive);
     }
 
     public void getSongOnPhoneLive(List<SourceSong> sourceSongsBeforeSync) {
@@ -244,7 +266,7 @@ public class ListSongs {
                 SongOnPhonesLive.add(null);
             }
         }
-        Log.d(LOG_TAG, "LS CR run initialize Data SongOnPhonesLive : "+SongOnPhonesLive.size());
+        Log.d(LOG_TAG, "LS CR run initialize Data SongOnPhonesLive : "+SongOnPhonesLive.size()+" "+SongOnPhonesLive);
     }
 
     public List<Song> getSongToPlaysA() {

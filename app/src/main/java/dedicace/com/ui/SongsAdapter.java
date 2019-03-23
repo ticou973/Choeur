@@ -163,12 +163,11 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
 
         if(songsPhone.length!=0) {
             songToPlay = songToPlays.get(position);
+            Log.d(TAG, "SA initDataSongs: "+songToPlay.getSourceSongTitre()+" "+songToPlay.getPupitre());
 
             songsViewHolder.setSongToPlay(songToPlay);
-
         }
     }
-
 
     /**
      *

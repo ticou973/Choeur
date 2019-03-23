@@ -4,9 +4,11 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -26,10 +28,13 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import dedicace.com.AppExecutors;
+import dedicace.com.R;
 import dedicace.com.WorkerThread;
 import dedicace.com.data.database.AppDataBase;
 import dedicace.com.data.database.Pupitre;
@@ -76,21 +81,9 @@ public class ChoraleNetWorkDataSource {
     private List<Song> listDownloadMp3;
     private List<Song> oldSongs = new ArrayList<>();
     private List<Song> songs = new ArrayList<>();
-    private Song song3, song4, song6, song5, song2;
-    private SourceSong sourceSong1, sourceSong2, sourceSong3, sourceSong4, sourceSong5, sourceSong6, sourceSong7, sourceSong8;
-    private Pupitre recordPupitre = Pupitre.NA;
     private String titre;
     private String currentPupitreStr;
     private List<Pupitre> pupitreToUpload = new ArrayList<>();
-
-    //calculSongs
-    private List<List<RecordSource>> RecordSources=new ArrayList<>();
-    private List<List<Song>> SongOnPhones= new ArrayList<>();
-    private List<List<Song>> SongOnClouds=new ArrayList<>();
-    private List<RecordSource> recordToPlays=new ArrayList<>();
-    private List<Song> songToPlays=new ArrayList<>();
-    private List<Object> listElements = new ArrayList<>();
-    private List<Song> listSongsOnPhone= new ArrayList<>();
 
     //DB
     private FirebaseFirestore db;
@@ -388,10 +381,9 @@ public class ChoraleNetWorkDataSource {
 
         final List<Song> tempList = new ArrayList<>();
 
-        //todo A retirer dès que préférences mises (pour l'instant on ne charge que TENOR et Alto)
+        //getPupitreToLoad();
+
         pupitreToUpload.add(pupitreUser);
-        pupitreToUpload.add(Pupitre.ALTO);
-        pupitreToUpload.add(Pupitre.TUTTI);
 
         //todo ajouter les oldsongs ici toujours égales à 0
 
@@ -400,6 +392,7 @@ public class ChoraleNetWorkDataSource {
         Log.d(LOG_TAG, "NDS getListDownloadMp3 oldsongs: "+oldSongs.size());
         Log.d(LOG_TAG, "NDS getListDownloadMp3 currentpupitre: "+currentPupitreStr);
         Log.d(LOG_TAG, "NDS getListDownloadMp3: pupitreUser "+pupitreUser);
+        Log.d(LOG_TAG, "NDS getListDownloadMp3: pupitre To Load "+pupitreToUpload);
 
         for (Song newSong : songs) {
             int i = 0;
@@ -439,6 +432,26 @@ public class ChoraleNetWorkDataSource {
         Log.d(LOG_TAG, "NDS getListDownloadMp3: "+tempList.size());
 
         return tempList;
+    }
+
+    private void getPupitreToLoad() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+
+        Log.d(LOG_TAG, "getPupitreToLoad: "+currentPupitreStr);
+
+        Set<String> pupitreToUploadSet = sharedPreferences.getStringSet(mContext.getString(R.string.pref_pupitre_key),Collections.singleton(currentPupitreStr));
+
+        for (String s: pupitreToUploadSet) {
+            Pupitre pupToUpload = SongsUtilities.converttoPupitre(s);
+
+            if(pupToUpload!=Pupitre.NA){
+                pupitreToUpload.add(pupToUpload);
+            }
+        }
+
+        Log.d(LOG_TAG, "getPupitreToLoad: "+ pupitreToUpload);
+
+
     }
 
     private void uploadOnPhoneMp3(List<Song> listMp3) {

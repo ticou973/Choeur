@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             Log.d(TAG, "" +
                     "onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
 
-            setUpSharedPreferences();
+           // setUpSharedPreferences();
             //todo voir si mettre la permission ici et voir la réponse négative (griser le record) et mettre dans le menu option de redemander
             OnRequestPermission();
 
@@ -146,15 +146,15 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
                     List<Song> listBs = database.songsDao().getSongsOnPhone("Des hommes pareils",RecordSource.BANDE_SON);
                     List<SourceSong> listSS = database.sourceSongDao().getAllSources();
-                    Log.d(TAG, "CR synchronisationLocalDataBase: test Database Room "+ listBs.size()+" "+ listSS.size());
+                    Log.d(TAG, "MA synchronisationLocalDataBase: test Database Room "+ listBs.size()+" "+ listSS.size());
                     if(listBs!=null){
                         for (int i = 0; i <listBs.size() ; i++) {
-                            Log.d(TAG, "CR getSongOnPhoneBS: listBs songs dans synchronisation "+listBs.get(i).getSourceSongTitre()+" "+listBs.get(i).getPupitre()+" "+listBs.get(i).getSongId()+ " "+listBs.get(i).getUpdatePhone()+" "+listBs.get(i).getUpdatePhoneMp3());
+                            Log.d(TAG, "MA getSongOnPhoneBS: listBs songs dans synchronisation "+listBs.get(i).getSourceSongTitre()+" "+listBs.get(i).getPupitre()+" "+listBs.get(i).getSongId()+ " "+listBs.get(i).getUpdatePhone()+" "+listBs.get(i).getUpdatePhoneMp3());
                         }
                     }
                     if(listSS!=null){
                         for (int i = 0; i <listSS.size() ; i++) {
-                            Log.d(TAG, "CR getSongOnPhoneBS: listSS Sourcesongs dans synchronisation "+listSS.get(i).getTitre()+ " "+listSS.get(i).getUpdatePhone());
+                            Log.d(TAG, "MA getSongOnPhoneBS: listSS Sourcesongs dans synchronisation "+listSS.get(i).getTitre()+ " "+listSS.get(i).getUpdatePhone());
                         }
                     }
                 }
@@ -183,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
                     currentThread = mViewModel.getCurrentThread();
 
+                    //todo à voir si il faut le déplacer plus haut
                     mCurrentAuthRole=mViewModel.getCurrentAuthRole();
                     Log.d(TAG, "onChanged: AuthRole "+mCurrentAuthRole);
 

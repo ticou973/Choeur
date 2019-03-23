@@ -24,11 +24,11 @@
     <string name="alto_label">Alto</string>
     <string name="soprano_label">Soprano</string>
 
-    <string name="tutti_value" translatable="false">tutti</string>
-    <string name="bass_value" translatable="false">bass</string>
-    <string name="tenor_value" translatable="false">tenor</string>
-    <string name="alto_value" translatable="false">alto</string>
-    <string name="soprano_value" translatable="false">soprano</string>
+    <string name="tutti_value" translatable="false">TUTTI</string>
+    <string name="bass_value" translatable="false">BASS</string>
+    <string name="tenor_value" translatable="false">TENOR</string>
+    <string name="alto_value" translatable="false">ALTO</string>
+    <string name="soprano_value" translatable="false">SOPRANO</string>
 
     <string name="pref_pupitre_label">Pupitre(s) à télécharger</string>
     <string name="pref_pupitre_key" translatable="false">pupitres</string>
