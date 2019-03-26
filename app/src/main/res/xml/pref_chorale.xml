@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+
     <MultiSelectListPreference
         android:defaultValue="@string/tenor_value"
         android:entries="@array/pref_pupitre_labels"
         android:entryValues="@array/pref_pupitre_values"
         android:key="@string/pref_pupitre_key"
         android:title="@string/pref_pupitre_label" />
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="maj_auto"
+        android:title="@string/charge_auto_donnees"
+        android:summaryOn="@string/charge_auto_summary"
+        android:summaryOff="@string/charge_manuel_summary"/>
 
 </PreferenceScreen>

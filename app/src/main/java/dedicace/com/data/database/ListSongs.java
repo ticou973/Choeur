@@ -193,7 +193,7 @@ public class ListSongs {
                 }
         }
 
-        Log.d(LOG_TAG, "CR getSongToPlays: après calcul "+" "+songToPlays.get(2).getSourceSongTitre()+" "+songToPlays.get(2).getPupitre()+Thread.currentThread().getName()+songToPlays);
+//        Log.d(LOG_TAG, "CR getSongToPlays: après calcul "+" "+songToPlays.get(2).getSourceSongTitre()+" "+songToPlays.get(2).getPupitre()+Thread.currentThread().getName()+songToPlays);
         return songToPlays;
     }
 

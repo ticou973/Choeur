@@ -32,5 +32,8 @@
 
     <string name="pref_pupitre_label">Pupitre(s) à télécharger</string>
     <string name="pref_pupitre_key" translatable="false">pupitres</string>
+    <string name="charge_auto_donnees">Chargement automatique des données</string>
+    <string name="charge_auto_summary">Chargement automatique</string>
+    <string name="charge_manuel_summary">Chargement manuel</string>
 
 </resources>

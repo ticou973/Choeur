@@ -64,8 +64,14 @@ public interface SongsDao {
     @Update
     void updateSong(Song song);
 
+    @Update
+    void updateSongs(List<Song> songs);
+
     @Delete
     void deleteSong(Song song);
+
+    @Delete
+    void deleteSongs(List<Song> songs);
 
 
 }

@@ -75,6 +75,7 @@ public class ChoraleNetWorkDataSource {
 
     //Songs
     private final MutableLiveData<List<SourceSong>> mDownloaderSourceSongs;
+    private final MutableLiveData<Long> mMajDbCloudLong;
     private List<SourceSong> sourceSongs = new ArrayList<>();
     private List<SourceSong> oldSourcesSongs = new ArrayList<>();
     private List<SourceSong> listDownLoadImages;
@@ -96,12 +97,20 @@ public class ChoraleNetWorkDataSource {
     private String mCurrentAuthRole;
     private Date majDateCloudDataBase;
     private String idChorale;
+    private List<String> idChorales= new ArrayList<>();
 
     //Local Storage
-    File localFileMp3;
-    File localFileImage;
+    private File localFileMp3;
+    private File localFileImage;
 
     private final static String BASEURI = "storage/emulated/0/Android/data/dedicace.com/files/";
+    private Thread threadMaj;
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
+
+    private Date majCloudDB;
+    private Long majCloudDBLong;
+    private Long majLocalDBLong;
 
     //todo penser à changer les règles de sécurité de la base de données.
 
@@ -109,6 +118,7 @@ public class ChoraleNetWorkDataSource {
         mContext = context;
         mExecutors = executors;
         mDownloaderSourceSongs = new MutableLiveData<>();
+        mMajDbCloudLong = new MutableLiveData<>();
         Log.d(LOG_TAG, "NetworkDataSource: constructor " + mDownloaderSourceSongs);
         db = FirebaseFirestore.getInstance();
         mStorage = FirebaseStorage.getInstance();
@@ -117,43 +127,9 @@ public class ChoraleNetWorkDataSource {
         current_user_id=mAuth.getCurrentUser().getUid();
         Log.d(LOG_TAG, "NDS ChoraleNetWorkDataSource: constructor "+ current_user_id);
         workerThread = new WorkerThread();
-
-        /*
-        db.collection("users").document(current_user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                Log.d(LOG_TAG, "NDS getCurrentIdChorale onComplete : "+Thread.currentThread().getName());
-                if(task.isSuccessful()){
-
-                    //todo mettre en local
-                    idChorale= (String) task.getResult().get("id_chorale");
-
-                    Log.d(LOG_TAG, "NDS getIdChorale "+idChorale);
-
-
-                }else{
-                    Log.d(LOG_TAG, "NDS onComplete: erreur de récupération du IdChorale");
-                }
-            }
-        });
-
-        db.collection("chorale").document(idChorale).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-
-                Log.d(LOG_TAG, "NDS getLastmaj "+Thread.currentThread().getName());
-                if(task.isSuccessful()){
-
-                    majDateCloudDataBase =(Date) task.getResult().get("maj");
-
-                    Log.d(LOG_TAG, "NDS getLastmaj "+majDateCloudDataBase);
-
-                }else{
-                    Log.d(LOG_TAG, "NDS onComplete: erreur de récupération du majDB");
-                }
-            }
-        });*/
+        sharedPreferences =PreferenceManager.getDefaultSharedPreferences(mContext);
     }
+
 
     /**
      * Get the singleton for this class
@@ -180,8 +156,49 @@ public class ChoraleNetWorkDataSource {
         return songs;
     }
 
-    public Date getMajDateCloudDataBase() {
-        return majDateCloudDataBase;
+    public void getMajDateCloudDataBase() {
+
+        threadMaj =Thread.currentThread();
+
+        //todo revoir pourquoi cela ne marche pas !
+        //idChorale=sharedPreferences.getString("idChorale"," ");
+        idChorale="jFHncTuYleIHhZtL2PmT";
+
+        if(!idChorale.equals(" ")) {
+
+            try {
+                db.collection("chorale").document(idChorale).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                        majDateCloudDataBase = (Date) task.getResult().get("maj");
+                        Log.d(LOG_TAG, "NDS onComplete: majDBCloud " + majDateCloudDataBase);
+
+                        majCloudDBLong = majDateCloudDataBase.getTime();
+                        Log.d(LOG_TAG, "NDS onComplete: majDBCloud Long " + majCloudDBLong);
+
+                        mMajDbCloudLong.postValue(majCloudDBLong);
+                    }
+                });
+
+            } catch (Exception e) {
+                // Server probably invalid
+                e.printStackTrace();
+            }
+
+        }else{
+            Log.d(LOG_TAG, "NDS getMajDateCloudDataBase: pas d'Id chorale");
+        }
+
+//        Log.d(LOG_TAG, "NDS2 : datelong : local "+new Date(majLocalDBLong)+" cloud "+majCloudDB+ " comparaison Long-local/Cloud "+ majLocalDBLong+" "+majCloudDBLong);
+    }
+
+    private void getMajDateLocalDataBase() {
+        sharedPreferences =PreferenceManager.getDefaultSharedPreferences(mContext);
+
+        majLocalDBLong =sharedPreferences.getLong("majDB",0);
+        Log.d(LOG_TAG, "NDS : datelong : local "+new Date(majLocalDBLong)+" cloud "+majCloudDB+ " comparaison Long-local/Cloud "+ majLocalDBLong+" "+majCloudDBLong);
+
     }
 
     public void startFetchSongsService() {
@@ -193,94 +210,91 @@ public class ChoraleNetWorkDataSource {
 
 
     public void fetchSongs() {
-        Log.d(LOG_TAG, "NDS network fetch started: "+Thread.currentThread().getName());
+            try {
+                db.collection("sourceSongs")
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                Log.d(LOG_TAG, "NDS onComplete: sourceSongs " + Thread.currentThread().getName());
+                                if (task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        Log.d(LOG_TAG, "NDS-exec deb Oncomplete " + document.getId() + " => " + document.getData().get("maj"));
+                                        //todo voir comment écrire une seule ligne avec ToObject
 
-        try {
-            db.collection("sourceSongs")
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            Log.d(LOG_TAG, "NDS onComplete: sourceSongs "+Thread.currentThread().getName());
-                            if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    Log.d(LOG_TAG, "NDS-exec deb Oncomplete "+document.getId() + " => " + document.getData().get("maj"));
-                                    //todo voir comment écrire une seule ligne avec ToObject
+                                        String titre, groupe, baseUrlOriginalSong, urlCloudBackground;
+                                        Date maj;
+                                        int duration;
 
-                                    String titre, groupe, baseUrlOriginalSong, urlCloudBackground;
-                                    Date maj;
-                                    int duration;
+                                        titre = (String) document.getData().get("titre");
+                                        groupe = (String) document.getData().get("groupe");
+                                        duration = ((Long) document.getData().get("duration")).intValue();
+                                        baseUrlOriginalSong = (String) document.getData().get("original_song");
+                                        maj = (Date) document.getData().get("maj");
+                                        urlCloudBackground = (String) document.getData().get("background");
 
-                                    titre = (String) document.getData().get("titre");
-                                    groupe = (String) document.getData().get("groupe");
-                                    duration = ((Long) document.getData().get("duration")).intValue();
-                                    baseUrlOriginalSong = (String) document.getData().get("original_song");
-                                    maj = (Date) document.getData().get("maj");
-                                    urlCloudBackground = (String) document.getData().get("background");
+                                        Log.d(LOG_TAG, "NDS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
+                                        SourceSong sourceSong = new SourceSong(titre, groupe, duration, urlCloudBackground, baseUrlOriginalSong, new Date(System.currentTimeMillis()));
+                                        sourceSongs.add(sourceSong);
+                                    }
 
-                                    Log.d(LOG_TAG, "NDS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
-                                    SourceSong sourceSong = new SourceSong(titre, groupe, duration, urlCloudBackground, baseUrlOriginalSong, new Date(System.currentTimeMillis()));
-                                    sourceSongs.add(sourceSong);
+                                    Log.d(LOG_TAG, "NDS-exec fetchSourceSongs: après fetch");
+                                } else {
+                                    Log.w(LOG_TAG, "NDS-exec Error getting documents.", task.getException());
                                 }
 
-                                Log.d(LOG_TAG, "NDS-exec fetchSourceSongs: après fetch");
-                            } else {
-                                Log.w(LOG_TAG, "NDS-exec Error getting documents.", task.getException());
-                            }
+                                try {
+                                    db.collection("songs")
+                                            .get()
+                                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                    Log.d(LOG_TAG, "NDS onComplete: Songs " + Thread.currentThread().getName());
+                                                    if (task.isSuccessful()) {
+                                                        for (QueryDocumentSnapshot document : task.getResult()) {
+                                                            Log.d(LOG_TAG, "NDS-exec " + document.getId() + " => " + document.getData().get("pupitre"));
 
-                            try {
-                                db.collection("songs")
-                                        .get()
-                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                Log.d(LOG_TAG, "NDS onComplete: Songs "+Thread.currentThread().getName());
-                                                if (task.isSuccessful()) {
-                                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                                        Log.d(LOG_TAG, "NDS-exec " + document.getId() + " => " + document.getData().get("pupitre"));
+                                                            final String pupitre, recordSource, urlMp3;
+                                                            final Date maj;
 
-                                                        final String pupitre, recordSource, urlMp3;
-                                                        final Date maj;
+                                                            pupitre = (String) document.getData().get("pupitre");
 
-                                                        pupitre = (String) document.getData().get("pupitre");
+                                                            final Pupitre pupitreObj = SongsUtilities.converttoPupitre(pupitre);
 
-                                                        final Pupitre pupitreObj = SongsUtilities.converttoPupitre(pupitre);
+                                                            recordSource = (String) document.getData().get("recordSource");
+                                                            final RecordSource sourceObj = SongsUtilities.convertToRecordSource(recordSource);
 
-                                                        recordSource = (String) document.getData().get("recordSource");
-                                                        final RecordSource sourceObj = SongsUtilities.convertToRecordSource(recordSource);
+                                                            urlMp3 = (String) document.getData().get("songPath");
 
-                                                        urlMp3 = (String) document.getData().get("songPath");
+                                                            maj = (Date) document.getData().get("maj");
 
-                                                        maj = (Date) document.getData().get("maj");
-
-                                                        //todo comment faire pour faire une référence à sourceSong
-                                                        titre = (String) document.getData().get("titre_song");
-                                                        Log.d(LOG_TAG, "NDS-exec : onComplete:B Songs " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
-                                                        Song song = new Song(titre, sourceObj, pupitreObj, new Date(System.currentTimeMillis()), urlMp3);
-                                                        songs.add(song);
+                                                            //todo comment faire pour faire une référence à sourceSong
+                                                            titre = (String) document.getData().get("titre_song");
+                                                            Log.d(LOG_TAG, "NDS-exec : onComplete:B Songs " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
+                                                            Song song = new Song(titre, sourceObj, pupitreObj, new Date(System.currentTimeMillis()), urlMp3);
+                                                            songs.add(song);
+                                                        }
+                                                        Log.d(LOG_TAG, "NDS-exec onComplete: avant post " + songs);
+                                                        //todo à vérifier surement inutile maintenant
+                                                        Message message = Message.obtain();
+                                                        message.obj = "OK";
+                                                        handler.sendMessage(message);
+                                                    } else {
+                                                        Log.w(LOG_TAG, "NDS-exec Error getting documents.", task.getException());
                                                     }
-                                                    Log.d(LOG_TAG, "NDS-exec onComplete: avant post "+songs);
-                                                    //todo à vérifier surement inutile maintenant
-                                                    Message message = Message.obtain();
-                                                    message.obj="OK";
-                                                    handler.sendMessage(message);
-                                                } else {
-                                                    Log.w(LOG_TAG, "NDS-exec Error getting documents.", task.getException());
                                                 }
-                                            }
-                                        });
-                            }catch (Exception e) {
-                                // Server probably invalid
-                                e.printStackTrace();
+                                            });
+                                } catch (Exception e) {
+                                    // Server probably invalid
+                                    e.printStackTrace();
+                                }
                             }
+                        });
 
-                        }
-                    });
-
-        } catch (Exception e) {
-            // Server probably invalid
-            e.printStackTrace();
-        }
+            } catch (Exception e) {
+                // Server probably invalid
+                e.printStackTrace();
+            }
 
     }
 
@@ -561,6 +575,19 @@ public class ChoraleNetWorkDataSource {
         });
 
         return mCurrentAuthRole;
+    }
+
+    public Context getContext() {
+
+        return mContext;
+    }
+
+    public Thread getThreadMaj() {
+        return threadMaj;
+    }
+
+    public LiveData<Long> getMajDBCloudLong() {
+        return mMajDbCloudLong;
     }
 }
 

@@ -44,7 +44,7 @@ import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
 import dedicace.com.utilities.InjectorUtils;
 
-public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener,DialogRecordFragment.DialogRecordFragmentListener {
+public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener,DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     //UI
     private  RecyclerView recyclerView;
@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     public static AppDataBase choeurDataBase;
     private AppExecutors mExecutors;
     private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
 
 
     //todo vérifier si extras dans des intents avec HasExtras
@@ -128,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             Log.d(TAG, "" +
                     "onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
 
-           // setUpSharedPreferences();
+            setUpSharedPreferences();
             //todo voir si mettre la permission ici et voir la réponse négative (griser le record) et mettre dans le menu option de redemander
             OnRequestPermission();
 
@@ -184,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                     currentThread = mViewModel.getCurrentThread();
 
                     //todo à voir si il faut le déplacer plus haut
-                    mCurrentAuthRole=mViewModel.getCurrentAuthRole();
+                    //mCurrentAuthRole=mViewModel.getCurrentAuthRole();
                     Log.d(TAG, "onChanged: AuthRole "+mCurrentAuthRole);
 
                     if (sourceSongs != null && sourceSongs.size() != 0&&currentThread!=null) {
@@ -226,8 +227,26 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     private void setUpSharedPreferences() {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
+        editor = sharedPreferences.edit();
+
+        //todo modifier dès que le process permettra de mettre la valeur de la base de données dès le début.
+        editor.putString("role","Super Admin");
+        editor.putString("idchorale","jFHncTuYleIHhZtL2PmT");
+        editor.apply();
+
+        mCurrentAuthRole=sharedPreferences.getString("role","Choriste");
+
+        Log.d(TAG, "MA setUpSharedPreferences: idchorale "+ sharedPreferences.getString("idchorale", " "));
+
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        //todo faire pour gérer entre autres si on veut charger les songs qui viennet d être changées
+
+        Toast.makeText(this, "paramètres changés !", Toast.LENGTH_LONG).show();
     }
 
     private void getListSongs() {
@@ -378,11 +397,16 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mAuth!=null) {
+        //todo voir où le mettre pour une bonne utilisation
+        /*if(mAuth!=null) {
             Log.d(TAG, "onStop: MA logout");
             mAuth.signOut();
             mAuth = null;
-        }
+        }*/
+
+        //todo vérifier la place de ce listerner
+        //todo remettre dès que vérifier sa place
+       // sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     private void sendToLogin() {
@@ -455,6 +479,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             case R.id.parametres:
 
                 //todo faire un if statement à la place du case
+                //todo stocker le super Admin ainsi que la chorale et son Id
                 if(mAuth!=null&&mCurrentAuthRole.equals("Super Admin")){
                     Toast.makeText(this, "Vous êtes "+mCurrentAuthRole, Toast.LENGTH_SHORT).show();
                     //todo faire le menu spécial à l'intérieur pour plus tard pour ajouter les songs...
@@ -712,6 +737,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             break;
         }
     }
+
+
 
 
     //todo à renommer
