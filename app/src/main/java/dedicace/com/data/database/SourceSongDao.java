@@ -38,4 +38,7 @@ public interface SourceSongDao {
 
     @Delete
     void deleteSourceSongs(List<SourceSong> sourceSongs);
+
+    @Delete
+    void deleteSourceSong(SourceSong sourceSong);
 }

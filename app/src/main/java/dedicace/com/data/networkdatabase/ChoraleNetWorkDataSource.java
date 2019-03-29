@@ -64,8 +64,8 @@ public class ChoraleNetWorkDataSource {
             String msgStr = (String) msg.obj;
             if(msgStr.equals("OK")){
                 Log.d(LOG_TAG, "handleMessage: OK");
-            downloadBgImage();
-            downloadMp3();
+            //downloadBgImage();
+            //downloadMp3();
             mDownloaderSourceSongs.postValue(sourceSongs);
             }else{
                 Log.d(LOG_TAG, "handleMessage: pas OK");
@@ -209,6 +209,7 @@ public class ChoraleNetWorkDataSource {
     }
 
 
+    //todo voir le cas où il n'y a pas de réseau pour charger les données en attente.
     public void fetchSongs() {
             try {
                 db.collection("sourceSongs")
@@ -234,7 +235,7 @@ public class ChoraleNetWorkDataSource {
                                         urlCloudBackground = (String) document.getData().get("background");
 
                                         Log.d(LOG_TAG, "NDS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
-                                        SourceSong sourceSong = new SourceSong(titre, groupe, duration, urlCloudBackground, baseUrlOriginalSong, new Date(System.currentTimeMillis()));
+                                        SourceSong sourceSong = new SourceSong(titre, groupe, duration, urlCloudBackground, baseUrlOriginalSong, maj);
                                         sourceSongs.add(sourceSong);
                                     }
 
@@ -271,7 +272,7 @@ public class ChoraleNetWorkDataSource {
                                                             //todo comment faire pour faire une référence à sourceSong
                                                             titre = (String) document.getData().get("titre_song");
                                                             Log.d(LOG_TAG, "NDS-exec : onComplete:B Songs " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
-                                                            Song song = new Song(titre, sourceObj, pupitreObj, new Date(System.currentTimeMillis()), urlMp3);
+                                                            Song song = new Song(titre, sourceObj, pupitreObj, maj, urlMp3);
                                                             songs.add(song);
                                                         }
                                                         Log.d(LOG_TAG, "NDS-exec onComplete: avant post " + songs);
@@ -299,13 +300,11 @@ public class ChoraleNetWorkDataSource {
     }
 
     //todo faire des download qu'avec wifi ou suivant préférences
-    public void downloadBgImage() {
+    public void downloadBgImage(List<SourceSong> sourceSongs) {
 
-        listDownLoadImages = getListDownloadBgImages();
-
-        if (listDownLoadImages != null) {
+        if (sourceSongs != null) {
             Log.d(LOG_TAG, "NDS downloadBgImage: uploadImage ");
-            uploadOnPhoneBgImages(listDownLoadImages);
+            uploadOnPhoneBgImages(sourceSongs);
         } else {
             Log.d(LOG_TAG, "NDS downloadBgImage: pas d'images de Background à sauvegarder");
         }
@@ -378,10 +377,10 @@ public class ChoraleNetWorkDataSource {
         }
     }
 
-    public void downloadMp3() {
-        Log.d(LOG_TAG, "NDS downloadMp3: avant get "+listDownloadMp3);
-        listDownloadMp3 = getListDownloadMp3();
-        Log.d(LOG_TAG, "NDS downloadMp3: après get"+listDownloadMp3);
+    public void downloadMp3(List<Song> songs) {
+
+        listDownloadMp3 =getListDownloadMp3(songs);
+
         if (listDownloadMp3 != null) {
             Log.d(LOG_TAG, "NDS : uploadMP3 "+ listDownloadMp3.size());
             uploadOnPhoneMp3(listDownloadMp3);
@@ -391,15 +390,13 @@ public class ChoraleNetWorkDataSource {
     }
 
 
-    private List<Song> getListDownloadMp3() {
+    private List<Song> getListDownloadMp3(List<Song> songs) {
 
         final List<Song> tempList = new ArrayList<>();
 
         //getPupitreToLoad();
 
         pupitreToUpload.add(pupitreUser);
-
-        //todo ajouter les oldsongs ici toujours égales à 0
 
         Log.d(LOG_TAG, "NDS getListDownloadMp3 user: "+current_user_id);
         Log.d(LOG_TAG, "NDS getListDownloadMp3 songs: "+songs.size());
@@ -418,28 +415,7 @@ public class ChoraleNetWorkDataSource {
                 if (newSong.getPupitre() == pupitre) {
                     Log.d(LOG_TAG, "NDS getListDownloadMp3: test pupitre passé " + oldSongs.size() + " " + oldSongs);
 
-                    if (oldSongs.size() != 0) {
-                        Log.d(LOG_TAG, "NDS getListDownloadMp3: test olsong non null passé");
-                        for (Song oldSong : oldSongs) {
-
-                            Log.d(LOG_TAG, "NDS onComplete:  oldsong" + oldSong.getSourceSongTitre() + " " + oldSong.getRecordSource() + " " + oldSong.getPupitre());
-                            if (oldSong.getSourceSongTitre().equals(newSong.getSourceSongTitre()) && oldSong.getPupitre() == newSong.getPupitre() && oldSong.getRecordSource() == newSong.getRecordSource() && !oldSong.getUrlCloudMp3().equals(newSong.getUrlCloudMp3())) {
-                                tempList.add(newSong);
-                                Log.d(LOG_TAG, "NDS onComplete:premier if ");
-                            }
-
-                            if ((!oldSong.getSourceSongTitre().equals(newSong.getSourceSongTitre())) || (oldSong.getSourceSongTitre().equals(newSong.getSourceSongTitre()) && !oldSong.getPupitre().equals(newSong.getPupitre())) || (oldSong.getSourceSongTitre().equals(newSong.getSourceSongTitre()) && oldSong.getRecordSource() != newSong.getRecordSource())) {
-                                i++;
-                                Log.d(LOG_TAG, "NDS onComplete:deuxième if " + i + " " + oldSongs.size());
-                            }
-                        }
-                        if (i == oldSongs.size()) {
-                            tempList.add(newSong);
-                        }
-                    } else {
-                        Log.d(LOG_TAG, "NDS getListDownloadMp3: test oldsong null");
-                        tempList.add(newSong);
-                    }
+                    tempList.add(newSong);
                 }
             }
         }
@@ -588,6 +564,53 @@ public class ChoraleNetWorkDataSource {
 
     public LiveData<Long> getMajDBCloudLong() {
         return mMajDbCloudLong;
+    }
+
+    public void deleteSongsMp3OnPhone(List<Song> deletedSongsList) {
+
+        mExecutors.storageIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                for (Song song:deletedSongsList) {
+                    String path = song.getSongPath();
+                    File tempFile = new File(path);
+                    String name = tempFile.getName();
+                    Log.d(LOG_TAG, "NDS deleteMp3OnPhone: name "+ name);
+
+                    //todo vérifier si le fichier existe
+
+                    if(mContext.deleteFile(name)){
+                        Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: mp3 effacé "+song.getSourceSongTitre());
+                    }else{
+                        Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: erreur d'effacement de Mp3 ");
+                    }
+                }
+            }
+        });
+    }
+
+    public void deleteBgOnPhone(List<SourceSong> oldSources) {
+        mExecutors.storageIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                for (SourceSong source:oldSources) {
+                    String path = source.getBackground();
+
+                    File tempfile = new File(path);
+                    String name = tempfile.getName();
+                    Log.d(LOG_TAG, "NDS deleteBgOnPhone: name "+ name);
+
+                    //todo vérifier si le fichier existe
+                    if(mContext.deleteFile(name)){
+                        Log.d(LOG_TAG, "NDS deleteBgOnPhone: background effacé "+source.getTitre());
+                    }else{
+                        Log.d(LOG_TAG, "NDS deleteBgOnPhone: erreur d'effcement de background ");
+                    }
+                }
+            }
+        });
+
+
     }
 }
 

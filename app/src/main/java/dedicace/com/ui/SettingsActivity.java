@@ -12,6 +12,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     //Attention, il ne faut pas oublier de demettre un preferenceThemene dans le style sinon crash
 
+    //todo penser lorsque l'on delete une source song de supprimer les songs qui sont avec cela effera aussi lorsque l'utilisateur mettra à jour
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

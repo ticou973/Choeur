@@ -3,16 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/reset_db"
-        android:title="@string/effacer_tous_les_enregistrements_live"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/reset_song"
-        android:title="@string/effacer_le_dernier_enregistrement"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/parametres"
         android:title="@string/parametres"
         app:showAsAction="never" />

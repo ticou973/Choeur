@@ -466,15 +466,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()){
-            case R.id.reset_db:
-
-                deleteAllRecordedSongs();
-                break;
-
-            case R.id.reset_song:
-
-                deleteLastRecordedSong();
-                break;
 
             case R.id.parametres:
 
