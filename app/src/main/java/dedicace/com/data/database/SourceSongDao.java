@@ -36,9 +36,14 @@ public interface SourceSongDao {
     @Update
     void upDateSourceSongs(List<SourceSong> sourceSongs);
 
+    @Update
+    int updateSourceSongs(SourceSong...sourceSongs);
+
     @Delete
     void deleteSourceSongs(List<SourceSong> sourceSongs);
 
     @Delete
     void deleteSourceSong(SourceSong sourceSong);
+
+
 }

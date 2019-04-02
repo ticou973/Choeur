@@ -96,16 +96,6 @@ public class ChoraleRepository {
                 oldSourcesSongs = mSourceDao.getAllSources();
                 oldSongs=mSongDao.getAllSongs();
 
-                if(oldSourcesSongs!=null&&oldSourcesSongs.size()!=0){
-                    isFromLocal=true;
-
-                    //todo voir comment retirer les arguments qui sont inutiles
-                    getListSongs(oldSourcesSongs,oldSongs);
-                    Log.d(LOG_TAG, "CR run: getOldSongs et SourcesSongs : données initiales "+oldSourcesSongs+" "+oldSongs);
-                }else{
-                    Log.d(LOG_TAG, "CR run: getOldSongs et SOurcesSongs : pas de données initiales ");
-                }
-
             }
         });
 
@@ -119,6 +109,14 @@ public class ChoraleRepository {
                 Log.d(LOG_TAG, "CR ChoraleRepository: ok on lance startFetchSongService");
                 startFetchSongsService();
             }else{
+                if(oldSourcesSongs!=null&&oldSourcesSongs.size()!=0){
+                    isFromLocal=true;
+                    //todo voir comment retirer les arguments qui sont inutiles
+                    getListSongs(oldSourcesSongs,oldSongs);
+                    Log.d(LOG_TAG, "CR run: getOldSongs et SourcesSongs : données initiales "+oldSourcesSongs+" "+oldSongs);
+                }else{
+                    Log.d(LOG_TAG, "CR run: getOldSongs et SOurcesSongs : pas de données initiales ");
+                }
                 Log.d(LOG_TAG, "CR ChoraleRepository: Stop startFectch pas lancé !");
             }
         });
@@ -156,8 +154,6 @@ public class ChoraleRepository {
         return sInstance;
     }
 
-
-
     private void getListSongs(List<SourceSong> sourceSongs, List<Song> songs) {
 
         //todo voir la différence avec un autre thread
@@ -166,7 +162,8 @@ public class ChoraleRepository {
             public void run() {
 
                 currentThread = Thread.currentThread();
-                Log.d(LOG_TAG, "CR run: currentThread "+currentThread);
+                Log.d(LOG_TAG, "CR run: currentThread "+currentThread+" "+isFromLocal
+                );
 
                 if(!isFromLocal) {
                     synchronisationLocalDataBase(sourceSongs,songs);
@@ -229,6 +226,67 @@ public class ChoraleRepository {
             }
         }
 
+        deletedSongsList();
+        if(deletedSongsList!=null&&deletedSongsList.size()!=0){
+            mChoraleNetworkDataSource.deleteSongsMp3OnPhone(deletedSongsList);
+            mSongDao.deleteSongs(deletedSongsList);
+        }
+
+        deletedSourceSongsList(sourceSongs);
+        if(deletedSourceSongsList!=null&&deletedSourceSongsList.size()!=0){
+            mChoraleNetworkDataSource.deleteBgOnPhone(deletedSourceSongsList);
+            mSourceDao.deleteSourceSongs(deletedSourceSongsList);
+        }
+
+        modifiedSongsList();
+        if(modifiedSongsList!=null&&modifiedSongsList.size()!=0){
+            if(mp3SongsToDelete!=null&&mp3SongsToDelete.size()!=0) {
+                mChoraleNetworkDataSource.deleteSongsMp3OnPhone(mp3SongsToDelete);
+            }
+            mChoraleNetworkDataSource.downloadMp3(modifiedSongsList);
+
+            for (Song song:modifiedSongsList) {
+                Log.d(LOG_TAG, "synchronisationLocalDataBase: milieu source "+song.getSourceSongTitre()+" "+song.getUpdatePhone());
+                String titre = song.getSourceSongTitre();
+                Pupitre pupitre = song.getPupitre();
+                RecordSource recordSource = song.getRecordSource();
+                Song tempSong = mSongDao.getSongsByTitrePupitreSource(titre,pupitre,recordSource);
+                mSongDao.deleteSong(tempSong);
+                mSongDao.insertSong(song);
+            }
+        }
+
+        modifiedSourcesSongsList(sourceSongs);
+        if(modifiedSourceSongsList!=null&&modifiedSourceSongsList.size()!=0){
+
+            if(bgSourcesToDelete!=null&&bgSourcesToDelete.size()!=0) {
+                mChoraleNetworkDataSource.deleteBgOnPhone(bgSourcesToDelete);
+            }
+            mChoraleNetworkDataSource.downloadBgImage(modifiedSourceSongsList);
+
+            for (SourceSong source:modifiedSourceSongsList) {
+                Log.d(LOG_TAG, "CR synchronisationLocalDataBase: milieu source "+source.getTitre()+" "+source.getUpdatePhone()+" "+source.getDuration());
+                String titre = source.getTitre();
+                SourceSong tempSource = mSourceDao.getSourceSongByTitre(titre);
+                tempSource.setTitre(source.getTitre());
+                tempSource.setUpdatePhone(source.getUpdatePhone());
+                tempSource.setBackground(source.getBackground());
+                tempSource.setBaseUrlOriginalSong(source.getBaseUrlOriginalSong());
+                tempSource.setBgSong(source.getBgSong());
+                tempSource.setDuration(source.getDuration());
+                tempSource.setGroupe(source.getGroupe());
+                tempSource.setUrlCloudBackground(source.getUrlCloudBackground());
+
+                int tempInt = mSourceDao.updateSourceSongs(tempSource);
+
+                Log.d(LOG_TAG, "CR synchronisationLocalDataBase: nb d'update SS"+tempInt+mSourceDao.getSourceSongByTitre(source.getTitre()));
+               // mSourceDao.deleteSourceSong(tempSource);
+               // mSourceDao.insertSourceSong(source);
+
+            }
+        }
+
+
         newSourceSongsList(sourceSongs);
         if(newSourceSongsList!=null&&newSourceSongsList.size()!=0){
             mChoraleNetworkDataSource.downloadBgImage(newSourceSongsList);
@@ -240,56 +298,6 @@ public class ChoraleRepository {
             mChoraleNetworkDataSource.downloadMp3(newSongsList);
             mSongDao.bulkInsert(newSongsList);
         }
-
-        modifiedSourcesSongsList(sourceSongs);
-        if(modifiedSourceSongsList!=null&&modifiedSourceSongsList.size()!=0){
-            mChoraleNetworkDataSource.downloadBgImage(modifiedSourceSongsList);
-            if(bgSourcesToDelete!=null&&bgSourcesToDelete.size()!=0) {
-                mChoraleNetworkDataSource.deleteBgOnPhone(bgSourcesToDelete);
-            }
-            for (SourceSong source:modifiedSourceSongsList) {
-                Log.d(LOG_TAG, "synchronisationLocalDataBase: milieu source "+source.getTitre()+" "+source.getUpdatePhone()+" "+source.getDuration());
-                String titre = source.getTitre();
-                SourceSong tempSource = mSourceDao.getSourceSongByTitre(titre);
-                mSourceDao.deleteSourceSong(tempSource);
-                mSourceDao.insertSourceSong(source);
-            }
-        }
-
-        modifiedSongsList();
-        if(modifiedSongsList!=null&&modifiedSongsList.size()!=0){
-            mChoraleNetworkDataSource.downloadMp3(modifiedSongsList);
-            if(mp3SongsToDelete!=null&&mp3SongsToDelete.size()!=0) {
-                mChoraleNetworkDataSource.deleteSongsMp3OnPhone(mp3SongsToDelete);
-            }
-
-            for (Song song:modifiedSongsList) {
-                Log.d(LOG_TAG, "synchronisationLocalDataBase: milieu source "+song.getSourceSongTitre()+" "+song.getUpdatePhone());
-                String titre = song.getSourceSongTitre();
-                Pupitre pupitre = song.getPupitre();
-                RecordSource recordSource = song.getRecordSource();
-                Song tempSong = mSongDao.getSongsByTitrePupitreSource(titre,pupitre,recordSource);
-                mSongDao.deleteSong(tempSong);
-                mSongDao.insertSong(song);
-            }
-
-
-        }
-
-        deletedSourceSongsList(sourceSongs);
-        if(deletedSourceSongsList!=null&&deletedSourceSongsList.size()!=0){
-            mChoraleNetworkDataSource.deleteBgOnPhone(deletedSourceSongsList);
-            mSourceDao.deleteSourceSongs(deletedSourceSongsList);
-        }
-
-        deletedSongsList();
-
-        if(deletedSongsList!=null&&deletedSongsList.size()!=0){
-            mChoraleNetworkDataSource.deleteSongsMp3OnPhone(deletedSongsList);
-            mSongDao.deleteSongs(deletedSongsList);
-
-        }
-
 
 
         Log.d(SongsAdapter.TAG, "CR run-exec: sourceSongs dans la database après "+ Thread.currentThread().getName());
@@ -315,7 +323,7 @@ public class ChoraleRepository {
         for (Song oldSong:oldSongs) {
             int i = 0;
             for (Song song: songs) {
-                if((!oldSong.getSourceSongTitre().equals(song.getSourceSongTitre()))||(oldSong.getSourceSongTitre().equals(song.getSourceSongTitre())&&oldSong.getPupitre()!=song.getPupitre())){
+                if((!oldSong.getSourceSongTitre().equals(song.getSourceSongTitre()))||(oldSong.getSourceSongTitre().equals(song.getSourceSongTitre())&&oldSong.getPupitre()!=song.getPupitre()&&!oldSong.getUrlCloudMp3().equals(song.getUrlCloudMp3()))){
                     i++;
                 }
             }
@@ -324,8 +332,10 @@ public class ChoraleRepository {
             }
         }
 
-
         Log.d(LOG_TAG, "CR deletedSongsList:  "+deletedSongsList.size());
+        for (Song song:deletedSongsList) {
+            Log.d(LOG_TAG, "CR deletedSongsList: "+song.getSourceSongTitre());
+        }
     }
 
     private void deletedSourceSongsList(List<SourceSong> sources) {
@@ -340,7 +350,6 @@ public class ChoraleRepository {
                 deletedSourceSongsList.add(oldSource);
             }
         }
-
 
         Log.d(LOG_TAG, "CR deletedSourceSongsList: "+ deletedSourceSongsList.size());
     }
@@ -358,7 +367,6 @@ public class ChoraleRepository {
                         modifiedSongsList.add(song);
                         if(!oldSong.getUrlCloudMp3().equals(song.getUrlCloudMp3())){
                             mp3SongsToDelete.add(oldSong);
-
                         }
                     }
                 }
