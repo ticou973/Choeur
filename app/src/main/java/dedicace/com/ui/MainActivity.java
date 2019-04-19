@@ -33,6 +33,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import dedicace.com.AppExecutors;
 import dedicace.com.R;
@@ -66,6 +67,9 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
 
     private Thread currentThread;
+    private AtomicBoolean processing = new AtomicBoolean(true);
+
+
 
 
     //todo à retirer seuelement pour les tests
@@ -186,7 +190,9 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
                     //todo à voir si il faut le déplacer plus haut
                     //mCurrentAuthRole=mViewModel.getCurrentAuthRole();
-                    Log.d(TAG, "onChanged: AuthRole "+mCurrentAuthRole);
+                    Log.d(TAG, "MA onChanged: AuthRole "+mCurrentAuthRole+" "+currentThread);
+
+                    //permet que la listsongs de CR se calcule
 
                     if (sourceSongs != null && sourceSongs.size() != 0&&currentThread!=null) {
 
@@ -201,11 +207,14 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                         Log.d("coucou", "MA onCreate: Thread fini");
                     }
 
+
+
                     showLoading();
                     getListSongs();
 
                     // partieAux(sourceSongs);
 
+//                    Log.d(TAG, "MA onChanged: VÉRIF "+listSongs+" "+recordSources.size()+" "+songToPlays.size()+" "+songOnPhones.size()+" "+songOnClouds.size() );
 
                     if (listSongs != null) {
                         if (recordSources.size() == sourceSongs.size() && songToPlays.size() == sourceSongs.size() && songOnPhones.size() == sourceSongs.size() && songOnClouds.size() == sourceSongs.size()) {
@@ -738,3 +747,5 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         void OndeleteSong();
     }
 }
+
+

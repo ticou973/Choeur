@@ -25,6 +25,7 @@ public class ChoraleRepository {
 
     // For Singleton instantiation
     private static final Object LOCK = new Object();
+    private final Object LOCK1 = new Object();
     private static final String LOG_TAG ="coucou" ;
     private static ChoraleRepository sInstance;
     private final SongsDao mSongDao;
@@ -32,7 +33,9 @@ public class ChoraleRepository {
     private final ChoraleNetWorkDataSource mChoraleNetworkDataSource;
     private final AppExecutors mExecutors;
     private boolean mInitialized = false;
-    private Thread currentThread;
+    private Thread currentThread,t2,t1;
+
+
 
     //Songs
     private List<SourceSong> sourceSongsBeforeSync = new ArrayList<>();
@@ -90,12 +93,12 @@ public class ChoraleRepository {
         mChoraleNetworkDataSource = choraleNetworkDataSource;
         mExecutors = executors;
 
+
         mExecutors.diskIO().execute(new Runnable() {
             @Override
             public void run() {
                 oldSourcesSongs = mSourceDao.getAllSources();
                 oldSongs=mSongDao.getAllSongs();
-
             }
         });
 
@@ -103,19 +106,21 @@ public class ChoraleRepository {
         majDBCloudLong.observeForever(majclouddblong -> {
             //todo vérifier l'utilité de l'égalité
             majCloudDBLong = majclouddblong;
-            Log.d(LOG_TAG, "CR ChoraleRepository: majCloudLong "+majclouddblong);
+            Log.d(LOG_TAG, "CR ChoraleRepository: majCloudLong "+ majclouddblong);
 
             if(majLocalDBLong<majCloudDBLong){
                 Log.d(LOG_TAG, "CR ChoraleRepository: ok on lance startFetchSongService");
                 startFetchSongsService();
             }else{
+                //pour le cas aucune modif
+                //todo à vérifier que cela marche
                 if(oldSourcesSongs!=null&&oldSourcesSongs.size()!=0){
                     isFromLocal=true;
                     //todo voir comment retirer les arguments qui sont inutiles
                     getListSongs(oldSourcesSongs,oldSongs);
                     Log.d(LOG_TAG, "CR run: getOldSongs et SourcesSongs : données initiales "+oldSourcesSongs+" "+oldSongs);
                 }else{
-                    Log.d(LOG_TAG, "CR run: getOldSongs et SOurcesSongs : pas de données initiales ");
+                    Log.d(LOG_TAG, "CR run: getOldSongs et SourcesSongs : pas de données initiales ");
                 }
                 Log.d(LOG_TAG, "CR ChoraleRepository: Stop startFectch pas lancé !");
             }
@@ -136,8 +141,6 @@ public class ChoraleRepository {
             getListSongs(sourceSongs,songs);
 
         });
-
-
     }
 
     public synchronized static ChoraleRepository getInstance(SongsDao songsDao, SourceSongDao sourceSongDao,ChoraleNetWorkDataSource choraleNetworkDataSource, AppExecutors executors) {
@@ -157,16 +160,22 @@ public class ChoraleRepository {
     private void getListSongs(List<SourceSong> sourceSongs, List<Song> songs) {
 
         //todo voir la différence avec un autre thread
-        Thread t1 = new Thread(new Runnable() {
+        t1 = new Thread(new Runnable() {
             @Override
             public void run() {
 
                 currentThread = Thread.currentThread();
-                Log.d(LOG_TAG, "CR run: currentThread "+currentThread+" "+isFromLocal
-                );
+                Log.d(LOG_TAG, "CR run: currentThread "+currentThread+" "+isFromLocal);
+
+               // processor.consume();
 
                 if(!isFromLocal) {
+                    Log.d(LOG_TAG, "CR run: if from local avant synchronisation db");
                     synchronisationLocalDataBase(sourceSongs,songs);
+                }else{
+                    //todo trouver une méthode un peu moins artificielle ? cf modèle architecture.
+                    Log.d(LOG_TAG, "CR run: else isFrom Local pas de synchronisation");
+                    mSourceDao.updateSourceSong(oldSourcesSongs.get(0));
                 }
 
                 //chercher les Sourcesongs sur Room
@@ -179,8 +188,7 @@ public class ChoraleRepository {
 
                 Log.d(LOG_TAG, "CR ChoraleRepository LiveData après sync sourceSongs : "+sourceSongs.size()+ " "+sourceSongsAfterSync.size()+" "+Thread.currentThread().getName());
 
-                for (SourceSong source:sourceSongsAfterSync
-                        ) {
+                for (SourceSong source:sourceSongsAfterSync) {
                     Log.d(LOG_TAG, "CR run: sourcesSONG dans la data : "+source.getTitre());
                 }
 
@@ -206,9 +214,12 @@ public class ChoraleRepository {
                 //listSongs.getSongOnClouds();
 
                 Log.d(LOG_TAG, "CR ChoraleRepository LiveData après tout : "+Thread.currentThread().getName());
+
+
             }
         });
 
+        Log.d(LOG_TAG, "CR getListSongs début du current Thread pour la listSongs: ");
         t1.start();
 
     }
@@ -432,14 +443,14 @@ public class ChoraleRepository {
 
 
     public synchronized void initializeData() {
-        Log.d(LOG_TAG, "CR initializeData: repository isfetchneeded");
+        Log.d(LOG_TAG, "CR initializeData: repository isfetchneeded "+mInitialized);
 
         // Only perform initialization once per app lifetime. If initialization has already been
         // performed, we have nothing to do in this method.
         if (mInitialized) return;
         mInitialized = true;
 
-        mExecutors.diskIO().execute(new Runnable() {
+        /*mExecutors.diskIO().execute(new Runnable() {
             @Override
             public void run() {
 
@@ -447,9 +458,8 @@ public class ChoraleRepository {
                 //chercher les Sourcesongs sur Room
                sourceSongsBeforeSync=mSourceDao.getAllSources();
                 Log.d(LOG_TAG, "CR run initialize Data SourceSongsBeforeSync: "+sourceSongsBeforeSync.size()+ " "+Thread.currentThread().getName());
-
             }
-        });
+        });*/
 
         if (isFetchNeeded()) {
             currentPupitreStr=getCurrentPupitreStr();
@@ -458,10 +468,15 @@ public class ChoraleRepository {
             //todo remettre si chargement fonctionne pas
             //startFetchSongsService();
 
-            String idChorale=sharedPreferences.getString("idChorale"," ");
-            Log.d(LOG_TAG, "initializeData: idchorale "+idChorale);
+            String idChorale=sharedPreferences.getString("idchorale"," ");
+            Log.d(LOG_TAG, "CR initializeData: idchorale "+idChorale);
+
+
+            //lance la recherche d'un emise à jour et condition le lancement de startFetchData
 
             LoadMajCloudDB();
+
+
 
             Log.d(LOG_TAG, "CR : isFetchNeeded "+ Thread.currentThread().getName());
         }else{
@@ -508,6 +523,9 @@ public class ChoraleRepository {
         Log.d(LOG_TAG, "CR getSourceSongs: avant initialized data "+ Thread.currentThread().getName());
         initializeData();
         Log.d(SongsAdapter.TAG, "CR getSourceSongs: repository après iniatialize data");
+
+
+        Log.d(LOG_TAG, "CR getSourceSongs après t2.join: ");
 
         return mSourceDao.getAllSourceSongs();
     }

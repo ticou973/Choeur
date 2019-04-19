@@ -12,6 +12,7 @@ import dedicace.com.data.database.ListSongs;
 import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
+import dedicace.com.utilities.Processor;
 
 public class MainActivityViewModel extends ViewModel {
 
@@ -33,7 +34,7 @@ public class MainActivityViewModel extends ViewModel {
         Log.d(SongsAdapter.TAG, "MainActivityViewModel: avant "+choeurSourceSongs);
         mRepository = repository;
         choeurSourceSongs = mRepository.getSourceSongs();
-        Log.d(SongsAdapter.TAG, "MainActivityViewModel: fin "+ choeurSourceSongs);
+        Log.d(SongsAdapter.TAG, "MainActivityViewModel: fin "+ choeurSourceSongs.getValue());
     }
 
 
@@ -42,7 +43,7 @@ public class MainActivityViewModel extends ViewModel {
         Log.d(SongsAdapter.TAG, "MAVM getChoeurSourceSongs: ");
 
         if(choeurSourceSongs!=null){
-            Log.d(SongsAdapter.TAG, "MAVM getChoeurSourceSongs: non null "+choeurSourceSongs.getValue()+choeurSourceSongs);
+            Log.d(SongsAdapter.TAG, "MAVM getChoeurSourceSongs: non null "+choeurSourceSongs.getValue()+" "+choeurSourceSongs);
         }
         return choeurSourceSongs;
     }
@@ -120,7 +121,12 @@ public class MainActivityViewModel extends ViewModel {
 
     }
 
+    public Processor getProcessor() {
 
+        Processor processor = mRepository.getProcessor();
+
+        return processor;
+    }
 }
 
 

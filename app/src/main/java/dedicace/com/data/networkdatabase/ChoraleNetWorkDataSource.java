@@ -130,7 +130,6 @@ public class ChoraleNetWorkDataSource {
         sharedPreferences =PreferenceManager.getDefaultSharedPreferences(mContext);
     }
 
-
     /**
      * Get the singleton for this class
      */
@@ -156,9 +155,9 @@ public class ChoraleNetWorkDataSource {
         return songs;
     }
 
-    public void getMajDateCloudDataBase() {
 
-        threadMaj =Thread.currentThread();
+    //todo voir s'il faut le gérer avec un service
+    public void getMajDateCloudDataBase() {
 
         //todo revoir pourquoi cela ne marche pas !
         //idChorale=sharedPreferences.getString("idChorale"," ");
@@ -170,6 +169,8 @@ public class ChoraleNetWorkDataSource {
                 db.collection("chorale").document(idChorale).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        threadMaj =Thread.currentThread();
+                        Log.d(LOG_TAG, "NDS onComplete thrzadMaj: "+threadMaj);
 
                         majDateCloudDataBase = (Date) task.getResult().get("maj");
                         Log.d(LOG_TAG, "NDS onComplete: majDBCloud " + majDateCloudDataBase);
@@ -190,7 +191,6 @@ public class ChoraleNetWorkDataSource {
             Log.d(LOG_TAG, "NDS getMajDateCloudDataBase: pas d'Id chorale");
         }
 
-//        Log.d(LOG_TAG, "NDS2 : datelong : local "+new Date(majLocalDBLong)+" cloud "+majCloudDB+ " comparaison Long-local/Cloud "+ majLocalDBLong+" "+majCloudDBLong);
     }
 
     private void getMajDateLocalDataBase() {

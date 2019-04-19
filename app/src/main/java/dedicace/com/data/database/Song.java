@@ -41,6 +41,8 @@ public class Song {
     @ColumnInfo(name = "update_mp3")
     private Date updatePhoneMp3;
 
+    //todo ajouter la duration en local une fois calculée
+
 
 //todo gérer lorsque le mediaplayer est lancé à 2 items différents
     @Ignore
