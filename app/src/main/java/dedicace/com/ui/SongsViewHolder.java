@@ -831,9 +831,9 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         @Override
         void onTimeChanged() {
+            Log.d(TAG, "onTimeChanged: ");
             setStopListener();
             setChronometerStop();
         }
-
     }
 }

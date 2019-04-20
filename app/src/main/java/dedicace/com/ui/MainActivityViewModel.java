@@ -12,7 +12,6 @@ import dedicace.com.data.database.ListSongs;
 import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
-import dedicace.com.utilities.Processor;
 
 public class MainActivityViewModel extends ViewModel {
 
@@ -121,12 +120,6 @@ public class MainActivityViewModel extends ViewModel {
 
     }
 
-    public Processor getProcessor() {
-
-        Processor processor = mRepository.getProcessor();
-
-        return processor;
-    }
 }
 
 

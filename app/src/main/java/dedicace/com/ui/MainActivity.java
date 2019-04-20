@@ -207,8 +207,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                         Log.d("coucou", "MA onCreate: Thread fini");
                     }
 
-
-
                     showLoading();
                     getListSongs();
 

@@ -76,9 +76,8 @@ public class ListSongs {
 
             if(listBs!=null){
                 for (int i = 0; i <listBs.size() ; i++) {
-                    Log.d(LOG_TAG, "CR getSongOnPhoneBS: listBs songs "+listBs.get(i).getSourceSongTitre()+" "+listBs.get(i).getPupitre());
+                    Log.d(LOG_TAG, "CR getSongOnPhoneBS: listBs songs "+listBs.get(i).getSourceSongTitre()+" "+listBs.get(i).getPupitre()+" "+listBs.get(i).getUrlCloudMp3());
                 }
-
             }
 
             if(listBs!=null&&listBs.size()!=0){

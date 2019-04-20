@@ -237,7 +237,7 @@ public class ChoraleRepository {
             }
         }
 
-        deletedSongsList();
+        deletedSongsList(songs);
         if(deletedSongsList!=null&&deletedSongsList.size()!=0){
             mChoraleNetworkDataSource.deleteSongsMp3OnPhone(deletedSongsList);
             mSongDao.deleteSongs(deletedSongsList);
@@ -249,21 +249,33 @@ public class ChoraleRepository {
             mSourceDao.deleteSourceSongs(deletedSourceSongsList);
         }
 
-        modifiedSongsList();
+        //todo non utilisé pour l'instant gérer au niveau de la db avec suppression et création après
+        modifiedSongsList(songs);
         if(modifiedSongsList!=null&&modifiedSongsList.size()!=0){
             if(mp3SongsToDelete!=null&&mp3SongsToDelete.size()!=0) {
                 mChoraleNetworkDataSource.deleteSongsMp3OnPhone(mp3SongsToDelete);
             }
+            Log.d(LOG_TAG, "NDS synchronisationLocalDataBase: "+Thread.currentThread().getName());
             mChoraleNetworkDataSource.downloadMp3(modifiedSongsList);
 
             for (Song song:modifiedSongsList) {
-                Log.d(LOG_TAG, "synchronisationLocalDataBase: milieu source "+song.getSourceSongTitre()+" "+song.getUpdatePhone());
+                Log.d(LOG_TAG, "CR synchronisationLocalDataBase: milieu source "+song.getSourceSongTitre()+" "+song.getUpdatePhone());
                 String titre = song.getSourceSongTitre();
                 Pupitre pupitre = song.getPupitre();
                 RecordSource recordSource = song.getRecordSource();
                 Song tempSong = mSongDao.getSongsByTitrePupitreSource(titre,pupitre,recordSource);
-                mSongDao.deleteSong(tempSong);
-                mSongDao.insertSong(song);
+                tempSong.setUpdatePhoneMp3(song.getUpdatePhoneMp3());
+                tempSong.setUpdatePhone(song.getUpdatePhone());
+                tempSong.setSongPath(song.getSongPath());
+                tempSong.setPupitre(song.getPupitre());
+                tempSong.setRecordSource(song.getRecordSource());
+                tempSong.setSourceSongTitre(song.getSourceSongTitre());
+                tempSong.setUrlCloudMp3(song.getUrlCloudMp3());
+
+
+                int tempInt = mSongDao.updateSongs(tempSong);
+
+                Log.d(LOG_TAG, "CR synchronisationLocalDataBase: nb d'update Songs "+tempInt+" "+mSongDao.getSongsByTitrePupitreSource(titre,pupitre,recordSource).getSourceSongTitre());
             }
         }
 
@@ -293,10 +305,8 @@ public class ChoraleRepository {
                 Log.d(LOG_TAG, "CR synchronisationLocalDataBase: nb d'update SS"+tempInt+mSourceDao.getSourceSongByTitre(source.getTitre()));
                // mSourceDao.deleteSourceSong(tempSource);
                // mSourceDao.insertSourceSong(source);
-
             }
         }
-
 
         newSourceSongsList(sourceSongs);
         if(newSourceSongsList!=null&&newSourceSongsList.size()!=0){
@@ -304,8 +314,9 @@ public class ChoraleRepository {
             mSourceDao.bulkInsert(newSourceSongsList);
         }
 
-        newSongsList();
+        newSongsList(songs);
         if(newSongsList!=null&newSongsList.size()!=0){
+            Log.d(LOG_TAG, "NDS1 synchronisationLocalDataBase: "+Thread.currentThread().getName());
             mChoraleNetworkDataSource.downloadMp3(newSongsList);
             mSongDao.bulkInsert(newSongsList);
         }
@@ -330,7 +341,7 @@ public class ChoraleRepository {
     }
 
     //todo voir pour les mettre dans SongsUtilities
-    private void deletedSongsList() {
+    private void deletedSongsList(List<Song> songs) {
         for (Song oldSong:oldSongs) {
             int i = 0;
             for (Song song: songs) {
@@ -365,7 +376,7 @@ public class ChoraleRepository {
         Log.d(LOG_TAG, "CR deletedSourceSongsList: "+ deletedSourceSongsList.size());
     }
 
-    private void modifiedSongsList() {
+    private void modifiedSongsList(List<Song> songs) {
         Log.d(LOG_TAG, "CR modifiedSongsList: entrée méthode");
         for (Song song:songs) {
             Log.d(LOG_TAG, "CR modifiedSongsList: entrée songs "+ song.getSourceSongTitre());
@@ -408,7 +419,7 @@ public class ChoraleRepository {
     }
 
 
-    private void newSongsList() {
+    private void newSongsList(List<Song> songs) {
         for (Song song:songs) {
             int i = 0;
             for (Song oldSong: oldSongs) {

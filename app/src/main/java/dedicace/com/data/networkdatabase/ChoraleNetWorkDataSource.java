@@ -382,7 +382,7 @@ public class ChoraleNetWorkDataSource {
         listDownloadMp3 =getListDownloadMp3(songs);
 
         if (listDownloadMp3 != null) {
-            Log.d(LOG_TAG, "NDS : uploadMP3 "+ listDownloadMp3.size());
+            Log.d(LOG_TAG, "NDS : uploadMP3 "+ listDownloadMp3.size()+" "+Thread.currentThread().getName());
             uploadOnPhoneMp3(listDownloadMp3);
         }else {
             Log.d(LOG_TAG, "NDS downloadMP3: pas d'images de fichiers audio à sauvegarder");
@@ -446,7 +446,7 @@ public class ChoraleNetWorkDataSource {
 
     private void uploadOnPhoneMp3(List<Song> listMp3) {
 
-        Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: fct upload "+ listMp3.size());
+        Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: fct upload "+ listMp3.size()+" "+Thread.currentThread().getName());
 
         for (Song song : listMp3) {
 
@@ -469,6 +469,8 @@ public class ChoraleNetWorkDataSource {
                             // Successfully downloaded data to local file
 
                            // Toast.makeText(mContext, "Vos chants sont enregistrés sur votre téléphone", Toast.LENGTH_LONG).show();
+
+                            Log.d(LOG_TAG, "NDS onSuccess: "+Thread.currentThread().getName()+" "+ filename);
 
                             // ...
                         }

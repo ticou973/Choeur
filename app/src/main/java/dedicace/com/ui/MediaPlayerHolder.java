@@ -201,6 +201,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
             if (mPlaybackInfoListener != null) {
                 mPlaybackInfoListener.onStateChanged(PlaybackInfoListener.State.PLAYING);
             }
+            Log.d("coucou", "MPH play: après OnStateChanged "+mMediaPlayer.isPlaying());
             startUpdatingCallbackWithPosition();
         }
     }
@@ -247,8 +248,8 @@ public final class MediaPlayerHolder implements PlayerAdapter {
             mSeekbarPositionUpdateTask = new Runnable() {
                 @Override
                 public void run() {
+                    Log.d("coucou", "MPH run: startUpdatingCallbackwithPosition "+mMediaPlayer.isPlaying());
                     updateProgressCallbackTask();
-
                 }
             };
         }
@@ -277,9 +278,12 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     }
 
     private void updateProgressCallbackTask() {
+        Log.d("coucou", "MPH updateProgressCallbackTask: before "+ mMediaPlayer+" "+mMediaPlayer.isPlaying() );
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
             int currentPosition = mMediaPlayer.getCurrentPosition();
+            Log.d("coucou", "MPH updateProgressCallbackTask: middle " + mPlaybackInfoListener);
             if (mPlaybackInfoListener != null) {
+                Log.d("coucou", "MPH updateProgressCallbackTask: "+currentPosition);
                 mPlaybackInfoListener.onPositionChanged(currentPosition);
             }
         }
