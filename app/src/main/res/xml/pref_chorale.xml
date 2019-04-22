@@ -16,4 +16,5 @@
         android:summaryOn="@string/charge_auto_summary"
         android:summaryOff="@string/charge_manuel_summary"/>
 
+
 </PreferenceScreen>

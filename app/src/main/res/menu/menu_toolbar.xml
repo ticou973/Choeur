@@ -6,10 +6,15 @@
         android:id="@+id/parametres"
         android:title="@string/parametres"
         app:showAsAction="never" />
-
+    <item
+        android:id="@+id/admin"
+        android:title="@string/admin"
+        app:showAsAction="never" />
     <item
         android:id="@+id/log_out"
         android:title="@string/se_déconnecter"
         app:showAsAction="never" />
+
+
 
 </menu>

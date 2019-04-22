@@ -43,6 +43,7 @@ import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
+import dedicace.com.ui.Admin.AdminHome;
 import dedicace.com.utilities.InjectorUtils;
 
 public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener,DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -475,19 +476,22 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         switch (item.getItemId()){
 
             case R.id.parametres:
+                launchSettingsActivity();
+                break;
 
-                //todo faire un if statement à la place du case
+            case R.id.admin:
                 //todo stocker le super Admin ainsi que la chorale et son Id
                 if(mAuth!=null&&mCurrentAuthRole.equals("Super Admin")){
                     Toast.makeText(this, "Vous êtes "+mCurrentAuthRole, Toast.LENGTH_SHORT).show();
-                    //todo faire le menu spécial à l'intérieur pour plus tard pour ajouter les songs...
-                    launchSettingsActivity();
+                    Intent  startAdminHomeActivity = new Intent(this, AdminHome.class);
+                    startActivity(startAdminHomeActivity);
 
                 }else{
-
-                    launchSettingsActivity();
+                    //todo vérifier que l'item est caché dans le cas non admin
+                    item.setVisible(false);
                 }
                 break;
+
 
             case R.id.log_out:
                 logOut();

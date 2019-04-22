@@ -35,5 +35,6 @@
     <string name="charge_auto_donnees">Chargement automatique des données</string>
     <string name="charge_auto_summary">Chargement automatique</string>
     <string name="charge_manuel_summary">Chargement manuel</string>
+    <string name="admin">Admin</string>
 
 </resources>

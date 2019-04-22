@@ -71,6 +71,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     //todo prévoir d'effacer les chansons que l'on a soit même enregistré (long click et menu)
     //todo voir pour suppprimer le listener
+    //todo voir pour interdire 2 lectures parallèles
 
     public SongsViewHolder(@NonNull View itemView, SongsAdapter.ListemClickedListener listener, Context context) {
         super(itemView);
