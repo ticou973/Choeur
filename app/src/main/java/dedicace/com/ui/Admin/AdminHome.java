@@ -44,7 +44,8 @@ public class AdminHome extends AppCompatActivity {
         modifySS.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Intent startModifySSActivity = new Intent(AdminHome.this,ModifySourceSong.class);
+                startActivity(startModifySSActivity);
             }
         });
 

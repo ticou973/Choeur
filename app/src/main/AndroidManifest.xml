@@ -53,11 +53,18 @@
         <activity
             android:name=".ui.Admin.CreateSourceSong"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"></activity>
-        <activity android:name=".ui.Admin.ChooseBackground"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".ui.Admin.ChooseBackground"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme">
-        </activity>
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".ui.Admin.ModifySourceSong"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+        <activity android:name=".ui.Admin.ModifySourceSongDetails"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" ></activity>
     </application>
 
 </manifest>

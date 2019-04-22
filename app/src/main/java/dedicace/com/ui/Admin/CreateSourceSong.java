@@ -2,9 +2,11 @@ package dedicace.com.ui.Admin;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -55,9 +57,12 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
     private String backgroundSS;
     private Uri downloadUrl;
     private Uri fileSelected;
+    private String idChorale;
 
-    //facultatif
     private int durationSS;
+
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
 
     private StorageReference mStorageRef;
     private FirebaseFirestore db;
@@ -76,6 +81,10 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
         db = FirebaseFirestore.getInstance();
+
+        sharedPreferences =PreferenceManager.getDefaultSharedPreferences(this);
+        idChorale=sharedPreferences.getString("idchorale"," ");
+        Log.d(TAG, "onCreate: idChorale "+ idChorale );
 
         getLists();
 
@@ -253,6 +262,7 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
                             Log.d(TAG, "CSS onSuccess: problème de suppression en local du fichier");
                         }
 
+                        modifyMajChorale();
                         newSS();
                     }
                 })
@@ -260,6 +270,26 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.d(TAG, "Error adding document", e);
+                    }
+                });
+    }
+
+    private void modifyMajChorale() {
+        Map<String,Object> data = new HashMap<>();
+        data.put("maj",Timestamp.now());
+
+        db.collection("chorale").document(idChorale)
+                .update(data)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "CSS onSuccess: maj chorale done");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "CSS onSuccess: maj chorale failed");
                     }
                 });
     }
