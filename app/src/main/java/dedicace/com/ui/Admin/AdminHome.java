@@ -12,6 +12,9 @@ public class AdminHome extends AppCompatActivity {
 
     private Button createSS, modifySS, createSong, modifySong;
 
+    //todo ajouter les chorales et users
+    //todo penser à ajouter les gestions plus complexes de doublons en local et en base...
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

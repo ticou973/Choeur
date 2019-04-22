@@ -2,9 +2,12 @@ package dedicace.com.ui.Admin;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -13,13 +16,27 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import dedicace.com.R;
 
-public class CreateSourceSong extends AppCompatActivity {
+public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFragment.DialogNewSSListener {
 
     private Button createSSInDb,selectBackground;
     private EditText titre, groupe, duration;
@@ -31,7 +48,19 @@ public class CreateSourceSong extends AppCompatActivity {
     private String[] listImages;
     private int imageSelected;
     private String pathSelected;
+    private String fileNameSelected;
     private final static int REQUEST_CODE=100;
+    private String titreSS;
+    private String groupeSS;
+    private String backgroundSS;
+    private Uri downloadUrl;
+    private Uri fileSelected;
+
+    //facultatif
+    private int durationSS;
+
+    private StorageReference mStorageRef;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,14 +74,29 @@ public class CreateSourceSong extends AppCompatActivity {
         duration = findViewById(R.id.et_duration_ss);
         background = findViewById(R.id.tv_background);
 
+        mStorageRef = FirebaseStorage.getInstance().getReference();
+        db = FirebaseFirestore.getInstance();
+
         getLists();
 
         createSSInDb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                insertBackgroundInCloudStorage();
-                insertSSinDb();
-                newSS();
+                //obligatoire
+                titreSS = titre.getText().toString();
+                groupeSS = groupe.getText().toString();
+                backgroundSS = background.getText().toString();
+
+                //facultatif
+                durationSS = Integer.parseInt(duration.getText().toString());
+
+                if(!titreSS.equals("")&&!groupeSS.equals("")&&!backgroundSS.equals("Selection background...")){
+                    Log.d(TAG, "CSS onClick: conditions passées "+ titreSS+ " "+groupeSS+" "+durationSS+" "+backgroundSS);
+                    insertBackgroundInCloudStorage();
+
+                }else{
+                    Toast.makeText(CreateSourceSong.this, "Il manque des éléments", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -102,15 +146,58 @@ public class CreateSourceSong extends AppCompatActivity {
 
     private void insertBackgroundInCloudStorage() {
 
+        fileSelected = Uri.fromFile(new File(pathSelected));
+        StorageReference imageRef = mStorageRef.child("songs/photos_background/"+fileNameSelected);
+
+        UploadTask uploadTask = imageRef.putFile(fileSelected);
+
+        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        Log.d(TAG, "CSS onSuccess: bravo c'est uploader");
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle unsuccessful uploads
+                        // ...
+                        Log.d(TAG, "CSS onFailure: dommage c'est raté");
+                    }
+                });
 
 
+        uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            @Override
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
+                }
+
+
+                // Continue with the task to get the download URL
+                return imageRef.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+                if (task.isSuccessful()) {
+                    downloadUrl = task.getResult();
+                    insertSSinDb();
+                    Log.d(TAG, "CSS onComplete: "+downloadUrl);
+                } else {
+                    // Handle failures
+                    // ...
+                    Log.d(TAG, "CSS onComplete: Il y a eu un pb");
+                }
+            }
+        });
     }
 
     private void newSS() {
-
-        //voulez vous en insérer d'autres ?
-
-
+        DialogFragment dialog = new DialogNewSSFragment();
+        dialog.show(getSupportFragmentManager(),"TAG");
     }
 
     private void selectBackground() {
@@ -128,7 +215,6 @@ public class CreateSourceSong extends AppCompatActivity {
             Log.d(TAG, "CSS onActivityResult: ok cela marche");
             if(requestCode==REQUEST_CODE){
 
-                int imageSelected= 0;
                 if (data != null) {
                     imageSelected = data.getIntExtra("imageselected",-1);
                 }
@@ -136,6 +222,7 @@ public class CreateSourceSong extends AppCompatActivity {
                 if(imageSelected!=-1) {
                     background.setText(listFilesImage.get(imageSelected));
                     pathSelected = listPath.get(imageSelected);
+                    fileNameSelected = listFilesImage.get(imageSelected);
                     Log.d(TAG, "CSS onCreate: " + pathSelected);
                 }
             }
@@ -145,25 +232,48 @@ public class CreateSourceSong extends AppCompatActivity {
     }
 
     private void insertSSinDb() {
-        //obligatoire
-        String titreSS = titre.getText().toString();
-        String groupeSS = groupe.getText().toString();
-        String backgroundSS = background.getText().toString();
+        Map<String,Object> sourceSong = new HashMap<>();
+        sourceSong.put("background",downloadUrl.toString());
+        sourceSong.put("duration",durationSS);
+        sourceSong.put("groupe",groupeSS);
+        sourceSong.put("original_song","");
+        sourceSong.put("titre",titreSS);
+        sourceSong.put("maj",Timestamp.now());
 
-        //facultatif
-        int durationSS = Integer.parseInt(duration.getText().toString());
+        db.collection("sourceSongs")
+                .add(sourceSong)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                        File file = new File(pathSelected);
+                        if(file.delete()){
+                            Log.d(TAG, "CSS onSuccess: le fichier est supprimé du local");
+                        }else{
+                            Log.d(TAG, "CSS onSuccess: problème de suppression en local du fichier");
+                        }
 
-        if(!titreSS.equals("")&&!groupeSS.equals("")&&!backgroundSS.equals("")){
-
-
-        }else{
-            Toast.makeText(this, "Il manque des éléments", Toast.LENGTH_SHORT).show();
-        }
-
+                        newSS();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Error adding document", e);
+                    }
+                });
     }
 
-    //todo voir communication entre activity
-    public static List<String> getListFilesImage() {
-        return listFilesImage;
+    @Override
+    public void onDialogPositiveClick() {
+        titre.setText("");
+        groupe.setText("");
+        duration.setText("");
+        background.setText("Selection background...");
+    }
+
+    @Override
+    public void onDialogNegativeClick() {
+        finish();
     }
 }
