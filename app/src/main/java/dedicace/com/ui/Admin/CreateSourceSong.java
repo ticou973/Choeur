@@ -88,6 +88,7 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
 
         getLists();
 
+
         createSSInDb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -96,11 +97,16 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
                 groupeSS = groupe.getText().toString();
                 backgroundSS = background.getText().toString();
 
-                //facultatif
-                durationSS = Integer.parseInt(duration.getText().toString());
 
-                if(!titreSS.equals("")&&!groupeSS.equals("")&&!backgroundSS.equals("Selection background...")){
-                    Log.d(TAG, "CSS onClick: conditions passées "+ titreSS+ " "+groupeSS+" "+durationSS+" "+backgroundSS);
+
+                if(duration.getText().toString().equals("")){
+                    durationSS=0;
+                }else{
+                    durationSS = Integer.parseInt(duration.getText().toString());
+                }
+
+                if(!titreSS.equals("")&&!groupeSS.equals("")&&!backgroundSS.equals("Selection background...")&&durationSS!=0){
+                    Log.d(TAG, "CSS onClick: conditions passées "+ titreSS+ " "+groupeSS+" "+String.valueOf(durationSS)+" "+backgroundSS);
                     insertBackgroundInCloudStorage();
 
                 }else{
@@ -119,7 +125,8 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
 
     }
 
-    private void getLists() {
+    //todo compléter le storage utilities pour chercher les lists sur le téléphone ou cloud
+     private void getLists() {
         File path = Environment.getExternalStorageDirectory();
         File file = new File(path,"DedicaceAdmin/Image_Background_Chorale");
 

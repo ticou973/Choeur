@@ -21,6 +21,7 @@ import java.util.List;
 import dedicace.com.R;
 import dedicace.com.data.database.SourceSong;
 
+//todo voir lorsque finish que l'on reinitialise les données changées
 public class ModifySourceSong extends AppCompatActivity implements SourceSongAdapter.OnItemListener{
 
     private RecyclerView recyclerSS;
@@ -41,7 +42,6 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
         db=FirebaseFirestore.getInstance();
 
         getListSourceSongs();
-
     }
 
     private void getListSourceSongs() {
@@ -71,17 +71,17 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
                                     maj = (Date) document.getData().get("maj");
                                     urlCloudBackground = (String) document.getData().get("background");
 
-                                    Log.d(TAG, "NDS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
+                                    Log.d(TAG, "MSS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
                                     SourceSong sourceSong = new SourceSong(titre, groupe, duration, urlCloudBackground, baseUrlOriginalSong, maj);
                                     listSourceSongs.add(sourceSong);
-
-                                    recyclerSS = findViewById(R.id.recyclerview_cloud_SS);
-                                    sourceSongAdapter = new SourceSongAdapter(listSourceSongs);
-                                    layoutManager = new LinearLayoutManager(ModifySourceSong.this);
-                                    recyclerSS.setLayoutManager(layoutManager);
-                                    recyclerSS.setHasFixedSize(true);
-                                    recyclerSS.setAdapter(sourceSongAdapter);
                                 }
+
+                                recyclerSS = findViewById(R.id.recyclerview_cloud_SS);
+                                sourceSongAdapter = new SourceSongAdapter(listSourceSongs);
+                                layoutManager = new LinearLayoutManager(ModifySourceSong.this);
+                                recyclerSS.setLayoutManager(layoutManager);
+                                recyclerSS.setHasFixedSize(true);
+                                recyclerSS.setAdapter(sourceSongAdapter);
 
                                 Log.d(TAG, "MSS fetchSourceSongs: après fetch");
                             } else {
@@ -100,7 +100,12 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
     public void onItemClick(int i) {
 
         Intent startDetailsSSActivity = new Intent(ModifySourceSong.this,ModifySourceSongDetails.class);
-        startDetailsSSActivity.putExtra("idSS",listId.get(i));
+        Bundle args = new Bundle();
+        args.putString("idSS", listId.get(i));
+        args.putString("oldTitre",listSourceSongs.get(i).getTitre());
+        args.putString("oldGroupe",listSourceSongs.get(i).getGroupe());
+        args.putInt("oldDuration",listSourceSongs.get(i).getDuration());
+        startDetailsSSActivity.putExtra("bundleSS",args);
         startActivity(startDetailsSSActivity);
 
     }
