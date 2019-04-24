@@ -62,7 +62,6 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
     private int durationSS;
 
     private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
 
     private StorageReference mStorageRef;
     private FirebaseFirestore db;
@@ -170,7 +169,7 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
         uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Log.d(TAG, "CSS onSuccess: bravo c'est uploader");
+                        Log.d(TAG, "CSS onSuccess: bravo c'est uploadé");
 
                     }
                 })
@@ -276,7 +275,7 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "Error adding document", e);
+                        Log.d(TAG, "CSS Error adding document", e);
                     }
                 });
     }

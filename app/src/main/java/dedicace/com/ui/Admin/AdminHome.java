@@ -37,7 +37,8 @@ public class AdminHome extends AppCompatActivity {
         createSong.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Intent startCreateSongActivity = new Intent(AdminHome.this,CreateSong.class);
+                startActivity(startCreateSongActivity);
             }
         });
 
@@ -45,6 +46,7 @@ public class AdminHome extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent startModifySSActivity = new Intent(AdminHome.this,ModifySourceSong.class);
+                startModifySSActivity.putExtra("origine","AdminHome");
                 startActivity(startModifySSActivity);
             }
         });

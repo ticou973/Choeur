@@ -3,10 +3,12 @@ package dedicace.com.ui.Admin;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -25,19 +27,34 @@ import dedicace.com.data.database.SourceSong;
 public class ModifySourceSong extends AppCompatActivity implements SourceSongAdapter.OnItemListener{
 
     private RecyclerView recyclerSS;
+    private FloatingActionButton fab;
     private SourceSongAdapter sourceSongAdapter;
     private List<SourceSong> listSourceSongs = new ArrayList<>();
     private List<String> listId = new ArrayList<>();
     private RecyclerView.LayoutManager layoutManager;
     private static final String TAG ="coucou";
     private FirebaseFirestore db;
-
-
+    private String origine;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_modify_source_song);
+
+        Intent intent = getIntent();
+
+        origine = intent.getStringExtra("origine");
+
+        fab = findViewById(R.id.fab_SS);
+
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent startCreateSSActivity = new Intent(ModifySourceSong.this,CreateSourceSong.class);
+                startActivity(startCreateSSActivity);
+            }
+        });
 
         db=FirebaseFirestore.getInstance();
 
@@ -99,14 +116,23 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
     @Override
     public void onItemClick(int i) {
 
-        Intent startDetailsSSActivity = new Intent(ModifySourceSong.this,ModifySourceSongDetails.class);
+        if (origine.equals("AdminHome")) {
+            Log.d(TAG, "MSS onItemClick: "+i);
+        Intent startDetailsSSActivity = new Intent(ModifySourceSong.this, ModifySourceSongDetails.class);
         Bundle args = new Bundle();
         args.putString("idSS", listId.get(i));
-        args.putString("oldTitre",listSourceSongs.get(i).getTitre());
-        args.putString("oldGroupe",listSourceSongs.get(i).getGroupe());
-        args.putInt("oldDuration",listSourceSongs.get(i).getDuration());
-        startDetailsSSActivity.putExtra("bundleSS",args);
+        args.putString("oldTitre", listSourceSongs.get(i).getTitre());
+        args.putString("oldGroupe", listSourceSongs.get(i).getGroupe());
+        args.putInt("oldDuration", listSourceSongs.get(i).getDuration());
+        startDetailsSSActivity.putExtra("bundleSS", args);
         startActivity(startDetailsSSActivity);
 
+        }else if(origine.equals("CreateSong")){
+            Log.d(TAG, "MSS onItemClick: "+i);
+            Intent result = new Intent();
+            result.putExtra("titreselected",listSourceSongs.get(i).getTitre());
+            setResult(RESULT_OK,result);
+            finish();
+        }
     }
 }
