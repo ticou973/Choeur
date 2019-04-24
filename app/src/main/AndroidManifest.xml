@@ -66,10 +66,19 @@
             android:name=".ui.Admin.ModifySourceSongDetails"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
-        <activity android:name=".ui.Admin.CreateSong"
+        <activity
+            android:name=".ui.Admin.CreateSong"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
-        <activity android:name=".ui.Admin.ChooseMp3"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".ui.Admin.ChooseMp3"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".ui.Admin.ModifySong"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+        <activity android:name=".ui.Admin.ModifySongDetails"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"></activity>
     </application>

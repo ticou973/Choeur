@@ -76,7 +76,7 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
         setContentView(R.layout.activity_modify_source_song_details);
         oldTitre= findViewById(R.id.tv_titre_old);
         oldGroupe= findViewById(R.id.tv_groupe_old);
-        oldDuration= findViewById(R.id.tv_duartion_old);
+        oldDuration= findViewById(R.id.tv_duration_old);
         oldBackground= findViewById(R.id.tv_background_old);
         newBackground= findViewById(R.id.tv_background_new);
         newTitre= findViewById(R.id.et_titre_new);
@@ -230,12 +230,12 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "MSSD onSuccess: maj chorale done");
+                        Log.d(TAG, "MSSD onSuccess: maj sourcesong done");
                         File file = new File(pathSelected);
                         if(file.delete()){
-                            Log.d(TAG, "CSS onSuccess: le fichier est supprimé du local");
+                            Log.d(TAG, "MSSD onSuccess: le fichier est supprimé du local");
                         }else{
-                            Log.d(TAG, "CSS onSuccess: problème de suppression en local du fichier");
+                            Log.d(TAG, "MSSD onSuccess: problème de suppression en local du fichier");
                         }
                         modifyMajChorale();
                         finish();
@@ -244,7 +244,7 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "MSSD onSuccess: maj chorale failed");
+                        Log.d(TAG, "MSSD onSuccess: maj sourceSong failed");
                     }
                 });
     }

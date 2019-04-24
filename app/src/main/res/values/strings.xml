@@ -36,5 +36,22 @@
     <string name="charge_auto_summary">Chargement automatique</string>
     <string name="charge_manuel_summary">Chargement manuel</string>
     <string name="admin">Admin</string>
+    <string name="modification_source_song">Modification Source Song</string>
+    <string name="backgr">Backgr.</string>
+    <string name="oldtitre">Oldtitre</string>
+    <string name="oldgroupe">OldGroupe</string>
+    <string name="oldduration">OldDuration</string>
+    <string name="oldbackgr">Oldbackgr.</string>
+    <string name="select_backgr">Select. Backgr.</string>
+    <string name="selection">Selection...</string>
+    <string name="pupitre">Pupitre</string>
+    <string name="source">Source</string>
+    <string name="modification_song">Modification Song</string>
+    <string name="oldpupitre">OldPupitre</string>
+    <string name="oldsource">OldSource</string>
+    <string name="oldmp3">OldMp3</string>
+    <string name="select_mp3">Select. Mp3</string>
+    <string name="supprimer">Supprimer</string>
+
 
 </resources>

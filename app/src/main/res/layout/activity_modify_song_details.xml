@@ -5,39 +5,39 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primaryColor"
-    tools:context=".ui.Admin.ModifySourceSongDetails">
+    tools:context=".ui.Admin.ModifySongDetails">
 
     <EditText
-        android:id="@+id/et_groupe_new"
+        android:id="@+id/et_pupitre_new"
         android:layout_width="137dp"
         android:layout_height="42dp"
         android:ems="10"
-        android:hint="@string/groupe"
+        android:hint="@string/pupitre"
         android:inputType="textPersonName"
-        app:layout_constraintBaseline_toBaselineOf="@+id/tv_groupe_old"
-        app:layout_constraintEnd_toEndOf="@+id/textView14"
-        app:layout_constraintStart_toStartOf="@+id/textView14" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_pupitre_old"
+        app:layout_constraintEnd_toEndOf="@+id/textView142"
+        app:layout_constraintStart_toStartOf="@+id/textView142" />
 
     <EditText
-        android:id="@+id/et_duration_new"
+        android:id="@+id/et_source_new"
         android:layout_width="137dp"
         android:layout_height="42dp"
         android:ems="10"
-        android:hint="@+string/duration"
+        android:hint="@string/source"
         android:inputType="number"
-        app:layout_constraintBaseline_toBaselineOf="@+id/tv_duration_old"
-        app:layout_constraintEnd_toEndOf="@+id/textView14"
-        app:layout_constraintStart_toStartOf="@+id/textView14" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_source_old"
+        app:layout_constraintEnd_toEndOf="@+id/textView142"
+        app:layout_constraintStart_toStartOf="@+id/textView142" />
 
     <TextView
-        android:id="@+id/textView8"
+        android:id="@+id/textView82"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:fontFamily="@font/roboto"
-        android:text="@string/modification_source_song"
+        android:text="@string/modification_song"
         android:textColor="@color/secondaryColor"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -46,7 +46,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView9"
+        android:id="@+id/textView92"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -57,52 +57,52 @@
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView8" />
+        app:layout_constraintTop_toBottomOf="@+id/textView82" />
 
     <TextView
-        android:id="@+id/textView10"
+        android:id="@+id/textView102"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:fontFamily="@font/roboto"
-        android:text="@string/groupe"
+        android:text="@string/pupitre"
         android:textColor="@android:color/black"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView9" />
+        app:layout_constraintTop_toBottomOf="@+id/textView92" />
 
     <TextView
-        android:id="@+id/textView11"
+        android:id="@+id/textView112"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:fontFamily="@font/roboto"
-        android:text="@+string/duration"
+        android:text="@string/source"
         android:textColor="@android:color/black"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView10" />
+        app:layout_constraintTop_toBottomOf="@+id/textView102" />
 
     <TextView
-        android:id="@+id/textView12"
+        android:id="@+id/textView122"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:fontFamily="@font/roboto"
-        android:text="@string/backgr"
+        android:text="Mp3"
         android:textColor="@android:color/black"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView11" />
+        app:layout_constraintTop_toBottomOf="@+id/textView112" />
 
     <Button
-        android:id="@+id/btn_supp_source_song"
+        android:id="@+id/btn_supp_song"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -115,7 +115,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/btn_modify_source_song"
+        android:id="@+id/btn_modify_song"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
@@ -128,7 +128,7 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
-        android:id="@+id/textView13"
+        android:id="@+id/textView132"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="60dp"
@@ -138,106 +138,95 @@
         android:textColor="@android:color/black"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toEndOf="@+id/textView11"
-        app:layout_constraintTop_toBottomOf="@+id/textView8" />
+        app:layout_constraintStart_toEndOf="@+id/textView112"
+        app:layout_constraintTop_toBottomOf="@+id/textView82" />
 
     <TextView
-        android:id="@+id/textView14"
+        android:id="@+id/textView142"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="50dp"
         android:layout_marginEnd="8dp"
         android:fontFamily="@font/roboto"
-        android:text="new"
+        android:text="New"
         android:textColor="@android:color/black"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView13"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView132"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textView13" />
+        app:layout_constraintStart_toEndOf="@+id/textView132" />
 
     <TextView
-        android:id="@+id/tv_titre_old"
+        android:id="@+id/tv_titre_song_old_modify"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/oldtitre"
+        android:text="Oldtitre"
         android:textColor="@android:color/black"
         android:textSize="18sp"
         android:textStyle="italic"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView9"
-        app:layout_constraintEnd_toEndOf="@+id/textView13"
-        app:layout_constraintStart_toStartOf="@+id/textView13" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView92"
+        app:layout_constraintEnd_toEndOf="@+id/textView132"
+        app:layout_constraintStart_toStartOf="@+id/textView132" />
 
     <TextView
-        android:id="@+id/tv_groupe_old"
+        android:id="@+id/tv_pupitre_old"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/oldgroupe"
+        android:text="@string/oldpupitre"
         android:textColor="@android:color/black"
         android:textSize="18sp"
         android:textStyle="italic"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView10"
-        app:layout_constraintEnd_toEndOf="@+id/tv_titre_old"
-        app:layout_constraintStart_toStartOf="@+id/tv_titre_old" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView102"
+        app:layout_constraintEnd_toEndOf="@+id/tv_titre_song_old_modify"
+        app:layout_constraintStart_toStartOf="@+id/tv_titre_song_old_modify" />
 
     <TextView
-        android:id="@+id/tv_duration_old"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto"
-        android:text="@string/oldduration"
-        android:textColor="@android:color/black"
-        android:textSize="18sp"
-        android:textStyle="italic"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView11"
-        app:layout_constraintEnd_toEndOf="@+id/tv_groupe_old"
-        app:layout_constraintStart_toStartOf="@+id/tv_groupe_old" />
-
-    <TextView
-        android:id="@+id/tv_background_old"
+        android:id="@+id/tv_source_old"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/roboto"
-        android:text="@string/oldbackgr"
+        android:text="@string/oldsource"
         android:textColor="@android:color/black"
         android:textSize="18sp"
         android:textStyle="italic"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView12"
-        app:layout_constraintEnd_toEndOf="@+id/tv_duration_old"
-        app:layout_constraintStart_toStartOf="@+id/tv_duration_old" />
-
-    <EditText
-        android:id="@+id/et_titre_new"
-        android:layout_width="137dp"
-        android:layout_height="42dp"
-        android:ems="10"
-        android:hint="@string/titre"
-        android:inputType="textPersonName"
-        app:layout_constraintBaseline_toBaselineOf="@+id/tv_titre_old"
-        app:layout_constraintEnd_toEndOf="@+id/textView14"
-        app:layout_constraintStart_toStartOf="@+id/textView14" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView112"
+        app:layout_constraintEnd_toEndOf="@+id/tv_pupitre_old"
+        app:layout_constraintStart_toStartOf="@+id/tv_pupitre_old" />
 
     <TextView
-        android:id="@+id/tv_background_new"
+        android:id="@+id/tv_mp3_old"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="@string/oldmp3"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="italic"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView122"
+        app:layout_constraintEnd_toEndOf="@+id/tv_source_old"
+        app:layout_constraintStart_toStartOf="@+id/tv_source_old" />
+
+    <TextView
+        android:id="@+id/tv_mp3_new_modify"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
         android:fontFamily="@font/roboto"
-        android:text="@string/select_backgr"
+        android:text="@string/select_mp3"
         android:textColor="@android:color/black"
         android:textSize="18sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/tv_background_old"
-        app:layout_constraintEnd_toEndOf="@+id/et_duration_new"
-        app:layout_constraintStart_toStartOf="@+id/et_duration_new" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_mp3_old"
+        app:layout_constraintEnd_toEndOf="@+id/et_source_new"
+        app:layout_constraintStart_toStartOf="@+id/et_source_new" />
 
     <Button
-        android:id="@+id/btn_select_new_background"
+        android:id="@+id/btn_select_new_mp3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:padding="10dp"
         android:text="@string/selection"
-        app:layout_constraintEnd_toEndOf="@+id/tv_background_new"
-        app:layout_constraintStart_toStartOf="@+id/tv_background_new"
-        app:layout_constraintTop_toBottomOf="@+id/tv_background_new" />
+        app:layout_constraintEnd_toEndOf="@+id/tv_mp3_new_modify"
+        app:layout_constraintStart_toStartOf="@+id/tv_mp3_new_modify"
+        app:layout_constraintTop_toBottomOf="@+id/tv_mp3_new_modify" />
 </android.support.constraint.ConstraintLayout>

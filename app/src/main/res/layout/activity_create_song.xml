@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primaryColor"
-    tools:context=".ui.Admin.CreateSourceSong">
+    tools:context=".ui.Admin.CreateSong">
 
     <TextView
         android:id="@+id/textView31"

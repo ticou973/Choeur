@@ -2,6 +2,7 @@ package dedicace.com.ui.Admin;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,16 +14,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dedicace.com.R;
-import dedicace.com.data.database.SourceSong;
+import dedicace.com.data.database.Song;
 
-class SourceSongAdapter extends RecyclerView.Adapter<SourceSongAdapter.SourceSongViewHolder> {
+public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder> {
 
-    private List<SourceSong> listSourceSongs = new ArrayList<>();
+    private List<Song> listSongs = new ArrayList<>();
     private OnItemListener mListener;
     private static final String TAG="coucou";
 
-    public SourceSongAdapter(List<SourceSong> listSourceSongs) {
-        this.listSourceSongs = listSourceSongs;
+    public SongAdapter(List<Song> listSongs) {
+        this.listSongs = listSongs;
     }
 
     public interface OnItemListener {
@@ -31,23 +32,22 @@ class SourceSongAdapter extends RecyclerView.Adapter<SourceSongAdapter.SourceSon
 
     @NonNull
     @Override
-    public SourceSongViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_ss_cloud, viewGroup, false);
+    public SongViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_song_cloud, viewGroup, false);
 
-        SourceSongViewHolder sourceSongViewHolder = new SourceSongViewHolder(view);
-        return sourceSongViewHolder;
-
+        SongViewHolder songViewHolder = new SongViewHolder(view);
+        return songViewHolder;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull SourceSongViewHolder sourceSongViewHolder, int i) {
-        sourceSongViewHolder.titre.setText(listSourceSongs.get(i).getTitre());
-
+    public void onBindViewHolder(@NonNull SongViewHolder songViewHolder, int i) {
+        songViewHolder.titre.setText(listSongs.get(i).getSourceSongTitre());
+        songViewHolder.pupitre.setText(listSongs.get(i).getPupitre().toString());
     }
 
     @Override
     public int getItemCount() {
-        return listSourceSongs.size();
+        return listSongs.size();
     }
 
     @Override
@@ -71,27 +71,27 @@ class SourceSongAdapter extends RecyclerView.Adapter<SourceSongAdapter.SourceSon
         mListener = null;
     }
 
-    private void selectSourceSong(int i) {
-
+    private void selectSong(int i) {
         if(mListener!=null){
             mListener.onItemClick(i);
         }
     }
 
-    public class SourceSongViewHolder extends RecyclerView.ViewHolder {
-
-        TextView titre;
-
-        public SourceSongViewHolder(@NonNull View itemView) {
+    public class SongViewHolder extends RecyclerView.ViewHolder {
+        TextView titre,pupitre;
+        CardView cv;
+        public SongViewHolder(@NonNull View itemView) {
             super(itemView);
-            titre = itemView.findViewById(R.id.sourceSongName);
+            titre = itemView.findViewById(R.id.songName);
+            pupitre =itemView.findViewById(R.id.songPupitre);
+            cv=itemView.findViewById(R.id.cv_list_song);
 
-            titre.setOnClickListener(new View.OnClickListener() {
+            cv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Log.d(TAG, "SSA onClick: "+getAdapterPosition());
+                    Log.d(TAG, "SA onClick: "+getAdapterPosition());
                     int i = getAdapterPosition();
-                    selectSourceSong(i);
+                    selectSong(i);
                 }
             });
         }
