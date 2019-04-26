@@ -2,6 +2,7 @@ package dedicace.com.ui.Admin;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -79,11 +80,13 @@ class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImagesViewHolder> {
 
     public class ImagesViewHolder extends RecyclerView.ViewHolder {
         TextView imageName;
+        CardView cv;
         public ImagesViewHolder(@NonNull View itemView) {
             super(itemView);
             imageName = itemView.findViewById(R.id.imageName);
+            cv=itemView.findViewById(R.id.cv_list_image);
 
-            imageName.setOnClickListener(new View.OnClickListener() {
+            cv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Log.d(TAG, "IA onClick: "+getAdapterPosition());

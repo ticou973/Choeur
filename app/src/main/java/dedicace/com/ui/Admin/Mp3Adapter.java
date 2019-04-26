@@ -2,6 +2,7 @@ package dedicace.com.ui.Admin;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -79,11 +80,13 @@ class Mp3Adapter extends RecyclerView.Adapter<Mp3Adapter.Mp3ViewHolder> {
 
     public class Mp3ViewHolder extends RecyclerView.ViewHolder {
         TextView mp3Name;
+        CardView cv;
         public Mp3ViewHolder(@NonNull View itemView) {
             super(itemView);
             mp3Name =itemView.findViewById(R.id.mp3Name);
+            cv =itemView.findViewById(R.id.cv_list_mp3);
 
-            mp3Name.setOnClickListener(new View.OnClickListener() {
+            cv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Log.d(TAG, "mp3A onClick: "+getAdapterPosition());

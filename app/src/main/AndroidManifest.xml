@@ -49,9 +49,11 @@
         <activity
             android:name=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
+            android:parentActivityName=".ui.MainActivity"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.Admin.CreateSourceSong"
+            android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
@@ -60,6 +62,7 @@
             android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.Admin.ModifySourceSong"
+            android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
@@ -68,6 +71,7 @@
             android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.Admin.CreateSong"
+            android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
@@ -76,6 +80,7 @@
             android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.Admin.ModifySong"
+            android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity android:name=".ui.Admin.ModifySongDetails"

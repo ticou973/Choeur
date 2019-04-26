@@ -10,8 +10,11 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
@@ -91,6 +94,12 @@ public class CreateSong extends AppCompatActivity implements DialogNewSSFragment
         rbSoprano=findViewById(R.id.rb_soprano_cs);
         rbTutti.setChecked(true);
 
+        ActionBar actionBar = this.getSupportActionBar();
+
+        if(actionBar != null){
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
         mStorageRef = FirebaseStorage.getInstance().getReference();
         db = FirebaseFirestore.getInstance();
 
@@ -98,7 +107,7 @@ public class CreateSong extends AppCompatActivity implements DialogNewSSFragment
         idChorale=sharedPreferences.getString("idchorale"," ");
         Log.d(TAG, "onCreate: idChorale "+ idChorale );
 
-        getLists();
+
 
         createSongInDb.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -151,6 +160,7 @@ public class CreateSong extends AppCompatActivity implements DialogNewSSFragment
         selectMp3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                getLists();
                 selectMp3();
             }
         });
@@ -402,5 +412,14 @@ public class CreateSong extends AppCompatActivity implements DialogNewSSFragment
     @Override
     public void onDialogNegativeClick() {
         finish();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id==android.R.id.home){
+            NavUtils.navigateUpFromSameTask(this);
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -2,7 +2,10 @@ package dedicace.com.ui.Admin;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
@@ -14,6 +17,7 @@ public class AdminHome extends AppCompatActivity {
 
     //todo ajouter les chorales et users
     //todo penser à ajouter les gestions plus complexes de doublons en local et en base...
+    //todo faire le cas Admin où il n'y encore aucun SS et song de créer dans la base cloud... surement à voir dans le ChoraleNetWorkDataSource
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +28,12 @@ public class AdminHome extends AppCompatActivity {
         createSong=findViewById(R.id.btn_create_song);
         modifySS=findViewById(R.id.btn_modify_ss);
         modifySong=findViewById(R.id.btn_modify_song);
+
+        ActionBar actionBar = this.getSupportActionBar();
+
+        if(actionBar != null){
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
 
         createSS.setOnClickListener(new View.OnClickListener() {
@@ -59,5 +69,13 @@ public class AdminHome extends AppCompatActivity {
 
             }
         });
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id==android.R.id.home){
+            NavUtils.navigateUpFromSameTask(this);
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

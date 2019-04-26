@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -172,7 +173,13 @@ public class ChoraleNetWorkDataSource {
                         threadMaj =Thread.currentThread();
                         Log.d(LOG_TAG, "NDS onComplete thrzadMaj: "+threadMaj);
 
-                        majDateCloudDataBase = (Date) task.getResult().get("maj");
+                        Log.d(LOG_TAG, "onComplete: "+task.getResult().get("maj").getClass().toString());
+
+                        Timestamp majDCBB =(Timestamp) task.getResult().get("maj");
+                        Log.d(LOG_TAG, "onComplete: "+majDCBB);
+
+                        majDateCloudDataBase = majDCBB.toDate();
+                       // majDateCloudDataBase = (Date) task.getResult().get("maj");
                         Log.d(LOG_TAG, "NDS onComplete: majDBCloud " + majDateCloudDataBase);
 
                         majCloudDBLong = majDateCloudDataBase.getTime();
@@ -226,12 +233,16 @@ public class ChoraleNetWorkDataSource {
                                         String titre, groupe, baseUrlOriginalSong, urlCloudBackground;
                                         Date maj;
                                         int duration;
+                                        Timestamp majss;
 
                                         titre = (String) document.getData().get("titre");
                                         groupe = (String) document.getData().get("groupe");
                                         duration = ((Long) document.getData().get("duration")).intValue();
                                         baseUrlOriginalSong = (String) document.getData().get("original_song");
-                                        maj = (Date) document.getData().get("maj");
+
+                                        majss = (Timestamp) document.getData().get("maj");
+
+                                        maj = majss.toDate();
                                         urlCloudBackground = (String) document.getData().get("background");
 
                                         Log.d(LOG_TAG, "NDS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
@@ -257,6 +268,7 @@ public class ChoraleNetWorkDataSource {
 
                                                             final String pupitre, recordSource, urlMp3;
                                                             final Date maj;
+                                                            final Timestamp majs;
 
                                                             pupitre = (String) document.getData().get("pupitre");
 
@@ -267,7 +279,8 @@ public class ChoraleNetWorkDataSource {
 
                                                             urlMp3 = (String) document.getData().get("songPath");
 
-                                                            maj = (Date) document.getData().get("maj");
+                                                            majs= (Timestamp) document.getData().get("maj");
+                                                            maj = majs.toDate() ;
 
                                                             //todo comment faire pour faire une référence à sourceSong
                                                             titre = (String) document.getData().get("titre_song");

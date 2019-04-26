@@ -10,8 +10,11 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -78,14 +81,18 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
         duration = findViewById(R.id.et_duration_ss);
         background = findViewById(R.id.tv_background);
 
+        ActionBar actionBar = this.getSupportActionBar();
+
+        if(actionBar != null){
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
         mStorageRef = FirebaseStorage.getInstance().getReference();
         db = FirebaseFirestore.getInstance();
 
         sharedPreferences =PreferenceManager.getDefaultSharedPreferences(this);
         idChorale=sharedPreferences.getString("idchorale"," ");
         Log.d(TAG, "onCreate: idChorale "+ idChorale );
-
-        getLists();
 
 
         createSSInDb.setOnClickListener(new View.OnClickListener() {
@@ -117,11 +124,10 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
         selectBackground.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                getLists();
                 selectBackground();
             }
         });
-
-
     }
 
     //todo compléter le storage utilities pour chercher les lists sur le téléphone ou cloud
@@ -232,6 +238,7 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
 
                 if (data != null) {
                     imageSelected = data.getIntExtra("imageselected",-1);
+                    Log.d(TAG, "CS onActivityResult: "+imageSelected);
                 }
 
                 if(imageSelected!=-1) {
@@ -311,5 +318,14 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
     @Override
     public void onDialogNegativeClick() {
         finish();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id==android.R.id.home){
+            NavUtils.navigateUpFromSameTask(this);
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

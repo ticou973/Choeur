@@ -438,7 +438,10 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
         modifyMajChorale();
         getSuppSongs();
         suppSourceSong();
-        finish();
+        Intent startModifySSActivity = new Intent(ModifySourceSongDetails.this,ModifySourceSong.class);
+        startModifySSActivity.putExtra("origine","AdminHome");
+        startModifySSActivity.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(startModifySSActivity);
     }
 
     private void getSuppSongs() {
@@ -466,8 +469,6 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
                 }
             }
         });
-
-
     }
 
     private void deleteSongs() {

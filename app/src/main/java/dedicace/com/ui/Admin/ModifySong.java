@@ -4,14 +4,18 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -42,6 +46,12 @@ public class ModifySong extends AppCompatActivity implements SongAdapter.OnItemL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_modify_song);
 
+        ActionBar actionBar = this.getSupportActionBar();
+
+        if(actionBar != null){
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
         fab = findViewById(R.id.fab_Song);
 
 
@@ -59,6 +69,7 @@ public class ModifySong extends AppCompatActivity implements SongAdapter.OnItemL
 
     }
 
+    //todo voir pour passer par NDS pour aller chercher les données
     private void getListSongs() {
         try {
             db.collection("songs")
@@ -76,6 +87,7 @@ public class ModifySong extends AppCompatActivity implements SongAdapter.OnItemL
                                     Date maj;
                                     RecordSource source;
                                     Pupitre pupitre;
+                                    Timestamp majs;
 
                                     idDocument = document.getId();
                                     listId.add(idDocument);
@@ -83,7 +95,8 @@ public class ModifySong extends AppCompatActivity implements SongAdapter.OnItemL
                                     titre = (String) document.getData().get("titre_song");
                                     pupitreStr = (String) document.getData().get("pupitre");
                                     recordSource = (String) document.getData().get("recordSource");
-                                    maj = (Date) document.getData().get("maj");
+                                    majs = (Timestamp) document.getData().get("maj");
+                                    maj = majs.toDate() ;
                                     songPath = (String) document.getData().get("songPath");
 
                                     source = SongsUtilities.convertToRecordSource(recordSource);
@@ -128,5 +141,15 @@ public class ModifySong extends AppCompatActivity implements SongAdapter.OnItemL
         startDetailsSongActivity.putExtra("bundleSong", args);
         startActivity(startDetailsSongActivity);
 
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id==android.R.id.home){
+            NavUtils.navigateUpFromSameTask(this);
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

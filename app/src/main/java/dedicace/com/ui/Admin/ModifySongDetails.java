@@ -308,8 +308,9 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
         modifyMajChorale();
         modifyMajSourceSong();
         suppSong();
-        finish();
-
+        Intent startModifySongActivity = new Intent(ModifySongDetails.this,ModifySong.class);
+        startModifySongActivity.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(startModifySongActivity);
     }
 
     private void suppSong() {
