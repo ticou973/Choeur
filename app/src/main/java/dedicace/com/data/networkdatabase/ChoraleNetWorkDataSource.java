@@ -157,12 +157,20 @@ public class ChoraleNetWorkDataSource {
     }
 
 
-    //todo voir s'il faut le gérer avec un service
     public void getMajDateCloudDataBase() {
 
-        //todo revoir pourquoi cela ne marche pas !
-        //idChorale=sharedPreferences.getString("idChorale"," ");
-        idChorale="jFHncTuYleIHhZtL2PmT";
+        Log.d(LOG_TAG, "NDS startFetchSongsService: début pour maj");
+        Intent intentToFetchMaj = new Intent(mContext, ChoraleSyncIntentService.class);
+        intentToFetchMaj.putExtra("origine","maj");
+        mContext.startService(intentToFetchMaj);
+        Log.d(LOG_TAG, "NDS Service created pour maj");
+
+    }
+
+    public void fetchMajClouDb() {
+
+        idChorale=sharedPreferences.getString("idchorale"," ");
+        Log.d(LOG_TAG, "NDS getMajDateCloudDataBase: "+idChorale);
 
         if(!idChorale.equals(" ")) {
 
@@ -179,7 +187,7 @@ public class ChoraleNetWorkDataSource {
                         Log.d(LOG_TAG, "onComplete: "+majDCBB);
 
                         majDateCloudDataBase = majDCBB.toDate();
-                       // majDateCloudDataBase = (Date) task.getResult().get("maj");
+                        // majDateCloudDataBase = (Date) task.getResult().get("maj");
                         Log.d(LOG_TAG, "NDS onComplete: majDBCloud " + majDateCloudDataBase);
 
                         majCloudDBLong = majDateCloudDataBase.getTime();
@@ -209,10 +217,11 @@ public class ChoraleNetWorkDataSource {
     }
 
     public void startFetchSongsService() {
-        Log.d(LOG_TAG, "NDS startFetchSongsService: début");
+        Log.d(LOG_TAG, "NDS startFetchSongsService: début pour SS");
         Intent intentToFetch = new Intent(mContext, ChoraleSyncIntentService.class);
+        intentToFetch.putExtra("origine","sources");
         mContext.startService(intentToFetch);
-        Log.d(LOG_TAG, "NDS Service created");
+        Log.d(LOG_TAG, "NDS Service created pour SS");
     }
 
 
@@ -368,7 +377,7 @@ public class ChoraleNetWorkDataSource {
             //todo ajouter pathimage à la place de bgSong int
             source.setBackground(pathImage);
 
-            Log.d(LOG_TAG, "NDS uploadOnPhoneBgImages: " + localFileImage.getParent() + " " + filename + " " + localFileImage.getPath() + " " + localFileImage.getAbsolutePath());
+            Log.d(LOG_TAG, "NDS uploadOnPhoneBgImages: " + localFileImage.getParent() + " " + filename + " " + localFileImage.getPath() + " " + localFileImage.getAbsolutePath()+" "+Thread.currentThread().getName());
 
             mStorageRef.getFile(localFileImage)
                     .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
@@ -457,6 +466,7 @@ public class ChoraleNetWorkDataSource {
 
     }
 
+    //todo faire dans le service data cloud
     private void uploadOnPhoneMp3(List<Song> listMp3) {
 
         Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: fct upload "+ listMp3.size()+" "+Thread.currentThread().getName());
@@ -581,6 +591,7 @@ public class ChoraleNetWorkDataSource {
         return mMajDbCloudLong;
     }
 
+    //todo pourquoi dans le NDS ?
     public void deleteSongsMp3OnPhone(List<Song> deletedSongsList) {
 
         mExecutors.storageIO().execute(new Runnable() {
@@ -592,12 +603,16 @@ public class ChoraleNetWorkDataSource {
                     String name = tempFile.getName();
                     Log.d(LOG_TAG, "NDS deleteMp3OnPhone: name "+ name);
 
-                    //todo vérifier si le fichier existe
+                    if (tempFile.exists()) {
+                        Log.d(LOG_TAG, "NDS run: le fichier existe  donc sera supprimé !");
+                        if(mContext.deleteFile(name)){
+                            Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: mp3 effacé "+song.getSourceSongTitre());
+                        }else{
+                            Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: erreur d'effacement de Mp3 ");
+                        }
 
-                    if(mContext.deleteFile(name)){
-                        Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: mp3 effacé "+song.getSourceSongTitre());
                     }else{
-                        Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: erreur d'effacement de Mp3 ");
+                        Log.d(LOG_TAG, "NDS run: e fichier n'existe pas donc ne peut être supprimé !");
                     }
                 }
             }
@@ -615,11 +630,15 @@ public class ChoraleNetWorkDataSource {
                     String name = tempfile.getName();
                     Log.d(LOG_TAG, "NDS deleteBgOnPhone: name "+ name);
 
-                    //todo vérifier si le fichier existe
-                    if(mContext.deleteFile(name)){
-                        Log.d(LOG_TAG, "NDS deleteBgOnPhone: background effacé "+source.getTitre());
+                    if(tempfile.exists()){
+                        Log.d(LOG_TAG, "NDS run: le fichier existe  donc sera supprimé !");
+                        if(mContext.deleteFile(name)){
+                            Log.d(LOG_TAG, "NDS deleteBgOnPhone: background effacé "+source.getTitre());
+                        }else{
+                            Log.d(LOG_TAG, "NDS deleteBgOnPhone: erreur d'effcement de background ");
+                        }
                     }else{
-                        Log.d(LOG_TAG, "NDS deleteBgOnPhone: erreur d'effcement de background ");
+                        Log.d(LOG_TAG, "NDS run: e fichier n'existe pas donc ne peut être supprimé !");
                     }
                 }
             }

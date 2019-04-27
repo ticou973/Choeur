@@ -58,7 +58,13 @@ public class ChoraleRepository {
     private List<SourceSong> modifiedSourceSongsList = new ArrayList<>();
     private List<Song> modifiedSongsList = new ArrayList<>();
     private List<SourceSong> bgSourcesToDelete = new ArrayList<>();
+    private List<SourceSong> bgSourcesToDownLoad = new ArrayList<>();
+
     private List<Song>  mp3SongsToDelete = new ArrayList<>();
+    private List<Song>  mp3SongsToDownload = new ArrayList<>();
+    private List<Song> tempSongs = new ArrayList<>();
+    private List<SourceSong> tempSourceSongs = new ArrayList<>();
+
 
 
     private List<List<Song>> SongOnPhonesBS= new ArrayList<>();
@@ -92,7 +98,6 @@ public class ChoraleRepository {
         mSourceDao=sourceSongDao;
         mChoraleNetworkDataSource = choraleNetworkDataSource;
         mExecutors = executors;
-
 
         mExecutors.diskIO().execute(new Runnable() {
             @Override
@@ -167,23 +172,22 @@ public class ChoraleRepository {
                 currentThread = Thread.currentThread();
                 Log.d(LOG_TAG, "CR run: currentThread "+currentThread+" "+isFromLocal);
 
-               // processor.consume();
-
                 if(!isFromLocal) {
                     Log.d(LOG_TAG, "CR run: if from local avant synchronisation db");
                     synchronisationLocalDataBase(sourceSongs,songs);
+                    //chercher les Sourcesongs sur Room
+                    sourceSongsAfterSync=mSourceDao.getAllSources();
+                    songsAfterSync=mSongDao.getAllSongs();
                 }else{
                     //todo trouver une méthode un peu moins artificielle ? cf modèle architecture.
                     Log.d(LOG_TAG, "CR run: else isFrom Local pas de synchronisation");
+                    //mis pour que alerte se déclenche
                     mSourceDao.updateSourceSong(oldSourcesSongs.get(0));
+                    sourceSongsAfterSync=oldSourcesSongs;
+                    songsAfterSync=oldSongs;
                 }
 
-                //chercher les Sourcesongs sur Room
-                sourceSongsAfterSync=mSourceDao.getAllSources();
-                songsAfterSync=mSongDao.getAllSongs();
-
                 listSongs= new ListSongs(mSongDao,mSourceDao,sourceSongsAfterSync,songsAfterSync);
-
                 listSongs.getSongOnClouds();
 
                 Log.d(LOG_TAG, "CR ChoraleRepository LiveData après sync sourceSongs : "+sourceSongs.size()+ " "+sourceSongsAfterSync.size()+" "+Thread.currentThread().getName());
@@ -215,7 +219,6 @@ public class ChoraleRepository {
 
                 Log.d(LOG_TAG, "CR ChoraleRepository LiveData après tout : "+Thread.currentThread().getName());
 
-
             }
         });
 
@@ -226,31 +229,22 @@ public class ChoraleRepository {
 
 
     private void synchronisationLocalDataBase(List<SourceSong> sourceSongs, List<Song> songs) {
-        //todo à retirer dès que cela marche (test)
-        for (SourceSong source:sourceSongs) {
-            List<Song> listBs = mSongDao.getSongsOnPhone(source.getTitre(),RecordSource.BANDE_SON);
-            //Log.d(LOG_TAG, "CR synchronisationLocalDataBase: test Database Room "+ listBs.size());
-            if(listBs!=null){
-                for (int i = 0; i <listBs.size() ; i++) {
-                    Log.d(LOG_TAG, "CR getSongOnPhoneBS: listBs songs dans synchronisation "+listBs.get(i).getSourceSongTitre()+" "+listBs.get(i).getPupitre());
-                }
-            }
-        }
 
-        deletedSongsList(songs);
+        getLists(sourceSongs,songs);
+
         if(deletedSongsList!=null&&deletedSongsList.size()!=0){
             mChoraleNetworkDataSource.deleteSongsMp3OnPhone(deletedSongsList);
             mSongDao.deleteSongs(deletedSongsList);
         }
 
-        deletedSourceSongsList(sourceSongs);
+
         if(deletedSourceSongsList!=null&&deletedSourceSongsList.size()!=0){
             mChoraleNetworkDataSource.deleteBgOnPhone(deletedSourceSongsList);
             mSourceDao.deleteSourceSongs(deletedSourceSongsList);
         }
 
         //todo non utilisé pour l'instant gérer au niveau de la db avec suppression et création après
-        modifiedSongsList(songs);
+
         if(modifiedSongsList!=null&&modifiedSongsList.size()!=0){
             if(mp3SongsToDelete!=null&&mp3SongsToDelete.size()!=0) {
                 mChoraleNetworkDataSource.deleteSongsMp3OnPhone(mp3SongsToDelete);
@@ -271,21 +265,23 @@ public class ChoraleRepository {
                 tempSong.setRecordSource(song.getRecordSource());
                 tempSong.setSourceSongTitre(song.getSourceSongTitre());
                 tempSong.setUrlCloudMp3(song.getUrlCloudMp3());
+                tempSongs.add(tempSong);
+               }
 
+            int tempInt = mSongDao.updatesSongs(tempSongs);
 
-                int tempInt = mSongDao.updateSongs(tempSong);
-
-                Log.d(LOG_TAG, "CR synchronisationLocalDataBase: nb d'update Songs "+tempInt+" "+mSongDao.getSongsByTitrePupitreSource(titre,pupitre,recordSource).getSourceSongTitre());
-            }
+            Log.d(LOG_TAG, "CR synchronisationLocalDataBase: nb d'update Songs "+tempInt);
         }
 
-        modifiedSourcesSongsList(sourceSongs);
+
         if(modifiedSourceSongsList!=null&&modifiedSourceSongsList.size()!=0){
 
             if(bgSourcesToDelete!=null&&bgSourcesToDelete.size()!=0) {
                 mChoraleNetworkDataSource.deleteBgOnPhone(bgSourcesToDelete);
             }
-            mChoraleNetworkDataSource.downloadBgImage(modifiedSourceSongsList);
+            if(bgSourcesToDownLoad!=null&&bgSourcesToDownLoad.size()!=0) {
+                mChoraleNetworkDataSource.downloadBgImage(bgSourcesToDelete);
+            }
 
             for (SourceSong source:modifiedSourceSongsList) {
                 Log.d(LOG_TAG, "CR synchronisationLocalDataBase: milieu source "+source.getTitre()+" "+source.getUpdatePhone()+" "+source.getDuration());
@@ -300,21 +296,20 @@ public class ChoraleRepository {
                 tempSource.setGroupe(source.getGroupe());
                 tempSource.setUrlCloudBackground(source.getUrlCloudBackground());
 
-                int tempInt = mSourceDao.updateSourceSongs(tempSource);
+                tempSourceSongs.add(tempSource);
+                 }
+            int tempInt = mSourceDao.upDateSourceSongs(tempSourceSongs);
 
-                Log.d(LOG_TAG, "CR synchronisationLocalDataBase: nb d'update SS"+tempInt+mSourceDao.getSourceSongByTitre(source.getTitre()));
-               // mSourceDao.deleteSourceSong(tempSource);
-               // mSourceDao.insertSourceSong(source);
-            }
+            Log.d(LOG_TAG, "CR synchronisationLocalDataBase: nb d'update SS"+tempInt);
         }
 
-        newSourceSongsList(sourceSongs);
+
         if(newSourceSongsList!=null&&newSourceSongsList.size()!=0){
             mChoraleNetworkDataSource.downloadBgImage(newSourceSongsList);
             mSourceDao.bulkInsert(newSourceSongsList);
         }
 
-        newSongsList(songs);
+
         if(newSongsList!=null&newSongsList.size()!=0){
             Log.d(LOG_TAG, "NDS1 synchronisationLocalDataBase: "+Thread.currentThread().getName());
             mChoraleNetworkDataSource.downloadMp3(newSongsList);
@@ -338,6 +333,15 @@ public class ChoraleRepository {
         editor.putLong("majDB",majCloudDBLong);
         editor.apply();
 
+    }
+
+    private void getLists(List<SourceSong> sourceSongs, List<Song> songs){
+        deletedSongsList(songs);
+        deletedSourceSongsList(sourceSongs);
+        modifiedSongsList(songs);
+        modifiedSourcesSongsList(sourceSongs);
+        newSourceSongsList(sourceSongs);
+        newSongsList(songs);
     }
 
     //todo voir pour les mettre dans SongsUtilities
@@ -376,6 +380,7 @@ public class ChoraleRepository {
         Log.d(LOG_TAG, "CR deletedSourceSongsList: "+ deletedSourceSongsList.size());
     }
 
+
     private void modifiedSongsList(List<Song> songs) {
         Log.d(LOG_TAG, "CR modifiedSongsList: entrée méthode");
         for (Song song:songs) {
@@ -408,6 +413,7 @@ public class ChoraleRepository {
                         modifiedSourceSongsList.add(source);
                         if(!oldSource.getUrlCloudBackground().equals(source.getUrlCloudBackground())){
                             bgSourcesToDelete.add(oldSource);
+                            bgSourcesToDownLoad.add(source);
                         }
                     }
                 }
@@ -460,17 +466,6 @@ public class ChoraleRepository {
         // performed, we have nothing to do in this method.
         if (mInitialized) return;
         mInitialized = true;
-
-        /*mExecutors.diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-
-                //todo vérifier l'utilité du sourceBeforSync ?
-                //chercher les Sourcesongs sur Room
-               sourceSongsBeforeSync=mSourceDao.getAllSources();
-                Log.d(LOG_TAG, "CR run initialize Data SourceSongsBeforeSync: "+sourceSongsBeforeSync.size()+ " "+Thread.currentThread().getName());
-            }
-        });*/
 
         if (isFetchNeeded()) {
             currentPupitreStr=getCurrentPupitreStr();

@@ -34,7 +34,7 @@ public interface SourceSongDao {
     void updateSourceSong(SourceSong sourceSong);
 
     @Update
-    void upDateSourceSongs(List<SourceSong> sourceSongs);
+    int upDateSourceSongs(List<SourceSong> sourceSongs);
 
     @Update
     int updateSourceSongs(SourceSong...sourceSongs);

@@ -31,7 +31,7 @@ public class AppExecutors {
                 sInstance = new AppExecutors(Executors.newSingleThreadExecutor(),
                         Executors.newSingleThreadExecutor(),
                         new MainThreadExecutor(),
-                        Executors.newSingleThreadExecutor());
+                        Executors.newFixedThreadPool(2));
             }
         }
         return sInstance;

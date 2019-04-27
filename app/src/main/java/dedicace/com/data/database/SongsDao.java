@@ -65,7 +65,7 @@ public interface SongsDao {
     void updateSong(Song song);
 
     @Update
-    void updatesSongs(List<Song> songs);
+    int updatesSongs(List<Song> songs);
 
     @Update
     int updateSongs(Song...songs);

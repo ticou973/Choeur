@@ -30,6 +30,7 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -41,7 +42,7 @@ import java.util.Map;
 
 import dedicace.com.R;
 
-public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFragment.DialogNewSSListener {
+public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFragment.DialogNewSSListener, OnFailureListener {
 
     private Button createSSInDb,selectBackground;
     private EditText titre, groupe, duration;
@@ -209,8 +210,9 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
                     Log.d(TAG, "CSS onComplete: "+downloadUrl);
                 } else {
                     // Handle failures
+
                     // ...
-                    Log.d(TAG, "CSS onComplete: Il y a eu un pb");
+                    Log.d(TAG, "CSS onComplete: Il y a eu un pb "+task.getException().getMessage());
                 }
             }
         });
@@ -242,9 +244,11 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
                 }
 
                 if(imageSelected!=-1) {
-                    background.setText(listFilesImage.get(imageSelected));
-                    pathSelected = listPath.get(imageSelected);
-                    fileNameSelected = listFilesImage.get(imageSelected);
+                    String name = listImages[imageSelected];
+                    background.setText(name);
+                    //pathSelected = listPath.get(imageSelected);
+                    pathSelected=listFiles[imageSelected].getAbsolutePath();
+                    fileNameSelected = name;
                     Log.d(TAG, "CSS onCreate: " + pathSelected);
                 }
             }
@@ -327,5 +331,14 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
             NavUtils.navigateUpFromSameTask(this);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onFailure(@NonNull Exception e) {
+        int errorCode = ((StorageException) e).getErrorCode();
+        String errorMessage = e.getMessage();
+
+        Log.d(TAG, "CSS onFailure: "+ errorMessage+" "+errorCode);
+
     }
 }

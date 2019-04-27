@@ -189,9 +189,11 @@ public class CreateSong extends AppCompatActivity implements DialogNewSSFragment
                 }
 
                 if (mp3Selected != -1) {
-                    fileMp3.setText(listFilesMp3.get(mp3Selected));
-                    pathSelected = listPath.get(mp3Selected);
-                    fileNameSelected = listFilesMp3.get(mp3Selected);
+                    String name = listMp3[mp3Selected];
+                    fileMp3.setText(name);
+                   // pathSelected = listPath.get(mp3Selected);
+                    pathSelected =listFiles[mp3Selected].getAbsolutePath();
+                    fileNameSelected = name;
                     Log.d(TAG, "CS onCreate: " + pathSelected);
                 }
             } else if (requestCode == REQUEST_CODE_B) {
