@@ -87,7 +87,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
 
     //Autres méthodes
     private void initDataSourceSong(SongsViewHolder songsViewHolder, int position) {
-        Log.d(TAG, "SA initDataSourceSong: SA");
+        Log.d(TAG, "SA initDataSourceSong: SA "+sourceSongs.get(position).getBackground()+" "+sourceSongs.get(position).getTitre());
         //initialisation de la sourceSong
         songsViewHolder.setTitre(sourceSongs.get(position).getTitre());
         songsViewHolder.setGroupe(sourceSongs.get(position).getGroupe());

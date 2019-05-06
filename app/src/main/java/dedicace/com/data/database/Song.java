@@ -18,6 +18,9 @@ public class Song {
     @PrimaryKey(autoGenerate = true)
     private int songId;
 
+   @ColumnInfo(name = "id_cloud")
+    private String songIdCloud;
+
     @ColumnInfo (name ="titre_song")
     private String sourceSongTitre;
 
@@ -67,8 +70,9 @@ public class Song {
         this.updatePhoneMp3 = updatePhoneMp3;
     }
 
-    public Song(int songId, String sourceSongTitre, RecordSource recordSource, Pupitre pupitre, String songPath, String urlCloudMp3, Date updatePhone, Date updatePhoneMp3) {
+    public Song(int songId, String sourceSongTitre, RecordSource recordSource, Pupitre pupitre, String songPath, String urlCloudMp3, Date updatePhone, Date updatePhoneMp3, String songIdCloud) {
         this.songId = songId;
+        this.songIdCloud=songIdCloud;
         this.sourceSongTitre = sourceSongTitre;
         this.recordSource = recordSource;
         this.pupitre = pupitre;
@@ -86,6 +90,16 @@ public class Song {
         this.pupitre = pupitre;
         this.updatePhone = updatePhone;
         this.urlCloudMp3 =urlCloudMp3;
+    }
+
+    @Ignore
+    public Song(String songIdCloud, String sourceSongTitre, RecordSource recordSource, Pupitre pupitre, String urlCloudMp3, Date updatePhone) {
+        this.songIdCloud = songIdCloud;
+        this.sourceSongTitre = sourceSongTitre;
+        this.recordSource = recordSource;
+        this.pupitre = pupitre;
+        this.urlCloudMp3 = urlCloudMp3;
+        this.updatePhone = updatePhone;
     }
 
     public int getSongId() {
@@ -154,5 +168,13 @@ public class Song {
 
     public void setUrlCloudMp3(String urlCloudMp3) {
         this.urlCloudMp3 = urlCloudMp3;
+    }
+
+    public String getSongIdCloud() {
+        return songIdCloud;
+    }
+
+    public void setSongIdCloud(String songIdCloud) {
+        this.songIdCloud = songIdCloud;
     }
 }

@@ -91,13 +91,11 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
 
         sharedPreferences =PreferenceManager.getDefaultSharedPreferences(this);
         idChorale=sharedPreferences.getString("idchorale"," ");
-        Log.d(TAG, "onCreate: idChorale "+ idChorale );
+        Log.d(TAG, "MSSD onCreate: idChorale "+ idChorale );
 
         getIntentBundle();
 
         completeOld();
-
-        getLists();
 
         suppSS.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,7 +123,8 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
 
                 if(!newTitreStr.equals("")||!newGroupeStr.equals("")||!newBackgroundStr.equals("Select. Backgr.")||newDurationInt!=0){
                     Log.d(TAG, "MSSD onClick: conditions passées "+ newTitreStr+ " "+newGroupeStr+" "+newDurationInt+" "+newBackgroundStr);
-                    insertSSinDb();
+                   insertBackgroundInCloudStorage();
+                   //insertSSinDb();
 
                 }else{
                     Toast.makeText(ModifySourceSongDetails.this, "Il manque des éléments pour insérer", Toast.LENGTH_SHORT).show();
@@ -137,6 +136,7 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
         selectBackground.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                getLists();
                 selectBackground();
             }
         });
@@ -144,8 +144,12 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
     }
 
     private void insertBackgroundInCloudStorage() {
+        sourceSong = new HashMap<>();
+        sourceSong.put("maj",Timestamp.now());
+        Log.d(TAG, "MSSD insertSSinDb: "+idSS);
 
         if(!newBackgroundStr.equals("Select. Backgr.")){
+            Log.d(TAG, "MSSD insertSSinDb: if background");
 
             fileSelected = Uri.fromFile(new File(pathSelected));
             StorageReference imageRef = mStorageRef.child("songs/photos_background/"+fileNameSelected);
@@ -155,8 +159,7 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
             uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    Log.d(TAG, "CSS onSuccess: bravo c'est uploader");
-
+                    Log.d(TAG, "CSS onSuccess: bravo c'est uploadé !");
                 }
             })
                     .addOnFailureListener(new OnFailureListener() {
@@ -184,7 +187,8 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
                     if (task.isSuccessful()) {
                         downloadUrl = task.getResult();
                         sourceSong.put("background",downloadUrl.toString());
-                        insertCloud();
+                        //insertCloud();
+                        insertSSinDb();
                         Log.d(TAG, "CSS onComplete: "+downloadUrl);
                     } else {
                         // Handle failures
@@ -194,15 +198,14 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
                 }
             });
 
+        }else{
+            //todo mettre insert plus bas et enlever les 2 du if else
+            Log.d(TAG, "MSSD insertBackgroundInCloudStorage: else if background");
+            insertSSinDb();
         }
-
     }
 
     private void insertSSinDb() {
-        sourceSong = new HashMap<>();
-        sourceSong.put("maj",Timestamp.now());
-        Log.d(TAG, "MSSD insertSSinDb: "+idSS);
-
 
        if(!newGroupeStr.equals("")){
             Log.d(TAG, "MSSD insertSSinDb: if groupe");
@@ -213,12 +216,13 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
             sourceSong.put("duration",newDurationInt);
         }
 
-        if(!newTitreStr.equals("")){
+        if(!newTitreStr.equals("")) {
             DialogFragment dialog = new DialogAlertTitle();
-            dialog.show(getSupportFragmentManager(),TAG);
+            dialog.show(getSupportFragmentManager(), TAG);
             Log.d(TAG, "MSSD insertSSinDb: if titre");
         }else{
-           ifBackground();
+            Log.d(TAG, "MSSD insertSSinDb: else titre");
+            insertCloud();
         }
 
     }
@@ -231,14 +235,21 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "MSSD onSuccess: maj sourcesong done");
-                        File file = new File(pathSelected);
-                        if(file.delete()){
-                            Log.d(TAG, "MSSD onSuccess: le fichier est supprimé du local");
+                        if(pathSelected!=null) {
+                            File file = new File(pathSelected);
+                            if (file.delete()) {
+                                Log.d(TAG, "MSSD onSuccess: le fichier est supprimé du local");
+                            } else {
+                                Log.d(TAG, "MSSD onSuccess: problème de suppression en local du fichier");
+                            }
                         }else{
-                            Log.d(TAG, "MSSD onSuccess: problème de suppression en local du fichier");
+                            Log.d(TAG, "MSSD onSuccess: il n'y a pas de fichier à supprimer car pas de modif de background");
                         }
+
                         modifyMajChorale();
-                        finish();
+                        Intent startMSS = new Intent(ModifySourceSongDetails.this,ModifySourceSong.class);
+                        startMSS.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        startActivity(startMSS);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -280,6 +291,7 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
         oldGroupeStr=args.getString("oldGroupe");
         oldDurationInt=args.getInt("oldDuration");
         idSS=args.getString("idSS");
+        Log.d(TAG, "MSSD getIntentBundle: "+oldTitreStr+" "+oldGroupeStr+" "+oldDuration+" "+idSS);
     }
 
     private void completeOld() {
@@ -297,33 +309,33 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
         File file = new File(path,"DedicaceAdmin/Image_Background_Chorale");
 
         if(file.mkdirs()){
-            Log.d(TAG, "CSS insertBackgroundInCloudStorage: le dossier est fait");
+            Log.d(TAG, "MSSD insertBackgroundInCloudStorage: le dossier est fait");
 
         }else{
-            Log.d(TAG, "CSS insertBackgroundInCloudStorage: dossier non réalisé ou déjà fait");
+            Log.d(TAG, "MSSD insertBackgroundInCloudStorage: dossier non réalisé ou déjà fait");
         }
 
         if(file.exists()){
             listFiles = file.listFiles();
 
             for (File image:listFiles) {
-                Log.d(TAG, "CSS selectBackground: "+image.getName());
+                Log.d(TAG, "MSSD selectBackground: "+image.getName());
                 listFilesImage.add(image.getName());
                 listPath.add(image.getAbsolutePath());
             }
 
-            Log.d(TAG, "CSS selectBackground: "+listFilesImage.size()+" "+listFiles.length);
+            Log.d(TAG, "MSSD selectBackground: "+listFilesImage.size()+" "+listFiles.length);
 
             listImages = new String[listFiles.length];
 
             for (int i = 0; i < listFiles.length; i++) {
                 listImages[i]=listFiles[i].getName();
 
-                Log.d(TAG, "selectBackground: "+listFiles[i].getName());
+                Log.d(TAG, "MSSD selectBackground: "+listFiles[i].getName()+listImages[i]);
             }
         }
 
-        Log.d(TAG, "CSS : selectBackground: "+ listImages.length);
+        Log.d(TAG, "MSSD : selectBackground: "+ listImages.length);
     }
 
     private void selectBackground() {
@@ -338,7 +350,7 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode== Activity.RESULT_OK){
-            Log.d(TAG, "MSS onActivityResult: ok cela marche");
+            Log.d(TAG, "MSSD onActivityResult: ok cela marche");
             if(requestCode==REQUEST_CODE){
 
                 if (data != null) {
@@ -346,20 +358,21 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
                 }
 
                 if(imageSelected!=-1) {
-                    newBackground.setText(listFilesImage.get(imageSelected));
-                    pathSelected = listPath.get(imageSelected);
-                    fileNameSelected = listFilesImage.get(imageSelected);
+                    String name = listImages[imageSelected];
+                    newBackground.setText(name);
+                    pathSelected=listFiles[imageSelected].getAbsolutePath();
+                    fileNameSelected = name;
                     Log.d(TAG, "MSS onCreate: " + pathSelected);
                 }
             }
         }else{
-            Log.d(TAG, "MSS onActivityResult: petit problème au retour ");
+            Log.d(TAG, "MSSD onActivityResult: petit problème au retour ");
         }
     }
 
     @Override
     public void onDialogPositiveClick() {
-        Log.d(TAG, "MSSD onDialogPositiveClick: ");
+        Log.d(TAG, "MSSD onDialogPositiveClick: "+newTitreStr);
         sourceSong.put("titre",newTitreStr);
         CollectionReference songsRef=db.collection("songs");
         Query query = songsRef.whereEqualTo("titre_song",oldTitreStr);
@@ -385,13 +398,18 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
             }
         });
 
-        ifBackground();
+        //ifBackground();
     }
 
     private void ifBackground() {
         if(!newBackgroundStr.equals("Select. Backgr.")){
             Log.d(TAG, "MSSD insertSSinDb: if background");
-
+            File file = new File(pathSelected);
+            if(file.delete()){
+                Log.d(TAG, "MSSD onSuccess: le fichier est supprimé du local");
+            }else{
+                Log.d(TAG, "MSSD onSuccess: problème de suppression en local du fichier");
+            }
             insertBackgroundInCloudStorage();
 
         }else{
@@ -407,12 +425,14 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
         Log.d(TAG, "MSSD changeSongsName: ");
 
         for(String name:listIds){
+            //todo faire un try catch là dessus
             db.collection("songs").document(name)
                     .update(data)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
                             Log.d(TAG, "MSSD onSuccess: Ok pour chgt de noms des songs ");
+                            insertCloud();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -430,7 +450,8 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
 
         Toast.makeText(this, "Nous n'avons pas inséré le nouveau titre ", Toast.LENGTH_SHORT).show();
 
-        ifBackground();
+        //ifBackground();
+        insertCloud();
     }
 
     @Override

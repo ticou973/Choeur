@@ -143,27 +143,33 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
             Log.d(TAG, "CSS insertBackgroundInCloudStorage: dossier non réalisé ou déjà fait");
         }
 
-        if(file.exists()){
+        if(file.exists()) {
             listFiles = file.listFiles();
 
-            for (File image:listFiles) {
-                Log.d(TAG, "CSS selectBackground: "+image.getName());
-                listFilesImage.add(image.getName());
-                listPath.add(image.getAbsolutePath());
-            }
+            Log.d(TAG, "CSS getLists: " + listFiles);
 
-            Log.d(TAG, "CSS selectBackground: "+listFilesImage.size()+" "+listFiles.length);
+            if (listFiles != null && listFiles.length != 0) {
+                for (File image : listFiles) {
+                    Log.d(TAG, "CSS selectBackground: " + image.getName());
+                    listFilesImage.add(image.getName());
+                    listPath.add(image.getAbsolutePath());
+                }
 
-            listImages = new String[listFiles.length];
+                Log.d(TAG, "CSS selectBackground: " + listFilesImage.size() + " " + listFiles.length);
 
-            for (int i = 0; i < listFiles.length; i++) {
-                listImages[i]=listFiles[i].getName();
+                listImages = new String[listFiles.length];
 
-                Log.d(TAG, "selectBackground: "+listFiles[i].getName());
+                for (int i = 0; i < listFiles.length; i++) {
+                    listImages[i] = listFiles[i].getName();
+
+                    Log.d(TAG, "selectBackground: " + listFiles[i].getName());
+                }
+            }else{
+                Log.d(TAG, "CSS getLists: pas de listFiles ");
             }
         }
 
-        Log.d(TAG, "CSS : selectBackground: "+ listImages.length);
+    //    Log.d(TAG, "CSS : selectBackground: "+ listImages.length);
     }
 
     private void insertBackgroundInCloudStorage() {

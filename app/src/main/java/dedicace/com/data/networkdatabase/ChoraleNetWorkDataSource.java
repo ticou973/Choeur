@@ -29,13 +29,10 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import dedicace.com.AppExecutors;
-import dedicace.com.R;
 import dedicace.com.WorkerThread;
 import dedicace.com.data.database.AppDataBase;
 import dedicace.com.data.database.Pupitre;
@@ -77,6 +74,7 @@ public class ChoraleNetWorkDataSource {
     //Songs
     private final MutableLiveData<List<SourceSong>> mDownloaderSourceSongs;
     private final MutableLiveData<Long> mMajDbCloudLong;
+    private final MutableLiveData<String> downloads;
     private List<SourceSong> sourceSongs = new ArrayList<>();
     private List<SourceSong> oldSourcesSongs = new ArrayList<>();
     private List<SourceSong> listDownLoadImages;
@@ -86,6 +84,11 @@ public class ChoraleNetWorkDataSource {
     private String titre;
     private String currentPupitreStr;
     private List<Pupitre> pupitreToUpload = new ArrayList<>();
+    private List<SourceSong> bgDownload = new ArrayList<>();
+    private List<SourceSong> newBgDownload = new ArrayList<>();
+    private List<Song> mp3Download = new ArrayList<>();
+    private List<Song> newMp3Download = new ArrayList<>();
+
 
     //DB
     private FirebaseFirestore db;
@@ -120,6 +123,7 @@ public class ChoraleNetWorkDataSource {
         mExecutors = executors;
         mDownloaderSourceSongs = new MutableLiveData<>();
         mMajDbCloudLong = new MutableLiveData<>();
+        downloads = new MutableLiveData<>();
         Log.d(LOG_TAG, "NetworkDataSource: constructor " + mDownloaderSourceSongs);
         db = FirebaseFirestore.getInstance();
         mStorage = FirebaseStorage.getInstance();
@@ -167,6 +171,7 @@ public class ChoraleNetWorkDataSource {
 
     }
 
+
     public void fetchMajClouDb() {
 
         idChorale=sharedPreferences.getString("idchorale"," ");
@@ -208,13 +213,28 @@ public class ChoraleNetWorkDataSource {
 
     }
 
-    private void getMajDateLocalDataBase() {
-        sharedPreferences =PreferenceManager.getDefaultSharedPreferences(mContext);
+    public void startDownloadService(List<SourceSong> bgSourcesToDownLoad, List<SourceSong> newSourceSongsList, List<Song> mp3SongsToDownload, List<Song> newSongsList){
+        Log.d(LOG_TAG, "NDS startFetchSongsService: début pour Download");
+        bgDownload=bgSourcesToDownLoad;
+       newBgDownload=newSourceSongsList;
+        mp3Download=mp3SongsToDownload;
+        newMp3Download=newSongsList;
 
-        majLocalDBLong =sharedPreferences.getLong("majDB",0);
-        Log.d(LOG_TAG, "NDS : datelong : local "+new Date(majLocalDBLong)+" cloud "+majCloudDB+ " comparaison Long-local/Cloud "+ majLocalDBLong+" "+majCloudDBLong);
-
+        Intent intentToDowload = new Intent(mContext, ChoraleSyncIntentService.class);
+        intentToDowload.putExtra("origine","download");
+        mContext.startService(intentToDowload);
+        Log.d(LOG_TAG, "NDS Service created pour Download");
     }
+
+    public void downloadImagesMp3(){
+
+        downloadBgImage(bgDownload);
+        downloadBgImage(newBgDownload);
+        downloadMp3(mp3Download);
+        downloadMp3(newMp3Download);
+        downloads.postValue("done");
+    }
+
 
     public void startFetchSongsService() {
         Log.d(LOG_TAG, "NDS startFetchSongsService: début pour SS");
@@ -239,11 +259,12 @@ public class ChoraleNetWorkDataSource {
                                         Log.d(LOG_TAG, "NDS-exec deb Oncomplete " + document.getId() + " => " + document.getData().get("maj"));
                                         //todo voir comment écrire une seule ligne avec ToObject
 
-                                        String titre, groupe, baseUrlOriginalSong, urlCloudBackground;
+                                        String titre, groupe, baseUrlOriginalSong, urlCloudBackground,idCloud;
                                         Date maj;
                                         int duration;
                                         Timestamp majss;
 
+                                        idCloud=(String) document.getId();
                                         titre = (String) document.getData().get("titre");
                                         groupe = (String) document.getData().get("groupe");
                                         duration = ((Long) document.getData().get("duration")).intValue();
@@ -255,7 +276,8 @@ public class ChoraleNetWorkDataSource {
                                         urlCloudBackground = (String) document.getData().get("background");
 
                                         Log.d(LOG_TAG, "NDS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
-                                        SourceSong sourceSong = new SourceSong(titre, groupe, duration, urlCloudBackground, baseUrlOriginalSong, maj);
+                                        SourceSong sourceSong = new SourceSong(idCloud,titre,groupe,duration,urlCloudBackground,baseUrlOriginalSong,maj);
+
                                         sourceSongs.add(sourceSong);
                                     }
 
@@ -275,9 +297,11 @@ public class ChoraleNetWorkDataSource {
                                                         for (QueryDocumentSnapshot document : task.getResult()) {
                                                             Log.d(LOG_TAG, "NDS-exec " + document.getId() + " => " + document.getData().get("pupitre"));
 
-                                                            final String pupitre, recordSource, urlMp3;
+                                                            final String pupitre, recordSource, urlMp3, idCloud;
                                                             final Date maj;
                                                             final Timestamp majs;
+
+                                                            idCloud = document.getId();
 
                                                             pupitre = (String) document.getData().get("pupitre");
 
@@ -294,7 +318,7 @@ public class ChoraleNetWorkDataSource {
                                                             //todo comment faire pour faire une référence à sourceSong
                                                             titre = (String) document.getData().get("titre_song");
                                                             Log.d(LOG_TAG, "NDS-exec : onComplete:B Songs " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
-                                                            Song song = new Song(titre, sourceObj, pupitreObj, maj, urlMp3);
+                                                            Song song = new Song(idCloud,titre,sourceObj,pupitreObj,urlMp3,maj);
                                                             songs.add(song);
                                                         }
                                                         Log.d(LOG_TAG, "NDS-exec onComplete: avant post " + songs);
@@ -323,49 +347,14 @@ public class ChoraleNetWorkDataSource {
 
     //todo faire des download qu'avec wifi ou suivant préférences
     public void downloadBgImage(List<SourceSong> sourceSongs) {
-
         if (sourceSongs != null) {
-            Log.d(LOG_TAG, "NDS downloadBgImage: uploadImage ");
+            Log.d(LOG_TAG, "NDS downloadBgImage: uploadImage "+sourceSongs);
             uploadOnPhoneBgImages(sourceSongs);
         } else {
             Log.d(LOG_TAG, "NDS downloadBgImage: pas d'images de Background à sauvegarder");
         }
     }
 
-    private List<SourceSong> getListDownloadBgImages() {
-
-        List<SourceSong> tempList = new ArrayList<>();
-        int i;
-
-        for (SourceSong newSource : sourceSongs) {
-            i = 0;
-            Log.d(LOG_TAG, "NDS getListDownloadBgImages: "+ newSource.getUrlCloudBackground());
-            //todo gérer les oldsourcessongs
-            if(oldSourcesSongs.size()!=0) {
-                Log.d(LOG_TAG, "NDS getListDownloadBgImages: il y a des old sources songs");
-                for (SourceSong oldSource : oldSourcesSongs) {
-
-                    if (oldSource.getTitre().equals(newSource.getTitre()) && !oldSource.getUrlCloudBackground().equals(newSource.getUrlCloudBackground())) { tempList.add(newSource); }
-
-                    if (!newSource.getTitre().equals(oldSource.getTitre())) { i++; }
-                }
-
-                if (i == oldSourcesSongs.size()) {
-                    tempList.add(newSource);
-                }
-            }else{
-                tempList.add(newSource);
-            }
-        }
-
-        Log.d(LOG_TAG, "NDS getListDownloadBgImages: "+ tempList.size());
-
-        for(SourceSong sourceSong:tempList){
-            Log.d(LOG_TAG, "NDS getListDownloadBgImages: "+sourceSong.getTitre()+" "+sourceSong.getSourceSongId());
-        }
-
-        return tempList;
-    }
 
     private void uploadOnPhoneBgImages(List<SourceSong> sources) {
         for (SourceSong source : sources) {
@@ -374,10 +363,9 @@ public class ChoraleNetWorkDataSource {
             String filename = mStorageRef.getName();
             localFileImage = new File(mContext.getFilesDir(), filename);
             String pathImage = localFileImage.getAbsolutePath();
-            //todo ajouter pathimage à la place de bgSong int
             source.setBackground(pathImage);
 
-            Log.d(LOG_TAG, "NDS uploadOnPhoneBgImages: " + localFileImage.getParent() + " " + filename + " " + localFileImage.getPath() + " " + localFileImage.getAbsolutePath()+" "+Thread.currentThread().getName());
+            Log.d(LOG_TAG, "NDS uploadOnPhoneBgImages: "+" "+source.getBackground() + localFileImage.getParent() + " " + filename + " " + localFileImage.getPath() + " " + localFileImage.getAbsolutePath()+" "+Thread.currentThread().getName());
 
             mStorageRef.getFile(localFileImage)
                     .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
@@ -385,6 +373,7 @@ public class ChoraleNetWorkDataSource {
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                             // Successfully downloaded data to local file
                             //todo modifier le texte pour l'utilisateur
+                            Log.d(LOG_TAG, "NDS onSuccess: storage upload bg ");
                            // Toast.makeText(mContext, "Vos images de fond sont enregistrées sur votre téléphone", Toast.LENGTH_LONG).show();
                             // ...
                         }
@@ -416,8 +405,6 @@ public class ChoraleNetWorkDataSource {
 
         final List<Song> tempList = new ArrayList<>();
 
-        //getPupitreToLoad();
-
         pupitreToUpload.add(pupitreUser);
 
         Log.d(LOG_TAG, "NDS getListDownloadMp3 user: "+current_user_id);
@@ -446,25 +433,6 @@ public class ChoraleNetWorkDataSource {
         return tempList;
     }
 
-    private void getPupitreToLoad() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-
-        Log.d(LOG_TAG, "getPupitreToLoad: "+currentPupitreStr);
-
-        Set<String> pupitreToUploadSet = sharedPreferences.getStringSet(mContext.getString(R.string.pref_pupitre_key),Collections.singleton(currentPupitreStr));
-
-        for (String s: pupitreToUploadSet) {
-            Pupitre pupToUpload = SongsUtilities.converttoPupitre(s);
-
-            if(pupToUpload!=Pupitre.NA){
-                pupitreToUpload.add(pupToUpload);
-            }
-        }
-
-        Log.d(LOG_TAG, "getPupitreToLoad: "+ pupitreToUpload);
-
-
-    }
 
     //todo faire dans le service data cloud
     private void uploadOnPhoneMp3(List<Song> listMp3) {
@@ -510,22 +478,6 @@ public class ChoraleNetWorkDataSource {
 
     }
 
-
-    public void setOldSourceSongs(List<SourceSong> oldSourcesSongs) {
-        this.oldSourcesSongs = oldSourcesSongs;
-    }
-
-    public void setOldSongs(List<Song> oldSongs) {
-        this.oldSongs = oldSongs;
-    }
-
-    //todo gérer les oldSongs
-    public void oldSongs(){
-        String url = "https://firebasestorage.googleapis.com/v0/b/dedicace-778c9.appspot.com/o/songs%2Ffichier_mp3%2Fzoom%20photo1.mp3?alt=media&token=b06bc1d0-5954-4146-ac82-567b8ebf9770";
-        Song song = new  Song("Des hommes pareils",RecordSource.BANDE_SON,Pupitre.TENOR,null,url);
-        oldSongs.add(song);
-
-    }
 
     public String getCurrentPupitreStr() {
 
@@ -628,6 +580,7 @@ public class ChoraleNetWorkDataSource {
 
                     File tempfile = new File(path);
                     String name = tempfile.getName();
+
                     Log.d(LOG_TAG, "NDS deleteBgOnPhone: name "+ name);
 
                     if(tempfile.exists()){
@@ -645,6 +598,10 @@ public class ChoraleNetWorkDataSource {
         });
 
 
+    }
+
+    public MutableLiveData<String> getDownloads() {
+        return downloads;
     }
 }
 

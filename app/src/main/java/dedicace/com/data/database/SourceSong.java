@@ -16,6 +16,9 @@ public class SourceSong {
     @PrimaryKey(autoGenerate = true)
     private int sourceSongId;
 
+    @ColumnInfo(name = "id_source_song")
+    private String idSourceSongCloud;
+
     @ColumnInfo(name = "titre")
     private String titre;
 
@@ -51,8 +54,9 @@ public class SourceSong {
         this.updatePhone=updatePhone;
     }
 
-    public SourceSong(int sourceSongId, String titre, String groupe, int duration, int bgSong, String background, String urlCloudBackground, String baseUrlOriginalSong,Date updatePhone) {
+    public SourceSong(int sourceSongId, String titre, String groupe, int duration, int bgSong, String background, String urlCloudBackground, String baseUrlOriginalSong,Date updatePhone,String idSourceSongCloud) {
         this.sourceSongId = sourceSongId;
+        this.idSourceSongCloud=idSourceSongCloud;
         this.titre = titre;
         this.groupe = groupe;
         this.duration = duration;
@@ -72,6 +76,17 @@ public class SourceSong {
         this.baseUrlOriginalSong = baseUrlOriginalSong;
         this.updatePhone = updatePhone;
         this.urlCloudBackground=urlCloudBackground;
+    }
+
+    @Ignore
+    public SourceSong(String idSourceSongCloud, String titre, String groupe, int duration, String urlCloudBackground, String baseUrlOriginalSong, Date updatePhone) {
+        this.idSourceSongCloud = idSourceSongCloud;
+        this.titre = titre;
+        this.groupe = groupe;
+        this.duration = duration;
+        this.urlCloudBackground = urlCloudBackground;
+        this.baseUrlOriginalSong = baseUrlOriginalSong;
+        this.updatePhone = updatePhone;
     }
 
     @Ignore
@@ -145,5 +160,13 @@ public class SourceSong {
 
     public void setBackground(String background) {
         this.background = background;
+    }
+
+    public String getIdSourceSongCloud() {
+        return idSourceSongCloud;
+    }
+
+    public void setIdSourceSongCloud(String idSourceSongCloud) {
+        this.idSourceSongCloud = idSourceSongCloud;
     }
 }

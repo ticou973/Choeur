@@ -33,7 +33,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import dedicace.com.AppExecutors;
 import dedicace.com.R;
@@ -65,19 +64,12 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private final int REQUEST_PERMISSION_CODE = 1000;
     private int position;
     private ListSongs listSongs;
-
-
     private Thread currentThread;
-    private AtomicBoolean processing = new AtomicBoolean(true);
-
-
-
 
     //todo à retirer seuelement pour les tests
     private LiveData<List<SourceSong>> sourceSongs;
     private List<SourceSong> sourceSongList = new ArrayList<>();
-    Song song3, song4, song6, song5,song2, firstSongPlayed;
-    SourceSong sourceSong1, sourceSong2,sourceSong7;
+    private Song  firstSongPlayed;
     private List<List<RecordSource>> recordSources;
     private List<Song> songToPlays;
     private List<List<Song>> songOnPhones;
@@ -85,9 +77,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private List<List<Song>> SongOnPhonesLive= new ArrayList<>();
     private List<List<Song>> SongOnPhonesBS= new ArrayList<>();
     private Pupitre currentPupitre;
-    private String currentPupitreStr;
-
-
 
     //ViewModel
     private MainActivityViewModel mViewModel;
@@ -103,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     //Utils
     private OnPositiveClickListener mPositiveClickListener;
     public static AppDataBase choeurDataBase;
+
     private AppExecutors mExecutors;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
@@ -118,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         //Firebase
         //todo voir l'intérêt de cette première ligne
         FirebaseApp.initializeApp(this);
+
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -137,8 +128,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             setUpSharedPreferences();
             //todo voir si mettre la permission ici et voir la réponse négative (griser le record) et mettre dans le menu option de redemander
             OnRequestPermission();
-
-            //initData();
 
             mExecutors = AppExecutors.getInstance();
 
@@ -160,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                     }
                     if(listSS!=null){
                         for (int i = 0; i <listSS.size() ; i++) {
-                            Log.d(TAG, "MA getSongOnPhoneBS: listSS Sourcesongs dans synchronisation "+listSS.get(i).getTitre()+ " "+listSS.get(i).getUpdatePhone());
+                            Log.d(TAG, "MA getSongOnPhoneBS: listSS Sourcesongs dans synchronisation "+listSS.get(i).getTitre()+ " "+listSS.get(i).getUpdatePhone()+listSS.get(i).getUrlCloudBackground());
                         }
                     }
                 }
@@ -506,56 +495,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         startActivity(startSettingsActivity);
     }
 
-    private void deleteLastRecordedSong() {
 
-
-        mExecutors.diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                Song song = choeurDataBase.songsDao().getLastSong();
-
-                if(song.getRecordSource()==RecordSource.LIVE){
-
-                    //todo supprimer le fichier physique aussi
-
-                    choeurDataBase.songsDao().deleteSong(song);
-
-                    mPositiveClickListener.OndeleteSong();
-
-                    String path = song.getSongPath();
-
-                    deleteMusicFiles(path);
-                }
-            }
-        });
-
-    }
-
-    private void deleteAllRecordedSongs(){
-
-        mExecutors.diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-
-                recordedSongs =MainActivity.choeurDataBase.songsDao().getSongsBySource(RecordSource.LIVE);
-
-                if(recordedSongs.size()>0){
-
-                    for (Song recordedSong:recordedSongs) {
-
-                        //todo supprimer le fichier physique aussi
-                        choeurDataBase.songsDao().deleteSong(recordedSong);
-
-                        //todo voir pour que les couleurs fonctionnenent
-
-                        songsAdapter.notifyDataSetChanged();
-
-                        //mPositiveClickListener.OndeleteSong();
-                    }
-                }
-            }
-        });
-    }
 
     public void deleteMusicFiles(final String path){
         mExecutors.diskIO().execute(new Runnable() {
@@ -608,8 +548,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 }
             }
         }
-
-//        Log.d(TAG, "MA OnPlaySong: "+ songToPlay.getRecordSource()+" "+songToPlay.getPupitre()+" "+songToPlay.getSourceSongTitre());
 
         return songToPlay;
     }
@@ -739,9 +677,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             break;
         }
     }
-
-
-
 
     //todo à renommer
     public interface OnPositiveClickListener {
