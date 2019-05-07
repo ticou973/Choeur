@@ -65,10 +65,12 @@ public class ChoraleRepository {
     private List<Object> listElements = new ArrayList<>();
     private List<SourceSong> sourceSongs1;
     private String currentPupitreStr;
+    private boolean alone;
 
     private ListSongs listSongs;
 
     private String mCurrentAuthRole;
+    private String typeSS;
 
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
@@ -96,6 +98,7 @@ public class ChoraleRepository {
             }
         });
 
+
         final LiveData<Long> majDBCloudLong= mChoraleNetworkDataSource.getMajDBCloudLong();
         majDBCloudLong.observeForever(majclouddblong -> {
             //todo vérifier l'utilité de l'égalité
@@ -103,13 +106,34 @@ public class ChoraleRepository {
             Log.d(LOG_TAG, "CR ChoraleRepository: majCloudLong "+ majclouddblong);
 
             if(majLocalDBLong<majCloudDBLong){
-                Log.d(LOG_TAG, "CR ChoraleRepository: ok on lance startFetchSongService");
+                if(oldSourcesSongs!=null&&oldSourcesSongs.size()!=0){
+                    typeSS="oldSS";
+                    Log.d(LOG_TAG, "CR ChoraleRepository modification : ok on lance startFetchSongService");
+                    isFromLocal=true;
+                    //todo voir comment retirer les arguments qui sont inutiles
+                    DoSynchronization(oldSourcesSongs,oldSongs);
+                    Log.d(LOG_TAG, "CR run: getOldSongs et SourcesSongs 2 modifications: données initiales "+oldSourcesSongs+" "+oldSongs);
+                }else{
+                    typeSS="newSS";
+                    Log.d(LOG_TAG, "CR ChoraleRepository new SS : ok on lance startFetchSongService");
+                }
+                Log.d(LOG_TAG, "CR ChoraleRepository: ok on lance startFetchSongService "+t2);
+
+                if(typeSS.equals("oldSS")) {
+                    try {
+                        t2.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        Log.d(LOG_TAG, "CR join: interrupted exception");
+                    }
+                }
                 startFetchSongsService();
             }else{
                 //pour le cas aucune modif
                 //todo à vérifier que cela marche
                 if(oldSourcesSongs!=null&&oldSourcesSongs.size()!=0){
                     isFromLocal=true;
+                    typeSS="oldSS";
                     //todo voir comment retirer les arguments qui sont inutiles
                     DoSynchronization(oldSourcesSongs,oldSongs);
                     Log.d(LOG_TAG, "CR run: getOldSongs et SourcesSongs : données initiales "+oldSourcesSongs+" "+oldSongs);
@@ -138,16 +162,29 @@ public class ChoraleRepository {
 
         final LiveData<String> downloads =mChoraleNetworkDataSource.getDownloads();
         downloads.observeForever(message -> {
-            if(message.equals("done")){
-
+            if(message.equals("Done")){
+                Log.d(LOG_TAG, "NDS ChoraleRepository: observer Done pour downloads");
+                DoWorkInRoomAndLists();
             }else{
                 Log.d(LOG_TAG, "CR ChoraleRepository: il faut encore attendre... ");
             }
-
         });
     }
 
+    private void DoWorkInRoomAndLists() {
 
+        t1 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                currentThread = Thread.currentThread();
+                DoWorkInRoom();
+                getListSongs(sourceSongs1,songs);
+            }
+        });
+
+        t1.start();
+
+    }
 
     public synchronized static ChoraleRepository getInstance(SongsDao songsDao, SourceSongDao sourceSongDao,ChoraleNetWorkDataSource choraleNetworkDataSource, AppExecutors executors) {
 
@@ -167,14 +204,15 @@ public class ChoraleRepository {
         t2 = new Thread(new Runnable() {
             @Override
             public void run() {
+
                 currentThread = Thread.currentThread();
                 Log.d(LOG_TAG, "CR run: currentThread "+currentThread+" "+isFromLocal);
                 if(!isFromLocal) {
-                    Log.d(LOG_TAG, "CR run: if from local avant synchronisation db");
+                    if(typeSS.equals("oldSS")){
+                        typeSS="modificationSS";
+                    }
+                    Log.d(LOG_TAG, "CR run: if from local avant synchronisation db "+typeSS);
                     synchronisationLocalDataBase(sourceSongs,songs);
-                    //chercher les Sourcesongs sur Room
-                    sourceSongsAfterSync=mSourceDao.getAllSources();
-                    songsAfterSync=mSongDao.getAllSongs();
 
                 }else{
                     //todo trouver une méthode un peu moins artificielle ? cf modèle architecture.
@@ -183,17 +221,17 @@ public class ChoraleRepository {
                     mSourceDao.updateSourceSong(oldSourcesSongs.get(0));
                     sourceSongsAfterSync=oldSourcesSongs;
                     songsAfterSync=oldSongs;
+                    getListSongs(sourceSongs,songs);
                 }
                 Log.d(LOG_TAG, "CR ChoraleRepository LiveData après sync sourceSongs : "+sourceSongs.size()+ " "+sourceSongsAfterSync.size()+" "+Thread.currentThread().getName());
 
                 for (SourceSong source:sourceSongsAfterSync) {
                     Log.d(LOG_TAG, "CR run: sourcesSONG dans la data : "+source.getTitre());
                 }
-
-                getListSongs(sourceSongs,songs);
             }
         });
 
+        Log.d(LOG_TAG, "CR DoSynchronization: juste avant T2 start");
         t2.start();
     }
 
@@ -223,51 +261,50 @@ public class ChoraleRepository {
 
 
     private void synchronisationLocalDataBase(List<SourceSong> sourceSongs, List<Song> songs) {
+        editor = sharedPreferences.edit();
+        editor.putLong("majDB",majCloudDBLong);
+        editor.apply();
+
         getModificationLists(sourceSongs,songs);
-        DoWorkDownloadCloud();
         DoWorkInLocalStorage();
-        DoWorkInRoom();
+        DoWorkDownloadCloud();
 
       //todo à retirer dès que test passé
       List<SourceSong> ssafter = mSourceDao.getAllSources();
       List<Song> songafter =mSongDao.getAllSongs();
+      Log.d(LOG_TAG, "CR synchronisationLocalDataBase: bilan des courses : Sources Songs "+ssafter.size()+" songs dans la db "+songafter.size());
 
-        Log.d(LOG_TAG, "CR synchronisationLocalDataBase: bilan des courses : Sources Songs "+ssafter.size()+" songs dans la db "+songafter.size());
-
-        editor = sharedPreferences.edit();
-        editor.putLong("majDB",majCloudDBLong);
-        editor.apply();
     }
 
     private void DoWorkDownloadCloud() {
-
         //Download Image
         if(bgSourcesToDownLoad!=null&&bgSourcesToDownLoad.size()!=0) {
-            //totalBgTodowload.addAll(bgSourcesToDownLoad);
-            mChoraleNetworkDataSource.downloadBgImage(bgSourcesToDownLoad);
+            totalBgTodowload.addAll(bgSourcesToDownLoad);
         }
         if(newSourceSongsList!=null&&newSourceSongsList.size()!=0){
-            //totalBgTodowload.addAll(newSourceSongsList);
-            mChoraleNetworkDataSource.downloadBgImage(newSourceSongsList);
+            totalBgTodowload.addAll(newSourceSongsList);
         }
-        Log.d(LOG_TAG, "CR DoWorkDownloadCloud: bg"+bgSourcesToDownLoad+" "+newSourceSongsList);
-
         //download Mp3
         if(mp3SongsToDownload!=null&&mp3SongsToDownload.size()!=0) {
-            //totalMp3Todowload.addAll(mp3SongsToDownload);
-            mChoraleNetworkDataSource.downloadMp3(mp3SongsToDownload);
+            totalMp3Todowload.addAll(mp3SongsToDownload);
         }
 
         if(newSongsList!=null&newSongsList.size()!=0){
-            //totalMp3Todowload.addAll(newSongsList);
-            mChoraleNetworkDataSource.downloadMp3(newSongsList);
+            totalMp3Todowload.addAll(newSongsList);
         }
-        Log.d(LOG_TAG, "CR DoWorkDowloadCloud: mp3"+mp3SongsToDownload+" "+newSongsList);
 
-        //mChoraleNetworkDataSource.startDownloadService(bgSourcesToDownLoad,newSourceSongsList,mp3SongsToDownload,newSongsList);
-
-
-
+        if(totalBgTodowload!=null&&totalBgTodowload.size()!=0){
+            if(totalMp3Todowload!=null&&totalMp3Todowload.size()!=0){
+                mChoraleNetworkDataSource.downloadBgImage(totalBgTodowload,false);
+                mChoraleNetworkDataSource.downloadMp3(totalMp3Todowload);
+            }else{
+                mChoraleNetworkDataSource.downloadBgImage(totalBgTodowload,true);
+            }
+        }else {
+            if(totalMp3Todowload!=null&&totalMp3Todowload.size()!=0){
+                mChoraleNetworkDataSource.downloadMp3(totalMp3Todowload);
+            }
+        }
     }
 
     private void DoWorkInLocalStorage() {
@@ -369,6 +406,10 @@ public class ChoraleRepository {
             Log.d(LOG_TAG, "CR DoWorkInRoom: create songs");
             mSongDao.bulkInsert(newSongsList);
         }
+
+        //chercher les Sourcesongs sur Room
+        sourceSongsAfterSync=mSourceDao.getAllSources();
+        songsAfterSync=mSongDao.getAllSongs();
     }
 
     private void getModificationLists(List<SourceSong> sourceSongs, List<Song> songs){
@@ -512,12 +553,11 @@ public class ChoraleRepository {
             String idChorale=sharedPreferences.getString("idchorale"," ");
             Log.d(LOG_TAG, "CR initializeData: idchorale "+idChorale);
 
+            getMajDateLocalDataBase();
 
             //lance la recherche d'un emise à jour et condition le lancement de startFetchData
 
             LoadMajCloudDB();
-
-
 
             Log.d(LOG_TAG, "CR : isFetchNeeded "+ Thread.currentThread().getName());
         }else{
@@ -545,15 +585,11 @@ public class ChoraleRepository {
 
     private boolean isFetchNeeded() {
         //todo à modifier éventuellement sur préférences veut - on regarder si on veut télécharger automatique ou non (à la demande) ou si la dernière date de maj à changer
-
-
         Context context = mChoraleNetworkDataSource.getContext();
 
         //todo à modifier dans le listener pour appliquer les changements
         sharedPreferences =PreferenceManager.getDefaultSharedPreferences(context);
         isAuto = sharedPreferences.getBoolean("maj_auto",true);
-
-        getMajDateLocalDataBase();
 
         Log.d(LOG_TAG, "CR isFetchNeeded: condition "+isAuto);
 
@@ -564,10 +600,6 @@ public class ChoraleRepository {
         Log.d(LOG_TAG, "CR getSourceSongs: avant initialized data "+ Thread.currentThread().getName());
         initializeData();
         Log.d(SongsAdapter.TAG, "CR getSourceSongs: repository après iniatialize data");
-
-
-        Log.d(LOG_TAG, "CR getSourceSongs après t2.join: ");
-
         return mSourceDao.getAllSourceSongs();
     }
 
@@ -629,6 +661,10 @@ public class ChoraleRepository {
                 mSongDao.insertSong(song);
             }
         });
+    }
+
+    public String getTypeSS() {
+        return typeSS;
     }
 }
 

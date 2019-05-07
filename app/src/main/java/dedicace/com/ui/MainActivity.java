@@ -45,7 +45,7 @@ import dedicace.com.data.database.SourceSong;
 import dedicace.com.ui.Admin.AdminHome;
 import dedicace.com.utilities.InjectorUtils;
 
-public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener,DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener,DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener, DialogMajSS.DialogMajSSListener {
 
     //UI
     private  RecyclerView recyclerView;
@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     public static String current_user_id;
 
     private String mCurrentAuthRole;
+    private String typeSS;
 
 
     //Utils
@@ -132,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             mExecutors = AppExecutors.getInstance();
 
             //todo à retirer dès que cela marche (test)
-            mExecutors.diskIO().execute(new Runnable() {
+          /*  mExecutors.diskIO().execute(new Runnable() {
                 @Override
                 public void run() {
                     AppDataBase database = AppDataBase.getInstance(getApplicationContext());
@@ -153,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                         }
                     }
                 }
-            });
+            });*/
 
             mfactory = InjectorUtils.provideViewModelFactory(this.getApplicationContext());
             Log.d("coucou", "MA onCreate: fin de la factory");
@@ -177,10 +178,11 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                     Log.d(TAG, "MA onChanged: Alerte, ça bouge dans le coin !" + sourceSongs + " " + mViewModel.getChoeurSourceSongs() + " " + Thread.currentThread().getName());
 
                     currentThread = mViewModel.getCurrentThread();
+                    typeSS=mViewModel.getTypeSS();
 
                     //todo à voir si il faut le déplacer plus haut
                     //mCurrentAuthRole=mViewModel.getCurrentAuthRole();
-                    Log.d(TAG, "MA onChanged: AuthRole "+mCurrentAuthRole+" "+currentThread);
+                    Log.d(TAG, "MA onChanged: AuthRole "+mCurrentAuthRole+" "+currentThread+" "+typeSS);
 
                     //permet que la listsongs de CR se calcule
 
@@ -193,24 +195,37 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                             e.printStackTrace();
                             Log.d(TAG, "MA onChanged: interrupted exception");
                         }
-
-                        Log.d("coucou", "MA onCreate: Thread fini");
+                        Log.d("coucou", "MA onCreate: Thread fini "+typeSS);
+                    }
+                    if(typeSS==null){
+                        showLoading();
+                    }else {
+                        if(!typeSS.equals("modificationSS")){
+                            showLoading();
+                        }
                     }
 
-                    showLoading();
                     getListSongs();
-
-                    // partieAux(sourceSongs);
-
-//                    Log.d(TAG, "MA onChanged: VÉRIF "+listSongs+" "+recordSources.size()+" "+songToPlays.size()+" "+songOnPhones.size()+" "+songOnClouds.size() );
 
                     if (listSongs != null) {
                         if (recordSources.size() == sourceSongs.size() && songToPlays.size() == sourceSongs.size() && songOnPhones.size() == sourceSongs.size() && songOnClouds.size() == sourceSongs.size()) {
-                            Log.d(TAG, "MA onChanged: conditions toutes réunies");
+                            Log.d(TAG, "MA onChanged: conditions toutes réunies"+typeSS);
+                            if(typeSS.equals("oldSS")) {
+                                Log.d(TAG, "MA onChanged: type OldSs");
+                                affichageRecyclerView(sourceSongs);
+                                songsAdapter.swapSongs(sourceSongs, recordSources, songToPlays, songOnPhones, songOnClouds);
+                            }else if(typeSS.equals("modificationSS")){
+                                //mettre un dialogue pour changer ou non
+                                Log.d(TAG, "MA onChanged: modification avant dialogAlert ");
+                                DialogFragment dialog = new DialogMajSS();
+                                dialog.show(getSupportFragmentManager(),"TAG");
 
-                            affichageRecyclerView(sourceSongs);
-                            songsAdapter.swapSongs(sourceSongs, recordSources, songToPlays, songOnPhones, songOnClouds);
-
+                            }else if(typeSS.equals("newSS")){
+                                //todo à terme mettre en place quelque chose qui montre l'évolution du chargement
+                                Toast.makeText(MainActivity.this, "Veuillez patienter le temps de mettre en place toutes les chansons...", Toast.LENGTH_LONG).show();
+                                affichageRecyclerView(sourceSongs);
+                                songsAdapter.swapSongs(sourceSongs, recordSources, songToPlays, songOnPhones, songOnClouds);
+                            }
                         } else {
                             Log.d(TAG, "MA onChanged: conditions pas réunies");
                         }
@@ -220,6 +235,18 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 }
             });
         }
+    }
+
+    @Override
+    public void onDialogPositiveClick() {
+        Log.d(TAG, "MA onDialogPositiveClick dialog positif: "+sourceSongList);
+        songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnPhones, songOnClouds);
+    }
+
+    @Override
+    public void onDialogNegativeClick() {
+
+        Toast.makeText(this, "Les nouvelles chansons appraitront au prochain lancement de l'application", Toast.LENGTH_LONG).show();
     }
 
     private void setUpSharedPreferences() {
@@ -677,6 +704,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             break;
         }
     }
+
+
 
     //todo à renommer
     public interface OnPositiveClickListener {

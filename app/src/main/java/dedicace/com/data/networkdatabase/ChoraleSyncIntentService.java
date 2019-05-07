@@ -15,10 +15,8 @@ public class ChoraleSyncIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-
         Log.d(SongsAdapter.TAG, "CSIS Intent service started "+Thread.currentThread().getName());
         ChoraleNetWorkDataSource networkDataSource = InjectorUtils.provideNetworkDataSource(this.getApplicationContext());
-
 
         if(intent.getStringExtra("origine").equals("sources")){
             networkDataSource.fetchSongs();
@@ -27,7 +25,7 @@ public class ChoraleSyncIntentService extends IntentService {
             networkDataSource.fetchMajClouDb();
             Log.d("coucou", "CSIS onHandleIntent: fin du travail maj"+Thread.currentThread().getName());
         }else if(intent.getStringExtra("origine").equals("download")){
-            networkDataSource.downloadImagesMp3();
+           // networkDataSource.downloadImagesMp3();
             Log.d("coucou", "CSIS onHandleIntent: fin du travail download"+Thread.currentThread().getName());
         }
     }

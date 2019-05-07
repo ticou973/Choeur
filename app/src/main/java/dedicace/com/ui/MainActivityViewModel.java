@@ -28,6 +28,7 @@ public class MainActivityViewModel extends ViewModel {
     private ListSongs listSongs;
 
     private String mCurrentAuthRole;
+    private String typeSS;
 
     public MainActivityViewModel(ChoraleRepository repository) {
         Log.d(SongsAdapter.TAG, "MainActivityViewModel: avant "+choeurSourceSongs);
@@ -120,6 +121,10 @@ public class MainActivityViewModel extends ViewModel {
 
     }
 
+    public String getTypeSS() {
+        typeSS = mRepository.getTypeSS();
+        return typeSS;
+    }
 }
 
 

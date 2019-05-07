@@ -25,6 +25,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
@@ -48,6 +49,7 @@ public class ChoraleNetWorkDataSource {
     private static final String LOG_TAG = "coucou";
     private static ChoraleNetWorkDataSource sInstance;
     private final Context mContext;
+    private boolean alone;
 
     //Utils
     private AppExecutors mExecutors;
@@ -102,6 +104,7 @@ public class ChoraleNetWorkDataSource {
     private Date majDateCloudDataBase;
     private String idChorale;
     private List<String> idChorales= new ArrayList<>();
+    private int increment,increment1;
 
     //Local Storage
     private File localFileMp3;
@@ -226,14 +229,14 @@ public class ChoraleNetWorkDataSource {
         Log.d(LOG_TAG, "NDS Service created pour Download");
     }
 
-    public void downloadImagesMp3(){
+   /* public void downloadImagesMp3(){
 
         downloadBgImage(bgDownload);
         downloadBgImage(newBgDownload);
         downloadMp3(mp3Download);
         downloadMp3(newMp3Download);
         downloads.postValue("done");
-    }
+    }*/
 
 
     public void startFetchSongsService() {
@@ -346,7 +349,8 @@ public class ChoraleNetWorkDataSource {
     }
 
     //todo faire des download qu'avec wifi ou suivant préférences
-    public void downloadBgImage(List<SourceSong> sourceSongs) {
+    public void downloadBgImage(List<SourceSong> sourceSongs, boolean test) {
+        alone = test;
         if (sourceSongs != null) {
             Log.d(LOG_TAG, "NDS downloadBgImage: uploadImage "+sourceSongs);
             uploadOnPhoneBgImages(sourceSongs);
@@ -357,7 +361,10 @@ public class ChoraleNetWorkDataSource {
 
 
     private void uploadOnPhoneBgImages(List<SourceSong> sources) {
+        increment1 =0;
         for (SourceSong source : sources) {
+            int bgSize = sources.size();
+            increment1++;
             String cloudPath = source.getUrlCloudBackground();
             mStorageRef = mStorage.getReferenceFromUrl(cloudPath);
             String filename = mStorageRef.getName();
@@ -373,7 +380,12 @@ public class ChoraleNetWorkDataSource {
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                             // Successfully downloaded data to local file
                             //todo modifier le texte pour l'utilisateur
-                            Log.d(LOG_TAG, "NDS onSuccess: storage upload bg ");
+
+                            if(increment1==bgSize&&alone){
+                                Log.d(LOG_TAG, "NDS onSuccess pour ne pas louper les BG: ");
+                                downloads.postValue("Done");
+                            }
+                            Log.d(LOG_TAG, "NDS onSuccess: storage upload bg "+Thread.currentThread().getName());
                            // Toast.makeText(mContext, "Vos images de fond sont enregistrées sur votre téléphone", Toast.LENGTH_LONG).show();
                             // ...
                         }
@@ -438,8 +450,11 @@ public class ChoraleNetWorkDataSource {
     private void uploadOnPhoneMp3(List<Song> listMp3) {
 
         Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: fct upload "+ listMp3.size()+" "+Thread.currentThread().getName());
+        increment =0;
 
         for (Song song : listMp3) {
+            int mp3Size = listMp3.size();
+            increment++;
 
             String cloudPath = song.getUrlCloudMp3();
             mStorageRef = mStorage.getReferenceFromUrl(cloudPath);
@@ -453,6 +468,7 @@ public class ChoraleNetWorkDataSource {
             song.setUpdatePhoneMp3(new Date(System.currentTimeMillis()));
             Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: " + localFileMp3.getParent() + " " + filename + " " + localFileMp3.getPath() + " " + localFileMp3.getAbsolutePath()+" "+ mContext.getFilesDir()+" "+Thread.currentThread().getName());
 
+            //todo voir comment utiliser download manager
             mStorageRef.getFile(localFileMp3)
                     .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override
@@ -463,6 +479,9 @@ public class ChoraleNetWorkDataSource {
 
                             Log.d(LOG_TAG, "NDS onSuccess: "+Thread.currentThread().getName()+" "+ filename);
 
+                            if(increment ==mp3Size) {
+                                downloads.postValue("Done");
+                            }
                             // ...
                         }
                     }).addOnFailureListener(new OnFailureListener() {
@@ -473,11 +492,16 @@ public class ChoraleNetWorkDataSource {
                     Toast.makeText(mContext, "Il y a eu un problème de téléchargement, veuillez réessayer plus tard...", Toast.LENGTH_LONG).show();
 
                 }
+                //todo voir comment intégrer l'avancement des données dans un retour utilisateur
+            }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    int progress = (int) (100.0 * taskSnapshot.getBytesTransferred()) / (int) taskSnapshot.getTotalByteCount();
+                    Log.d(LOG_TAG, "NDS onProgress: "+ filename +" "+progress+"%");
+                }
             });
         }
-
     }
-
 
     public String getCurrentPupitreStr() {
 
@@ -601,6 +625,8 @@ public class ChoraleNetWorkDataSource {
     }
 
     public MutableLiveData<String> getDownloads() {
+
+
         return downloads;
     }
 }

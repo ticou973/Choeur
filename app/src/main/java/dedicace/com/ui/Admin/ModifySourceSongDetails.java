@@ -43,6 +43,7 @@ import dedicace.com.R;
 import dedicace.com.data.database.Song;
 
 //todo voir tout le doublonnage de code par rapport o Create SourceSong, à factoriser à tous les niveaux
+//todo voir comment delete sur le cloud les éléments dont on ne se sert plus pour éviter une accumulation dans le cloud
 public class ModifySourceSongDetails extends AppCompatActivity implements DialogAlertTitle.DialogAlertTitleListener, DialogSuppFragment.DialogSuppListener {
     private TextView oldTitre, oldGroupe, oldDuration, oldBackground, newBackground;
     private EditText newTitre, newGroupe, newDuration;
