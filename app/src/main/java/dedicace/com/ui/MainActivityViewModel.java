@@ -125,6 +125,10 @@ public class MainActivityViewModel extends ViewModel {
         typeSS = mRepository.getTypeSS();
         return typeSS;
     }
+
+    public boolean getDeleted() {
+        return mRepository.getDeleted();
+    }
 }
 
 

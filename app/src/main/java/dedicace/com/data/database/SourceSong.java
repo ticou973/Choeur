@@ -43,6 +43,9 @@ public class SourceSong {
     @ColumnInfo(name = "update_phone")
     private Date updatePhone;
 
+    @ColumnInfo(name ="update_bg_phone")
+    private Date updateBgPhone;
+
 
     @Ignore
     public SourceSong(String titre, String groupe, int duration, int bgSong, String baseUrlOriginalSong, Date updatePhone) {
@@ -54,7 +57,7 @@ public class SourceSong {
         this.updatePhone=updatePhone;
     }
 
-    public SourceSong(int sourceSongId, String titre, String groupe, int duration, int bgSong, String background, String urlCloudBackground, String baseUrlOriginalSong,Date updatePhone,String idSourceSongCloud) {
+    public SourceSong(int sourceSongId, String titre, String groupe, int duration, int bgSong, String background, String urlCloudBackground, String baseUrlOriginalSong,Date updatePhone,String idSourceSongCloud, Date updateBgPhone) {
         this.sourceSongId = sourceSongId;
         this.idSourceSongCloud=idSourceSongCloud;
         this.titre = titre;
@@ -65,7 +68,7 @@ public class SourceSong {
         this.updatePhone=updatePhone;
         this.urlCloudBackground=urlCloudBackground;
         this.background=background;
-
+        this.updateBgPhone=updateBgPhone;
     }
 
     @Ignore
@@ -168,5 +171,13 @@ public class SourceSong {
 
     public void setIdSourceSongCloud(String idSourceSongCloud) {
         this.idSourceSongCloud = idSourceSongCloud;
+    }
+
+    public Date getUpdateBgPhone() {
+        return updateBgPhone;
+    }
+
+    public void setUpdateBgPhone(Date updateBgPhone) {
+        this.updateBgPhone = updateBgPhone;
     }
 }

@@ -206,6 +206,8 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
 //            Log.d(TAG, "SA swapSongs: songOnClouds 3 "+songOnClouds.get(1).get(1).getSourceSongTitre()+" "+songOnClouds.get(1).get(1).getPupitre());
         }*/
         sourceSongs=sources;
+
+        Log.d(TAG, "SA swapSongs: url :"+sourceSongs.get(0).getUrlCloudBackground());
         this.RecordSources=recordSources;
         this.songToPlays=songToPlays;
         this.songOnPhones=songOnPhones;

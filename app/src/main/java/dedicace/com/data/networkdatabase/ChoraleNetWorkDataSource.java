@@ -49,7 +49,7 @@ public class ChoraleNetWorkDataSource {
     private static final String LOG_TAG = "coucou";
     private static ChoraleNetWorkDataSource sInstance;
     private final Context mContext;
-    private boolean alone;
+    private boolean aloneCreate, aloneDelete, deleted = false;
 
     //Utils
     private AppExecutors mExecutors;
@@ -350,18 +350,24 @@ public class ChoraleNetWorkDataSource {
 
     //todo faire des download qu'avec wifi ou suivant préférences
     public void downloadBgImage(List<SourceSong> sourceSongs, boolean test) {
-        alone = test;
-        if (sourceSongs != null) {
+        aloneCreate = test;
+        if (sourceSongs != null&&sourceSongs.size()!=0) {
             Log.d(LOG_TAG, "NDS downloadBgImage: uploadImage "+sourceSongs);
             uploadOnPhoneBgImages(sourceSongs);
         } else {
             Log.d(LOG_TAG, "NDS downloadBgImage: pas d'images de Background à sauvegarder");
+            downloads.postValue("Done");
         }
     }
 
 
     private void uploadOnPhoneBgImages(List<SourceSong> sources) {
         increment1 =0;
+
+        if(sources.size()==0&&aloneCreate){
+                Log.d(LOG_TAG, "NDS size0 pour ne pas louper les BG: ");
+                downloads.postValue("Done");
+        }
         for (SourceSong source : sources) {
             int bgSize = sources.size();
             increment1++;
@@ -371,6 +377,7 @@ public class ChoraleNetWorkDataSource {
             localFileImage = new File(mContext.getFilesDir(), filename);
             String pathImage = localFileImage.getAbsolutePath();
             source.setBackground(pathImage);
+            source.setUpdateBgPhone(new Date(System.currentTimeMillis()));
 
             Log.d(LOG_TAG, "NDS uploadOnPhoneBgImages: "+" "+source.getBackground() + localFileImage.getParent() + " " + filename + " " + localFileImage.getPath() + " " + localFileImage.getAbsolutePath()+" "+Thread.currentThread().getName());
 
@@ -381,7 +388,7 @@ public class ChoraleNetWorkDataSource {
                             // Successfully downloaded data to local file
                             //todo modifier le texte pour l'utilisateur
 
-                            if(increment1==bgSize&&alone){
+                            if(increment1==bgSize&&aloneCreate){
                                 Log.d(LOG_TAG, "NDS onSuccess pour ne pas louper les BG: ");
                                 downloads.postValue("Done");
                             }
@@ -403,12 +410,14 @@ public class ChoraleNetWorkDataSource {
     public void downloadMp3(List<Song> songs) {
 
         listDownloadMp3 =getListDownloadMp3(songs);
+        Log.d(LOG_TAG, "NDS downloadMp3: coucou "+listDownloadMp3);
 
-        if (listDownloadMp3 != null) {
+        if (listDownloadMp3 != null&&listDownloadMp3.size()!=0) {
             Log.d(LOG_TAG, "NDS : uploadMP3 "+ listDownloadMp3.size()+" "+Thread.currentThread().getName());
             uploadOnPhoneMp3(listDownloadMp3);
         }else {
             Log.d(LOG_TAG, "NDS downloadMP3: pas d'images de fichiers audio à sauvegarder");
+            downloads.postValue("Done");
         }
     }
 
@@ -451,6 +460,11 @@ public class ChoraleNetWorkDataSource {
 
         Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: fct upload "+ listMp3.size()+" "+Thread.currentThread().getName());
         increment =0;
+
+        if(listMp3.size()==0){
+            Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: size 0 ");
+            downloads.postValue("Done");
+        }
 
         for (Song song : listMp3) {
             int mp3Size = listMp3.size();
@@ -516,7 +530,6 @@ public class ChoraleNetWorkDataSource {
                     currentPupitreStr = (String) task.getResult().get("pupitre");
                     pupitreUser=SongsUtilities.converttoPupitre(currentPupitreStr);
 
-
                     Log.d(LOG_TAG, "NDS getCurrentPupitre "+currentPupitreStr);
 
 
@@ -569,7 +582,7 @@ public class ChoraleNetWorkDataSource {
 
     //todo pourquoi dans le NDS ?
     public void deleteSongsMp3OnPhone(List<Song> deletedSongsList) {
-
+        deleted=true;
         mExecutors.storageIO().execute(new Runnable() {
             @Override
             public void run() {
@@ -590,12 +603,15 @@ public class ChoraleNetWorkDataSource {
                     }else{
                         Log.d(LOG_TAG, "NDS run: e fichier n'existe pas donc ne peut être supprimé !");
                     }
+                    song.setUpdatePhoneMp3(null);
                 }
             }
         });
     }
 
     public void deleteBgOnPhone(List<SourceSong> oldSources) {
+        //todo voir si cela fonctionne avec cela
+        deleted=false;
         mExecutors.storageIO().execute(new Runnable() {
             @Override
             public void run() {
@@ -617,8 +633,10 @@ public class ChoraleNetWorkDataSource {
                     }else{
                         Log.d(LOG_TAG, "NDS run: e fichier n'existe pas donc ne peut être supprimé !");
                     }
+                    source.setUpdateBgPhone(null);
                 }
             }
+
         });
 
 
@@ -628,6 +646,10 @@ public class ChoraleNetWorkDataSource {
 
 
         return downloads;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
     }
 }
 

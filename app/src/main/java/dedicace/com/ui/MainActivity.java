@@ -215,11 +215,19 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                 affichageRecyclerView(sourceSongs);
                                 songsAdapter.swapSongs(sourceSongs, recordSources, songToPlays, songOnPhones, songOnClouds);
                             }else if(typeSS.equals("modificationSS")){
-                                //mettre un dialogue pour changer ou non
-                                Log.d(TAG, "MA onChanged: modification avant dialogAlert ");
-                                DialogFragment dialog = new DialogMajSS();
-                                dialog.show(getSupportFragmentManager(),"TAG");
+                                boolean deleted = mViewModel.getDeleted();
+                                if(deleted){
+                                    //todo voir pour différé la suppression
+                                    Log.d(TAG, "MA deleted: "+sourceSongList+sourceSongList.get(0).getUrlCloudBackground());
+                                    Toast.makeText(MainActivity.this, "Des éléments ont été spprimés de votre liste de chansons.", Toast.LENGTH_SHORT).show();
+                                    songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnPhones, songOnClouds);
 
+                                }else{
+                                    //mettre un dialogue pour changer ou non
+                                    Log.d(TAG, "MA onChanged: modification avant dialogAlert ");
+                                    DialogFragment dialog = new DialogMajSS();
+                                    dialog.show(getSupportFragmentManager(),"TAG");
+                                }
                             }else if(typeSS.equals("newSS")){
                                 //todo à terme mettre en place quelque chose qui montre l'évolution du chargement
                                 Toast.makeText(MainActivity.this, "Veuillez patienter le temps de mettre en place toutes les chansons...", Toast.LENGTH_LONG).show();

@@ -38,7 +38,7 @@ public class DialogMajSS extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage("De nouvelles chansons sont disponibles, voulez-vous les utiliser dès à présent ?")
+        builder.setMessage("Des modifications et/ou de nouvelles chansons sont disponibles, voulez-vous les mettre à jour ?")
                 .setPositiveButton("Oui", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
 

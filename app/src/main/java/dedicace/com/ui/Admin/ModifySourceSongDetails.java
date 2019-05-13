@@ -389,7 +389,15 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
                         listIds.add(document.getId());
                         Log.d(TAG, "MSSD onEvent: "+document.getId());
                     }
-                    changeSongsName();
+
+                    if(listIds!=null&&listIds.size()!=0) {
+                         changeSongsName();
+                    }else{
+
+                        Log.d(TAG, "MSSD : pas de changments de noms");
+                        insertCloud();
+                    }
+
 
                     Log.d(TAG, "MSSD onDialogPositiveClick: "+query);
 
@@ -424,25 +432,24 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
         Map<String,Object> data = new HashMap<>();
         data.put("titre_song",newTitreStr);
         Log.d(TAG, "MSSD changeSongsName: ");
-
-        for(String name:listIds){
-            //todo faire un try catch là dessus
-            db.collection("songs").document(name)
-                    .update(data)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Log.d(TAG, "MSSD onSuccess: Ok pour chgt de noms des songs ");
-                            insertCloud();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.d(TAG, "MSSD onFailure: raté chgt de noms des songs ");
-                        }
-                    });
-        }
+            for (String name : listIds) {
+                //todo faire un try catch là dessus
+                db.collection("songs").document(name)
+                        .update(data)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.d(TAG, "MSSD onSuccess: Ok pour chgt de noms des songs ");
+                                insertCloud();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.d(TAG, "MSSD onFailure: raté chgt de noms des songs ");
+                            }
+                        });
+            }
     }
 
     @Override
