@@ -133,6 +133,10 @@ public class MainActivityViewModel extends ViewModel {
     public void downloadSingleSong(Song song) {
         mRepository.downloadSingleSong(song);
     }
+
+    public void deleteSingleSong(Song song) {
+        mRepository.deleteSingleSong(song);
+    }
 }
 
 

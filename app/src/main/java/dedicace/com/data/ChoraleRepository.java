@@ -87,7 +87,7 @@ public class ChoraleRepository {
     private Long majLocalDBLong;
     private boolean isAuto;
     private boolean isFromLocal;
-
+    private Song songToDelete;
 
 
     private ChoraleRepository(SongsDao songsDao, SourceSongDao sourceSongDao, final ChoraleNetWorkDataSource choraleNetworkDataSource, AppExecutors executors) {
@@ -175,9 +175,15 @@ public class ChoraleRepository {
             }else if(message.equals("SingleDownload")){
                 Log.d(LOG_TAG, "CR ChoraleRepository: single download ");
                 DoWorkInRoomBis(songToDownload);
-            }else{
+            }else if(message.equals("deleteSingle")) {
+                Log.d(LOG_TAG, "CR ChoraleRepository: single download ");
+                DoWorkInRoomBis(songToDelete);
+
+            }else {
                 Log.d(LOG_TAG, "CR ChoraleRepository: il faut encore attendre... ");
             }
+
+
         });
     }
 
@@ -288,6 +294,12 @@ public class ChoraleRepository {
         songToDownload=song;
         mChoraleNetworkDataSource.downloadSingleMp3(song);
 
+    }
+
+    public void deleteSingleSong(Song song){
+        typeSS="deleteSingleSongOnPhone";
+        songToDelete=song;
+        mChoraleNetworkDataSource.deleteSingleSong(song);
     }
 
     private void syncSingleSongDb(Song song) {

@@ -47,7 +47,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private Song songToPlay;
     private List<Song> songOnPhoneRecorded= new ArrayList<>();
     private List<Song> songOnCloudRecorded= new ArrayList<>();
-    private Song[] recordedCloudSongs;
+    private Song[] recordedCloudSongs, recordedLocalSongs;
 
     private ArrayList pupitreSourceButton = new ArrayList();
 
@@ -68,7 +68,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private Song songToRecord;
     private Pupitre recordPupitre;
     private String pathSave;
-    private Song songToDownload;
+    private Song songToDownload, songToDelete;
 
 
     //todo prévoir d'effacer les chansons que l'on a soit même enregistré (long click et menu)
@@ -281,6 +281,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     public void setSongRecorded(Song...recordedLocalSongs){
 
+        this.recordedLocalSongs=recordedLocalSongs;
         for (Song song:recordedLocalSongs) {
             if(song!=null) {
                 Pupitre pupitrerecorded = song.getPupitre();
@@ -548,13 +549,10 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private void handleLongClickPupitre(Pupitre pupitre, Button button) {
 
         if(button.getAlpha()==0.9f){
-            //todo à retirer Toast
-            Toast.makeText(context, "OK", Toast.LENGTH_SHORT).show();
-
             for(Song song : recordedCloudSongs){
                 if(song.getPupitre()==pupitre){
                     songToDownload=song;
-                    Log.d(TAG, "SVH handleLongClickPupitre:A "+songToDownload);
+                    Log.d(TAG, "SVH handleLongClickPupitre:A download "+songToDownload);
                 }
             }
             Log.d(TAG, "SVH handleLongClickPupitre: single song "+songToDownload);
@@ -562,6 +560,15 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         }else{
             Toast.makeText(context, "Song déjà chargée sur le téléphone", Toast.LENGTH_SHORT).show();
+            for(Song song : recordedLocalSongs){
+                if(song.getPupitre()==pupitre){
+                    songToDelete=song;
+                    Log.d(TAG, "SVH handleLongClickPupitre:B delete "+songToDelete);
+                }
+            }
+            Log.d(TAG, "SVH handleLongClickPupitre: delete single song "+songToDelete);
+            mlistItemClickedListener.OnLongClickDeleteItem(getAdapterPosition(),songToDelete);
+
         }
     }
 

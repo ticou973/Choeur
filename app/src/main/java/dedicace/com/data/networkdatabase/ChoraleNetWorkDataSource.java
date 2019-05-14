@@ -695,6 +695,36 @@ public class ChoraleNetWorkDataSource {
             }
         });
     }
+
+    public void deleteSingleSong(Song song) {
+        deleted=true;
+        mExecutors.storageIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                    String path = song.getSongPath();
+                    File tempFile = new File(path);
+                    String name = tempFile.getName();
+                    Log.d(LOG_TAG, "NDS deleteMp3OnPhone single: name "+ name);
+
+                    if (tempFile.exists()) {
+                        Log.d(LOG_TAG, "NDS run: le fichier existe  donc sera supprimé single !");
+                        if(mContext.deleteFile(name)){
+                            Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: mp3 effacé single"+song.getSourceSongTitre());
+                        }else{
+                            Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: erreur d'effacement de Mp3 ");
+                        }
+
+                    }else{
+                        Log.d(LOG_TAG, "NDS run: le fichier n'existe pas donc ne peut être supprimé !");
+                    }
+                    song.setUpdatePhoneMp3(null);
+                    song.setSongPath(null);
+                    downloads.postValue("deleteSingle");
+
+            }
+        });
+
+    }
 }
 
 

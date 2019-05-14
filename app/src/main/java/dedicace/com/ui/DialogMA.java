@@ -12,7 +12,7 @@ import dedicace.com.data.database.Song;
 
 public class DialogMA extends DialogFragment {
     private String origine;
-    private Song songToDownload;
+    private Song song, songToDelete;
     private String messageIntro;
     private String messagePositif;
     private String messageNegatif;
@@ -25,6 +25,9 @@ public class DialogMA extends DialogFragment {
     public interface DialogMAListener {
         void onDialogMAPositiveClick(int position, Song song);
         void onDialogMANegativeClick();
+        void onDialogMADeletePositiveClick(int position, Song song);
+        void onDialogMADeleteNegativeClick();
+
     }
 
     private DialogMAListener mListener;
@@ -52,9 +55,14 @@ public class DialogMA extends DialogFragment {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         if(origine.equals("downloadSingle")) {
-            messageIntro = "Voulez-vous charger sur votre téléphone cette chanson ?";
+            messageIntro = "Voulez-vous charger cette chanson sur votre téléphone ?";
             messagePositif = "Oui";
             messageNegatif = "Non";
+        }else if(origine.equals("deleteSingle")){
+            messageIntro = "Voulez-vous effacer cette chanson sur votre téléphone?";
+            messagePositif = "Oui";
+            messageNegatif = "Non";
+
         }else{
             Log.d("coucou", "DMA onCreateDialog: pas de messages...");
         }
@@ -64,14 +72,24 @@ public class DialogMA extends DialogFragment {
 
                         if(mListener!=null){
                             Log.d("coucou", "DMA onClick: (position) "+position);
-                            mListener.onDialogMAPositiveClick(position,songToDownload);
+
+                            if(origine.equals("downloadSingle")) {
+                                mListener.onDialogMAPositiveClick(position,song);
+                            }else if(origine.equals("deleteSingle")){
+                                mListener.onDialogMADeletePositiveClick(position,song);
+                            }
                         }
                     }
                 })
                 .setNegativeButton(messageNegatif, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         if(mListener!=null){
-                            mListener.onDialogMANegativeClick();
+
+                            if(origine.equals("downloadSingle")) {
+                                mListener.onDialogMANegativeClick();
+                            }else if(origine.equals("deleteSingle")){
+                                mListener.onDialogMADeleteNegativeClick();
+                            }
                         }
                     }
                 });
@@ -80,7 +98,7 @@ public class DialogMA extends DialogFragment {
     }
 
     public void setSong(Song song){
-        songToDownload = song;
-        Log.d("coucou", "DMA setSong: "+songToDownload);
+        this.song = song;
+        Log.d("coucou", "DMA setSong: "+song);
     }
 }

@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private Toast mToast;
     private static final String TAG = "coucou";
     private final int REQUEST_PERMISSION_CODE = 1000;
-    private int position, positionToDownload;
+    private int position, positionToDownload, positionToDelete;
     private ListSongs listSongs;
     private Thread currentThread;
 
@@ -210,6 +210,11 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                 affichageRecyclerView(sourceSongs);
                                 Log.d(TAG, "MA onChanged: position "+positionToDownload);
                                 songsAdapter.swapSingleSong(positionToDownload,songToPlays,songOnPhones,songOnClouds);
+                            }else if(typeSS.equals("deleteSingleSongOnPhone")){
+                                Log.d(TAG, "MA onChanged: lancement du SA pour le single (delete) ");
+                                affichageRecyclerView(sourceSongs);
+                                Log.d(TAG, "MA onChanged: position (delete) "+positionToDelete);
+                                songsAdapter.swapSingleSong(positionToDelete,songToPlays,songOnPhones,songOnClouds);
                             }
                         } else {
                             Log.d(TAG, "MA onChanged: conditions pas réunies");
@@ -545,13 +550,25 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     public void OnLongClickItem(int position,Song song) {
 
         Log.d(TAG, "MA OnLongClickItem: "+position);
-        //todo voir pour supprimer les autres dialogFragment pour en avoir un seul par type d'activité
         DialogFragment dialog = new DialogMA();
         Bundle args = new Bundle();
         args.putString("origine","downloadSingle");
         args.putInt("position",position);
         dialog.setArguments(args);
         //todo à voir si cela fonctionne
+        ((DialogMA) dialog).setSong(song);
+        dialog.show(getSupportFragmentManager(),"TAG");
+    }
+
+    @Override
+    public void OnLongClickDeleteItem(int adapterPosition, Song song) {
+
+        Log.d(TAG, "MA OnLongClickItem B: "+position);
+        DialogFragment dialog = new DialogMA();
+        Bundle args = new Bundle();
+        args.putString("origine","deleteSingle");
+        args.putInt("position",position);
+        dialog.setArguments(args);
         ((DialogMA) dialog).setSong(song);
         dialog.show(getSupportFragmentManager(),"TAG");
     }
@@ -567,6 +584,19 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     @Override
     public void onDialogMANegativeClick() {
         Toast.makeText(this, "Vous pourrez la charger ultérieurement...", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onDialogMADeletePositiveClick(int position, Song song) {
+        positionToDelete=position;
+        mViewModel.deleteSingleSong(song);
+        Toast.makeText(this, "Votre chanson est supprimé sur le téléphone", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "MA onDialogMAPositiveClick: suppression sur tel du single (position) "+position);
+    }
+
+    @Override
+    public void onDialogMADeleteNegativeClick() {
+        Toast.makeText(this, "Vous pourrez la supprimer ultérieurement...", Toast.LENGTH_SHORT).show();
     }
 
 

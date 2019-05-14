@@ -57,7 +57,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         List<Song> OnListRecordedSongsOnCloud(SourceSong sourceSong,RecordSource recordSource);
         void OnSaveRecordSong(Song song);
         void OnLongClickItem(int position, Song song);
-
+        void OnLongClickDeleteItem(int adapterPosition, Song songToDelete);
     }
 
     @NonNull
@@ -179,29 +179,6 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
      */
 
     public void swapSongs(final List<SourceSong> sources, List<List<RecordSource>> recordSources, List<Song> songToPlays, List<List<Song>> songOnPhones, List<List<Song>> songOnClouds) {
-   /*     Log.d("coucou", "swapSongs: SongAdapter \n"+sources+"\n"+recordSources+"\n"+ songToPlays+"\n"+ songOnPhones+"\n"+ songOnClouds);
-        if(songToPlays.get(0)!=null){
-            Log.d(TAG, "SA swapSongs: songToplays 1 "+songToPlays.get(0).getSourceSongTitre()+" "+songToPlays.get(0).getPupitre());
-        }
-        if(songToPlays.get(1)!=null){
-            Log.d(TAG, "SA swapSongs: songToplays 2 "+songToPlays.get(1).getSourceSongTitre()+" "+songToPlays.get(1).getPupitre());
-        }
-        if(songOnPhones.get(1)!=null){
-            Log.d(TAG, "SA swapSongs: songOnPhones 1 "+songOnPhones.get(1).get(0).getSourceSongTitre()+" "+songOnPhones.get(1).get(0).getPupitre());
-        }
-        if(songToPlays.get(1)!=null){
-//            Log.d(TAG, "SA swapSongs: songOnPhones 2 "+songOnPhones.get(1).get(1).getSourceSongTitre()+" "+songOnPhones.get(1).get(1).getPupitre());
-        }
-
-        if(songOnClouds.get(0)!=null){
-            Log.d(TAG, "SA swapSongs: songOnClouds 1 "+songOnClouds.get(0).get(0).getSourceSongTitre()+" "+songOnClouds.get(0).get(0).getPupitre());
-        }
-        if(songOnClouds.get(1)!=null){
-            Log.d(TAG, "SA swapSongs: songOnClouds 2 "+songOnClouds.get(1).get(0).getSourceSongTitre()+" "+songOnClouds.get(1).get(0).getPupitre());
-        }
-        if(songOnClouds.get(1)!=null){
-//            Log.d(TAG, "SA swapSongs: songOnClouds 3 "+songOnClouds.get(1).get(1).getSourceSongTitre()+" "+songOnClouds.get(1).get(1).getPupitre());
-        }*/
         sourceSongs=sources;
 
         Log.d(TAG, "SA swapSongs: url :"+sourceSongs.get(0).getUrlCloudBackground());
@@ -222,7 +199,6 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         this.songOnPhones=songOnPhones;
         this.songOnClouds=songOnClouds;
         notifyItemChanged(position);
-        notifyDataSetChanged();
     }
 
     @Override
