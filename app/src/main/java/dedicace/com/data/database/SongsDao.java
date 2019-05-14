@@ -62,7 +62,7 @@ public interface SongsDao {
     void deleteAll();
 
     @Update
-    void updateSong(Song song);
+    int updateSong(Song song);
 
     @Update
     int updatesSongs(List<Song> songs);

@@ -29,14 +29,12 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import dedicace.com.AppExecutors;
 import dedicace.com.R;
-import dedicace.com.data.database.AppDataBase;
 import dedicace.com.data.database.ListSongs;
 import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
@@ -45,7 +43,7 @@ import dedicace.com.data.database.SourceSong;
 import dedicace.com.ui.Admin.AdminHome;
 import dedicace.com.utilities.InjectorUtils;
 
-public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener,DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener, DialogMajSS.DialogMajSSListener {
+public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener,DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener, DialogMajSS.DialogMajSSListener, DialogMA.DialogMAListener {
 
     //UI
     private  RecyclerView recyclerView;
@@ -62,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private Toast mToast;
     private static final String TAG = "coucou";
     private final int REQUEST_PERMISSION_CODE = 1000;
-    private int position;
+    private int position, positionToDownload;
     private ListSongs listSongs;
     private Thread currentThread;
 
@@ -92,8 +90,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     //Utils
     private OnPositiveClickListener mPositiveClickListener;
-    public static AppDataBase choeurDataBase;
-
     private AppExecutors mExecutors;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
@@ -131,30 +127,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             OnRequestPermission();
 
             mExecutors = AppExecutors.getInstance();
-
-            //todo à retirer dès que cela marche (test)
-          /*  mExecutors.diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    AppDataBase database = AppDataBase.getInstance(getApplicationContext());
-                    //database.songsDao().deleteAll();
-                    //database.sourceSongDao().deleteAll();
-
-                    List<Song> listBs = database.songsDao().getSongsOnPhone("Des hommes pareils",RecordSource.BANDE_SON);
-                    List<SourceSong> listSS = database.sourceSongDao().getAllSources();
-                    Log.d(TAG, "MA synchronisationLocalDataBase: test Database Room "+ listBs.size()+" "+ listSS.size());
-                    if(listBs!=null){
-                        for (int i = 0; i <listBs.size() ; i++) {
-                            Log.d(TAG, "MA getSongOnPhoneBS: listBs songs dans synchronisation "+listBs.get(i).getSourceSongTitre()+" "+listBs.get(i).getPupitre()+" "+listBs.get(i).getSongId()+ " "+listBs.get(i).getUpdatePhone()+" "+listBs.get(i).getUpdatePhoneMp3());
-                        }
-                    }
-                    if(listSS!=null){
-                        for (int i = 0; i <listSS.size() ; i++) {
-                            Log.d(TAG, "MA getSongOnPhoneBS: listSS Sourcesongs dans synchronisation "+listSS.get(i).getTitre()+ " "+listSS.get(i).getUpdatePhone()+listSS.get(i).getUrlCloudBackground());
-                        }
-                    }
-                }
-            });*/
 
             mfactory = InjectorUtils.provideViewModelFactory(this.getApplicationContext());
             Log.d("coucou", "MA onCreate: fin de la factory");
@@ -233,6 +205,11 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                 Toast.makeText(MainActivity.this, "Veuillez patienter le temps de mettre en place toutes les chansons...", Toast.LENGTH_LONG).show();
                                 affichageRecyclerView(sourceSongs);
                                 songsAdapter.swapSongs(sourceSongs, recordSources, songToPlays, songOnPhones, songOnClouds);
+                            }else if(typeSS.equals("newSongOnPhone")){
+                                Log.d(TAG, "MA onChanged: lancement du SA pour le single");
+                                affichageRecyclerView(sourceSongs);
+                                Log.d(TAG, "MA onChanged: position "+positionToDownload);
+                                songsAdapter.swapSingleSong(positionToDownload,songToPlays,songOnPhones,songOnClouds);
                             }
                         } else {
                             Log.d(TAG, "MA onChanged: conditions pas réunies");
@@ -336,61 +313,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         }
     }
 
-    private void partieAux(List<SourceSong> sourceSongs) {
-
-        Log.d("coucou", "MainActivity: observers");
-
-        if (sourceSongs != null) {
-            Log.d("coucou", "MA onCreate: observers A " + sourceSongs.size()+" ");
-        }
-
-
-        //todo gérer le cas où l'on a que des chansons live sur Phone mais tout de même des chansons onCloud. pour l'instant btn disabled. voir télécharger via le menu
-        Log.d(TAG, "MA onChanged: RecordSources " + recordSources.size());
-        Log.d(TAG, "MA onChanged: songToplays " + songToPlays.size());
-        Log.d(TAG, " MA onChanged: songOnPhones " + songOnPhones.size());
-        Log.d(TAG, "MA onChanged: songOnClouds " + songOnClouds.size());
-
-        for (List<RecordSource> sources : recordSources) {
-            for (RecordSource source : sources) {
-                Log.d(TAG, "MA onChanged: A " + source + " " + sources.size());
-            }
-        }
-
-        for (Song song : songToPlays) {
-            if (song != null) {
-                Log.d(TAG, "MA onChanged: B " + song + "  " + song.getSourceSongTitre() + " " + song.getRecordSource() + " " + song.getPupitre());
-            } else {
-                Log.d(TAG, "MA onChanged: B pas de chanson " + song);
-            }
-        }
-
-        for (List<Song> songs : songOnPhones) {
-
-            for (Song song : songs) {
-                if (song != null) {
-                    Log.d(TAG, "MA onChanged: C " + song.getSourceSongTitre() + " " + song.getRecordSource() + " " + song.getPupitre());
-                } else {
-                    Log.d(TAG, "MA onChanged: C pas de chanson sur le Phone");
-                }
-            }
-        }
-
-        for (List<Song> songs : songOnClouds) {
-            for (Song song : songs) {
-                if (song != null) {
-                    Log.d(TAG, "MA onChanged: D " + song.getSourceSongTitre() + " " + song.getRecordSource() + " " + song.getPupitre());
-                } else {
-                    Log.d(TAG, "MA onChanged: D pas de chanson non enregistrée");
-                }
-            }
-        }
-
-        if (sourceSongs != null) {
-            Log.d("coucou", "MA onCreate: observers B" + sourceSongs.size()+" ");
-        }
-
-    }
 
     @Override
     protected void onStart() {
@@ -412,16 +334,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             Log.d("coucou", "MA onStart C: "+ current_user_id);
 
         }
-    }
-
-    private String getCurrentPupitreStr() {
-
-        return mViewModel.getCurrentPupitreStr();
-    }
-
-    private String getCurrentAuthRole() {
-
-        return mViewModel.getCurrentPupitreStr();
     }
 
 
@@ -531,20 +443,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     }
 
 
-
-    public void deleteMusicFiles(final String path){
-        mExecutors.diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-
-                File file = new File(path);
-                boolean deletefile = file.delete();
-                Log.d(TAG, "deleteMusicFiles: "+deletefile);
-            }
-        });
-    }
-
-
     /**
      * Méthode passée dans le listener dans l'adapter
      *
@@ -637,6 +535,40 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     }
 
+    /**
+     * gestion du long click pour téléchargement single
+     * @param position
+     *
+     */
+
+    @Override
+    public void OnLongClickItem(int position,Song song) {
+
+        Log.d(TAG, "MA OnLongClickItem: "+position);
+        //todo voir pour supprimer les autres dialogFragment pour en avoir un seul par type d'activité
+        DialogFragment dialog = new DialogMA();
+        Bundle args = new Bundle();
+        args.putString("origine","downloadSingle");
+        args.putInt("position",position);
+        dialog.setArguments(args);
+        //todo à voir si cela fonctionne
+        ((DialogMA) dialog).setSong(song);
+        dialog.show(getSupportFragmentManager(),"TAG");
+    }
+
+    @Override
+    public void onDialogMAPositiveClick(int position, Song song) {
+        positionToDownload=position;
+        mViewModel.downloadSingleSong(song);
+        Toast.makeText(this, "Votre chanson est en train de se charger sur le téléphone", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "MA onDialogMAPositiveClick: chargement sur tel du single (position) "+position);
+    }
+
+    @Override
+    public void onDialogMANegativeClick() {
+        Toast.makeText(this, "Vous pourrez la charger ultérieurement...", Toast.LENGTH_SHORT).show();
+    }
+
 
     @Override
     public void OnDialogRecord(int position, SongsViewHolder songsViewHolder) {
@@ -712,7 +644,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             break;
         }
     }
-
 
 
     //todo à renommer

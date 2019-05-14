@@ -34,7 +34,7 @@ public class ChoraleRepository {
     private final ChoraleNetWorkDataSource mChoraleNetworkDataSource;
     private final AppExecutors mExecutors;
     private boolean mInitialized = false;
-    private Thread currentThread,t2,t1;
+    private Thread currentThread,t2,t1,t3;
 
     //Songs
     private List<SourceSong> sourceSongsAfterSync = new ArrayList<>();
@@ -66,6 +66,7 @@ public class ChoraleRepository {
     private List<SourceSong> totalBgToDelete = new ArrayList<SourceSong>();
     private Map<String,String> titres = new HashMap<>();
     private Map<String,String> titress = new HashMap<>();
+    private Song songToDownload;
 
     private List<List<Song>> SongOnClouds=new ArrayList<>();
     private List<Object> listElements = new ArrayList<>();
@@ -171,10 +172,28 @@ public class ChoraleRepository {
             if(message.equals("Done")){
                 Log.d(LOG_TAG, "CR ChoraleRepository: observer Done pour downloads");
                 DoWorkInRoomAndLists();
+            }else if(message.equals("SingleDownload")){
+                Log.d(LOG_TAG, "CR ChoraleRepository: single download ");
+                DoWorkInRoomBis(songToDownload);
             }else{
                 Log.d(LOG_TAG, "CR ChoraleRepository: il faut encore attendre... ");
             }
         });
+    }
+
+    private void DoWorkInRoomBis(Song song) {
+        Log.d(LOG_TAG, "CR DoWorkInRoomBis: ");
+        t3 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                currentThread = Thread.currentThread();
+                syncSingleSongDb(song);
+                getListSongsA();
+            }
+        });
+        t3.start();
+
+
     }
 
     private void DoWorkInRoomAndLists() {
@@ -184,7 +203,7 @@ public class ChoraleRepository {
             public void run() {
                 currentThread = Thread.currentThread();
                 DoWorkInRoom();
-                getListSongs(sourceSongs1,songs);
+                getListSongsA();
             }
         });
 
@@ -227,7 +246,7 @@ public class ChoraleRepository {
                     mSourceDao.updateSourceSong(oldSourcesSongs.get(0));
                     sourceSongsAfterSync=oldSourcesSongs;
                     songsAfterSync=oldSongs;
-                    getListSongs(sourceSongs,songs);
+                    getListSongsA();
                 }
                 Log.d(LOG_TAG, "CR ChoraleRepository LiveData après sync sourceSongs : "+sourceSongs.size()+ " "+sourceSongsAfterSync.size()+" "+Thread.currentThread().getName());
 
@@ -241,8 +260,7 @@ public class ChoraleRepository {
         t2.start();
     }
 
-    private void getListSongs(List<SourceSong> sourceSongs, List<Song> songs) {
-
+    private void getListSongsA() {
 
         listSongs= new ListSongs(mSongDao,mSourceDao,sourceSongsAfterSync,songsAfterSync);
         listSongs.getSongOnClouds();
@@ -263,6 +281,49 @@ public class ChoraleRepository {
         listSongs.getSongToPlays();
 
         Log.d(LOG_TAG, "CR ChoraleRepository LiveData après tout : "+Thread.currentThread().getName());
+    }
+
+    public void downloadSingleSong(Song song){
+        typeSS="newSongOnPhone";
+        songToDownload=song;
+        mChoraleNetworkDataSource.downloadSingleMp3(song);
+
+    }
+
+    private void syncSingleSongDb(Song song) {
+
+        String titre = song.getSourceSongTitre();
+        Pupitre pupitre = song.getPupitre();
+        RecordSource recordSource = song.getRecordSource();
+        Song tempSong = mSongDao.getSongsByTitrePupitreSource(titre,pupitre,recordSource);
+        SourceSong tempSource = mSourceDao.getSourceSongByTitre(titre);
+        tempSource.setUpdateBgPhone(new Date(System.currentTimeMillis()));
+        if(tempSong!=null) {
+            Log.d(LOG_TAG, "CR syncSingleSongDb "+tempSong);
+            tempSong.setUpdatePhone(new Date(System.currentTimeMillis()));
+            tempSong.setSongPath(song.getSongPath());
+            tempSong.setUpdatePhoneMp3(song.getUpdatePhoneMp3());
+        }else{
+            Log.d(LOG_TAG, "CR syncSingleSongDb: pb sur TempSong single");
+        }
+
+        if(tempSong!=null) {
+            int tempInt = mSongDao.updateSong(tempSong);
+            Log.d(LOG_TAG, "CR syncSingleSongDb(: update single "+tempInt+" "+tempSong.getPupitre()+" "+tempSong.getSongPath());
+        }else{
+            Log.d(LOG_TAG, "CR syncSingleSongDb: pb sync single");
+        }
+
+        if(tempSource!=null) {
+            mSourceDao.updateSourceSong(tempSource);
+            Log.d(LOG_TAG, "CR syncSingleSongDb(: update single "+" "+tempSong.getPupitre()+" "+tempSong.getSongPath());
+        }else{
+            Log.d(LOG_TAG, "CR syncSingleSongDb: pb sync single");
+        }
+
+        //chercher les Sourcesongs sur Room
+        sourceSongsAfterSync=mSourceDao.getAllSources();
+        songsAfterSync=mSongDao.getAllSongs();
     }
 
 
@@ -418,6 +479,7 @@ public class ChoraleRepository {
             }
         }
 
+        //todo à finir la partie modifiedSong du côté admin
         if(modifiedSongsList!=null&&modifiedSongsList.size()!=0){
             Log.d(LOG_TAG, "CR DoWorkInRoom: modifysongs");
 
@@ -436,7 +498,6 @@ public class ChoraleRepository {
                     tempSong.setUpdatePhone(song.getUpdatePhone());
                     tempSong.setPupitre(song.getPupitre());
                     tempSong.setRecordSource(song.getRecordSource());
-                    tempSong.setSourceSongTitre(song.getSourceSongTitre());
                     tempSong.setUrlCloudMp3(song.getUrlCloudMp3());
                     tempSongs.add(tempSong);
                 }else{

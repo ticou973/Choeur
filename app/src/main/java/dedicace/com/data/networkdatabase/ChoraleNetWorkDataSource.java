@@ -651,6 +651,50 @@ public class ChoraleNetWorkDataSource {
     public boolean isDeleted() {
         return deleted;
     }
+
+    //download single song
+    public void downloadSingleMp3(Song song) {
+
+        String cloudPath = song.getUrlCloudMp3();
+        mStorageRef = mStorage.getReferenceFromUrl(cloudPath);
+
+        String filename = mStorageRef.getName();
+
+        //todo essayer de mettre un dossier sons.mp3
+        localFileMp3 = new File(mContext.getFilesDir(), filename);
+        String pathLocalMp3 = localFileMp3.getAbsolutePath();
+        song.setSongPath(pathLocalMp3);
+        song.setUpdatePhoneMp3(new Date(System.currentTimeMillis()));
+        Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: " + localFileMp3.getParent() + " " + filename + " " + localFileMp3.getPath() + " " + localFileMp3.getAbsolutePath()+" "+ mContext.getFilesDir()+" "+Thread.currentThread().getName());
+
+        //todo voir comment utiliser download manager
+        mStorageRef.getFile(localFileMp3)
+                .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                        // Successfully downloaded data to local file
+
+                        Log.d(LOG_TAG, "NDS onSuccess single: "+Thread.currentThread().getName()+" "+ filename);
+
+                            downloads.postValue("SingleDownload");
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle failed download
+                // ...
+                Toast.makeText(mContext, "Il y a eu un problème de téléchargement, veuillez réessayer plus tard...", Toast.LENGTH_LONG).show();
+
+            }
+            //todo voir comment intégrer l'avancement des données dans un retour utilisateur
+        }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
+            @Override
+            public void onProgress(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                int progress = (int) (100.0 * taskSnapshot.getBytesTransferred()) / (int) taskSnapshot.getTotalByteCount();
+                Log.d(LOG_TAG, "NDS onProgress: "+ filename +" "+progress+"%");
+            }
+        });
+    }
 }
 
 

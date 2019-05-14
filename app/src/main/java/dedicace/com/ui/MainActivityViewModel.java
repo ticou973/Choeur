@@ -129,6 +129,10 @@ public class MainActivityViewModel extends ViewModel {
     public boolean getDeleted() {
         return mRepository.getDeleted();
     }
+
+    public void downloadSingleSong(Song song) {
+        mRepository.downloadSingleSong(song);
+    }
 }
 
 

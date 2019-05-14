@@ -47,6 +47,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private Song songToPlay;
     private List<Song> songOnPhoneRecorded= new ArrayList<>();
     private List<Song> songOnCloudRecorded= new ArrayList<>();
+    private Song[] recordedCloudSongs;
 
     private ArrayList pupitreSourceButton = new ArrayList();
 
@@ -67,6 +68,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private Song songToRecord;
     private Pupitre recordPupitre;
     private String pathSave;
+    private Song songToDownload;
 
 
     //todo prévoir d'effacer les chansons que l'on a soit même enregistré (long click et menu)
@@ -278,6 +280,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     }
 
     public void setSongRecorded(Song...recordedLocalSongs){
+
         for (Song song:recordedLocalSongs) {
             if(song!=null) {
                 Pupitre pupitrerecorded = song.getPupitre();
@@ -297,6 +300,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     }
 
     public void setSongCloudRecorded(Song... recordedCloudSongs){
+        this.recordedCloudSongs=recordedCloudSongs;
         for (Song song:recordedCloudSongs) {
             Pupitre pupitrerecorded = song.getPupitre();
 
@@ -448,7 +452,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             setResourceToMediaPlayer();
 
         }else{
-            message = source.toString() +" non chargé";
+            message = source.toString() +" pas encore chargée ! Pour charger, appuyer longuement sur le pupitre désiré ! ";
         }
     }
 
@@ -544,7 +548,18 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private void handleLongClickPupitre(Pupitre pupitre, Button button) {
 
         if(button.getAlpha()==0.9f){
+            //todo à retirer Toast
             Toast.makeText(context, "OK", Toast.LENGTH_SHORT).show();
+
+            for(Song song : recordedCloudSongs){
+                if(song.getPupitre()==pupitre){
+                    songToDownload=song;
+                    Log.d(TAG, "SVH handleLongClickPupitre:A "+songToDownload);
+                }
+            }
+            Log.d(TAG, "SVH handleLongClickPupitre: single song "+songToDownload);
+            mlistItemClickedListener.OnLongClickItem(getAdapterPosition(),songToDownload);
+
         }else{
             Toast.makeText(context, "Song déjà chargée sur le téléphone", Toast.LENGTH_SHORT).show();
         }

@@ -46,8 +46,6 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         Log.d(TAG, "SA SongsAdapter: ");
     }
 
-
-
     //todo à voir si bouger interface côté viewHolder
     public interface ListemClickedListener {
         void OnClickedItem(String titre, String message);
@@ -58,7 +56,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         List<Song> OnListRecordedSongsOnPhone(SourceSong sourceSong,RecordSource recordSource);
         List<Song> OnListRecordedSongsOnCloud(SourceSong sourceSong,RecordSource recordSource);
         void OnSaveRecordSong(Song song);
-
+        void OnLongClickItem(int position, Song song);
 
     }
 
@@ -102,7 +100,6 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         Log.d(TAG, "SA initDataSourceSong: "+sourceSong.getTitre()+" "+position);
 
         songsViewHolder.setSourceSong(sourceSong);
-
 
         initRecordSongs(songsViewHolder,position);
 
@@ -216,6 +213,16 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
 
     //todo voir si utile le diffResult cf evernote
 
+    }
+
+    public void swapSingleSong(int position, List<Song> songToPlays, List<List<Song>> songOnPhones, List<List<Song>> songOnClouds) {
+        Log.d(TAG, "SA swapSongs single: url :"+" "+recordSources+" "+position+" "+songToPlays+" "+songOnPhones+" "+songOnClouds);
+
+        this.songToPlays=songToPlays;
+        this.songOnPhones=songOnPhones;
+        this.songOnClouds=songOnClouds;
+        notifyItemChanged(position);
+        notifyDataSetChanged();
     }
 
     @Override
