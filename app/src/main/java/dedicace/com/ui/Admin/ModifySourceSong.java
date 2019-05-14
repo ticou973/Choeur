@@ -112,11 +112,11 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
                                 }
 
                                 if(newIntent){
-                                    Log.d(TAG, "onComplete: new intent");
+                                    Log.d(TAG, "MSS onComplete: new intent");
                                     sourceSongAdapter.notifyDataSetChanged();
 
                                 }else{
-                                    Log.d(TAG, "onComplete: pas de new intent");
+                                    Log.d(TAG, "MSS onComplete: pas de new intent");
                                     sourceSongAdapter = new SourceSongAdapter(listSourceSongs);
                                     recyclerSS.setAdapter(sourceSongAdapter);
                                 }

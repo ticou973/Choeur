@@ -431,6 +431,7 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
     private void changeSongsName() {
         Map<String,Object> data = new HashMap<>();
         data.put("titre_song",newTitreStr);
+        data.put("maj",Timestamp.now());
         Log.d(TAG, "MSSD changeSongsName: ");
             for (String name : listIds) {
                 //todo faire un try catch là dessus

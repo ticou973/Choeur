@@ -8,7 +8,9 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import dedicace.com.AppExecutors;
 import dedicace.com.data.database.ListSongs;
@@ -62,6 +64,8 @@ public class ChoraleRepository {
     private List<SourceSong> totalBgTodowload = new ArrayList<SourceSong>();
     private List<Song> totalMp3ToDelete = new ArrayList<>();
     private List<SourceSong> totalBgToDelete = new ArrayList<SourceSong>();
+    private Map<String,String> titres = new HashMap<>();
+    private Map<String,String> titress = new HashMap<>();
 
     private List<List<Song>> SongOnClouds=new ArrayList<>();
     private List<Object> listElements = new ArrayList<>();
@@ -382,38 +386,17 @@ public class ChoraleRepository {
             mSourceDao.deleteSourceSongs(deletedSourceSongsList);
         }
 
-        if(modifiedSongsList!=null&&modifiedSongsList.size()!=0){
-            Log.d(LOG_TAG, "CR DoWorkInRoom: modifysongs");
-
-            for (Song song:modifiedSongsList) {
-                Log.d(LOG_TAG, "CR synchronisationLocalDataBase: milieu source "+song.getSourceSongTitre()+" "+song.getUpdatePhone());
-                String titre = song.getSourceSongTitre();
-                Pupitre pupitre = song.getPupitre();
-                RecordSource recordSource = song.getRecordSource();
-                Song tempSong = mSongDao.getSongsByTitrePupitreSource(titre,pupitre,recordSource);
-               //todo voir utilité pupitre et recordSource et de titre
-                tempSong.setSourceSongTitre(song.getSourceSongTitre());
-                tempSong.setUpdatePhone(song.getUpdatePhone());
-                tempSong.setPupitre(song.getPupitre());
-                tempSong.setRecordSource(song.getRecordSource());
-                tempSong.setSourceSongTitre(song.getSourceSongTitre());
-                tempSong.setUrlCloudMp3(song.getUrlCloudMp3());
-                tempSongs.add(tempSong);
-            }
-
-            int tempInt = mSongDao.updatesSongs(tempSongs);
-
-            Log.d(LOG_TAG, "CR synchronisationLocalDataBase: nb d'update Songs "+tempInt);
-        }
-
         if(modifiedSourceSongsList!=null&&modifiedSourceSongsList.size()!=0){
             Log.d(LOG_TAG, "CR DoWorkInRoom: modify sourcesongs");
             for (SourceSong source:modifiedSourceSongsList) {
-                Log.d(LOG_TAG, "CR synchronisationLocalDataBase: milieu source "+source.getTitre()+" "+source.getUpdatePhone()+" "+source.getDuration()+" "+source.getUrlCloudBackground());
-                String titre = source.getTitre();
+                Log.d(LOG_TAG, "CR synchronisationLocalDataBase: milieu sourceSong "+source.getTitre()+" "+source.getUpdatePhone()+" "+source.getDuration()+" "+source.getUrlCloudBackground());
+                String tempTitre = source.getTitre();
+                String titre = titres.get(tempTitre);
+                Log.d(LOG_TAG, "CR DoWorkInRoom : titres : "+tempTitre+" "+titre);
                 SourceSong tempSource = mSourceDao.getSourceSongByTitre(titre);
+                Log.d(LOG_TAG, "CR DoWorkInRoom: tempSource "+tempSource);
                 if(tempSource!=null) {
-                    tempSource.setTitre(source.getTitre());
+                    tempSource.setTitre(tempTitre);
                     tempSource.setUpdatePhone(source.getUpdatePhone());
                     //todo pb ici avec le bg ?
                     if(source.getBackground()!=null) {
@@ -431,8 +414,39 @@ public class ChoraleRepository {
             }
             if(tempSourceSongs!=null) {
                 int tempInt = mSourceDao.upDateSourceSongs(tempSourceSongs);
-
                 Log.d(LOG_TAG, "CR synchronisationLocalDataBase: nb d'update SS " + tempInt);
+            }
+        }
+
+        if(modifiedSongsList!=null&&modifiedSongsList.size()!=0){
+            Log.d(LOG_TAG, "CR DoWorkInRoom: modifysongs");
+
+            for (Song song:modifiedSongsList) {
+                Log.d(LOG_TAG, "CR synchronisationLocalDataBase: milieu song "+song.getSourceSongTitre()+" "+song.getUpdatePhone());
+                String tempTitre = song.getSourceSongTitre();
+                String titre = titress.get(tempTitre);
+                Log.d(LOG_TAG, "CR DoWorkInRoom : titres songs : "+tempTitre+" "+titre);
+                Pupitre pupitre = song.getPupitre();
+                RecordSource recordSource = song.getRecordSource();
+                Song tempSong = mSongDao.getSongsByTitrePupitreSource(titre,pupitre,recordSource);
+                //todo voir utilité pupitre et recordSource et de titre
+                if(tempSong!=null) {
+                    Log.d(LOG_TAG, "CR DoWorkInRoom: "+tempSong);
+                    tempSong.setSourceSongTitre(tempTitre);
+                    tempSong.setUpdatePhone(song.getUpdatePhone());
+                    tempSong.setPupitre(song.getPupitre());
+                    tempSong.setRecordSource(song.getRecordSource());
+                    tempSong.setSourceSongTitre(song.getSourceSongTitre());
+                    tempSong.setUrlCloudMp3(song.getUrlCloudMp3());
+                    tempSongs.add(tempSong);
+                }else{
+                    Log.d(LOG_TAG, "CR DoWorkInRoom: pb sur TempSong");
+                }
+            }
+
+            if(tempSongs!=null) {
+                int tempInt = mSongDao.updatesSongs(tempSongs);
+                Log.d(LOG_TAG, "CR synchronisationLocalDataBase: nb d'update Songs "+tempInt);
             }
         }
 
@@ -452,6 +466,7 @@ public class ChoraleRepository {
     }
 
     private void getModificationLists(List<SourceSong> sourceSongs, List<Song> songs){
+        Log.d(LOG_TAG, "CR getModificationLists: "+songs+" "+sourceSongs);
         deletedSongsList(songs);
         deletedSourceSongsList(sourceSongs);
         modifiedSongsList(songs);
@@ -507,6 +522,7 @@ public class ChoraleRepository {
 
 
     private void modifiedSongsList(List<Song> songs) {
+        Log.d(LOG_TAG, "CR modifiedSongsList: modified Songs List");
         for (Song song:songs) {
             for (Song oldSong: oldSongs) {
                 if(oldSong.getSongIdCloud().equals(song.getSongIdCloud())){
@@ -520,6 +536,7 @@ public class ChoraleRepository {
                         }
                     }
                 }
+                titress.put(song.getSourceSongTitre(),oldSong.getSourceSongTitre());
             }
         }
         Log.d(LOG_TAG, "CR modifiedSongsList: "+modifiedSongsList.size());
@@ -538,7 +555,6 @@ public class ChoraleRepository {
                     Log.d(LOG_TAG, "CR modifiedSourcesSongsList: "+oldSource.getUpdatePhone()+" "+source.getUpdatePhone());
 
                     if(oldSource.getUpdatePhone().getTime()<source.getUpdatePhone().getTime()){
-
                         Log.d(LOG_TAG, "CR modifiedSourcesSongsList: "+oldSource.getBackground()+" "+source.getBackground()+" "+oldSource.getTitre()+" "+source.getTitre()+" "+oldSource.getGroupe()+" "+source.getGroupe()+" "+oldSource.getBaseUrlOriginalSong()+ " "+ source.getBaseUrlOriginalSong()+" "+oldSource.getDuration()+" "+source.getDuration());
                         Log.d(LOG_TAG, "CR modifiedSourcesSongsList: ajout de modified SS "+source.getTitre());
                         modifiedSourceSongsList.add(source);
@@ -548,6 +564,7 @@ public class ChoraleRepository {
                             Log.d(LOG_TAG, "CR modifiedSourcesSongsList:  delete download ");
                         }
                     }
+                    titres.put(source.getTitre(),oldSource.getTitre());
                 }
             }
         }

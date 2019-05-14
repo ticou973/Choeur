@@ -2,7 +2,6 @@ package dedicace.com.data.database;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
@@ -10,9 +9,10 @@ import android.arch.persistence.room.PrimaryKey;
 import java.util.Date;
 
 
-@Entity(foreignKeys = @ForeignKey(entity = SourceSong.class,
+/*@Entity(foreignKeys = @ForeignKey(entity = SourceSong.class,
         parentColumns = "titre",
-        childColumns = "titre_song"),indices = {@Index(value = {"titre_song"})})
+        childColumns = "titre_song"),indices = {@Index(value = {"titre_song"})})*/
+@Entity(indices = {@Index(value = {"titre_song"})})
 public class Song {
 
     @PrimaryKey(autoGenerate = true)
