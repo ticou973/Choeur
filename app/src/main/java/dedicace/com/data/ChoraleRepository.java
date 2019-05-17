@@ -198,8 +198,6 @@ public class ChoraleRepository {
             }
         });
         t3.start();
-
-
     }
 
     private void DoWorkInRoomAndLists() {
@@ -328,7 +326,7 @@ public class ChoraleRepository {
 
         if(tempSource!=null) {
             mSourceDao.updateSourceSong(tempSource);
-            Log.d(LOG_TAG, "CR syncSingleSongDb(: update single "+" "+tempSong.getPupitre()+" "+tempSong.getSongPath());
+            Log.d(LOG_TAG, "CR syncSingleSongDb(: update single source "+" "+tempSong.getPupitre()+" "+tempSong.getSongPath());
         }else{
             Log.d(LOG_TAG, "CR syncSingleSongDb: pb sync single");
         }

@@ -45,8 +45,8 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private List<RecordSource> recordSources= new ArrayList<>();
     private SourceSong sourceSong = new SourceSong();
     private Song songToPlay;
-    private List<Song> songOnPhoneRecorded= new ArrayList<>();
-    private List<Song> songOnCloudRecorded= new ArrayList<>();
+    private List<Song> songOnPhoneRecorded;
+    private List<Song> songOnCloudRecorded;
     private Song[] recordedCloudSongs, recordedLocalSongs;
 
     private ArrayList pupitreSourceButton = new ArrayList();
@@ -115,6 +115,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         altoBtn.setOnLongClickListener(this);
         sopranoBtn.setOnLongClickListener(this);
 
+        //todo vérifier que pas doublons avec le SA
         setButtonActivable(false, bsBtn,liveBtn,tuttiBtn,bassBtn,tenorBtn,altoBtn,sopranoBtn);
 
         chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
@@ -280,33 +281,46 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     }
 
     public void setSongRecorded(Song...recordedLocalSongs){
-
-        this.recordedLocalSongs=recordedLocalSongs;
         for (Song song:recordedLocalSongs) {
             if(song!=null) {
                 Pupitre pupitrerecorded = song.getPupitre();
 
-                if (pupitrerecorded != pupitre) {
+                //todo voir le pb idem pour cloud recorded
+                //if (pupitrerecorded != pupitre) {
+                    Log.d(TAG, "SVH setSongRecorded: "+song+" "+recordedLocalSongs);
                     setPupitresLoadedOnPhoneVisible(pupitrerecorded);
-                }
+                //}
             }
         }
+    }
+
+    public void setValueCloudSongRecorded(Song... recordedCloudSongs){
+
+        this.recordedCloudSongs=recordedCloudSongs;
+
+    }
+    public void setValueSongLocalRecorded(Song...recordedLocalSongs){
+        this.recordedLocalSongs=recordedLocalSongs;
     }
 
     public void setPupitresLoadedOnPhoneVisible(Pupitre... pupitres){
         for (Pupitre pupitre: pupitres) {
             int pupitreIndex=pupitreSourceButton.indexOf(pupitre);
+            Log.d(TAG, "SVH setPupitresLoadedOnPhoneVisible: orange pale onPhone "+ pupitre);
             setColorButton(false,(Button) pupitreSourceButton.get(pupitreIndex+1));
         }
     }
 
     public void setSongCloudRecorded(Song... recordedCloudSongs){
-        this.recordedCloudSongs=recordedCloudSongs;
+
         for (Song song:recordedCloudSongs) {
             Pupitre pupitrerecorded = song.getPupitre();
 
-            if(pupitrerecorded!=pupitre){
-                setPupitresLoadedOnCloudVisible(pupitrerecorded);            }
+            //todo voir le cas dans le changement de source ? cf. note plus bas de todo
+           // if(pupitrerecorded!=pupitre){
+                Log.d(TAG, "SVH setSongCloudRecorded: "+song+" "+recordedCloudSongs);
+                setPupitresLoadedOnCloudVisible(pupitrerecorded);
+           // }
         }
     }
 
@@ -314,6 +328,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     public void setPupitresLoadedOnCloudVisible(Pupitre... pupitres){
         for (Pupitre pupitre: pupitres) {
             int pupitreIndex=pupitreSourceButton.indexOf(pupitre);
+            Log.d(TAG, "SVH setPupitresLoadedOnCloudVisible : gris Cloud "+ pupitre);
             setGreyButton(true,(Button) pupitreSourceButton.get(pupitreIndex+1));
         }
     }
@@ -323,12 +338,14 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         int red, green, blue;
         for (Button button: buttons) {
             if(focus) {
+                Log.d(TAG, "SVH setColorButton: true");
                 red = 249;
                 green = 191;
                 blue = 45;
                 button.setAlpha(1.0f);
 
             }else{
+                Log.d(TAG, "SVH setColorButton: false");
                 red = 255;
                 green = 241;
                 blue = 99;
@@ -347,10 +364,13 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             blue = 224;
 
             if(focus) {
+                Log.d(TAG, "SVH setGreyButton: true");
                 button.setAlpha(0.9f);
                 button.setEnabled(true);
 
-            }else{ button.setAlpha(0.3f); }
+            }else{
+                Log.d(TAG, "SVH setGreyButton: false");
+                button.setAlpha(0.3f); }
             button.setBackgroundColor(rgb(red,green,blue));
 
         }
@@ -359,18 +379,18 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     public void setButtonActivable(boolean activable, Button... buttons){
         for (Button button: buttons) {
             if(activable){
+                Log.d(TAG, "SVH setButtonActivable: activable "+ button);
                 button.setAlpha(1.0f);
                 button.setEnabled(true);
 
             }else{
+                Log.d(TAG, "SVH setButtonActivable: non activable "+ button);
                 button.setAlpha(0.3f);
                 button.setEnabled(false);
                 setGreyButton(false,button);
             }
         }
     }
-
-    //todo à voir si on met une variable pour gérer cela
 
     /** Gestion des clicks sur tous les boutons de l'interface
      * Gestion aussi du longClick pour les téléchargements des songs sur le cloud
@@ -382,7 +402,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     @Override
     public void onClick(View view) {
         switch (view.getId()){
-            //todo faire les 2 cas suivants dès que le système de fichiers est au point
+            //todo faire les 2 cas suivants dès que le système de fichiers est au point voir notamment les recorded dans le handle
             case R.id.btn_bs :
                 handleClickSource(RecordSource.BANDE_SON,bsBtn);
                 break;
@@ -464,7 +484,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         setButtonActivable(false,tuttiBtn,bassBtn,tenorBtn,altoBtn,sopranoBtn);
 
         Song[] songsPhone, songsCloud;
-
+        //todo voir comment calculer le songOnCloudRecorded ici
         songOnCloudRecorded = mlistItemClickedListener.OnListRecordedSongsOnCloud(sourceSong,recordSource);
 
         if(songOnCloudRecorded!=null) {
@@ -473,9 +493,12 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             songsCloud = new Song[0];
         }
 
+        //todo voir ce cas avec le cas différent de pupitre cf. la méthode
         setSongCloudRecorded(songsCloud);
 
         Log.d(TAG, "SVH HandleListSongs "+ songsCloud.length);
+
+        //todo voir comment calculer le songLocalRecorded ici
 
         songOnPhoneRecorded = mlistItemClickedListener.OnListRecordedSongsOnPhone(sourceSong,recordSource);
         if(songOnPhoneRecorded!=null) {
@@ -547,10 +570,9 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
 
     private void handleLongClickPupitre(Pupitre pupitre, Button button) {
-
         if(button.getAlpha()==0.9f){
             for(Song song : recordedCloudSongs){
-                if(song.getPupitre()==pupitre){
+                if(song.getPupitre()==pupitre&&song.getSourceSongTitre().equals(sourceSong.getTitre())&&song.getRecordSource()==source){
                     songToDownload=song;
                     Log.d(TAG, "SVH handleLongClickPupitre:A download "+songToDownload);
                 }
@@ -561,14 +583,13 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         }else{
             Toast.makeText(context, "Song déjà chargée sur le téléphone", Toast.LENGTH_SHORT).show();
             for(Song song : recordedLocalSongs){
-                if(song.getPupitre()==pupitre){
+                if(song.getPupitre()==pupitre&&song.getSourceSongTitre().equals(sourceSong.getTitre())&&song.getRecordSource()==source){
                     songToDelete=song;
                     Log.d(TAG, "SVH handleLongClickPupitre:B delete "+songToDelete);
                 }
             }
             Log.d(TAG, "SVH handleLongClickPupitre: delete single song "+songToDelete);
             mlistItemClickedListener.OnLongClickDeleteItem(getAdapterPosition(),songToDelete);
-
         }
     }
 
@@ -588,7 +609,8 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             if (songToPlay != null) {
                 if(songToPlay.getPupitre()!=pupitre||songToPlay.getRecordSource()!=source){
                     Log.d(TAG, "SVH setResourceToMediaPlayer: "+songToPlay.getSourceSongTitre()+songToPlay.getPupitre());
-                    songToPlay = mlistItemClickedListener.OnPlaySong(sourceSong,pupitre,source);
+                   // songToPlay = mlistItemClickedListener.OnPlaySong(sourceSong,pupitre,source);
+                    calculSongToPlay(pupitre,source);
                 }
 
                 String resStrToPlay = songToPlay.getSongPath();
@@ -603,6 +625,15 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                 setTotalTime(0);
             }
 
+    }
+
+    private void calculSongToPlay(Pupitre pupitre,RecordSource source) {
+        for (Song song : songOnPhoneRecorded) {
+            if (song.getPupitre() == pupitre && song.getRecordSource() == source) {
+                songToPlay = song;
+                Log.d(TAG, "SVH OnPlaySong: "+songToPlay+" "+songToPlay.getPupitre());
+            }
+        }
     }
 
     //Méthodes pour les boutons de controle du mediaplayer et mediarecorder
@@ -817,6 +848,14 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     public ImageView getPlaySongs() {
         return playSongs;
+    }
+
+    public void setListSongLocalRecorded(List<Song> songOnPhoneRecorded) {
+        this.songOnPhoneRecorded=songOnPhoneRecorded;
+    }
+
+    public void setListSongCloudRecorded(List<Song> songOnCloudRecorded) {
+        this.songOnCloudRecorded=songOnCloudRecorded;
     }
 
     /** Interface pour communiquer avec la classe MediaPLayer

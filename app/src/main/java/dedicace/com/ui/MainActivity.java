@@ -43,6 +43,7 @@ import dedicace.com.data.database.SourceSong;
 import dedicace.com.ui.Admin.AdminHome;
 import dedicace.com.utilities.InjectorUtils;
 
+//todo revoir dans tout le logiciel les new Object lorsqu'ils sont déjà définis
 public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener,DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener, DialogMajSS.DialogMajSSListener, DialogMA.DialogMAListener {
 
     //UI
@@ -184,8 +185,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                             Log.d(TAG, "MA onChanged: conditions toutes réunies"+typeSS);
                             if(typeSS.equals("oldSS")) {
                                 Log.d(TAG, "MA onChanged: type OldSs");
-                                affichageRecyclerView(sourceSongs);
-                                songsAdapter.swapSongs(sourceSongs, recordSources, songToPlays, songOnPhones, songOnClouds);
+                                affichageRecyclerView(sourceSongList);
+                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnPhones, songOnClouds);
                             }else if(typeSS.equals("modificationSS")){
                                 boolean deleted = mViewModel.getDeleted();
                                 if(deleted){
@@ -203,16 +204,16 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                             }else if(typeSS.equals("newSS")){
                                 //todo à terme mettre en place quelque chose qui montre l'évolution du chargement
                                 Toast.makeText(MainActivity.this, "Veuillez patienter le temps de mettre en place toutes les chansons...", Toast.LENGTH_LONG).show();
-                                affichageRecyclerView(sourceSongs);
-                                songsAdapter.swapSongs(sourceSongs, recordSources, songToPlays, songOnPhones, songOnClouds);
+                                affichageRecyclerView(sourceSongList);
+                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnPhones, songOnClouds);
                             }else if(typeSS.equals("newSongOnPhone")){
                                 Log.d(TAG, "MA onChanged: lancement du SA pour le single");
-                                affichageRecyclerView(sourceSongs);
+                                affichageRecyclerView(sourceSongList);
                                 Log.d(TAG, "MA onChanged: position "+positionToDownload);
                                 songsAdapter.swapSingleSong(positionToDownload,songToPlays,songOnPhones,songOnClouds);
                             }else if(typeSS.equals("deleteSingleSongOnPhone")){
                                 Log.d(TAG, "MA onChanged: lancement du SA pour le single (delete) ");
-                                affichageRecyclerView(sourceSongs);
+                                affichageRecyclerView(sourceSongList);
                                 Log.d(TAG, "MA onChanged: position (delete) "+positionToDelete);
                                 songsAdapter.swapSingleSong(positionToDelete,songToPlays,songOnPhones,songOnClouds);
                             }
@@ -467,16 +468,24 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     @Override
     public Song OnPlaySong(SourceSong sourceSong, Pupitre pupitre, RecordSource source) {
-        Log.d(TAG, "MA OnPlaySong: au secours");
+        Log.d(TAG, "MA OnPlaySong: au secours "+sourceSong+ " "+sourceSong.getTitre()+" "+ pupitre+ " "+source+" "+sourceSongList);
 
         Song songToPlay = null;
 
+        for(SourceSong sourceSong1:sourceSongList){
+            Log.d(TAG, "MA OnPlaySong: "+sourceSong1.getTitre());
+        }
+
         int indexSourceSong = sourceSongList.indexOf(sourceSong);
+        Log.d(TAG, "MA OnPlaySong: index "+indexSourceSong);
 
         if(source ==RecordSource.BANDE_SON) {
+            Log.d(TAG, "MA OnPlaySong: BS");
             for (Song song : SongOnPhonesBS.get(indexSourceSong)) {
+                Log.d(TAG, "MA OnPlaySong: "+song.getPupitre());
                 if (song.getPupitre() == pupitre && song.getRecordSource() == source) {
                     songToPlay = song;
+                    Log.d(TAG, "MA OnPlaySong: "+songToPlay+" "+songToPlay.getPupitre());
                 }
             }
         }else if(source ==RecordSource.LIVE) {
@@ -486,7 +495,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 }
             }
         }
-
         return songToPlay;
     }
 
@@ -561,7 +569,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     }
 
     @Override
-    public void OnLongClickDeleteItem(int adapterPosition, Song song) {
+    public void OnLongClickDeleteItem(int position, Song song) {
 
         Log.d(TAG, "MA OnLongClickItem B: "+position);
         DialogFragment dialog = new DialogMA();

@@ -116,6 +116,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
     }
 
     private void init(SongsViewHolder songsViewHolder){
+        Log.d(TAG, "SA init: "+songsViewHolder.getAdapterPosition());
         songsViewHolder.getPlaySongs().setImageResource(R.drawable.ic_play_orange);
         songsViewHolder.setSongToPlay(null);
         songsViewHolder.setButtonNonActivable();
@@ -131,7 +132,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         songsViewHolder.setRecordSource(recordSources);
         //dans le sens à recordToPlay
         recordSource=songsViewHolder.getSource();
-        Log.d(TAG, "initRecordSongs: recordSource "+recordSource);
+        Log.d(TAG, "SA initRecordSongs: recordSource "+recordSource);
     }
 
     private void initDataSongs(SongsViewHolder songsViewHolder,int position) {
@@ -141,23 +142,50 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
 
         songOnCloudRecorded = songOnClouds.get(position);
         if(songOnCloudRecorded!=null) {
+            Log.d(TAG, "SA initDataSongs: "+songOnCloudRecorded);
             songsCloud = songOnCloudRecorded.toArray(new Song[0]);
+            for(Song song : songOnCloudRecorded){
+                Log.d(TAG, "SA initDataSongs: cloud "+song.getSourceSongTitre()+" "+song.getPupitre());
+            }
         }else{
             songsCloud = new Song[0];
         }
 
+        Log.d(TAG, "SA initDataSongs: songsCloud "+ songsCloud.length+" "+songsCloud);
+        for(Song song : songsCloud){
+            if(song!=null) {
+                Log.d(TAG, "SA initDataSongs: cloud "+song.getSourceSongTitre()+" "+song.getPupitre());
+            }
+        }
+        songsViewHolder.setValueCloudSongRecorded(songsCloud);
+        songsViewHolder.setListSongCloudRecorded(songOnCloudRecorded);
         songsViewHolder.setSongCloudRecorded(songsCloud);
-        Log.d(TAG, "SA initDataSongs: songsCloud "+ songsCloud.length);
+
 
         songOnPhoneRecorded = songOnPhones.get(position);
         if(songOnPhoneRecorded!=null) {
+            Log.d(TAG, "SA initDataSongs: "+songOnPhoneRecorded);
+
             songsPhone = songOnPhoneRecorded.toArray(new Song[0]);
+            for(Song song : songOnPhoneRecorded){
+                Log.d(TAG, "initDataSongs: Phone"+song.getSourceSongTitre()+" "+song.getPupitre());
+            }
         }else{
             songsPhone = new Song[0];
         }
+
+        Log.d(TAG, "SA initDataSongs: songsPhone "+ songsPhone.length+" "+songsPhone);
+        for(Song song : songsPhone){
+            if(song!=null) {
+                Log.d(TAG, "SA initDataSongs: phones "+song.getSourceSongTitre()+" "+song.getPupitre());
+            }
+        }
+
+        songsViewHolder.setValueSongLocalRecorded(songsPhone);
+        songsViewHolder.setListSongLocalRecorded(songOnPhoneRecorded);
         songsViewHolder.setSongRecorded(songsPhone);
 
-        Log.d(TAG, "SA initDataSongs: songsPhone "+ songsPhone.length);
+
 
         if(songsPhone.length!=0) {
             songToPlay = songToPlays.get(position);
@@ -180,8 +208,9 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
 
     public void swapSongs(final List<SourceSong> sources, List<List<RecordSource>> recordSources, List<Song> songToPlays, List<List<Song>> songOnPhones, List<List<Song>> songOnClouds) {
         sourceSongs=sources;
+        Log.d(TAG, "SA swapSongs: url :"+sourceSongs+" "+recordSources+" "+" "+songToPlays+" "+songOnPhones+" "+songOnClouds);
+        logSources(sources,recordSources,songToPlays,songOnPhones,songOnClouds);
 
-        Log.d(TAG, "SA swapSongs: url :"+sourceSongs.get(0).getUrlCloudBackground());
         this.RecordSources=recordSources;
         this.songToPlays=songToPlays;
         this.songOnPhones=songOnPhones;
@@ -193,13 +222,38 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
     }
 
     public void swapSingleSong(int position, List<Song> songToPlays, List<List<Song>> songOnPhones, List<List<Song>> songOnClouds) {
-        Log.d(TAG, "SA swapSongs single: url :"+" "+recordSources+" "+position+" "+songToPlays+" "+songOnPhones+" "+songOnClouds);
+        Log.d(TAG, "SA swapSongs single: url :"+sourceSongs+" "+RecordSources+" "+position+" "+songToPlays+" "+songOnPhones+" "+songOnClouds);
 
+        logSources(sourceSongs,RecordSources,songToPlays,songOnPhones,songOnClouds);
         this.songToPlays=songToPlays;
         this.songOnPhones=songOnPhones;
         this.songOnClouds=songOnClouds;
         notifyItemChanged(position);
     }
+
+    public static void logSources(List<SourceSong> sourceSongs, List<List<RecordSource>> RecordSources, List<Song> songToPlays, List<List<Song>> songOnPhones, List<List<Song>> songOnClouds) {
+            Log.d(TAG, "SA logSources: :\n sourcesSongs " + sourceSongs + "\n RecordSources " + RecordSources + "\nsongToPlays " + songToPlays + "\nsongOnPhones " + songOnPhones + "\nSongOnClouds " + songOnClouds);
+            for (List<Song> songs : songOnPhones) {
+                if(songs!=null) {
+                    for (Song song : songs) {
+                        if(song!=null) {
+                            Log.d(TAG, "SA logSources: Phones " + song.getSourceSongTitre() + " " + song.getPupitre());
+                        }
+                    }
+                }
+            }
+        for (List<Song> songs : songOnClouds) {
+            if(songs!=null) {
+                for (Song song : songs) {
+                    if(song!=null) {
+                        Log.d(TAG, "SA logSources: Clouds " + song.getSourceSongTitre() + " " + song.getPupitre());
+                    }
+                }
+            }
+        }
+
+    }
+
 
     @Override
     public int getItemCount() {
