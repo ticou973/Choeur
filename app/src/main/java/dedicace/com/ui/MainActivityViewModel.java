@@ -137,6 +137,14 @@ public class MainActivityViewModel extends ViewModel {
     public void deleteSingleSong(Song song) {
         mRepository.deleteSingleSong(song);
     }
+
+    public void downloadPupitresSongs(List<Song> songsToDownload) {
+        mRepository.downloadPupitresSongs(songsToDownload);
+    }
+
+    public void deletePupitresSongs(List<Song> songsToDelete) {
+        mRepository.deletePupitresSongs(songsToDelete);
+    }
 }
 
 

@@ -144,19 +144,19 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         if(songOnCloudRecorded!=null) {
             Log.d(TAG, "SA initDataSongs: "+songOnCloudRecorded);
             songsCloud = songOnCloudRecorded.toArray(new Song[0]);
-            for(Song song : songOnCloudRecorded){
+            /*for(Song song : songOnCloudRecorded){
                 Log.d(TAG, "SA initDataSongs: cloud "+song.getSourceSongTitre()+" "+song.getPupitre());
-            }
+            }*/
         }else{
             songsCloud = new Song[0];
         }
 
         Log.d(TAG, "SA initDataSongs: songsCloud "+ songsCloud.length+" "+songsCloud);
-        for(Song song : songsCloud){
+       /* for(Song song : songsCloud){
             if(song!=null) {
                 Log.d(TAG, "SA initDataSongs: cloud "+song.getSourceSongTitre()+" "+song.getPupitre());
             }
-        }
+        }*/
         songsViewHolder.setValueCloudSongRecorded(songsCloud);
         songsViewHolder.setListSongCloudRecorded(songOnCloudRecorded);
         songsViewHolder.setSongCloudRecorded(songsCloud);
@@ -167,19 +167,19 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
             Log.d(TAG, "SA initDataSongs: "+songOnPhoneRecorded);
 
             songsPhone = songOnPhoneRecorded.toArray(new Song[0]);
-            for(Song song : songOnPhoneRecorded){
+           /* for(Song song : songOnPhoneRecorded){
                 Log.d(TAG, "initDataSongs: Phone"+song.getSourceSongTitre()+" "+song.getPupitre());
-            }
+            }*/
         }else{
             songsPhone = new Song[0];
         }
 
         Log.d(TAG, "SA initDataSongs: songsPhone "+ songsPhone.length+" "+songsPhone);
-        for(Song song : songsPhone){
+        /*for(Song song : songsPhone){
             if(song!=null) {
                 Log.d(TAG, "SA initDataSongs: phones "+song.getSourceSongTitre()+" "+song.getPupitre());
             }
-        }
+        }*/
 
         songsViewHolder.setValueSongLocalRecorded(songsPhone);
         songsViewHolder.setListSongLocalRecorded(songOnPhoneRecorded);
@@ -209,7 +209,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
     public void swapSongs(final List<SourceSong> sources, List<List<RecordSource>> recordSources, List<Song> songToPlays, List<List<Song>> songOnPhones, List<List<Song>> songOnClouds) {
         sourceSongs=sources;
         Log.d(TAG, "SA swapSongs: url :"+sourceSongs+" "+recordSources+" "+" "+songToPlays+" "+songOnPhones+" "+songOnClouds);
-        logSources(sources,recordSources,songToPlays,songOnPhones,songOnClouds);
+        //logSources(sources,recordSources,songToPlays,songOnPhones,songOnClouds);
 
         this.RecordSources=recordSources;
         this.songToPlays=songToPlays;
@@ -224,7 +224,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
     public void swapSingleSong(int position, List<Song> songToPlays, List<List<Song>> songOnPhones, List<List<Song>> songOnClouds) {
         Log.d(TAG, "SA swapSongs single: url :"+sourceSongs+" "+RecordSources+" "+position+" "+songToPlays+" "+songOnPhones+" "+songOnClouds);
 
-        logSources(sourceSongs,RecordSources,songToPlays,songOnPhones,songOnClouds);
+        //logSources(sourceSongs,RecordSources,songToPlays,songOnPhones,songOnClouds);
         this.songToPlays=songToPlays;
         this.songOnPhones=songOnPhones;
         this.songOnClouds=songOnClouds;

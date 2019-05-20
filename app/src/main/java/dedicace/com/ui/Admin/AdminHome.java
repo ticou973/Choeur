@@ -11,6 +11,7 @@ import android.widget.Button;
 
 import dedicace.com.R;
 
+//todo prévoir un dév pour les doublons en base (pour les éviter lors des créations de ss et de songs
 public class AdminHome extends AppCompatActivity {
 
     private Button createSS, modifySS, createSong, modifySong;

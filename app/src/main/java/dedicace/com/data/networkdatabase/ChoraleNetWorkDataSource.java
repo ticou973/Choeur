@@ -32,6 +32,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import dedicace.com.AppExecutors;
 import dedicace.com.WorkerThread;
@@ -363,14 +364,13 @@ public class ChoraleNetWorkDataSource {
 
     private void uploadOnPhoneBgImages(List<SourceSong> sources) {
         increment1 =0;
+        int bgSize = sources.size();
 
         if(sources.size()==0&&aloneCreate){
                 Log.d(LOG_TAG, "NDS size0 pour ne pas louper les BG: ");
                 downloads.postValue("Done");
         }
         for (SourceSong source : sources) {
-            int bgSize = sources.size();
-            increment1++;
             String cloudPath = source.getUrlCloudBackground();
             mStorageRef = mStorage.getReferenceFromUrl(cloudPath);
             String filename = mStorageRef.getName();
@@ -387,7 +387,7 @@ public class ChoraleNetWorkDataSource {
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                             // Successfully downloaded data to local file
                             //todo modifier le texte pour l'utilisateur
-
+                            increment1++;
                             if(increment1==bgSize&&aloneCreate){
                                 Log.d(LOG_TAG, "NDS onSuccess pour ne pas louper les BG: ");
                                 downloads.postValue("Done");
@@ -426,7 +426,19 @@ public class ChoraleNetWorkDataSource {
 
         final List<Song> tempList = new ArrayList<>();
 
-        pupitreToUpload.add(pupitreUser);
+       // pupitreToUpload.add(pupitreUser);
+        Set<String> pupitreDownload = null;
+        pupitreDownload=sharedPreferences.getStringSet("pupitreAuto",null);
+
+        if(pupitreDownload!=null) {
+            Log.d(LOG_TAG, "NDS getListDownloadMp3: ppupitreToDownload "+pupitreDownload);
+            for (String pupitreStr : pupitreDownload) {
+                Pupitre tempPupitre = SongsUtilities.converttoPupitre(pupitreStr);
+                pupitreToUpload.add(tempPupitre);
+            }
+        }else {
+            pupitreToUpload.add(pupitreUser);
+        }
 
         Log.d(LOG_TAG, "NDS getListDownloadMp3 user: "+current_user_id);
         Log.d(LOG_TAG, "NDS getListDownloadMp3 songs: "+songs.size());
@@ -460,6 +472,7 @@ public class ChoraleNetWorkDataSource {
 
         Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: fct upload "+ listMp3.size()+" "+Thread.currentThread().getName());
         increment =0;
+        int mp3Size = listMp3.size();
 
         if(listMp3.size()==0){
             Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: size 0 ");
@@ -467,9 +480,6 @@ public class ChoraleNetWorkDataSource {
         }
 
         for (Song song : listMp3) {
-            int mp3Size = listMp3.size();
-            increment++;
-
             String cloudPath = song.getUrlCloudMp3();
             mStorageRef = mStorage.getReferenceFromUrl(cloudPath);
 
@@ -491,9 +501,11 @@ public class ChoraleNetWorkDataSource {
 
                            // Toast.makeText(mContext, "Vos chants sont enregistrés sur votre téléphone", Toast.LENGTH_LONG).show();
 
+                            increment++;
                             Log.d(LOG_TAG, "NDS onSuccess: "+Thread.currentThread().getName()+" "+ filename);
 
                             if(increment ==mp3Size) {
+                                Log.d(LOG_TAG, "NDS onSuccess :lancement de postValue Done "+mp3Size);
                                 downloads.postValue("Done");
                             }
                             // ...
@@ -510,11 +522,15 @@ public class ChoraleNetWorkDataSource {
             }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
                 @Override
                 public void onProgress(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    int progress = (int) (100.0 * taskSnapshot.getBytesTransferred()) / (int) taskSnapshot.getTotalByteCount();
-                    Log.d(LOG_TAG, "NDS onProgress: "+ filename +" "+progress+"%");
+                    if(taskSnapshot.getTotalByteCount()!=0) {
+                        int progress = (int) (100.0 * taskSnapshot.getBytesTransferred()) / (int) taskSnapshot.getTotalByteCount();
+                        Log.d(LOG_TAG, "NDS onProgress: " + filename + " " + progress + "%");
+                    }
                 }
             });
         }
+
+        Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: pour voir si cela passe avant la fin des chargements");
     }
 
     public String getCurrentPupitreStr() {
@@ -531,8 +547,6 @@ public class ChoraleNetWorkDataSource {
                     pupitreUser=SongsUtilities.converttoPupitre(currentPupitreStr);
 
                     Log.d(LOG_TAG, "NDS getCurrentPupitre "+currentPupitreStr);
-
-
 
                 }else{
                     Log.d(LOG_TAG, "NDS onComplete: erreur de récupération du pupitre");
@@ -696,6 +710,66 @@ public class ChoraleNetWorkDataSource {
         });
     }
 
+    //todo factorisation des parties communes
+    public void downloadMp3PupitresSongs(List<Song> songsToDownload) {
+        increment =0;
+        int mp3Size = songsToDownload.size();
+        if(songsToDownload.size()==0){
+            Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: size 0 ");
+            downloads.postValue("MultipleDownloads");
+        }
+
+        for (Song song : songsToDownload) {
+
+            String cloudPath = song.getUrlCloudMp3();
+            mStorageRef = mStorage.getReferenceFromUrl(cloudPath);
+
+            String filename = mStorageRef.getName();
+
+            //todo essayer de mettre un dossier sons.mp3
+            localFileMp3 = new File(mContext.getFilesDir(), filename);
+            String pathLocalMp3 = localFileMp3.getAbsolutePath();
+            song.setSongPath(pathLocalMp3);
+            song.setUpdatePhoneMp3(new Date(System.currentTimeMillis()));
+            Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: " + localFileMp3.getParent() + " " + filename + " " + localFileMp3.getPath() + " " + localFileMp3.getAbsolutePath()+" "+ mContext.getFilesDir()+" "+Thread.currentThread().getName());
+
+            //todo voir comment utiliser download manager
+            mStorageRef.getFile(localFileMp3)
+                    .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            // Successfully downloaded data to local file
+                            // Toast.makeText(mContext, "Vos chants sont enregistrés sur votre téléphone", Toast.LENGTH_LONG).show();
+                            increment++;
+                            Log.d(LOG_TAG, "NDS onSuccess: "+Thread.currentThread().getName()+" "+ filename);
+
+                            if(increment ==mp3Size) {
+                                Log.d(LOG_TAG, "NDS onSuccess :lancement de postValue Done "+mp3Size);
+                                downloads.postValue("MultipleDownloads");
+                            }
+                            // ...
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle failed download
+                    // ...
+                    Toast.makeText(mContext, "Il y a eu un problème de téléchargement, veuillez réessayer plus tard...", Toast.LENGTH_LONG).show();
+
+                }
+                //todo voir comment intégrer l'avancement des données dans un retour utilisateur
+            }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    if(taskSnapshot.getTotalByteCount()!=0) {
+                        int progress = (int) (100.0 * taskSnapshot.getBytesTransferred()) / (int) taskSnapshot.getTotalByteCount();
+                        Log.d(LOG_TAG, "NDS onProgress: multiple" + filename + " " + progress + "%");
+                    }
+                }
+            });
+        }
+    }
+
     public void deleteSingleSong(Song song) {
         deleted=true;
         mExecutors.storageIO().execute(new Runnable() {
@@ -723,6 +797,45 @@ public class ChoraleNetWorkDataSource {
 
             }
         });
+
+    }
+
+    public void deleteMultipleSong(List<Song> songsToDelete) {
+        deleted=true;
+        mExecutors.storageIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                int incr =0;
+                int size = songsToDelete.size();
+                for (Song song:songsToDelete) {
+                    String path = song.getSongPath();
+                    File tempFile = new File(path);
+                    String name = tempFile.getName();
+                    Log.d(LOG_TAG, "NDS deleteMp3OnPhone: multiple name "+ name);
+
+                    if (tempFile.exists()) {
+                        Log.d(LOG_TAG, "NDS run: le fichier existe  donc sera supprimé !");
+                        if(mContext.deleteFile(name)){
+                            Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: mp3 effacé multiple"+song.getSourceSongTitre());
+                            incr++;
+
+                            if(incr==size){
+                                downloads.postValue("deleteMultiple");
+                            }
+
+                        }else{
+                            Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: erreur d'effacement de Mp3 ");
+                        }
+
+                    }else{
+                        Log.d(LOG_TAG, "NDS run: le fichier n'existe pas donc ne peut être supprimé !");
+                    }
+                    song.setUpdatePhoneMp3(null);
+                    song.setSongPath(null);
+                }
+            }
+        });
+
 
     }
 }

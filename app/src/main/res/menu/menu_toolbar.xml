@@ -7,6 +7,14 @@
         android:title="@string/parametres"
         app:showAsAction="never" />
     <item
+        android:id="@+id/load_pupitre"
+        android:title="@string/charger_les_chansons_d_un_pupitre"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/delete_pupitre"
+        android:title="@string/supprimer_les_chansons_d_un_pupitre"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/admin"
         android:title="@string/admin"
         app:showAsAction="never" />

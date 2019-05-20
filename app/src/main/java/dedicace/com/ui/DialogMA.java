@@ -8,6 +8,10 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import dedicace.com.R;
 import dedicace.com.data.database.Song;
 
 public class DialogMA extends DialogFragment {
@@ -17,6 +21,7 @@ public class DialogMA extends DialogFragment {
     private String messagePositif;
     private String messageNegatif;
     private int position;
+    private List<Integer> selectedItems= new ArrayList<>();
 
     public DialogMA() {
 
@@ -27,7 +32,10 @@ public class DialogMA extends DialogFragment {
         void onDialogMANegativeClick();
         void onDialogMADeletePositiveClick(int position, Song song);
         void onDialogMADeleteNegativeClick();
-
+        void onDialogMADownloadPupitresPositiveClick(List<Integer> selectedItems);
+        void onDialogMADownloadPupitresNegativeClick();
+        void onDialogMADeletePupitresPositiveClick(List<Integer> selectedItems);
+        void onDialogMADeletePupitresNegativeClick();
     }
 
     private DialogMAListener mListener;
@@ -58,25 +66,78 @@ public class DialogMA extends DialogFragment {
             messageIntro = "Voulez-vous charger cette chanson sur votre téléphone ?";
             messagePositif = "Oui";
             messageNegatif = "Non";
-        }else if(origine.equals("deleteSingle")){
+            builder.setMessage(messageIntro);
+        }else if(origine.equals("deleteSingle")) {
             messageIntro = "Voulez-vous effacer cette chanson sur votre téléphone?";
             messagePositif = "Oui";
             messageNegatif = "Non";
+            builder.setMessage(messageIntro);
+        }else if(origine.equals("downloadPupitres")){
+            builder.setTitle("Pupitres à télécharger")
+                    .setMultiChoiceItems(R.array.pupitre_download_delete, null, new DialogInterface.OnMultiChoiceClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int which, boolean isChecked) {
+                    if (isChecked) {
+                        Log.d("coucou", "DMA onClick if" +
+                                ": "+which+isChecked);
+                        // If the user checked the item, add it to the selected items
+                        selectedItems.add(which);
+                    } else if (selectedItems.contains(which)) {
+                        Log.d("coucou", "DMA onClick else: "+which+isChecked);
+                        // Else, if the item is already in the array, remove it
+                        selectedItems.remove(Integer.valueOf(which));
+                    }
+
+                    if(selectedItems.size()!=0&&selectedItems!=null) {
+                        Log.d("coucou", "DMA onCreateDialog: " + selectedItems);
+                    }else {
+                        Log.d("coucou", "DMA onCreateDialog: pb selectedItems ");
+                    }
+                }
+            });
+            messagePositif = "OK";
+            messageNegatif = "Annuler";
+            if(selectedItems.size()!=0&&selectedItems!=null) {
+                Log.d("coucou", "DMA onCreateDialog: " + selectedItems.size());
+            }else {
+                Log.d("coucou", "DMA onCreateDialog: pb selectedItems ");
+            }
+
+        }else if(origine.equals("deletePupitres")){
+            builder.setTitle("Pupitres à supprimer")
+                    .setMultiChoiceItems(R.array.pupitre_download_delete, null, new DialogInterface.OnMultiChoiceClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int which, boolean isChecked) {
+                    if (isChecked) {
+                        // If the user checked the item, add it to the selected items
+                        selectedItems.add(which);
+                    } else if (selectedItems.contains(which)) {
+                        // Else, if the item is already in the array, remove it
+                        selectedItems.remove(Integer.valueOf(which));
+                    }
+                }
+            });
+
+            messagePositif = "Ok";
+            messageNegatif = "Annuler";
 
         }else{
             Log.d("coucou", "DMA onCreateDialog: pas de messages...");
         }
-        builder.setMessage(messageIntro)
-                .setPositiveButton(messagePositif, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(messagePositif, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
 
-                        if(mListener!=null){
-                            Log.d("coucou", "DMA onClick: (position) "+position);
+                        if (mListener != null) {
+                            Log.d("coucou", "DMA onClick: (position) " + position);
 
-                            if(origine.equals("downloadSingle")) {
-                                mListener.onDialogMAPositiveClick(position,song);
-                            }else if(origine.equals("deleteSingle")){
-                                mListener.onDialogMADeletePositiveClick(position,song);
+                            if (origine.equals("downloadSingle")) {
+                                mListener.onDialogMAPositiveClick(position, song);
+                            } else if (origine.equals("deleteSingle")) {
+                                mListener.onDialogMADeletePositiveClick(position, song);
+                            } else if (origine.equals("downloadPupitres")) {
+                                mListener.onDialogMADownloadPupitresPositiveClick(selectedItems);
+                            }else if (origine.equals("deletePupitres")) {
+                                mListener.onDialogMADeletePupitresPositiveClick(selectedItems);
                             }
                         }
                     }
@@ -89,10 +150,18 @@ public class DialogMA extends DialogFragment {
                                 mListener.onDialogMANegativeClick();
                             }else if(origine.equals("deleteSingle")){
                                 mListener.onDialogMADeleteNegativeClick();
+                            }else if (origine.equals("downloadPupitres")) {
+
+                                mListener.onDialogMADownloadPupitresNegativeClick();
+
+                            }else if (origine.equals("deletePupitres")) {
+
+                                mListener.onDialogMADeletePupitresNegativeClick();
                             }
                         }
                     }
                 });
+
         // Create the AlertDialog object and return it
         return builder.create();
     }
@@ -101,4 +170,7 @@ public class DialogMA extends DialogFragment {
         this.song = song;
         Log.d("coucou", "DMA setSong: "+song);
     }
+
+
+
 }

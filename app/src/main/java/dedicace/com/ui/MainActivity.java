@@ -31,10 +31,13 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import dedicace.com.AppExecutors;
 import dedicace.com.R;
+import dedicace.com.data.database.AppDataBase;
 import dedicace.com.data.database.ListSongs;
 import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
@@ -42,6 +45,7 @@ import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
 import dedicace.com.ui.Admin.AdminHome;
 import dedicace.com.utilities.InjectorUtils;
+import dedicace.com.utilities.SongsUtilities;
 
 //todo revoir dans tout le logiciel les new Object lorsqu'ils sont déjà définis
 public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener,DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener, DialogMajSS.DialogMajSSListener, DialogMA.DialogMAListener {
@@ -87,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     private String mCurrentAuthRole;
     private String typeSS;
+    private boolean installation;
 
 
     //Utils
@@ -94,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private AppExecutors mExecutors;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
+    private List<Pupitre> pupitresToDownloadDelete;
 
 
     //todo vérifier si extras dans des intents avec HasExtras
@@ -106,7 +112,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         //Firebase
         //todo voir l'intérêt de cette première ligne
         FirebaseApp.initializeApp(this);
-
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -136,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
             //todo faire une condition au niveau du repository suivant que l'on connait ou non le currentpupitre (1ère fois ou non)
             //currentPupitre = SongsUtilities.converttoPupitre(getCurrentPupitreStr());
-            Log.d(TAG, "MA onCreate: "+ currentPupitre);
+            Log.d(TAG, "MA onCreate: ");
 
             sourceSongs =mViewModel.getChoeurSourceSongs();
 
@@ -211,11 +216,19 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                 affichageRecyclerView(sourceSongList);
                                 Log.d(TAG, "MA onChanged: position "+positionToDownload);
                                 songsAdapter.swapSingleSong(positionToDownload,songToPlays,songOnPhones,songOnClouds);
+                            }else if(typeSS.equals("newSongsOnPhone")){
+                                Log.d(TAG, "MA onChanged: lancement du SA pour le multiple");
+                                affichageRecyclerView(sourceSongList);
+                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnPhones, songOnClouds);
                             }else if(typeSS.equals("deleteSingleSongOnPhone")){
                                 Log.d(TAG, "MA onChanged: lancement du SA pour le single (delete) ");
                                 affichageRecyclerView(sourceSongList);
                                 Log.d(TAG, "MA onChanged: position (delete) "+positionToDelete);
                                 songsAdapter.swapSingleSong(positionToDelete,songToPlays,songOnPhones,songOnClouds);
+                            }else if(typeSS.equals("deleteMultipleSongOnPhone")){
+                                Log.d(TAG, "MA onChanged: lancement du SA pour le multiple delete");
+                                affichageRecyclerView(sourceSongList);
+                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnPhones, songOnClouds);
                             }
                         } else {
                             Log.d(TAG, "MA onChanged: conditions pas réunies");
@@ -243,13 +256,25 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private void setUpSharedPreferences() {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-
+        installation = sharedPreferences.getBoolean("installation",true);
         editor = sharedPreferences.edit();
 
-        //todo modifier dès que le process permettra de mettre la valeur de la base de données dès le début.
-        editor.putString("role","Super Admin");
-        editor.putString("idchorale","jFHncTuYleIHhZtL2PmT");
-        editor.apply();
+        if(installation){
+            Log.d(TAG, "MA setUpSharedPreferences: installation");
+            editor.putBoolean("installation",false);
+            editor.putString("role","Super Admin");
+            editor.putString("idchorale","jFHncTuYleIHhZtL2PmT");
+            editor.putString("pupitre","TENOR");
+            Set<String> pupitreToDownload = new HashSet<>();
+            pupitreToDownload.add("TENOR");
+            //  pupitreToDownload.add("TUTTI");
+            // pupitreToDownload.add("ALTO");
+            editor.putStringSet("pupitreAuto",pupitreToDownload);
+            editor.apply();
+            deleteDbRoom();
+        }else{
+            Log.d(TAG, "MA setUpSharedPreferences: plus une installation");
+        }
 
         mCurrentAuthRole=sharedPreferences.getString("role","Choriste");
 
@@ -421,6 +446,16 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 launchSettingsActivity();
                 break;
 
+            case R.id.load_pupitre:
+
+                loadSongsPupitre();
+                Log.d(TAG, "MA onOptionsItemSelected: "+sourceSongList);
+                break;
+
+            case R.id.delete_pupitre:
+                deleteSongsPupitre();
+                break;
+
             case R.id.admin:
                 //todo stocker le super Admin ainsi que la chorale et son Id
                 if(mAuth!=null&&mCurrentAuthRole.equals("Super Admin")){
@@ -441,6 +476,25 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void deleteSongsPupitre() {
+        Log.d(TAG, "MA deleteSongsPupitre: ");
+        DialogFragment dialog = new DialogMA();
+        Bundle args = new Bundle();
+        args.putString("origine","deletePupitres");
+        dialog.setArguments(args);
+        dialog.show(getSupportFragmentManager(),"TAG");
+    }
+
+    private void loadSongsPupitre() {
+        Log.d(TAG, "MA loadSongsPupitre: ");
+        DialogFragment dialog = new DialogMA();
+        Bundle args = new Bundle();
+        args.putString("origine","downloadPupitres");
+        dialog.setArguments(args);
+        dialog.show(getSupportFragmentManager(),"TAG");
+
     }
 
     private void launchSettingsActivity() {
@@ -545,7 +599,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     @Override
     public void OnSaveRecordSong(Song song) {
         mViewModel.setRecordSongInAppDb(song);
-
     }
 
     /**
@@ -563,7 +616,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         args.putString("origine","downloadSingle");
         args.putInt("position",position);
         dialog.setArguments(args);
-        //todo à voir si cela fonctionne
         ((DialogMA) dialog).setSong(song);
         dialog.show(getSupportFragmentManager(),"TAG");
     }
@@ -598,13 +650,97 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     public void onDialogMADeletePositiveClick(int position, Song song) {
         positionToDelete=position;
         mViewModel.deleteSingleSong(song);
-        Toast.makeText(this, "Votre chanson est supprimé sur le téléphone", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Votre chanson est supprimé sur le téléphone", Toast.LENGTH_LONG).show();
         Log.d(TAG, "MA onDialogMAPositiveClick: suppression sur tel du single (position) "+position);
     }
 
     @Override
     public void onDialogMADeleteNegativeClick() {
-        Toast.makeText(this, "Vous pourrez la supprimer ultérieurement...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Vous pourrez la supprimer ultérieurement...", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onDialogMADownloadPupitresPositiveClick(List<Integer> selectedItems) {
+        getListPupitresToDownloadDelete(selectedItems);
+        Log.d(TAG, "onDialogMADownloadPupitresPositiveClick: selectedItems "+selectedItems+" "+pupitresToDownloadDelete);
+        Toast.makeText(this, "Vos chansons sont en train de se charger sur le téléphone", Toast.LENGTH_SHORT).show();
+
+        List<Song> songsToDownload = new ArrayList<>();
+
+        for(Pupitre pupitre:pupitresToDownloadDelete){
+            for(List<Song> songs:songOnClouds){
+                for(Song song :songs){
+                    if(song.getPupitre()==pupitre){
+                        if(song.getUpdatePhoneMp3()==null){
+                            songsToDownload.add(song);
+                        }else{
+                            Log.d(TAG, "NDS downloadMp3PupitresSongs: déjà présent dans le phone ");
+                        }
+                    }
+                }
+            }
+        }
+        mLoadingIndicator.setVisibility(View.VISIBLE);
+        Log.d(TAG, "MA onDialogMADownloadPupitresPositiveClick: "+songsToDownload);
+        mViewModel.downloadPupitresSongs(songsToDownload);
+
+    }
+
+    private void getListPupitresToDownloadDelete(List<Integer> selectedItems) {
+        pupitresToDownloadDelete=new ArrayList<>();
+
+        for(int itemId :selectedItems){
+            String pupitreToLoad = null;
+            switch(itemId){
+                case 0 :
+                    pupitreToLoad="TUTTI";
+                    break;
+                case 1 :
+                    pupitreToLoad="BASSE";
+                    break;
+                case 2 :
+                    pupitreToLoad="TENOR";
+                    break;
+                case 3 :
+                    pupitreToLoad="ALTO";
+                    break;
+                case 4 :
+                    pupitreToLoad="SOPRANO";
+                    break;
+            }
+            pupitresToDownloadDelete.add(SongsUtilities.converttoPupitre(pupitreToLoad));
+        }
+    }
+
+    @Override
+    public void onDialogMADownloadPupitresNegativeClick() {
+        Toast.makeText(this, "Vous pourrez les charger ultérieurement...", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onDialogMADeletePupitresPositiveClick(List<Integer> selectedItems) {
+        getListPupitresToDownloadDelete(selectedItems);
+        Log.d(TAG, "onDialogMADeletePupitresPositiveClick: selectedItems "+selectedItems+" "+pupitresToDownloadDelete);
+        Toast.makeText(this, "Vos chansons sont en train d'être supprimer de votre téléphone", Toast.LENGTH_SHORT).show();
+
+        List<Song> songsToDelete = new ArrayList<>();
+
+        for(Pupitre pupitre:pupitresToDownloadDelete){
+            for(List<Song> songs:songOnPhones){
+                for(Song song :songs){
+                    if(song.getPupitre()==pupitre){
+                            songsToDelete.add(song);
+                    }
+                }
+            }
+        }
+        Log.d(TAG, "MA onDialogMADownloadPupitresPositiveClick: "+songsToDelete);
+        mViewModel.deletePupitresSongs(songsToDelete);
+    }
+
+    @Override
+    public void onDialogMADeletePupitresNegativeClick() {
+        Toast.makeText(this, "Vous pourrez les supprimer ultérieurement...", Toast.LENGTH_LONG).show();
     }
 
 
@@ -683,11 +819,22 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         }
     }
 
-
     //todo à renommer
     public interface OnPositiveClickListener {
         void OnRecord(Song song);
         void OndeleteSong();
+    }
+
+    private void deleteDbRoom(){
+        mExecutors = AppExecutors.getInstance();
+        mExecutors.diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                AppDataBase database = AppDataBase.getInstance(getApplicationContext());
+                database.songsDao().deleteAll();
+                database.sourceSongDao().deleteAll();
+            }
+        });
     }
 }
 

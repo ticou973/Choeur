@@ -287,7 +287,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
                 //todo voir le pb idem pour cloud recorded
                 //if (pupitrerecorded != pupitre) {
-                    Log.d(TAG, "SVH setSongRecorded: "+song+" "+recordedLocalSongs);
+                   // Log.d(TAG, "SVH setSongRecorded: "+song+" "+recordedLocalSongs);
                     setPupitresLoadedOnPhoneVisible(pupitrerecorded);
                 //}
             }
@@ -306,7 +306,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     public void setPupitresLoadedOnPhoneVisible(Pupitre... pupitres){
         for (Pupitre pupitre: pupitres) {
             int pupitreIndex=pupitreSourceButton.indexOf(pupitre);
-            Log.d(TAG, "SVH setPupitresLoadedOnPhoneVisible: orange pale onPhone "+ pupitre);
+            //Log.d(TAG, "SVH setPupitresLoadedOnPhoneVisible: orange pale onPhone "+ pupitre);
             setColorButton(false,(Button) pupitreSourceButton.get(pupitreIndex+1));
         }
     }
@@ -318,7 +318,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
             //todo voir le cas dans le changement de source ? cf. note plus bas de todo
            // if(pupitrerecorded!=pupitre){
-                Log.d(TAG, "SVH setSongCloudRecorded: "+song+" "+recordedCloudSongs);
+               // Log.d(TAG, "SVH setSongCloudRecorded: "+song+" "+recordedCloudSongs);
                 setPupitresLoadedOnCloudVisible(pupitrerecorded);
            // }
         }
@@ -328,7 +328,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     public void setPupitresLoadedOnCloudVisible(Pupitre... pupitres){
         for (Pupitre pupitre: pupitres) {
             int pupitreIndex=pupitreSourceButton.indexOf(pupitre);
-            Log.d(TAG, "SVH setPupitresLoadedOnCloudVisible : gris Cloud "+ pupitre);
+            //Log.d(TAG, "SVH setPupitresLoadedOnCloudVisible : gris Cloud "+ pupitre);
             setGreyButton(true,(Button) pupitreSourceButton.get(pupitreIndex+1));
         }
     }
@@ -338,14 +338,14 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         int red, green, blue;
         for (Button button: buttons) {
             if(focus) {
-                Log.d(TAG, "SVH setColorButton: true");
+               // Log.d(TAG, "SVH setColorButton: true");
                 red = 249;
                 green = 191;
                 blue = 45;
                 button.setAlpha(1.0f);
 
             }else{
-                Log.d(TAG, "SVH setColorButton: false");
+               // Log.d(TAG, "SVH setColorButton: false");
                 red = 255;
                 green = 241;
                 blue = 99;
@@ -364,12 +364,12 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             blue = 224;
 
             if(focus) {
-                Log.d(TAG, "SVH setGreyButton: true");
+               // Log.d(TAG, "SVH setGreyButton: true");
                 button.setAlpha(0.9f);
                 button.setEnabled(true);
 
             }else{
-                Log.d(TAG, "SVH setGreyButton: false");
+               // Log.d(TAG, "SVH setGreyButton: false");
                 button.setAlpha(0.3f); }
             button.setBackgroundColor(rgb(red,green,blue));
 
@@ -379,12 +379,12 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     public void setButtonActivable(boolean activable, Button... buttons){
         for (Button button: buttons) {
             if(activable){
-                Log.d(TAG, "SVH setButtonActivable: activable "+ button);
+               // Log.d(TAG, "SVH setButtonActivable: activable "+ button);
                 button.setAlpha(1.0f);
                 button.setEnabled(true);
 
             }else{
-                Log.d(TAG, "SVH setButtonActivable: non activable "+ button);
+              //  Log.d(TAG, "SVH setButtonActivable: non activable "+ button);
                 button.setAlpha(0.3f);
                 button.setEnabled(false);
                 setGreyButton(false,button);

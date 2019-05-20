@@ -15,4 +15,13 @@
         <item>@string/alto_value</item>
         <item>@string/soprano_value</item>
     </array>
+
+    <array name="pupitre_download_delete">
+        <item>"TUTTI"</item>
+        <item>"BASSE"</item>
+        <item>"TENOR"</item>
+        <item>"ALTO"</item>
+        <item>"SOPRANO"</item>
+    </array>
+
 </resources>
