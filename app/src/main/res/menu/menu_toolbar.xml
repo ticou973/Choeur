@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/parametres"
-        android:title="@string/parametres"
+        android:title="@string/preferences"
         app:showAsAction="never" />
     <item
         android:id="@+id/load_pupitre"

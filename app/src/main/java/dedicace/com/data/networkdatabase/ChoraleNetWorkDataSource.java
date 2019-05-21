@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Set;
 
 import dedicace.com.AppExecutors;
+import dedicace.com.R;
 import dedicace.com.WorkerThread;
 import dedicace.com.data.database.AppDataBase;
 import dedicace.com.data.database.Pupitre;
@@ -428,7 +429,7 @@ public class ChoraleNetWorkDataSource {
 
        // pupitreToUpload.add(pupitreUser);
         Set<String> pupitreDownload = null;
-        pupitreDownload=sharedPreferences.getStringSet("pupitreAuto",null);
+        pupitreDownload=sharedPreferences.getStringSet(mContext.getString(R.string.pref_pupitre_key),null);
 
         if(pupitreDownload!=null) {
             Log.d(LOG_TAG, "NDS getListDownloadMp3: ppupitreToDownload "+pupitreDownload);

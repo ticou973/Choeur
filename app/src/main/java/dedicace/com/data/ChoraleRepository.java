@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import dedicace.com.AppExecutors;
+import dedicace.com.R;
 import dedicace.com.data.database.ListSongs;
 import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
@@ -34,7 +35,7 @@ public class ChoraleRepository {
     private final ChoraleNetWorkDataSource mChoraleNetworkDataSource;
     private final AppExecutors mExecutors;
     private boolean mInitialized = false;
-    private Thread currentThread,t2,t1,t3,t4;
+    private Thread currentThread,t2,t1,t3,t4,t5;
 
     //Songs
     private List<SourceSong> sourceSongsAfterSync = new ArrayList<>();
@@ -99,14 +100,27 @@ public class ChoraleRepository {
         mChoraleNetworkDataSource = choraleNetworkDataSource;
         mExecutors = executors;
 
-        mExecutors.diskIO().execute(new Runnable() {
+        //todo remettre si Thread marche pas
+        /*mExecutors.diskIO().execute(new Runnable() {
             @Override
             public void run() {
+                t5 = Thread.currentThread();
+                oldSourcesSongs = mSourceDao.getAllSources();
+                oldSongs=mSongDao.getAllSongs();
+                Log.d(LOG_TAG, "CR run:  old SS et song "+oldSourcesSongs.size()+" songs "+oldSongs.size());
+            }
+        });*/
+
+        t5 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                t5 = Thread.currentThread();
                 oldSourcesSongs = mSourceDao.getAllSources();
                 oldSongs=mSongDao.getAllSongs();
                 Log.d(LOG_TAG, "CR run:  old SS et song "+oldSourcesSongs.size()+" songs "+oldSongs.size());
             }
         });
+        t5.start();
 
 
         final LiveData<Long> majDBCloudLong= mChoraleNetworkDataSource.getMajDBCloudLong();
@@ -140,7 +154,6 @@ public class ChoraleRepository {
                 startFetchSongsService();
             }else{
                 //pour le cas aucune modif
-                //todo à vérifier que cela marche
                 if(oldSourcesSongs!=null&&oldSourcesSongs.size()!=0){
                     isFromLocal=true;
                     typeSS="oldSS";
@@ -789,6 +802,23 @@ public class ChoraleRepository {
             Log.d(LOG_TAG, "CR : isFetchNeeded "+ Thread.currentThread().getName());
         }else{
             Log.d(LOG_TAG, "CR initializeData: inutile les données n'ont pas changées ");
+            try {
+                t5.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                Log.d(LOG_TAG, "CR join: interrupted exception");
+            }
+            if(oldSourcesSongs!=null&&oldSourcesSongs.size()!=0){
+                isFromLocal=true;
+                typeSS="oldSS";
+                //todo voir comment retirer les arguments qui sont inutiles
+                DoSynchronization(oldSourcesSongs,oldSongs);
+                Log.d(LOG_TAG, "CR run: getOldSongs et SourcesSongs : données initiales "+oldSourcesSongs+" "+oldSongs);
+            }else{
+                Log.d(LOG_TAG, "CR run: getOldSongs et SourcesSongs : pas de données initiales ");
+                //todo ajouter une alerte éventuelle si nécessaire ?
+            }
+            Log.d(LOG_TAG, "CR ChoraleRepository: Stop startFectch pas lancé !");
         }
     }
 
@@ -816,8 +846,7 @@ public class ChoraleRepository {
 
         //todo à modifier dans le listener pour appliquer les changements
         sharedPreferences =PreferenceManager.getDefaultSharedPreferences(context);
-        isAuto = sharedPreferences.getBoolean("maj_auto",true);
-
+        isAuto = sharedPreferences.getBoolean(context.getString(R.string.maj_auto),true);
         Log.d(LOG_TAG, "CR isFetchNeeded: condition "+isAuto);
 
         return isAuto;

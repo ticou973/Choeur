@@ -80,6 +80,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private List<List<Song>> SongOnPhonesLive= new ArrayList<>();
     private List<List<Song>> SongOnPhonesBS= new ArrayList<>();
     private Pupitre currentPupitre;
+    private Set<String> pupitresAuto;
+    private Set<String> pupitreAutoDefault;
 
     //ViewModel
     private MainActivityViewModel mViewModel;
@@ -257,6 +259,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         installation = sharedPreferences.getBoolean("installation",true);
+
         editor = sharedPreferences.edit();
 
         if(installation){
@@ -264,12 +267,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             editor.putBoolean("installation",false);
             editor.putString("role","Super Admin");
             editor.putString("idchorale","jFHncTuYleIHhZtL2PmT");
+            editor.putBoolean(getString(R.string.maj_auto),true);
+            //todo remplacer TENOR par le pupitre que l'on aura en base
             editor.putString("pupitre","TENOR");
             Set<String> pupitreToDownload = new HashSet<>();
-            pupitreToDownload.add("TENOR");
-            //  pupitreToDownload.add("TUTTI");
-            // pupitreToDownload.add("ALTO");
-            editor.putStringSet("pupitreAuto",pupitreToDownload);
+            pupitreToDownload.add(sharedPreferences.getString("pupitre",""));
+            editor.putStringSet(getString(R.string.pref_pupitre_key),pupitreToDownload);
+            Log.d(TAG, "MA setUpSharedPreferences: "+pupitresAuto+" "+pupitreAutoDefault);
             editor.apply();
             deleteDbRoom();
         }else{
@@ -283,10 +287,23 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     }
 
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         //todo faire pour gérer entre autres si on veut charger les songs qui viennet d être changées
 
         Toast.makeText(this, "paramètres changés !", Toast.LENGTH_LONG).show();
+        Log.d(TAG, "MA onSharedPreferenceChanged: key "+key);
+        Set<String> pupitreAuto = new HashSet<>();
+
+        if(key.equals(getString(R.string.pref_pupitre_key))){
+            Log.d(TAG, "onSharedPreferenceChanged: changement pupitres auto "+sharedPreferences.getStringSet(key,pupitreAuto));
+            //todo voir si on propose de charger les pupitres non chargées encore
+
+        }
+        if(key.equals("maj_auto")){
+            Log.d(TAG, "onSharedPreferenceChanged: changement maj_auto "+sharedPreferences.getBoolean(key,true));
+
+        }
+
     }
 
     private void getListSongs() {
@@ -378,10 +395,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             mAuth.signOut();
             mAuth = null;
         }*/
-
-        //todo vérifier la place de ce listerner
-        //todo remettre dès que vérifier sa place
-       // sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     private void sendToLogin() {
@@ -448,11 +462,14 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
             case R.id.load_pupitre:
 
+                //todo faire les calculs pour ne prposer que les pupitres non complets
                 loadSongsPupitre();
                 Log.d(TAG, "MA onOptionsItemSelected: "+sourceSongList);
                 break;
 
             case R.id.delete_pupitre:
+                //todo faire les calculs pour ne prposer que les pupitres qui ont des chansons à supprimer
+
                 deleteSongsPupitre();
                 break;
 

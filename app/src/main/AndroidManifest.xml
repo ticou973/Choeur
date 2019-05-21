@@ -15,6 +15,7 @@
         android:supportsRtl="true">
         <activity
             android:name=".ui.MainActivity"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
@@ -39,7 +40,7 @@
 
         <activity
             android:name=".ui.SettingsActivity"
-            android:label="@string/preferences"
+            android:label="preferences"
             android:parentActivityName=".ui.MainActivity"
             android:theme="@style/AppTheme">
             <meta-data
