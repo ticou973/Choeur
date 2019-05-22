@@ -162,7 +162,7 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
                 for (int i = 0; i < listFiles.length; i++) {
                     listImages[i] = listFiles[i].getName();
 
-                    Log.d(TAG, "selectBackground: " + listFiles[i].getName());
+                    Log.d(TAG, "CSS selectBackground: " + listFiles[i].getName());
                 }
             }else{
                 Log.d(TAG, "CSS getLists: pas de listFiles ");

@@ -105,4 +105,88 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView16"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="60dp"
+        android:fontFamily="@font/roboto"
+        android:text="Users"
+        android:textColor="@android:color/black"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+    <Button
+        android:id="@+id/btn_create_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/secondaryColor"
+        android:fontFamily="@font/roboto"
+        android:padding="10dp"
+        android:text="créer"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@id/textView16"
+        app:layout_constraintEnd_toEndOf="@+id/btn_create_song"
+        app:layout_constraintStart_toStartOf="@+id/btn_create_song" />
+
+    <Button
+        android:id="@+id/btn_modify_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:background="@color/secondaryColor"
+        android:fontFamily="@font/roboto"
+        android:padding="10dp"
+        android:text="modifier"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@id/btn_create_user"
+        app:layout_constraintStart_toEndOf="@+id/btn_create_user" />
+
+    <TextView
+        android:id="@+id/textView23"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="60dp"
+        android:fontFamily="@font/roboto"
+        android:text="Chorale"
+        android:textColor="@android:color/black"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView16" />
+
+    <Button
+        android:id="@+id/btn_create_chorale"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/secondaryColor"
+        android:fontFamily="@font/roboto"
+        android:text="créer"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@id/textView23"
+        app:layout_constraintEnd_toEndOf="@+id/btn_create_user"
+        app:layout_constraintStart_toStartOf="@+id/btn_create_user" />
+
+    <Button
+        android:id="@+id/btn_modify_chorale"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:background="@color/secondaryColor"
+        android:fontFamily="@font/roboto"
+        android:padding="10dp"
+        android:text="Modifier"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@id/btn_create_chorale"
+        app:layout_constraintStart_toEndOf="@+id/btn_create_chorale" />
 </android.support.constraint.ConstraintLayout>

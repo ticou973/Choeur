@@ -374,13 +374,12 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
             Log.d("coucou", "MA onCreate:B Start "+ current_user_id);
         } else {
-            //todo à compléter
+            //todo à compléter (rapatrier toute la partie non null de Oncreate ici en fait.
 
             Log.d(TAG, "MA onStart: currentuser non null");
 
             current_user_id = mAuth.getCurrentUser().getUid();
             Log.d("coucou", "MA onStart C: "+ current_user_id);
-
         }
     }
 

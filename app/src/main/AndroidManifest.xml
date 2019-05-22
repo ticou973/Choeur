@@ -49,8 +49,8 @@
         </activity>
         <activity
             android:name=".ui.Admin.AdminHome"
-            android:screenOrientation="portrait"
             android:parentActivityName=".ui.MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.Admin.CreateSourceSong"
@@ -84,9 +84,19 @@
             android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
-        <activity android:name=".ui.Admin.ModifySongDetails"
+        <activity
+            android:name=".ui.Admin.ModifySongDetails"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".ui.Admin.CreateUser"
+            android:parentActivityName=".ui.Admin.AdminHome"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+        <activity android:name=".ui.Admin.CreateChorale"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".ui.Admin.AdminHome"
+            android:theme="@style/AppTheme"/>
     </application>
 
 </manifest>
