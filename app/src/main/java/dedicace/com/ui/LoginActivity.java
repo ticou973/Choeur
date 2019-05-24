@@ -45,18 +45,21 @@ public class LoginActivity extends AppCompatActivity {
         loginPassText = findViewById(R.id.reg_confirm_pass);
         loginBtn = findViewById(R.id.login_btn);
         loginProgress = findViewById(R.id.login_progress);
-        Log.d("coucou", "Login onCreate: ");
+        Log.d("coucou", "LA Login onCreate: ");
 
 
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d("coucou", "LA onClick: ");
 
                 String loginEmail = loginEmailText.getText().toString();
                 String loginPass = loginPassText.getText().toString();
+                Log.d("coucou", "LA onClick: "+loginEmail+" "+loginPass);
 
                 if(!TextUtils.isEmpty(loginEmail) && !TextUtils.isEmpty(loginPass)){
                     loginProgress.setVisibility(View.VISIBLE);
+                    Log.d("coucou", "LA onClick: go Auth");
 
                     mAuth.signInWithEmailAndPassword(loginEmail, loginPass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
@@ -65,7 +68,7 @@ public class LoginActivity extends AppCompatActivity {
                             if(task.isSuccessful()){
                                 FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
                                 current_user_id = currentUser.getUid();
-                                Log.d("coucou", "onComplete Login: "+current_user_id);
+                                Log.d("coucou", "LA onComplete Login: "+current_user_id);
 
                                 sendToMain();
 
@@ -84,10 +87,13 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
         FirebaseUser currentUser = mAuth.getCurrentUser();
+        Log.d("coucou", "LA onStart: "+currentUser);
         if(currentUser != null){
+            Log.d("coucou", "LA onStart: non null");
             sendToMain();
+        }else{
+            Log.d("coucou", "LA onStart: current null");
         }
     }
 

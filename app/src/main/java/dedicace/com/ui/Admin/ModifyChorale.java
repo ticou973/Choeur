@@ -141,10 +141,10 @@ public class ModifyChorale extends AppCompatActivity implements ChoraleAdapter.O
             startDetailsChoraleActivity.putExtra("bundleChorale", args);
             startActivity(startDetailsChoraleActivity);
 
-        }else if(origine.equals("CreateChorale")){
+        }else if(origine.equals("CreateUser")){
             Log.d(TAG, "MC onItemClick: "+i);
             Intent result = new Intent();
-            result.putExtra("titreselected",listChorales.get(i));
+            result.putExtra("idselected",listId.get(i));
             setResult(RESULT_OK,result);
             finish();
         }

@@ -116,6 +116,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         FirebaseApp.initializeApp(this);
 
         mAuth = FirebaseAuth.getInstance();
+        Log.d(TAG, "MA onCreate: "+mAuth);
+        setUpSharedPreferences();
 
         if(mAuth.getCurrentUser() != null) {
             //UI
@@ -130,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             Log.d(TAG, "" +
                     "onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
 
-            setUpSharedPreferences();
+
             //todo voir si mettre la permission ici et voir la réponse négative (griser le record) et mettre dans le menu option de redemander
             OnRequestPermission();
 

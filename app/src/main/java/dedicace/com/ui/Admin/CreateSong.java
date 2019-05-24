@@ -407,7 +407,7 @@ public class CreateSong extends AppCompatActivity implements DialogNewSSFragment
     @Override
     public void onDialogPositiveClick() {
         titre.setText("Selection titre...");
-        rbBass.setChecked(true);
+        rbTutti.setChecked(true);
         fileMp3.setText("Selection mp3...");
     }
 
