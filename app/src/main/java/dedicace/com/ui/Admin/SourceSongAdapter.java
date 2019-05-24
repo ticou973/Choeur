@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import dedicace.com.R;
@@ -18,7 +17,7 @@ import dedicace.com.data.database.SourceSong;
 
 class SourceSongAdapter extends RecyclerView.Adapter<SourceSongAdapter.SourceSongViewHolder> {
 
-    private List<SourceSong> listSourceSongs = new ArrayList<>();
+    private List<SourceSong> listSourceSongs;
     private OnItemListener mListener;
     private static final String TAG="coucou";
 

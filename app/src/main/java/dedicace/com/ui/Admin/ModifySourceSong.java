@@ -57,6 +57,12 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
 
         origine = intent.getStringExtra("origine");
 
+        //todo voir l'utilité de new Intent ?
+        /*
+        if(origine.equals("ModifySSDetails")){
+            newIntent=true;
+        }*/
+
         fab = findViewById(R.id.fab_SS);
 
 
@@ -111,6 +117,7 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
                                     listSourceSongs.add(sourceSong);
                                 }
 
+                                //todo voir l'intêtert du new Intent non mis en place à voir aussi sur le modify chorale
                                 if(newIntent){
                                     Log.d(TAG, "MSS onComplete: new intent");
                                     sourceSongAdapter.notifyDataSetChanged();
@@ -123,7 +130,7 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
 
                                 Log.d(TAG, "MSS fetchSourceSongs: après fetch");
                             } else {
-                                Log.w(TAG, "MSS-exec Error getting documents.", task.getException());
+                                Log.d(TAG, "MSS-exec Error getting documents.", task.getException());
                             }
                         }
                     });
@@ -137,7 +144,7 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
     @Override
     public void onItemClick(int i) {
 
-        if (origine.equals("AdminHome")) {
+        if (origine.equals("AdminHome")||origine.equals("ModifySSDetails")) {
             Log.d(TAG, "MSS onItemClick: "+i);
         Intent startDetailsSSActivity = new Intent(ModifySourceSong.this, ModifySourceSongDetails.class);
         Bundle args = new Bundle();

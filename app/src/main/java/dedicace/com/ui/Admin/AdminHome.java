@@ -86,6 +86,8 @@ public class AdminHome extends AppCompatActivity {
         modifyUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent startModifyUsersActivity = new Intent(AdminHome.this,ModifyUser.class);
+                startActivity(startModifyUsersActivity);
 
             }
         });
@@ -101,7 +103,9 @@ public class AdminHome extends AppCompatActivity {
         modifyChorale.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Intent startModifyChoraleActivity = new Intent(AdminHome.this,ModifyChorale.class);
+                startModifyChoraleActivity.putExtra("origine","AdminHome");
+                startActivity(startModifyChoraleActivity);
             }
         });
     }

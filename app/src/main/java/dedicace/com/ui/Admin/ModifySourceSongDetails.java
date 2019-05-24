@@ -44,6 +44,7 @@ import dedicace.com.data.database.Song;
 
 //todo voir tout le doublonnage de code par rapport o Create SourceSong, à factoriser à tous les niveaux
 //todo voir comment delete sur le cloud les éléments dont on ne se sert plus pour éviter une accumulation dans le cloud
+//todo revoir l'id de la chorale lorsqu'il y aura plusieures chorales, es sources songs changeront idem pour les songs
 public class ModifySourceSongDetails extends AppCompatActivity implements DialogAlertTitle.DialogAlertTitleListener, DialogSuppFragment.DialogSuppListener {
     private TextView oldTitre, oldGroupe, oldDuration, oldBackground, newBackground;
     private EditText newTitre, newGroupe, newDuration;
@@ -225,7 +226,6 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
             Log.d(TAG, "MSSD insertSSinDb: else titre");
             insertCloud();
         }
-
     }
 
     private void insertCloud() {
@@ -250,6 +250,7 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
                         modifyMajChorale();
                         Intent startMSS = new Intent(ModifySourceSongDetails.this,ModifySourceSong.class);
                         startMSS.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        startMSS.putExtra("origine","AdminHome");
                         startActivity(startMSS);
                     }
                 })
@@ -286,7 +287,7 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
 
     private void getIntentBundle() {
         Intent intent = getIntent();
-        Bundle args = new Bundle();
+        Bundle args;
         args = intent.getBundleExtra("bundleSS");
         oldTitreStr=args.getString("oldTitre");
         oldGroupeStr=args.getString("oldGroupe");
@@ -406,25 +407,6 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
                 }
             }
         });
-
-        //ifBackground();
-    }
-
-    private void ifBackground() {
-        if(!newBackgroundStr.equals("Select. Backgr.")){
-            Log.d(TAG, "MSSD insertSSinDb: if background");
-            File file = new File(pathSelected);
-            if(file.delete()){
-                Log.d(TAG, "MSSD onSuccess: le fichier est supprimé du local");
-            }else{
-                Log.d(TAG, "MSSD onSuccess: problème de suppression en local du fichier");
-            }
-            insertBackgroundInCloudStorage();
-
-        }else{
-            Log.d(TAG, "MSSD insertSSinDb: else background");
-            insertCloud();
-        }
 
     }
 

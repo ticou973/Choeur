@@ -93,9 +93,28 @@
             android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
-        <activity android:name=".ui.Admin.CreateChorale"
-            android:screenOrientation="portrait"
+        <activity
+            android:name=".ui.Admin.CreateChorale"
             android:parentActivityName=".ui.Admin.AdminHome"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".ui.Admin.ModifyChorale"
+            android:parentActivityName=".ui.Admin.AdminHome"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".ui.Admin.ModifyUserDetails"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"/>
+        <activity
+            android:name=".ui.Admin.ModifyUser"
+            android:parentActivityName=".ui.Admin.AdminHome"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"/>
+        <activity
+            android:name=".ui.Admin.ModifyChoraleDetails"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
     </application>
 
