@@ -91,7 +91,7 @@ public class ListSongs {
             }
         }
 
-        Log.d(LOG_TAG, "LS ChoraleRepository LiveData après sync SongOnPhonesBS: "+SongOnPhonesBS.size()+" "+SongOnPhonesBS.get(0).size()+" "+Thread.currentThread().getName());
+//        Log.d(LOG_TAG, "LS ChoraleRepository LiveData après sync SongOnPhonesBS: "+SongOnPhonesBS.size()+" "+SongOnPhonesBS.get(0).size()+" "+Thread.currentThread().getName());
         for (int i = 0; i <SongOnPhonesBS.size() ; i++) {
             Log.d(LOG_TAG, "LS run: "+ SongOnPhonesBS.get(i));
         }
@@ -192,7 +192,7 @@ public class ListSongs {
            }
 
 
-        Log.d(LOG_TAG, "LS getSongsOnPhones: (SongOnPhones) "+SongsOnPhones.size()+" "+SongsOnPhones+" "+SongsOnPhones.get(0).size()+" "+Thread.currentThread().getName());
+//       Log.d(LOG_TAG, "LS getSongsOnPhones: (SongOnPhones) "+SongsOnPhones.size()+" "+SongsOnPhones+" "+SongsOnPhones.get(0).size()+" "+Thread.currentThread().getName());
 
         return SongsOnPhones;
     }

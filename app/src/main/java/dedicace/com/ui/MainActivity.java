@@ -60,8 +60,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private RecyclerView.LayoutManager layoutManager;
 
     //Songs
-    private List<Song> songs = new ArrayList<>();
-    private List<Song> recordedSongs = new ArrayList<>();
     private Toast mToast;
     private static final String TAG = "coucou";
     private final int REQUEST_PERMISSION_CODE = 1000;
@@ -79,9 +77,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private List<List<Song>> songOnClouds;
     private List<List<Song>> SongOnPhonesLive= new ArrayList<>();
     private List<List<Song>> SongOnPhonesBS= new ArrayList<>();
-    private Pupitre currentPupitre;
-    private Set<String> pupitresAuto;
-    private Set<String> pupitreAutoDefault;
 
     //ViewModel
     private MainActivityViewModel mViewModel;
@@ -114,47 +109,35 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         //Firebase
         //todo voir l'intérêt de cette première ligne
         FirebaseApp.initializeApp(this);
-
         mAuth = FirebaseAuth.getInstance();
         Log.d(TAG, "MA onCreate: "+mAuth);
-        setUpSharedPreferences();
+        //UI
+        mLoadingIndicator = findViewById(R.id.pb_loading_indicator);
+        recyclerView = findViewById(R.id.recyclerview_media_item);
+        songsAdapter = new SongsAdapter(this, this);
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(songsAdapter);
+        OnRequestPermission();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+        mExecutors = AppExecutors.getInstance();
+        Log.d(TAG, "" + "onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
+        //todo voir si mettre la permission ici et voir la réponse négative (griser le record) et mettre dans le menu option de redemander
+
 
         if(mAuth.getCurrentUser() != null) {
-            //UI
-            mLoadingIndicator = findViewById(R.id.pb_loading_indicator);
-            recyclerView = findViewById(R.id.recyclerview_media_item);
-            songsAdapter = new SongsAdapter(this, this);
-            layoutManager = new LinearLayoutManager(this);
-            recyclerView.setLayoutManager(layoutManager);
-            recyclerView.setHasFixedSize(true);
-            recyclerView.setAdapter(songsAdapter);
-
-            Log.d(TAG, "" +
-                    "onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
-
-
-            //todo voir si mettre la permission ici et voir la réponse négative (griser le record) et mettre dans le menu option de redemander
-            OnRequestPermission();
-
-            mExecutors = AppExecutors.getInstance();
-
             mfactory = InjectorUtils.provideViewModelFactory(this.getApplicationContext());
             Log.d("coucou", "MA onCreate: fin de la factory");
             mViewModel = ViewModelProviders.of(this, mfactory).get(MainActivityViewModel.class);
             Log.d("coucou", "MA onCreate: fin du viewModel");
-
-            //todo faire une condition au niveau du repository suivant que l'on connait ou non le currentpupitre (1ère fois ou non)
-            //currentPupitre = SongsUtilities.converttoPupitre(getCurrentPupitreStr());
-            Log.d(TAG, "MA onCreate: ");
-
+            setUpSharedPreferences();
             sourceSongs =mViewModel.getChoeurSourceSongs();
-
             Log.d(TAG, "MA onCreate: getChoeurSourcesongs " + sourceSongs);
-
             sourceSongs.observe(this, new Observer<List<SourceSong>>() {
                 @Override
                 public void onChanged(@Nullable List<SourceSong> sourceSongs) {
-
                     sourceSongList=sourceSongs;
 
                     Log.d(TAG, "MA onChanged: Alerte, ça bouge dans le coin !" + sourceSongs + " " + mViewModel.getChoeurSourceSongs() + " " + Thread.currentThread().getName());
@@ -258,26 +241,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     }
 
     private void setUpSharedPreferences() {
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         installation = sharedPreferences.getBoolean("installation",true);
-
-        editor = sharedPreferences.edit();
-
         if(installation){
-            Log.d(TAG, "MA setUpSharedPreferences: installation");
-            editor.putBoolean("installation",false);
-            editor.putString("role","Super Admin");
-            editor.putString("idchorale","jFHncTuYleIHhZtL2PmT");
-            editor.putBoolean(getString(R.string.maj_auto),true);
-            //todo remplacer TENOR par le pupitre que l'on aura en base
-            editor.putString("pupitre","TENOR");
-            Set<String> pupitreToDownload = new HashSet<>();
-            pupitreToDownload.add(sharedPreferences.getString("pupitre",""));
-            editor.putStringSet(getString(R.string.pref_pupitre_key),pupitreToDownload);
-            Log.d(TAG, "MA setUpSharedPreferences: "+pupitresAuto+" "+pupitreAutoDefault);
-            editor.apply();
+            current_user_id=mAuth.getUid();
+            getData();
+            Log.d(TAG, "MA setUpSharedPreferences: installation "+current_user_id);
             deleteDbRoom();
+
         }else{
             Log.d(TAG, "MA setUpSharedPreferences: plus une installation");
         }
@@ -288,9 +258,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     }
 
+    private void getData() {
+        mViewModel.getData(current_user_id);
+    }
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        //todo faire pour gérer entre autres si on veut charger les songs qui viennet d être changées
+        //todo faire pour gérer entre autres si on veut charger les songs qui viennent d être changées
 
         Toast.makeText(this, "paramètres changés !", Toast.LENGTH_LONG).show();
         Log.d(TAG, "MA onSharedPreferenceChanged: key "+key);
@@ -396,7 +370,9 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             mAuth.signOut();
             mAuth = null;
         }*/
-        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+        if(sharedPreferences!=null) {
+            sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+        }
     }
 
     private void sendToLogin() {

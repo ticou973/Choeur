@@ -113,14 +113,6 @@ public class MainActivityViewModel extends ViewModel {
     }
 
 
-    public String getCurrentAuthRole(){
-        Log.d("coucou", "getCurrentAuthRole: ");
-
-        mCurrentAuthRole=mRepository.getCurrentAuthRole();
-        return mCurrentAuthRole;
-
-    }
-
     public String getTypeSS() {
         typeSS = mRepository.getTypeSS();
         return typeSS;
@@ -144,6 +136,10 @@ public class MainActivityViewModel extends ViewModel {
 
     public void deletePupitresSongs(List<Song> songsToDelete) {
         mRepository.deletePupitresSongs(songsToDelete);
+    }
+
+    public void getData(String current_user_id) {
+        mRepository.getData(current_user_id);
     }
 }
 

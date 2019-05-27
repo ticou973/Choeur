@@ -10,6 +10,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -31,6 +32,7 @@ import com.google.firebase.storage.StorageReference;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -52,6 +54,7 @@ public class ChoraleNetWorkDataSource {
     private static ChoraleNetWorkDataSource sInstance;
     private final Context mContext;
     private boolean aloneCreate, aloneDelete, deleted = false;
+    private DialogFragment dialog;
 
     //Utils
     private AppExecutors mExecutors;
@@ -505,6 +508,8 @@ public class ChoraleNetWorkDataSource {
                             increment++;
                             Log.d(LOG_TAG, "NDS onSuccess: "+Thread.currentThread().getName()+" "+ filename);
 
+
+
                             if(increment ==mp3Size) {
                                 Log.d(LOG_TAG, "NDS onSuccess :lancement de postValue Done "+mp3Size);
                                 downloads.postValue("Done");
@@ -534,6 +539,7 @@ public class ChoraleNetWorkDataSource {
         Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: pour voir si cela passe avant la fin des chargements");
     }
 
+    //todo à supprimer car déjà calculer plus tôt pour le shredPreferences (?)
     public String getCurrentPupitreStr() {
 
         //todo mettre dans la bdd locale users avec les éléments le concernant dont le pupitre, ce qui évitera cette partie un peu lourde
@@ -556,30 +562,6 @@ public class ChoraleNetWorkDataSource {
         });
 
         return currentPupitreStr;
-    }
-
-    public String getmCurrentAuthRole() {
-
-        db.collection("users").document(current_user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                Log.d(LOG_TAG, "NDS getCurrentPupitre onComplete: "+Thread.currentThread().getName());
-                if(task.isSuccessful()){
-
-                    //todo voir comment mettre les rôles en DB local
-
-                    mCurrentAuthRole= (String) task.getResult().get("role");
-
-                    Log.d(LOG_TAG, "NDS getCurrentAuthRole "+mCurrentAuthRole);
-
-
-                }else{
-                    Log.d(LOG_TAG, "NDS onComplete: erreur de récupération du role");
-                }
-            }
-        });
-
-        return mCurrentAuthRole;
     }
 
     public Context getContext() {
@@ -838,6 +820,50 @@ public class ChoraleNetWorkDataSource {
         });
 
 
+    }
+
+    public void getData(String current_user_id) {
+        Log.d(LOG_TAG, "NDS getData: "+current_user_id);
+        db.collection("users").document(current_user_id)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if(task.isSuccessful()){
+                            if(task.getResult().exists()){
+                                String role, pupitre,idChorale,email,nom,prenom;
+                                role =(String) task.getResult().get("role");
+                                pupitre =(String) task.getResult().get("pupitre");
+                                idChorale=(String) task.getResult().get("id_chorale");
+                                //todo voir à quoi pourront servir ces éléments (peut être dans le préférence compte)
+                                email = (String) task.getResult().get("email");
+                                nom=(String) task.getResult().get("nom");
+                                prenom=(String) task.getResult().get("prenom");
+                                editor = sharedPreferences.edit();
+                                Log.d(LOG_TAG, "NDS setUpSharedPreferences: installation "+role+" "+pupitre+" "+idChorale+" "+email+" "+nom+" "+prenom);
+                                editor.putBoolean("installation",false);
+                                editor.putString("role",role);
+                                editor.putString("idchorale",idChorale);
+                                editor.putBoolean(mContext.getString(R.string.maj_auto),true);
+                                editor.putString("pupitre",pupitre);
+                                Set<String> pupitreToDownload = new HashSet<>();
+                                pupitreToDownload.add(pupitre);
+                                editor.putStringSet(mContext.getString(R.string.pref_pupitre_key),pupitreToDownload);
+                                Log.d(LOG_TAG, "NDS setUpSharedPreferences: fin");
+                                editor.apply();
+                            }
+
+                        }else{
+                            Log.d(LOG_TAG, "NDS onComplete: help pb sur documents users");
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
     }
 }
 

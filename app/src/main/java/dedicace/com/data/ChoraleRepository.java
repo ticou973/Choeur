@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -27,7 +28,6 @@ import dedicace.com.ui.SongsAdapter;
 public class ChoraleRepository {
     // For Singleton instantiation
     private static final Object LOCK = new Object();
-    private final Object LOCK1 = new Object();
     private static final String LOG_TAG ="coucou" ;
     private static ChoraleRepository sInstance;
     private final SongsDao mSongDao;
@@ -36,6 +36,7 @@ public class ChoraleRepository {
     private final AppExecutors mExecutors;
     private boolean mInitialized = false;
     private Thread currentThread,t2,t1,t3,t4,t5;
+    private Context context;
 
     //Songs
     private List<SourceSong> sourceSongsAfterSync = new ArrayList<>();
@@ -55,7 +56,6 @@ public class ChoraleRepository {
     private List<Song> modifiedSongsList = new ArrayList<>();
     private List<SourceSong> bgSourcesToDelete = new ArrayList<>();
     private List<SourceSong> bgSourcesToDownLoad = new ArrayList<>();
-    private List<Pupitre> pupitresToDownloadDelete= new ArrayList<>();
 
     private List<Song>  mp3SongsToDelete = new ArrayList<>();
     private List<Song>  mp3SongsToDownload = new ArrayList<>();
@@ -75,11 +75,10 @@ public class ChoraleRepository {
     private List<Object> listElements = new ArrayList<>();
     private List<SourceSong> sourceSongs1;
     private String currentPupitreStr;
-    private boolean alone;
+
 
     private ListSongs listSongs;
 
-    private String mCurrentAuthRole;
     private String typeSS;
 
     private SharedPreferences sharedPreferences;
@@ -99,17 +98,6 @@ public class ChoraleRepository {
         mSourceDao=sourceSongDao;
         mChoraleNetworkDataSource = choraleNetworkDataSource;
         mExecutors = executors;
-
-        //todo remettre si Thread marche pas
-        /*mExecutors.diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                t5 = Thread.currentThread();
-                oldSourcesSongs = mSourceDao.getAllSources();
-                oldSongs=mSongDao.getAllSongs();
-                Log.d(LOG_TAG, "CR run:  old SS et song "+oldSourcesSongs.size()+" songs "+oldSongs.size());
-            }
-        });*/
 
         t5 = new Thread(new Runnable() {
             @Override
@@ -249,7 +237,6 @@ public class ChoraleRepository {
         });
 
         t1.start();
-
     }
 
     public synchronized static ChoraleRepository getInstance(SongsDao songsDao, SourceSongDao sourceSongDao,ChoraleNetWorkDataSource choraleNetworkDataSource, AppExecutors executors) {
@@ -787,17 +774,16 @@ public class ChoraleRepository {
             currentPupitreStr=getCurrentPupitreStr();
             Log.d(LOG_TAG, "CR : isFetchNeeded "+ currentPupitreStr);
 
-            //todo remettre si chargement fonctionne pas
-            //startFetchSongsService();
-
-            String idChorale=sharedPreferences.getString("idchorale"," ");
+            String idChorale=sharedPreferences.getString("idchorale","");
             Log.d(LOG_TAG, "CR initializeData: idchorale "+idChorale);
 
-            getMajDateLocalDataBase();
-
-            //lance la recherche d'un emise à jour et condition le lancement de startFetchData
-
-            LoadMajCloudDB();
+            if(!TextUtils.isEmpty(idChorale)) {
+                getMajDateLocalDataBase();
+                //lance la recherche d'un emise à jour et condition le lancement de startFetchData
+                LoadMajCloudDB();
+            }else{
+                Log.d(LOG_TAG, "CR initializeData: pb d'initialisation du sharedpreferences");
+            }
 
             Log.d(LOG_TAG, "CR : isFetchNeeded "+ Thread.currentThread().getName());
         }else{
@@ -842,7 +828,7 @@ public class ChoraleRepository {
 
     private boolean isFetchNeeded() {
         //todo à modifier éventuellement sur préférences veut - on regarder si on veut télécharger automatique ou non (à la demande) ou si la dernière date de maj à changer
-        Context context = mChoraleNetworkDataSource.getContext();
+        context = mChoraleNetworkDataSource.getContext();
 
         //todo à modifier dans le listener pour appliquer les changements
         sharedPreferences =PreferenceManager.getDefaultSharedPreferences(context);
@@ -869,12 +855,6 @@ public class ChoraleRepository {
         currentPupitreStr=mChoraleNetworkDataSource.getCurrentPupitreStr();
         Log.d(LOG_TAG, "CR getCurrentPupitreStr: "+currentPupitreStr);
         return currentPupitreStr;
-    }
-
-    public String getCurrentAuthRole(){
-        Log.d(LOG_TAG, "getCurrentAuthRole: ");
-        mCurrentAuthRole=mChoraleNetworkDataSource.getmCurrentAuthRole();
-        return mCurrentAuthRole;
     }
 
     public List<Object> getElements() {
@@ -926,6 +906,9 @@ public class ChoraleRepository {
        return mChoraleNetworkDataSource.isDeleted();
     }
 
+    public void getData(String current_user_id) {
+        mChoraleNetworkDataSource.getData(current_user_id);
+    }
 }
 
 
