@@ -47,15 +47,15 @@ public class CreateUser extends AppCompatActivity implements DialogNewSSFragment
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     public static String current_user_id;
-    private String idChorale,emailStr,pwdStr,nomStr,prenomStr,roleStr,userId;
+    private String idChorale,emailStr,pwdStr,nomStr,prenomStr,roleStr,userId, pupitreStr;
     private static final String TAG ="coucou";
     private static final int REQUEST_CODE_B = 200;
 
     private TextView selectChorale;
     private EditText nom,prenom,email,pwd;
     private Button selectChoraleBtn,createUserBtn;
-    private RadioGroup rgb;
-    private RadioButton choristeRb, adminRb,superAdminRb;
+    private RadioGroup rgb,rgbPupitre;
+    private RadioButton choristeRb, adminRb,superAdminRb,tuttirb,bassRb,tenorRb,altoRb,sopranoRb;
 
 
     @Override
@@ -75,6 +75,14 @@ public class CreateUser extends AppCompatActivity implements DialogNewSSFragment
         adminRb=findViewById(R.id.rb_admin);
         superAdminRb=findViewById(R.id.rb_super_admin);
         choristeRb.setChecked(true);
+        rgbPupitre=findViewById(R.id.rb_user_pupitre);
+        tuttirb=findViewById(R.id.rb_user_tutti);
+        bassRb=findViewById(R.id.rb_user_bass);
+        tenorRb=findViewById(R.id.rb_user_tenor);
+        altoRb=findViewById(R.id.rb_user_alto);
+        sopranoRb=findViewById(R.id.rb_user_soprano);
+        tuttirb.setChecked(true);
+
 
         ActionBar actionBar = this.getSupportActionBar();
 
@@ -120,10 +128,29 @@ public class CreateUser extends AppCompatActivity implements DialogNewSSFragment
                         break;
                 }
 
+                int idRbPupitre = rgbPupitre.getCheckedRadioButtonId();
+                switch (idRbPupitre){
+                    case R.id.rb_user_tutti:
+                        pupitreStr="TUTTI";
+                        break;
+                    case R.id.rb_user_bass:
+                        pupitreStr="BASS";
+                        break;
+                    case R.id.rb_user_tenor:
+                        pupitreStr="TENOR";
+                        break;
+                    case R.id.rb_user_alto:
+                        pupitreStr="ALTO";
+                        break;
+                    case R.id.rb_user_soprano:
+                        pupitreStr="SOPRANO";
+                        break;
+                }
+
                 Log.d(TAG, "CU onClick: role "+roleStr);
 
                 if(!idChorale.equals("Selection Chorale...")&&!TextUtils.isEmpty(emailStr)&&!TextUtils.isEmpty(pwdStr)&&!TextUtils.isEmpty(nomStr)&&!TextUtils.isEmpty(prenomStr)){
-                    Log.d(TAG, "CU onClick: conditions passées "+ idChorale+ " "+emailStr+" "+pwdStr+" "+nomStr+" "+prenomStr+" "+roleStr);
+                    Log.d(TAG, "CU onClick: conditions passées "+ idChorale+ " "+emailStr+" "+pwdStr+" "+nomStr+" "+prenomStr+" "+roleStr+" "+pupitreStr);
 
                     insertUserinAuth();
 
@@ -173,7 +200,7 @@ public class CreateUser extends AppCompatActivity implements DialogNewSSFragment
         user.put("prenom",prenomStr);
         user.put("role",roleStr);
         user.put("url_photo","");
-        user.put("pupitre","");
+        user.put("pupitre",pupitreStr);
         user.put("maj", Timestamp.now());
 
         db.collection("users").document(userId)
