@@ -44,6 +44,7 @@ import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
+import dedicace.com.ui.DialogDownload;
 import dedicace.com.utilities.SongsUtilities;
 
 public class ChoraleNetWorkDataSource {
@@ -141,6 +142,7 @@ public class ChoraleNetWorkDataSource {
         Log.d(LOG_TAG, "NDS ChoraleNetWorkDataSource: constructor "+ current_user_id);
         workerThread = new WorkerThread();
         sharedPreferences =PreferenceManager.getDefaultSharedPreferences(mContext);
+        dialog = new DialogDownload();
     }
 
     /**
@@ -182,17 +184,22 @@ public class ChoraleNetWorkDataSource {
 
     public void fetchMajClouDb() {
 
-        idChorale=sharedPreferences.getString("idchorale"," ");
+        idChorale = sharedPreferences.getString("idchorale","");
+        //idChorale="jFHncTuYleIHhZtL2PmT";
         Log.d(LOG_TAG, "NDS getMajDateCloudDataBase: "+idChorale);
 
-        if(!idChorale.equals(" ")) {
-
+        if(!idChorale.equals("")) {
             try {
-                db.collection("chorale").document(idChorale).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                db.collection("chorale").document(idChorale)
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        Log.d(LOG_TAG, "NDS onComplete avant existe: "+task+" "+task.getResult());
+                        if(task.getResult().exists()){
                         threadMaj =Thread.currentThread();
-                        Log.d(LOG_TAG, "NDS onComplete thrzadMaj: "+threadMaj);
+
+                        Log.d(LOG_TAG, "NDS onComplete threadMaj: "+threadMaj+" "+task+" "+task.getResult());
 
                         Log.d(LOG_TAG, "onComplete: "+task.getResult().get("maj").getClass().toString());
 
@@ -207,6 +214,22 @@ public class ChoraleNetWorkDataSource {
                         Log.d(LOG_TAG, "NDS onComplete: majDBCloud Long " + majCloudDBLong);
 
                         mMajDbCloudLong.postValue(majCloudDBLong);
+                        }else{
+                            Log.d(LOG_TAG, "NDS onComplete: taskresult n'existe pas");
+                        }
+
+                    }
+                })
+                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            @Override
+                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                Log.d(LOG_TAG, "NDS onSuccess: majCloudDate "+documentSnapshot+" "+" "+documentSnapshot.getString("nom"));
+                            }
+                        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(LOG_TAG, "NDS onFailure: "+e);
                     }
                 });
 
@@ -542,8 +565,13 @@ public class ChoraleNetWorkDataSource {
     //todo à supprimer car déjà calculer plus tôt pour le shredPreferences (?)
     public String getCurrentPupitreStr() {
 
+
+        //todo vérifier que cela marche sans appel à la db plus loin
+        currentPupitreStr=sharedPreferences.getString("pupitre","TUTTI");
+        pupitreUser=SongsUtilities.converttoPupitre(currentPupitreStr);
+
         //todo mettre dans la bdd locale users avec les éléments le concernant dont le pupitre, ce qui évitera cette partie un peu lourde
-        db.collection("users").document(current_user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        /*db.collection("users").document(current_user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 Log.d(LOG_TAG, "NDS getCurrentPupitre onComplete: "+Thread.currentThread().getName());
@@ -559,7 +587,7 @@ public class ChoraleNetWorkDataSource {
                     Log.d(LOG_TAG, "NDS onComplete: erreur de récupération du pupitre");
                 }
             }
-        });
+        });*/
 
         return currentPupitreStr;
     }
@@ -747,6 +775,7 @@ public class ChoraleNetWorkDataSource {
                     if(taskSnapshot.getTotalByteCount()!=0) {
                         int progress = (int) (100.0 * taskSnapshot.getBytesTransferred()) / (int) taskSnapshot.getTotalByteCount();
                         Log.d(LOG_TAG, "NDS onProgress: multiple" + filename + " " + progress + "%");
+
                     }
                 }
             });
@@ -840,7 +869,7 @@ public class ChoraleNetWorkDataSource {
                                 nom=(String) task.getResult().get("nom");
                                 prenom=(String) task.getResult().get("prenom");
                                 editor = sharedPreferences.edit();
-                                Log.d(LOG_TAG, "NDS setUpSharedPreferences: installation "+role+" "+pupitre+" "+idChorale+" "+email+" "+nom+" "+prenom);
+                                Log.d(LOG_TAG, "NDS setUpSharedPreferences: installation"+role+" "+pupitre+" "+idChorale+" "+email+" "+nom+" "+prenom);
                                 editor.putBoolean("installation",false);
                                 editor.putString("role",role);
                                 editor.putString("idchorale",idChorale);

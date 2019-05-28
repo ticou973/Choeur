@@ -362,8 +362,8 @@ public class ModifyChoraleDetails extends AppCompatActivity implements DialogSup
     }
 
     private void getSuppUsers() {
-        CollectionReference songsRef=db.collection("users");
-        Query query = songsRef.whereEqualTo("id_chorale",idChorale);
+        CollectionReference userRef=db.collection("users");
+        Query query = userRef.whereEqualTo("id_chorale",idChorale);
 
         query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override

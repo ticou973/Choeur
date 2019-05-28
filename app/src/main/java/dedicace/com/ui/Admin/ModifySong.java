@@ -140,7 +140,6 @@ public class ModifySong extends AppCompatActivity implements SongAdapter.OnItemL
         args.putString("oldPath",listSongs.get(i).getSongPath());
         startDetailsSongActivity.putExtra("bundleSong", args);
         startActivity(startDetailsSongActivity);
-
     }
 
 

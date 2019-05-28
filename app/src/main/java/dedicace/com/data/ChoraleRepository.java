@@ -44,8 +44,6 @@ public class ChoraleRepository {
     private List<SourceSong> oldSourcesSongs = new ArrayList<>();
     private  List<Song> songs;
     private List<Song> oldSongs = new ArrayList<>();
-    private List<List<RecordSource>> RecordSources=new ArrayList<>();
-    private List<Song> songToPlays=new ArrayList<>();
     private List<SourceSong> newSourceSongsList = new ArrayList<>();
     private List<Song> newSongsList = new ArrayList<>();
     private List<SourceSong> deletedSourceSongsList = new ArrayList<>();
@@ -61,7 +59,6 @@ public class ChoraleRepository {
     private List<Song>  mp3SongsToDownload = new ArrayList<>();
     private List<Song> tempSongs = new ArrayList<>();
     private List<SourceSong> tempSourceSongs = new ArrayList<>();
-    private List<List<Song>> SongsOnPhones= new ArrayList<>();
     private List<Song> totalMp3Todowload = new ArrayList<>();
     private List<SourceSong> totalBgTodowload = new ArrayList<SourceSong>();
     private List<Song> totalMp3ToDelete = new ArrayList<>();
@@ -70,9 +67,6 @@ public class ChoraleRepository {
     private Map<String,String> titress = new HashMap<>();
     private Song songToDownload;
     private List<Song> songsToDownload, songsToDelete;
-
-    private List<List<Song>> SongOnClouds=new ArrayList<>();
-    private List<Object> listElements = new ArrayList<>();
     private List<SourceSong> sourceSongs1;
     private String currentPupitreStr;
 
@@ -605,6 +599,7 @@ public class ChoraleRepository {
             mSourceDao.bulkInsert(newSourceSongsList);
         }
 
+
         if(newSongsList!=null&newSongsList.size()!=0){
             Log.d(LOG_TAG, "CR DoWorkInRoom: create songs "+newSongsList);
             mSongDao.bulkInsert(newSongsList);
@@ -855,27 +850,6 @@ public class ChoraleRepository {
         currentPupitreStr=mChoraleNetworkDataSource.getCurrentPupitreStr();
         Log.d(LOG_TAG, "CR getCurrentPupitreStr: "+currentPupitreStr);
         return currentPupitreStr;
-    }
-
-    public List<Object> getElements() {
-        return listElements;
-    }
-
-    public List<Song> getSongToPlaysA() {
-        return  songToPlays;
-    }
-
-    public List<List<Song>> getSongsOnPhonesA() {
-        return SongsOnPhones;
-    }
-
-    public List<List<Song>> getSongsOnCloudsA() {
-        return SongOnClouds;
-    }
-
-    public List<List<RecordSource>> getRecordSourcesA(){
-
-        return RecordSources;
     }
 
     public Thread getCurrentThread() {

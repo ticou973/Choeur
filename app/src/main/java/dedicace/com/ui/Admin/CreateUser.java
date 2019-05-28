@@ -24,6 +24,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,6 +37,7 @@ import java.util.Map;
 
 import dedicace.com.R;
 
+//todo faire un process complet pour envoi d'email et vérification
 public class CreateUser extends AppCompatActivity implements DialogNewSSFragment.DialogNewSSListener{
 
     private SharedPreferences sharedPreferences;
@@ -128,7 +130,6 @@ public class CreateUser extends AppCompatActivity implements DialogNewSSFragment
                 }else{
                     Toast.makeText(CreateUser.this, "Il manque des éléments", Toast.LENGTH_SHORT).show();
                 }
-
             }
         });
 
@@ -173,6 +174,7 @@ public class CreateUser extends AppCompatActivity implements DialogNewSSFragment
         user.put("role",roleStr);
         user.put("url_photo","");
         user.put("pupitre","");
+        user.put("maj", Timestamp.now());
 
         db.collection("users").document(userId)
                 .set(user)

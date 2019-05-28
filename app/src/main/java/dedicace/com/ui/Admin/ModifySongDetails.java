@@ -60,7 +60,6 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
     private String idChorale,idSong,oldTitreStr,oldPupitreStr,oldSourceStr,newPupitreStr,newMp3Str,newSourceStr;
 
     private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
     private StorageReference mStorageRef;
     private FirebaseFirestore db;
     private Uri downloadUrl;
@@ -91,7 +90,7 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
         db = FirebaseFirestore.getInstance();
 
         sharedPreferences =PreferenceManager.getDefaultSharedPreferences(this);
-        idChorale=sharedPreferences.getString("idchorale"," ");
+        idChorale=sharedPreferences.getString("idchorale","");
         Log.d(TAG, "MSD onCreate: idChorale "+ idChorale );
 
         getIntentBundle();
@@ -295,7 +294,7 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
 
     private void getIntentBundle() {
         Intent intent = getIntent();
-        Bundle args = new Bundle();
+        Bundle args;
         args = intent.getBundleExtra("bundleSong");
         oldTitreStr=args.getString("oldTitre");
         oldPupitreStr=args.getString("oldPupitre");

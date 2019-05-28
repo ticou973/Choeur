@@ -119,15 +119,12 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(songsAdapter);
-        OnRequestPermission();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-        mExecutors = AppExecutors.getInstance();
-        Log.d(TAG, "" + "onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
-        //todo voir si mettre la permission ici et voir la réponse négative (griser le record) et mettre dans le menu option de redemander
-
 
         if(mAuth.getCurrentUser() != null) {
+            Log.d(TAG, "" + "onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
+            OnRequestPermission();
             mfactory = InjectorUtils.provideViewModelFactory(this.getApplicationContext());
             Log.d("coucou", "MA onCreate: fin de la factory");
             mViewModel = ViewModelProviders.of(this, mfactory).get(MainActivityViewModel.class);
@@ -249,12 +246,12 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             deleteDbRoom();
 
         }else{
-            Log.d(TAG, "MA setUpSharedPreferences: plus une installation");
+            Log.d(TAG, "MA setUpSharedPreferences: plus une installation ");
         }
 
         mCurrentAuthRole=sharedPreferences.getString("role","Choriste");
 
-        Log.d(TAG, "MA setUpSharedPreferences: idchorale "+ sharedPreferences.getString("idchorale", " "));
+        Log.d(TAG, "MA setUpSharedPreferences: idchorale "+ sharedPreferences.getString("idchorale", ""));
 
     }
 

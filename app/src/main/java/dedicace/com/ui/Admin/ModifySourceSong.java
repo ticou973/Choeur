@@ -65,7 +65,6 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
 
         fab = findViewById(R.id.fab_SS);
 
-
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
