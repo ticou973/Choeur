@@ -16,7 +16,7 @@ public class ChoraleSyncIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         Log.d(SongsAdapter.TAG, "CSIS Intent service started "+Thread.currentThread().getName());
-        ChoraleNetWorkDataSource networkDataSource = InjectorUtils.provideNetworkDataSource(this.getApplicationContext());
+        ChoraleNetWorkDataSource networkDataSource = InjectorUtils.provideNetworkDataSource(this.getApplicationContext(),this.getApplicationContext());
 
         if(intent.getStringExtra("origine").equals("sources")){
             networkDataSource.fetchSongs();

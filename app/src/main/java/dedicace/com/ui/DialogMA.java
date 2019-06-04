@@ -121,46 +121,53 @@ public class DialogMA extends DialogFragment {
             messagePositif = "Ok";
             messageNegatif = "Annuler";
 
-        }else{
+        }else if(origine.equals("waitSongs")){
+            Log.d("coucou", "DMA onCreateDialog: waitsongs");
+            builder.setMessage("Veuillez attendre la mise à jour des données... ");
+
+        } else{
             Log.d("coucou", "DMA onCreateDialog: pas de messages...");
         }
-        builder.setPositiveButton(messagePositif, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
 
-                        if (mListener != null) {
-                            Log.d("coucou", "DMA onClick: (position) " + position);
+        if(!origine.equals("waitSongs")) {
+            builder.setPositiveButton(messagePositif, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
 
-                            if (origine.equals("downloadSingle")) {
-                                mListener.onDialogMAPositiveClick(position, song);
-                            } else if (origine.equals("deleteSingle")) {
-                                mListener.onDialogMADeletePositiveClick(position, song);
-                            } else if (origine.equals("downloadPupitres")) {
-                                mListener.onDialogMADownloadPupitresPositiveClick(selectedItems);
-                            }else if (origine.equals("deletePupitres")) {
-                                mListener.onDialogMADeletePupitresPositiveClick(selectedItems);
-                            }
+                    if (mListener != null) {
+                        Log.d("coucou", "DMA onClick: (position) " + position);
+
+                        if (origine.equals("downloadSingle")) {
+                            mListener.onDialogMAPositiveClick(position, song);
+                        } else if (origine.equals("deleteSingle")) {
+                            mListener.onDialogMADeletePositiveClick(position, song);
+                        } else if (origine.equals("downloadPupitres")) {
+                            mListener.onDialogMADownloadPupitresPositiveClick(selectedItems);
+                        } else if (origine.equals("deletePupitres")) {
+                            mListener.onDialogMADeletePupitresPositiveClick(selectedItems);
                         }
                     }
-                })
-                .setNegativeButton(messageNegatif, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        if(mListener!=null){
+                }
+            })
+                    .setNegativeButton(messageNegatif, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            if (mListener != null) {
 
-                            if(origine.equals("downloadSingle")) {
-                                mListener.onDialogMANegativeClick();
-                            }else if(origine.equals("deleteSingle")){
-                                mListener.onDialogMADeleteNegativeClick();
-                            }else if (origine.equals("downloadPupitres")) {
+                                if (origine.equals("downloadSingle")) {
+                                    mListener.onDialogMANegativeClick();
+                                } else if (origine.equals("deleteSingle")) {
+                                    mListener.onDialogMADeleteNegativeClick();
+                                } else if (origine.equals("downloadPupitres")) {
 
-                                mListener.onDialogMADownloadPupitresNegativeClick();
+                                    mListener.onDialogMADownloadPupitresNegativeClick();
 
-                            }else if (origine.equals("deletePupitres")) {
+                                } else if (origine.equals("deletePupitres")) {
 
-                                mListener.onDialogMADeletePupitresNegativeClick();
+                                    mListener.onDialogMADeletePupitresNegativeClick();
+                                }
                             }
                         }
-                    }
-                });
+                    });
+        }
 
         // Create the AlertDialog object and return it
         return builder.create();

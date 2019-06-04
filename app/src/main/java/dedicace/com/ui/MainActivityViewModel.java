@@ -82,6 +82,10 @@ public class MainActivityViewModel extends ViewModel {
     public void getData(String current_user_id) {
         mRepository.getData(current_user_id);
     }
+
+    public void getSourceSongs() {
+        choeurSourceSongs=mRepository.getSourceSongs();
+    }
 }
 
 

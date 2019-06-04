@@ -8,6 +8,7 @@ import android.view.MenuItem;
 
 import dedicace.com.R;
 
+//todo faire dans les settings le profil de l'utilisateur
 public class SettingsActivity extends AppCompatActivity {
 
     //Attention, il ne faut pas oublier de demettre un preferenceTheme dans le style sinon crash

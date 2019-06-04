@@ -759,9 +759,16 @@ public class ChoraleRepository {
 
     public synchronized void initializeData() {
         Log.d(LOG_TAG, "CR initializeData: repository isfetchneeded "+mInitialized);
-
+        //todo à modifier éventuellement sur préférences veut - on regarder si on veut télécharger automatique ou non (à la demande) ou si la dernière date de maj à changer
+        context = mChoraleNetworkDataSource.getContext();
+        //todo à modifier dans le listener pour appliquer les changements
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean initialisation = sharedPreferences.getBoolean("initializeData",false);
         // Only perform initialization once per app lifetime. If initialization has already been
         // performed, we have nothing to do in this method.
+        if(initialisation){
+            mInitialized=false;
+        }
         if (mInitialized) return;
         mInitialized = true;
 
@@ -822,11 +829,7 @@ public class ChoraleRepository {
 
 
     private boolean isFetchNeeded() {
-        //todo à modifier éventuellement sur préférences veut - on regarder si on veut télécharger automatique ou non (à la demande) ou si la dernière date de maj à changer
-        context = mChoraleNetworkDataSource.getContext();
 
-        //todo à modifier dans le listener pour appliquer les changements
-        sharedPreferences =PreferenceManager.getDefaultSharedPreferences(context);
         isAuto = sharedPreferences.getBoolean(context.getString(R.string.maj_auto),true);
         Log.d(LOG_TAG, "CR isFetchNeeded: condition "+isAuto);
 

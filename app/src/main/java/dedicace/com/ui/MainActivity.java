@@ -14,6 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -43,12 +44,13 @@ import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
+import dedicace.com.data.networkdatabase.ChoraleNetWorkDataSource;
 import dedicace.com.ui.Admin.AdminHome;
 import dedicace.com.utilities.InjectorUtils;
 import dedicace.com.utilities.SongsUtilities;
 
 //todo revoir dans tout le logiciel les new Object lorsqu'ils sont déjà définis
-public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener,DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener, DialogMajSS.DialogMajSSListener, DialogMA.DialogMAListener {
+public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener,DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener, DialogMajSS.DialogMajSSListener, DialogMA.DialogMAListener, ChoraleNetWorkDataSource.OnNDSListener {
 
     //UI
     private  RecyclerView recyclerView;
@@ -97,6 +99,9 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private List<Pupitre> pupitresToDownloadDelete;
+    private AlertDialog alertDialog;
+    private AlertDialog.Builder dialog;
+    private DialogFragment dialogWait;
 
 
     //todo vérifier si extras dans des intents avec HasExtras
@@ -125,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         if(mAuth.getCurrentUser() != null) {
             Log.d(TAG, "" + "onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
             OnRequestPermission();
-            mfactory = InjectorUtils.provideViewModelFactory(this.getApplicationContext());
+            mfactory = InjectorUtils.provideViewModelFactory(this.getApplicationContext(),this);
             Log.d("coucou", "MA onCreate: fin de la factory");
             mViewModel = ViewModelProviders.of(this, mfactory).get(MainActivityViewModel.class);
             Log.d("coucou", "MA onCreate: fin du viewModel");
@@ -148,6 +153,19 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
                     //permet que la listsongs de CR se calcule
 
+                    if(typeSS==null){
+                        Log.d(TAG, "MA onChanged: typeSS null et alertbox");
+                        //mLoadingIndicator.setIndeterminate(true);
+                        showLoading();
+                        AlertBox();
+                    }else {
+                        if(!typeSS.equals("modificationSS")){
+                            Log.d(TAG, "MA onChanged: typeSS non null et alertbox");
+                            //mLoadingIndicator.setIndeterminate(false);
+                            showLoading();
+                        }
+                    }
+
                     if (sourceSongs != null && sourceSongs.size() != 0&&currentThread!=null) {
 
                         Log.d(TAG, "MA onChanged: currentThread "+currentThread);
@@ -159,13 +177,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                         }
                         Log.d("coucou", "MA onCreate: Thread fini "+typeSS);
                     }
-                    if(typeSS==null){
-                        showLoading();
-                    }else {
-                        if(!typeSS.equals("modificationSS")){
-                            showLoading();
-                        }
-                    }
+
+
 
                     getListSongs();
 
@@ -174,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                             Log.d(TAG, "MA onChanged: conditions toutes réunies"+typeSS);
                             if(typeSS.equals("oldSS")) {
                                 Log.d(TAG, "MA onChanged: type OldSs");
+                                dialogWait.dismiss();
                                 affichageRecyclerView(sourceSongList);
                                 songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnPhones, songOnClouds);
                             }else if(typeSS.equals("modificationSS")){
@@ -182,17 +196,21 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                     //todo voir pour différé la suppression
                                     Log.d(TAG, "MA deleted: "+sourceSongList+sourceSongList.get(0).getUrlCloudBackground());
                                     Toast.makeText(MainActivity.this, "Des éléments ont été spprimés de votre liste de chansons.", Toast.LENGTH_SHORT).show();
+                                    dialogWait.dismiss();
                                     songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnPhones, songOnClouds);
 
                                 }else{
                                     //mettre un dialogue pour changer ou non
                                     Log.d(TAG, "MA onChanged: modification avant dialogAlert ");
+                                    dialogWait.dismiss();
                                     DialogFragment dialog = new DialogMajSS();
                                     dialog.show(getSupportFragmentManager(),"TAG");
                                 }
                             }else if(typeSS.equals("newSS")){
                                 //todo à terme mettre en place quelque chose qui montre l'évolution du chargement
                                 Toast.makeText(MainActivity.this, "Veuillez patienter le temps de mettre en place toutes les chansons...", Toast.LENGTH_LONG).show();
+                                Log.d(TAG, "MA onChanged: newSS ");
+                                dialogWait.dismiss();
                                 affichageRecyclerView(sourceSongList);
                                 songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnPhones, songOnClouds);
                             }else if(typeSS.equals("newSongOnPhone")){
@@ -202,6 +220,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                 songsAdapter.swapSingleSong(positionToDownload,songToPlays,songOnPhones,songOnClouds);
                             }else if(typeSS.equals("newSongsOnPhone")){
                                 Log.d(TAG, "MA onChanged: lancement du SA pour le multiple");
+                                dialogWait.dismiss();
                                 affichageRecyclerView(sourceSongList);
                                 songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnPhones, songOnClouds);
                             }else if(typeSS.equals("deleteSingleSongOnPhone")){
@@ -223,6 +242,15 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 }
             });
         }
+    }
+
+    private void AlertBox() {
+        Log.d(TAG, "MA AlertBox: ");
+        dialogWait= new DialogMA();
+        Bundle args = new Bundle();
+        args.putString("origine","waitSongs");
+        dialogWait.setArguments(args);
+        dialogWait.show(getSupportFragmentManager(),"TAG");
     }
 
     @Override
@@ -277,6 +305,11 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
         }
 
+        if(key.equals("initializeData")){
+            Log.d(TAG, "MA onSharedPreferenceChanged: initialize ");
+            mViewModel.getSourceSongs();
+        }
+
     }
 
     private void getListSongs() {
@@ -317,7 +350,15 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     private void affichageRecyclerView(List<SourceSong> sourceSongs) {
 
-        if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
+        if (mPosition == RecyclerView.NO_POSITION) {
+            mPosition = 0;
+        }
+
+        if(typeSS.equals("newSongOnPhone")){
+            mPosition =positionToDownload;
+        }
+
+        Log.d(TAG, "MA affichageRecyclerView: "+mPosition);
         recyclerView.smoothScrollToPosition(mPosition);
 
         Log.d("coucou", "MA onCreate: observers - mposition " + mPosition);
@@ -392,10 +433,14 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
      * each view is currently visible or invisible.
      */
     private void showSongsDataView() {
+        Log.d(TAG, "MA showSongsDataView: ");
+        //alertDialog.dismiss();
+        //dialogWait.dismiss();
         // First, hide the loading indicator
         mLoadingIndicator.setVisibility(View.INVISIBLE);
         // Finally, make sure the weather data is visible
         recyclerView.setVisibility(View.VISIBLE);
+
     }
 
     /**
@@ -627,6 +672,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     @Override
     public void onDialogMAPositiveClick(int position, Song song) {
         positionToDownload=position;
+        mLoadingIndicator.setVisibility(View.VISIBLE);
         mViewModel.downloadSingleSong(song);
         Toast.makeText(this, "Votre chanson est en train de se charger sur le téléphone", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "MA onDialogMAPositiveClick: chargement sur tel du single (position) "+position);
@@ -655,7 +701,9 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         getListPupitresToDownloadDelete(selectedItems);
         Log.d(TAG, "onDialogMADownloadPupitresPositiveClick: selectedItems "+selectedItems+" "+pupitresToDownloadDelete);
         Toast.makeText(this, "Vos chansons sont en train de se charger sur le téléphone", Toast.LENGTH_SHORT).show();
+        AlertBox();
 
+        mLoadingIndicator.setVisibility(View.VISIBLE);
         List<Song> songsToDownload = new ArrayList<>();
 
         for(Pupitre pupitre:pupitresToDownloadDelete){
@@ -809,6 +857,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             break;
         }
     }
+
+    @Override
+    public void OnProgressLoading(int progress) {
+        mLoadingIndicator.setProgress(progress);
+
+    }
+
 
     //todo à renommer
     public interface OnPositiveClickListener {

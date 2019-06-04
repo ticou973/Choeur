@@ -125,9 +125,11 @@ public class ChoraleNetWorkDataSource {
     private Long majCloudDBLong;
     private Long majLocalDBLong;
 
+    private OnNDSListener mlistener;
+
     //todo penser à changer les règles de sécurité de la base de données.
 
-    private ChoraleNetWorkDataSource(Context context, AppExecutors executors) {
+    private ChoraleNetWorkDataSource(Context context, Context mAContext, AppExecutors executors) {
         mContext = context;
         mExecutors = executors;
         mDownloaderSourceSongs = new MutableLiveData<>();
@@ -143,16 +145,25 @@ public class ChoraleNetWorkDataSource {
         workerThread = new WorkerThread();
         sharedPreferences =PreferenceManager.getDefaultSharedPreferences(mContext);
         dialog = new DialogDownload();
+
+        //todo voir si cela fonctionne dans tous les cas et supprimer si pas utile dans le progress
+        if(mAContext!=context){
+        mlistener = (OnNDSListener) mAContext;
+        }
+    }
+
+    public interface OnNDSListener {
+        void OnProgressLoading(int progress);
     }
 
     /**
      * Get the singleton for this class
      */
-    public static ChoraleNetWorkDataSource getInstance(Context context, AppExecutors executors) {
+    public static ChoraleNetWorkDataSource getInstance(Context context, Context mAContext, AppExecutors executors) {
         Log.d(LOG_TAG, "NDS Getting the network data source");
         if (sInstance == null) {
             synchronized (LOCK) {
-                sInstance = new ChoraleNetWorkDataSource(context.getApplicationContext(), executors);
+                sInstance = new ChoraleNetWorkDataSource(context.getApplicationContext(), mAContext, executors);
 
                 Log.d(LOG_TAG, "NDS Made new network data source");
             }
@@ -501,7 +512,7 @@ public class ChoraleNetWorkDataSource {
         increment =0;
         int mp3Size = listMp3.size();
 
-        if(listMp3.size()==0){
+        if(listMp3.size()==0) {
             Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: size 0 ");
             downloads.postValue("Done");
         }
@@ -531,8 +542,6 @@ public class ChoraleNetWorkDataSource {
                             increment++;
                             Log.d(LOG_TAG, "NDS onSuccess: "+Thread.currentThread().getName()+" "+ filename);
 
-
-
                             if(increment ==mp3Size) {
                                 Log.d(LOG_TAG, "NDS onSuccess :lancement de postValue Done "+mp3Size);
                                 downloads.postValue("Done");
@@ -554,6 +563,7 @@ public class ChoraleNetWorkDataSource {
                     if(taskSnapshot.getTotalByteCount()!=0) {
                         int progress = (int) (100.0 * taskSnapshot.getBytesTransferred()) / (int) taskSnapshot.getTotalByteCount();
                         Log.d(LOG_TAG, "NDS onProgress: " + filename + " " + progress + "%");
+                        mlistener.OnProgressLoading(progress);
                     }
                 }
             });
@@ -562,32 +572,10 @@ public class ChoraleNetWorkDataSource {
         Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: pour voir si cela passe avant la fin des chargements");
     }
 
-    //todo à supprimer car déjà calculer plus tôt pour le shredPreferences (?)
     public String getCurrentPupitreStr() {
 
-
-        //todo vérifier que cela marche sans appel à la db plus loin
         currentPupitreStr=sharedPreferences.getString("pupitre","TUTTI");
         pupitreUser=SongsUtilities.converttoPupitre(currentPupitreStr);
-
-        //todo mettre dans la bdd locale users avec les éléments le concernant dont le pupitre, ce qui évitera cette partie un peu lourde
-        /*db.collection("users").document(current_user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                Log.d(LOG_TAG, "NDS getCurrentPupitre onComplete: "+Thread.currentThread().getName());
-                if(task.isSuccessful()){
-
-                    //todo voir comment mettre les rôles en DB local
-                    currentPupitreStr = (String) task.getResult().get("pupitre");
-                    pupitreUser=SongsUtilities.converttoPupitre(currentPupitreStr);
-
-                    Log.d(LOG_TAG, "NDS getCurrentPupitre "+currentPupitreStr);
-
-                }else{
-                    Log.d(LOG_TAG, "NDS onComplete: erreur de récupération du pupitre");
-                }
-            }
-        });*/
 
         return currentPupitreStr;
     }
@@ -597,9 +585,6 @@ public class ChoraleNetWorkDataSource {
         return mContext;
     }
 
-    public Thread getThreadMaj() {
-        return threadMaj;
-    }
 
     public LiveData<Long> getMajDBCloudLong() {
         return mMajDbCloudLong;
@@ -878,6 +863,7 @@ public class ChoraleNetWorkDataSource {
                                 Set<String> pupitreToDownload = new HashSet<>();
                                 pupitreToDownload.add(pupitre);
                                 editor.putStringSet(mContext.getString(R.string.pref_pupitre_key),pupitreToDownload);
+                                editor.putBoolean("initializeData",true);
                                 Log.d(LOG_TAG, "NDS setUpSharedPreferences: fin");
                                 editor.apply();
                             }
