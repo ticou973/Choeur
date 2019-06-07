@@ -20,6 +20,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -76,8 +77,6 @@ public final class MediaPlayerHolder implements PlayerAdapter {
                     stopUpdatingCallbackWithPosition(true);
                     Log.d(SongsAdapter.TAG, "MPH onCompletion: ");
 
-                    //todo voir si on peut supprimer le playbackinfo
-
                     if (mPlaybackInfoListener != null) {
                         mPlaybackInfoListener.onStateChanged(PlaybackInfoListener.State.COMPLETED);
                         mPlaybackInfoListener.onPlaybackCompleted();
@@ -93,7 +92,6 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     }
 
     // Implements PlaybackControl.
-    //todo voir comment installer dès le départ le fichier pour l'accueil avec getFilesDir.
     @Override
     public void prepareMediaPlayer(Context context, String resStrToPlay) throws IOException {
         Log.d("coucou", "MPH prepareMediaPlayer: ");
@@ -117,7 +115,6 @@ public final class MediaPlayerHolder implements PlayerAdapter {
             e.printStackTrace();
         }
 
-        //todo stocker la durée de la chanson pour avoir un affichage immédiat
         mMediaPlayer.setOnPreparedListener(mediaPlayer -> {
             Log.d("coucou", "MPH prepareMediaPlayer: On prepared juste avant la duration");
             //duration = mediaPlayer.getDuration();
@@ -128,13 +125,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mMediaPlayer.setScreenOnWhilePlaying(true);
 
-        //setupMediaRecorder();
-
         Log.d(SongsAdapter.TAG, "MPH prepareMediaPlayer B: "+resStrToPlay);
-
-        //todo penser à créer les dossiers pour les songs
-
-        //initializeProgressCallback();
 
     }
 
@@ -149,13 +140,13 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         Log.d(SongsAdapter.TAG, "MPH record: "+ pathSave);
 
         try {
-            Log.d(SongsAdapter.TAG, "MPH record: ");
+            Log.d(SongsAdapter.TAG, "MPH record: try");
             mMediaRecorder.prepare();
             mMediaRecorder.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.d(SongsAdapter.TAG, "MPH record: ");
+        Log.d(SongsAdapter.TAG, "MPH record: after try ");
         }
         else{
             Toast.makeText(mContext, "Vous n'avez pas de mémoire externe disponible", Toast.LENGTH_SHORT).show();
@@ -168,8 +159,30 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         Log.d(SongsAdapter.TAG, "MPH stopRecord: ");
         if(mMediaRecorder!=null) {
             mMediaRecorder.stop();
+
         }else{
             Log.d(SongsAdapter.TAG, "MPH stopRecord: Mediaplayer null ");
+        }
+    }
+
+    @Override
+    public void pauseRecord() {
+        Log.d(SongsAdapter.TAG, "MPH pauseRecord: ");
+        if(mMediaRecorder!=null){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                Log.d("coucou", "MPH pauseRecord: pause cas pause");
+                mMediaRecorder.pause();
+            }
+        }
+    }
+
+    @Override
+    public void restartRecord() {
+        Log.d("coucou", "MPH restartRecord: ");
+        if(mMediaRecorder!=null){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                mMediaRecorder.resume();
+            }
         }
     }
 
@@ -315,7 +328,4 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
         mMediaRecorder.setOutputFile(pathSave);
     }
-
-
-    //todo voir quand release le mediaplayer
 }

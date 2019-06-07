@@ -24,9 +24,6 @@ public interface SourceSongDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void bulkInsert(List<SourceSong> sourceSongs);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertSourceSong(SourceSong sourceSong);
-
     @Query("DELETE FROM sourcesong")
     void deleteAll();
 
@@ -36,14 +33,7 @@ public interface SourceSongDao {
     @Update
     int upDateSourceSongs(List<SourceSong> sourceSongs);
 
-    @Update
-    int updateSourceSongs(SourceSong...sourceSongs);
-
     @Delete
     void deleteSourceSongs(List<SourceSong> sourceSongs);
-
-    @Delete
-    void deleteSourceSong(SourceSong sourceSong);
-
 
 }

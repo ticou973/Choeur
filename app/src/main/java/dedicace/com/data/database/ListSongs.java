@@ -21,7 +21,6 @@ public class ListSongs {
     private List<List<Song>> SongOnPhonesBS= new ArrayList<>();
     private List<Song> songToPlaysLive=new ArrayList<>();
     private List<Song> songToPlaysBs=new ArrayList<>();
-    private List<RecordSource> recordToPlays=new ArrayList<>();
     private SongsDao mSongDao;
     private SourceSongDao mSourceSongDao;
     private List<SourceSong> sourceSongs;
@@ -41,12 +40,6 @@ public class ListSongs {
         Log.d(LOG_TAG, "LS CR ListSongs:constructeur A "+songs.size()+"local songs"+this.songs.size());
     }
 
-    public ListSongs(SongsDao mSongDao, SourceSongDao mSourceSongDao) {
-        this.mSongDao=mSongDao;
-        this.mSourceSongDao=mSourceSongDao;
-        Log.d(LOG_TAG, "LS CR ListSongs:constructeur B ");
-    }
-
     public void getSongOnClouds() {
         //chercher les SongsOnCloud BS
 
@@ -54,7 +47,7 @@ public class ListSongs {
                 List<Song> listSongbyTitre = new ArrayList<>();
 
                 for (Song song : songs) {
-                     if (song.getSourceSongTitre().equals(sourceSong.getTitre())) {
+                     if (song.getSourceSongTitre().equals(sourceSong.getTitre())&&song.getRecordSource()==RecordSource.BANDE_SON) {
                         listSongbyTitre.add(song);
                      }
                 }
@@ -123,7 +116,7 @@ public class ListSongs {
         return RecordSources;
     }
 
-    public  List<RecordSource> getRecordSources(String titre) {
+    private List<RecordSource> getRecordSources(String titre) {
 
 
         List<RecordSource> sources= new ArrayList<>();
@@ -232,7 +225,7 @@ public class ListSongs {
         return  songToPlays;
     }
 
-    public List<List<Song>> getSongsOnPhonesA(Thread currentThread) {
+    public List<List<Song>> getSongsOnPhonesA() {
 
         Log.d(LOG_TAG, "LS ListSongs getSongsOnPhonesA: après "+SongsOnPhones);
         return SongsOnPhones;

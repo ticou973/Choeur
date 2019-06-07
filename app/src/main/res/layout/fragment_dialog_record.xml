@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     tools:context=".ui.DialogRecordFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+
 
     <RadioGroup
         android:id="@+id/rg_pupitres"

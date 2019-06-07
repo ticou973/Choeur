@@ -18,15 +18,19 @@ public class ChoraleSyncIntentService extends IntentService {
         Log.d(SongsAdapter.TAG, "CSIS Intent service started "+Thread.currentThread().getName());
         ChoraleNetWorkDataSource networkDataSource = InjectorUtils.provideNetworkDataSource(this.getApplicationContext(),this.getApplicationContext());
 
-        if(intent.getStringExtra("origine").equals("sources")){
-            networkDataSource.fetchSongs();
-            Log.d("coucou", "CSIS onHandleIntent: fin du travail SS"+Thread.currentThread().getName());
-        }else if(intent.getStringExtra("origine").equals("maj")){
-            networkDataSource.fetchMajClouDb();
-            Log.d("coucou", "CSIS onHandleIntent: fin du travail maj"+Thread.currentThread().getName());
-        }else if(intent.getStringExtra("origine").equals("download")){
-           // networkDataSource.downloadImagesMp3();
-            Log.d("coucou", "CSIS onHandleIntent: fin du travail download"+Thread.currentThread().getName());
+        switch (intent.getStringExtra("origine")) {
+            case "sources":
+                networkDataSource.fetchSongs();
+                Log.d("coucou", "CSIS onHandleIntent: fin du travail SS " + Thread.currentThread().getName());
+                break;
+            case "maj":
+                networkDataSource.fetchMajClouDb();
+                Log.d("coucou", "CSIS onHandleIntent: fin du travail maj " + Thread.currentThread().getName());
+                break;
+            case "download":
+                // networkDataSource.downloadImagesMp3();
+                Log.d("coucou", "CSIS onHandleIntent: fin du travail download " + Thread.currentThread().getName());
+                break;
         }
     }
 }

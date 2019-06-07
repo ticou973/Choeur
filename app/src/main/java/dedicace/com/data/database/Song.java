@@ -44,8 +44,6 @@ public class Song {
     @ColumnInfo(name = "update_mp3")
     private Date updatePhoneMp3;
 
-    //todo ajouter la duration en local une fois calculée
-
 
 //todo gérer lorsque le mediaplayer est lancé à 2 items différents
     @Ignore
@@ -102,12 +100,8 @@ public class Song {
         this.updatePhone = updatePhone;
     }
 
-    public int getSongId() {
+    int getSongId() {
         return songId;
-    }
-
-    public void setSongId(int songId) {
-        this.songId = songId;
     }
 
     public String getSongPath() {
@@ -136,10 +130,6 @@ public class Song {
 
     public String getSourceSongTitre() {
         return sourceSongTitre;
-    }
-
-    public void setSourceSongId(int sourceSongId) {
-        this.sourceSongTitre = sourceSongTitre;
     }
 
     public void setSourceSongTitre(String sourceSongTitre) {
@@ -174,7 +164,4 @@ public class Song {
         return songIdCloud;
     }
 
-    public void setSongIdCloud(String songIdCloud) {
-        this.songIdCloud = songIdCloud;
-    }
 }

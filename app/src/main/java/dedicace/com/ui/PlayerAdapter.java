@@ -29,5 +29,9 @@ public interface PlayerAdapter {
 
     void stopRecord();
 
+    void pauseRecord();
+
+    void restartRecord();
+
     int getDuration();
 }

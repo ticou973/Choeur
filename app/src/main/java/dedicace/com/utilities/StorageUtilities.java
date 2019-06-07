@@ -27,7 +27,10 @@ public class StorageUtilities {
 
     public static String getExternalPath(String nomFichier,String extension){
 
-        String path=Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+nomFichier+"."+extension;
+        File directory = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_MUSIC);
+
+        String path=directory.getAbsolutePath()+"/"+nomFichier+"."+extension;
 
         return path;
     }

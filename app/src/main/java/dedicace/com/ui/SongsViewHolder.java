@@ -2,6 +2,7 @@ package dedicace.com.ui;
 
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
+import android.os.Build;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -28,12 +29,12 @@ import dedicace.com.data.database.SourceSong;
 
 import static android.graphics.Color.rgb;
 
-public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,MainActivity.OnPositiveClickListener,View.OnLongClickListener {
+public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, MainActivity.OnPositiveClickListener,View.OnLongClickListener {
 
     //Element UI
     private TextView titre, groupe;
     private ImageView imageSong, playSongs,stopSongs,recordSongs;
-    private Button bsBtn, liveBtn, tuttiBtn, bassBtn, tenorBtn, altoBtn, sopranoBtn, mainBtn, secondBtn, thirdBtn, fourthBtn, fifthBtn;
+    private Button bsBtn, liveBtn, tuttiBtn, bassBtn, tenorBtn, altoBtn, sopranoBtn;
     private SeekBar seekBar;
     private TextView totalTime;
     private Chronometer chronometer;
@@ -65,6 +66,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private long lastPause;
     private Context context;
     private boolean pause = false;
+    private boolean pauseRecord = false;
     private Song songToRecord;
     private Pupitre recordPupitre;
     private String pathSave;
@@ -75,7 +77,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     //todo voir pour suppprimer le listener
     //todo voir pour interdire 2 lectures parallèles
 
-    public SongsViewHolder(@NonNull View itemView, SongsAdapter.ListemClickedListener listener, Context context) {
+    SongsViewHolder(@NonNull View itemView, SongsAdapter.ListemClickedListener listener, Context context) {
         super(itemView);
 
         titre = itemView.findViewById(R.id.tv_titre);
@@ -118,18 +120,16 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         //todo vérifier que pas doublons avec le SA
         setButtonActivable(false, bsBtn,liveBtn,tuttiBtn,bassBtn,tenorBtn,altoBtn,sopranoBtn);
 
-        chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
-            public void onChronometerTick(Chronometer cArg) {
-                long t = SystemClock.elapsedRealtime() - cArg.getBase();
-                if(t>=600000) {
-                    cArg.setText(DateFormat.format("mm:ss", t));
-                }else{
-                    cArg.setText(DateFormat.format("m:ss", t));
-                }
+        chronometer.setOnChronometerTickListener(cArg -> {
+            long t = SystemClock.elapsedRealtime() - cArg.getBase();
+            if(t>=600000) {
+                cArg.setText(DateFormat.format("mm:ss", t));
+            }else{
+                cArg.setText(DateFormat.format("m:ss", t));
+            }
 
-                if(t>=mPlayerAdapter.getDuration()){
-                    setStopListener();
-                }
+            if(t>=mPlayerAdapter.getDuration()){
+                setStopListener();
             }
         });
 
@@ -139,7 +139,9 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         animation = (AnimationDrawable) ContextCompat.getDrawable((Context) mlistItemClickedListener, R.drawable.ic_equalizer_white_36dp);
        //todo vérifier la place d'animation start à cet endroit
-        animation.start();
+        if (animation != null) {
+            animation.start();
+        }
 
         initPupitreSourceButton();
 
@@ -151,7 +153,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
      */
 
     //todo vérifier utilité doublon is First Time
-    public void isFirstTime(){
+    void isFirstTime(){
         if(isFirstTime) {
             //PlayBackController
             initializePlaybackController();
@@ -248,19 +250,19 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         source=recordSource;
     }
 
-    public void setCurrentSourceActive(RecordSource source) {
+    private void setCurrentSourceActive(RecordSource source) {
         if(source!=RecordSource.NA) {
             int recordSourceIndex = pupitreSourceButton.indexOf(source);
             setColorButton(true, (Button) pupitreSourceButton.get(recordSourceIndex + 1));
         }
     }
 
-    public void setSourceActivable(RecordSource source) {
+    private void setSourceActivable(RecordSource source) {
         int recordSourceIndex = pupitreSourceButton.indexOf(source);
         setColorButton(false,(Button) pupitreSourceButton.get(recordSourceIndex+1));
     }
 
-    public void setSongToPlay(Song songToPlay) {
+    void setSongToPlay(Song songToPlay) {
         if(pupitre != Pupitre.NA&&source !=RecordSource.NA) {
            setSongRecorded(songToPlay);
         }
@@ -271,16 +273,16 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         }
     }
 
-    public void setButtonNonActivable(){
+    void setButtonNonActivable(){
         setButtonActivable(false, bsBtn,liveBtn,tuttiBtn,bassBtn,tenorBtn,altoBtn,sopranoBtn);
     }
 
-    public void setCurrentSongActive(Pupitre pupitre){
+    private void setCurrentSongActive(Pupitre pupitre){
         int pupitreIndex=pupitreSourceButton.indexOf(pupitre);
         setColorButton(true,(Button) pupitreSourceButton.get(pupitreIndex+1));
     }
 
-    public void setSongRecorded(Song...recordedLocalSongs){
+    void setSongRecorded(Song... recordedLocalSongs){
         for (Song song:recordedLocalSongs) {
             if(song!=null) {
                 Pupitre pupitrerecorded = song.getPupitre();
@@ -294,24 +296,23 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         }
     }
 
-    public void setValueCloudSongRecorded(Song... recordedCloudSongs){
+    void setValueCloudSongRecorded(Song... recordedCloudSongs){
 
         this.recordedCloudSongs=recordedCloudSongs;
 
     }
-    public void setValueSongLocalRecorded(Song...recordedLocalSongs){
+    void setValueSongLocalRecorded(Song... recordedLocalSongs){
         this.recordedLocalSongs=recordedLocalSongs;
     }
 
-    public void setPupitresLoadedOnPhoneVisible(Pupitre... pupitres){
+    private void setPupitresLoadedOnPhoneVisible(Pupitre... pupitres){
         for (Pupitre pupitre: pupitres) {
             int pupitreIndex=pupitreSourceButton.indexOf(pupitre);
-            //Log.d(TAG, "SVH setPupitresLoadedOnPhoneVisible: orange pale onPhone "+ pupitre);
             setColorButton(false,(Button) pupitreSourceButton.get(pupitreIndex+1));
         }
     }
 
-    public void setSongCloudRecorded(Song... recordedCloudSongs){
+    void setSongCloudRecorded(Song... recordedCloudSongs){
 
         for (Song song:recordedCloudSongs) {
             Pupitre pupitrerecorded = song.getPupitre();
@@ -325,7 +326,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     }
 
 
-    public void setPupitresLoadedOnCloudVisible(Pupitre... pupitres){
+    private void setPupitresLoadedOnCloudVisible(Pupitre... pupitres){
         for (Pupitre pupitre: pupitres) {
             int pupitreIndex=pupitreSourceButton.indexOf(pupitre);
             //Log.d(TAG, "SVH setPupitresLoadedOnCloudVisible : gris Cloud "+ pupitre);
@@ -334,7 +335,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     }
 
 
-    public void setColorButton(boolean focus, Button... buttons) {
+    private void setColorButton(boolean focus, Button... buttons) {
         int red, green, blue;
         for (Button button: buttons) {
             if(focus) {
@@ -356,7 +357,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         }
     }
 
-    public void setGreyButton(boolean focus, Button... buttons){
+    private void setGreyButton(boolean focus, Button... buttons){
         int red, green, blue;
         for (Button button: buttons) {
             red = 224;
@@ -376,7 +377,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         }
     }
 
-    public void setButtonActivable(boolean activable, Button... buttons){
+    private void setButtonActivable(boolean activable, Button... buttons){
         for (Button button: buttons) {
             if(activable){
                // Log.d(TAG, "SVH setButtonActivable: activable "+ button);
@@ -396,7 +397,6 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
      * Gestion aussi du longClick pour les téléchargements des songs sur le cloud
      * et pas sur le téléphone.
      * 1.0f chanson active, 0.9f On Cloud grey, 0.5f chanson sur téléphone mais pas active 0.3f chanson inexistante
-     * @param view
      */
 
     @Override
@@ -463,10 +463,11 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             source=recordSource;
             setCurrentSourceActive(source);
 
-            HandleListSongs(recordSource,button);
+            HandleListSongs(recordSource);
 
             isFirstTime = true;
             message= source.toString();
+            //todo ajouter les cas de record pause et record dans le if
             if (mPlayerAdapter != null&&(mPlayerAdapter.isPlaying()||pause)) {
                 setStopListener();
             }
@@ -477,17 +478,18 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         }
     }
 
-    private void HandleListSongs(RecordSource recordSource, Button button) {
+    private void HandleListSongs(RecordSource recordSource) {
 
         Log.d(TAG, "SVH HandleListSongs début");
 
         setButtonActivable(false,tuttiBtn,bassBtn,tenorBtn,altoBtn,sopranoBtn);
 
         Song[] songsPhone, songsCloud;
-        //todo voir comment calculer le songOnCloudRecorded ici
-        songOnCloudRecorded = mlistItemClickedListener.OnListRecordedSongsOnCloud(sourceSong,recordSource);
+        /*
+          songOnCloudRecorded = mlistItemClickedListener.OnListRecordedSongsOnCloud(sourceSong,recordSource);
 
         if(songOnCloudRecorded!=null) {
+            Log.d(TAG, "SVH HandleListSongs: "+ songOnCloudRecorded.size());
             songsCloud = songOnCloudRecorded.toArray(new Song[0]);
         }else{
             songsCloud = new Song[0];
@@ -497,11 +499,12 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         setSongCloudRecorded(songsCloud);
 
         Log.d(TAG, "SVH HandleListSongs "+ songsCloud.length);
+        */
 
         //todo voir comment calculer le songLocalRecorded ici
-
-        songOnPhoneRecorded = mlistItemClickedListener.OnListRecordedSongsOnPhone(sourceSong,recordSource);
+          songOnPhoneRecorded = mlistItemClickedListener.OnListRecordedSongsOnPhone(getAdapterPosition(),recordSource);
         if(songOnPhoneRecorded!=null) {
+            Log.d(TAG, "SVH HandleListSongs: "+songOnPhoneRecorded.size());
             songsPhone = songOnPhoneRecorded.toArray(new Song[0]);
         }else{
             songsPhone = new Song[0];
@@ -510,11 +513,11 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         Log.d(TAG, "SA initDataSongs: songsPhone "+ songsPhone.length);
 
+        //todo voir pour utiliser le calcul songToPlay
         if(songsPhone.length!=0) {
-            songToPlay = mlistItemClickedListener.OnPlayFirstSong(sourceSong,recordSource);
+            songToPlay = mlistItemClickedListener.OnPlayFirstSong(getAdapterPosition(),recordSource);
             setSongToPlay(songToPlay);
         }
-
     }
 
 
@@ -527,6 +530,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             setCurrentSongActive(pupitre);
             isFirstTime = true;
             message = pupitre.toString();
+            //todo idem que pour les sources gérer les cas de record et pause
             if (mPlayerAdapter != null&&(mPlayerAdapter.isPlaying()||pause)) {
                 Log.d(TAG, "SVH handleClickPupitre: setStopListener");
                 setStopListener();
@@ -597,7 +601,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
      * Gestion du Mediaplayer et MediaRecorder
      */
 
-    public void setResourceToMediaPlayer(){
+    void setResourceToMediaPlayer(){
         Log.d(TAG, "SVH setResourceToMediaPlayer: début "+songToPlay+" "+ pupitre+" "+isFirstTime);
         //Fournit et prépare le Mediaplayer
         if(isFirstTime) {
@@ -609,7 +613,6 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             if (songToPlay != null) {
                 if(songToPlay.getPupitre()!=pupitre||songToPlay.getRecordSource()!=source){
                     Log.d(TAG, "SVH setResourceToMediaPlayer: "+songToPlay.getSourceSongTitre()+songToPlay.getPupitre());
-                   // songToPlay = mlistItemClickedListener.OnPlaySong(sourceSong,pupitre,source);
                     calculSongToPlay(pupitre,source);
                 }
 
@@ -673,41 +676,40 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             }
 
         }else if(isRecording&&!mPlayerAdapter.isPlaying()){
-            mPlayerAdapter.stopRecord();
-            recordSongs.setImageResource(R.drawable.ic_record_orange);
-            Log.d(TAG, "SVH setRecordListener: StopRecord");
-            isRecording=false;
 
-
-            //RecordSource UI
-            setCurrentSourceActive(RecordSource.LIVE);
-
-            if(source==RecordSource.BANDE_SON){
-                setSourceActivable(source);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                if(!pauseRecord) {
+                    Log.d(TAG, "SVH setRecordListener: pause");
+                    mPlayerAdapter.pauseRecord();
+                    recordSongs.setImageResource(R.drawable.ic_pause_orange);
+                    pauseRecord = true;
+                }else{
+                    Log.d(TAG, "SVH setRecordListener: restart");
+                    mPlayerAdapter.restartRecord();
+                    recordSongs.setImageDrawable(animation);
+                    pauseRecord=false;
+                }
+            }else{
+                stopRecord();
             }
-
-            //pupitre UI
-            setCurrentSongActive(recordPupitre);
-            if(source==RecordSource.LIVE){
-              setPupitresLoadedOnPhoneVisible(pupitre);
-            }
-
-            //verifyExistingSongs();
         }
     }
 
-    public void setRecord(){
+    @Override
+    public void OnRecord(Song song) {
+        songToRecord=song;
+        setRecord();
+    }
+
+    private void setRecord(){
 
         recordSongs.setImageDrawable(animation);
-
         isRecording=true;
-        if (mlistItemClickedListener != null) {
-            mlistItemClickedListener.OnRequestPermission();
-        }
-
 
         recordPupitre = songToRecord.getPupitre();
         String recordSongName = songToRecord.getSourceSongTitre();
+
+        //todo ajouter suivant le nombre d'enregistrement
         String recordNamePupitre = recordSongName+"_"+recordPupitre.toString();
 
         Log.d(TAG, "SVH setRecord: c'est parti ! "+ recordPupitre+ " "+recordNamePupitre);
@@ -716,15 +718,6 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         pathSave = mPlayerAdapter.record(recordNamePupitre);
 
-        if(pathSave.equals("")) {
-
-            Log.d(TAG, "setRecord: pb de mémoire externe");
-
-        }else{
-            songToRecord.setSongPath(pathSave);
-            Log.d(TAG, "SVH setRecord: " + pathSave);
-            mlistItemClickedListener.OnSaveRecordSong(songToRecord);
-        }
     }
 
     private void setStopListener() {
@@ -732,10 +725,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             Log.d(TAG, "SVH setStopListener: entrée");
 
             if(isRecording) {
-                mPlayerAdapter.stopRecord();
-                recordSongs.setImageResource(R.drawable.ic_record_orange);
-                Log.d(TAG, "SVH setRecordListener: StopRecord");
-                isRecording=false;
+                stopRecord();
             }else{
                 Log.d(TAG, "SVH setStopListener: not recording but playing");
                 playSongs.setImageResource(R.drawable.ic_play_orange);
@@ -749,12 +739,44 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         }
     }
 
+    private void stopRecord(){
+        mPlayerAdapter.stopRecord();
+        recordSongs.setImageResource(R.drawable.ic_record_orange);
+        Log.d(TAG, "SVH setRecordListener: StopRecord");
+        isRecording=false;
+
+        if(pathSave.equals("")) {
+            Log.d(TAG, "stopRecord: pb de mémoire externe");
+        }else{
+            songToRecord.setSongPath(pathSave);
+            Log.d(TAG, "SVH setRecord: " + pathSave);
+            mlistItemClickedListener.OnSaveRecordSong(songToRecord);
+        }
+
+
+        /*
+        //RecordSource UI
+        setCurrentSourceActive(RecordSource.LIVE);
+
+        if(source==RecordSource.BANDE_SON){
+            setSourceActivable(source);
+        }
+
+        //pupitre UI
+        setCurrentSongActive(recordPupitre);
+        if(source==RecordSource.LIVE){
+            setPupitresLoadedOnPhoneVisible(pupitre);
+        }
+        */
+
+
+    }
+
     /**
      * Gestion du chronomètre
      */
 
-    public void setChronometer(long time){
-        //todo vérifier car cela me semble compliqué pour mettre à 0
+    void setChronometer(long time){
         Log.d(TAG, "SVH setChronometer: "+time+" "+chronometer.getBase());
         long t = time - chronometer.getBase();
         chronometer.setText(DateFormat.format("m:ss", time));
@@ -789,7 +811,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         isRunning=false;
     }
 
-    public void setTotalTime(int totalTimeMillis) {
+    private void setTotalTime(int totalTimeMillis) {
 
         if(totalTimeMillis>=600000){
             this.totalTime.setText(DateFormat.format("mm:ss",totalTimeMillis));
@@ -801,17 +823,13 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     }
 
-
-    @Override
-    public void OnRecord(Song song) {
-        songToRecord=song;
-        setRecord();
+    ImageView getImageSong() {
+        return imageSong;
     }
 
     @Override
     public void OndeleteSong() {
 
-       // verifyExistingSongs(RecordSource.LIVE);
     }
 
     /**
@@ -820,41 +838,26 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     public void setTitre(String titre){ this.titre.setText(titre); }
 
-    public void setFirstTime(boolean firstTime) {
+    void setFirstTime(boolean firstTime) {
         isFirstTime = firstTime;
     }
 
     public void setGroupe(String groupe){ this.groupe.setText(groupe); }
 
-    public ImageView getStopSongs() {
-        return stopSongs;
-    }
-
-    public ImageView getImageSong() {
-        return imageSong;
-    }
-
-    public ImageView getRecordSongs() {
-        return recordSongs;
-    }
-
-    public SeekBar getSeekBar() {
-        return seekBar;
-    }
 
     public RecordSource getSource() {
         return source;
     }
 
-    public ImageView getPlaySongs() {
+    ImageView getPlaySongs() {
         return playSongs;
     }
 
-    public void setListSongLocalRecorded(List<Song> songOnPhoneRecorded) {
+    void setListSongLocalRecorded(List<Song> songOnPhoneRecorded) {
         this.songOnPhoneRecorded=songOnPhoneRecorded;
     }
 
-    public void setListSongCloudRecorded(List<Song> songOnCloudRecorded) {
+    void setListSongCloudRecorded(List<Song> songOnCloudRecorded) {
         this.songOnCloudRecorded=songOnCloudRecorded;
     }
 
@@ -862,7 +865,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
      */
     public class PlaybackListener extends PlaybackInfoListener {
 
-        public PlaybackListener(){
+        PlaybackListener(){
         }
 
         @Override

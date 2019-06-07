@@ -14,19 +14,12 @@ import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
@@ -34,12 +27,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import dedicace.com.AppExecutors;
 import dedicace.com.R;
 import dedicace.com.WorkerThread;
-import dedicace.com.data.database.AppDataBase;
 import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Song;
@@ -54,12 +47,11 @@ public class ChoraleNetWorkDataSource {
     private static final String LOG_TAG = "coucou";
     private static ChoraleNetWorkDataSource sInstance;
     private final Context mContext;
-    private boolean aloneCreate, aloneDelete, deleted = false;
+    private boolean aloneCreate, deleted = false;
     private DialogFragment dialog;
 
     //Utils
     private AppExecutors mExecutors;
-    public static AppDataBase choeurDataBase;
     private WorkerThread workerThread;
 
     //todo remplacer par un join ?
@@ -69,9 +61,7 @@ public class ChoraleNetWorkDataSource {
             super.handleMessage(msg);
             String msgStr = (String) msg.obj;
             if(msgStr.equals("OK")){
-                Log.d(LOG_TAG, "handleMessage: OK");
-            //downloadBgImage();
-            //downloadMp3();
+                Log.d(LOG_TAG, "NDS handleMessage: OK "+songs.size());
             mDownloaderSourceSongs.postValue(sourceSongs);
             }else{
                 Log.d(LOG_TAG, "handleMessage: pas OK");
@@ -84,8 +74,6 @@ public class ChoraleNetWorkDataSource {
     private final MutableLiveData<Long> mMajDbCloudLong;
     private final MutableLiveData<String> downloads;
     private List<SourceSong> sourceSongs = new ArrayList<>();
-    private List<SourceSong> oldSourcesSongs = new ArrayList<>();
-    private List<SourceSong> listDownLoadImages;
     private List<Song> listDownloadMp3;
     private List<Song> oldSongs = new ArrayList<>();
     private List<Song> songs = new ArrayList<>();
@@ -106,24 +94,21 @@ public class ChoraleNetWorkDataSource {
     private Pupitre pupitreUser;
     private FirebaseAuth mAuth;
 
-    private String mCurrentAuthRole;
+
     private Date majDateCloudDataBase;
     private String idChorale;
-    private List<String> idChorales= new ArrayList<>();
     private int increment,increment1;
 
     //Local Storage
     private File localFileMp3;
     private File localFileImage;
 
-    private final static String BASEURI = "storage/emulated/0/Android/data/dedicace.com/files/";
+
     private Thread threadMaj;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
 
-    private Date majCloudDB;
     private Long majCloudDBLong;
-    private Long majLocalDBLong;
 
     private OnNDSListener mlistener;
 
@@ -140,7 +125,7 @@ public class ChoraleNetWorkDataSource {
         mStorage = FirebaseStorage.getInstance();
         Log.d(LOG_TAG, "NDS ChoraleNetWorkDataSource: constructor ref de storage et db");
         mAuth=FirebaseAuth.getInstance();
-        current_user_id=mAuth.getCurrentUser().getUid();
+        current_user_id= Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
         Log.d(LOG_TAG, "NDS ChoraleNetWorkDataSource: constructor "+ current_user_id);
         workerThread = new WorkerThread();
         sharedPreferences =PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -193,7 +178,7 @@ public class ChoraleNetWorkDataSource {
     }
 
 
-    public void fetchMajClouDb() {
+    void fetchMajClouDb() {
 
         idChorale = sharedPreferences.getString("idchorale","");
         //idChorale="jFHncTuYleIHhZtL2PmT";
@@ -203,40 +188,31 @@ public class ChoraleNetWorkDataSource {
             try {
                 db.collection("chorale").document(idChorale)
                         .get()
-                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        Log.d(LOG_TAG, "NDS onComplete avant existe: "+task+" "+task.getResult());
-                        if(task.getResult().exists()){
-                        threadMaj =Thread.currentThread();
+                        .addOnCompleteListener(task -> {
+                            Log.d(LOG_TAG, "NDS onComplete avant existe: "+task+" "+task.getResult());
+                            if(Objects.requireNonNull(task.getResult()).exists()){
+                            threadMaj =Thread.currentThread();
 
-                        Log.d(LOG_TAG, "NDS onComplete threadMaj: "+threadMaj+" "+task+" "+task.getResult());
+                            Log.d(LOG_TAG, "NDS onComplete threadMaj: "+threadMaj+" "+task+" "+task.getResult());
 
-                        Log.d(LOG_TAG, "onComplete: "+task.getResult().get("maj").getClass().toString());
+                            Log.d(LOG_TAG, "NDS onComplete: "+ Objects.requireNonNull(task.getResult().get("maj")).getClass().toString());
 
-                        Timestamp majDCBB =(Timestamp) task.getResult().get("maj");
-                        Log.d(LOG_TAG, "onComplete: "+majDCBB);
+                            Timestamp majDCBB =(Timestamp) task.getResult().get("maj");
+                            Log.d(LOG_TAG, "NDS onComplete: "+majDCBB);
 
-                        majDateCloudDataBase = majDCBB.toDate();
-                        // majDateCloudDataBase = (Date) task.getResult().get("maj");
-                        Log.d(LOG_TAG, "NDS onComplete: majDBCloud " + majDateCloudDataBase);
+                            majDateCloudDataBase = Objects.requireNonNull(majDCBB).toDate();
+                            Log.d(LOG_TAG, "NDS onComplete: majDBCloud " + majDateCloudDataBase);
 
-                        majCloudDBLong = majDateCloudDataBase.getTime();
-                        Log.d(LOG_TAG, "NDS onComplete: majDBCloud Long " + majCloudDBLong);
+                            majCloudDBLong = majDateCloudDataBase.getTime();
+                            Log.d(LOG_TAG, "NDS onComplete: majDBCloud Long " + majCloudDBLong);
 
-                        mMajDbCloudLong.postValue(majCloudDBLong);
-                        }else{
-                            Log.d(LOG_TAG, "NDS onComplete: taskresult n'existe pas");
-                        }
-
-                    }
-                })
-                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                            @Override
-                            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                Log.d(LOG_TAG, "NDS onSuccess: majCloudDate "+documentSnapshot+" "+" "+documentSnapshot.getString("nom"));
+                            mMajDbCloudLong.postValue(majCloudDBLong);
+                            }else{
+                                Log.d(LOG_TAG, "NDS onComplete: taskresult n'existe pas");
                             }
+
                         })
+                        .addOnSuccessListener(documentSnapshot -> Log.d(LOG_TAG, "NDS onSuccess: majCloudDate "+documentSnapshot+" "+" "+documentSnapshot.getString("nom")))
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
@@ -268,15 +244,6 @@ public class ChoraleNetWorkDataSource {
         Log.d(LOG_TAG, "NDS Service created pour Download");
     }
 
-   /* public void downloadImagesMp3(){
-
-        downloadBgImage(bgDownload);
-        downloadBgImage(newBgDownload);
-        downloadMp3(mp3Download);
-        downloadMp3(newMp3Download);
-        downloads.postValue("done");
-    }*/
-
 
     public void startFetchSongsService() {
         Log.d(LOG_TAG, "NDS startFetchSongsService: début pour SS");
@@ -288,95 +255,89 @@ public class ChoraleNetWorkDataSource {
 
 
     //todo voir le cas où il n'y a pas de réseau pour charger les données en attente.
-    public void fetchSongs() {
+    void fetchSongs() {
             try {
                 db.collection("sourceSongs")
                         .get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                Log.d(LOG_TAG, "NDS onComplete: sourceSongs " + Thread.currentThread().getName());
-                                if (task.isSuccessful()) {
-                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                        Log.d(LOG_TAG, "NDS-exec deb Oncomplete " + document.getId() + " => " + document.getData().get("maj"));
-                                        //todo voir comment écrire une seule ligne avec ToObject
+                        .addOnCompleteListener(task -> {
+                            Log.d(LOG_TAG, "NDS onComplete: sourceSongs " + Thread.currentThread().getName());
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                                    Log.d(LOG_TAG, "NDS-exec deb Oncomplete " + document.getId() + " => " + document.getData().get("maj"));
+                                    //todo voir comment écrire une seule ligne avec ToObject
 
-                                        String titre, groupe, baseUrlOriginalSong, urlCloudBackground,idCloud;
-                                        Date maj;
-                                        int duration;
-                                        Timestamp majss;
+                                    String titre, groupe, baseUrlOriginalSong, urlCloudBackground,idCloud;
+                                    Date maj;
+                                    int duration;
+                                    Timestamp majss;
 
-                                        idCloud=(String) document.getId();
-                                        titre = (String) document.getData().get("titre");
-                                        groupe = (String) document.getData().get("groupe");
-                                        duration = ((Long) document.getData().get("duration")).intValue();
-                                        baseUrlOriginalSong = (String) document.getData().get("original_song");
+                                    idCloud= document.getId();
+                                    titre = (String) document.getData().get("titre");
+                                    groupe = (String) document.getData().get("groupe");
+                                    duration = ((Long) Objects.requireNonNull(document.getData().get("duration"))).intValue();
+                                    baseUrlOriginalSong = (String) document.getData().get("original_song");
 
-                                        majss = (Timestamp) document.getData().get("maj");
+                                    majss = (Timestamp) document.getData().get("maj");
 
-                                        maj = majss.toDate();
-                                        urlCloudBackground = (String) document.getData().get("background");
+                                    maj = Objects.requireNonNull(majss).toDate();
+                                    urlCloudBackground = (String) document.getData().get("background");
 
-                                        Log.d(LOG_TAG, "NDS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
-                                        SourceSong sourceSong = new SourceSong(idCloud,titre,groupe,duration,urlCloudBackground,baseUrlOriginalSong,maj);
+                                    Log.d(LOG_TAG, "NDS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
+                                    SourceSong sourceSong = new SourceSong(idCloud,titre,groupe,duration,urlCloudBackground,baseUrlOriginalSong,maj);
 
-                                        sourceSongs.add(sourceSong);
-                                    }
-
-                                    Log.d(LOG_TAG, "NDS-exec fetchSourceSongs: après fetch");
-                                } else {
-                                    Log.w(LOG_TAG, "NDS-exec Error getting documents.", task.getException());
+                                    sourceSongs.add(sourceSong);
                                 }
 
-                                try {
-                                    db.collection("songs")
-                                            .get()
-                                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                    Log.d(LOG_TAG, "NDS onComplete: Songs " + Thread.currentThread().getName());
-                                                    if (task.isSuccessful()) {
-                                                        for (QueryDocumentSnapshot document : task.getResult()) {
-                                                            Log.d(LOG_TAG, "NDS-exec " + document.getId() + " => " + document.getData().get("pupitre"));
+                                Log.d(LOG_TAG, "NDS-exec fetchSourceSongs: après fetch");
+                            } else {
+                                Log.w(LOG_TAG, "NDS-exec Error getting documents.", task.getException());
+                            }
 
-                                                            final String pupitre, recordSource, urlMp3, idCloud;
-                                                            final Date maj;
-                                                            final Timestamp majs;
+                            try {
+                                db.collection("songs")
+                                        .get()
+                                        .addOnCompleteListener(task1 -> {
+                                            Log.d(LOG_TAG, "NDS onComplete: Songs " + Thread.currentThread().getName());
+                                            if (task1.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document : Objects.requireNonNull(task1.getResult())) {
+                                                    Log.d(LOG_TAG, "NDS-exec " + document.getId() + " => " + document.getData().get("pupitre"));
 
-                                                            idCloud = document.getId();
+                                                    final String pupitre, recordSource, urlMp3, idCloud;
+                                                    final Date maj;
+                                                    final Timestamp majs;
 
-                                                            pupitre = (String) document.getData().get("pupitre");
+                                                    idCloud = document.getId();
 
-                                                            final Pupitre pupitreObj = SongsUtilities.converttoPupitre(pupitre);
+                                                    pupitre = (String) document.getData().get("pupitre");
 
-                                                            recordSource = (String) document.getData().get("recordSource");
-                                                            final RecordSource sourceObj = SongsUtilities.convertToRecordSource(recordSource);
+                                                    final Pupitre pupitreObj = SongsUtilities.converttoPupitre(Objects.requireNonNull(pupitre));
 
-                                                            urlMp3 = (String) document.getData().get("songPath");
+                                                    recordSource = (String) document.getData().get("recordSource");
+                                                    final RecordSource sourceObj = SongsUtilities.convertToRecordSource(Objects.requireNonNull(recordSource));
 
-                                                            majs= (Timestamp) document.getData().get("maj");
-                                                            maj = majs.toDate() ;
+                                                    urlMp3 = (String) document.getData().get("songPath");
 
-                                                            //todo comment faire pour faire une référence à sourceSong
-                                                            titre = (String) document.getData().get("titre_song");
-                                                            Log.d(LOG_TAG, "NDS-exec : onComplete:B Songs " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
-                                                            Song song = new Song(idCloud,titre,sourceObj,pupitreObj,urlMp3,maj);
-                                                            songs.add(song);
-                                                        }
-                                                        Log.d(LOG_TAG, "NDS-exec onComplete: avant post " + songs);
-                                                        //todo à vérifier surement inutile maintenant
-                                                        Message message = Message.obtain();
-                                                        message.obj = "OK";
-                                                        handler.sendMessage(message);
-                                                    } else {
-                                                        Log.w(LOG_TAG, "NDS-exec Error getting documents.", task.getException());
-                                                    }
+                                                    majs= (Timestamp) document.getData().get("maj");
+                                                    maj = Objects.requireNonNull(majs).toDate() ;
+
+                                                    //todo comment faire pour faire une référence à sourceSong
+                                                    titre = (String) document.getData().get("titre_song");
+                                                    Log.d(LOG_TAG, "NDS-exec : onComplete:B Songs " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
+                                                    Song song = new Song(idCloud,titre,sourceObj,pupitreObj,urlMp3,maj);
+                                                    songs.add(song);
                                                 }
-                                            });
-                                } catch (Exception e) {
-                                    // Server probably invalid
-                                    e.printStackTrace();
-                                }
+                                                Log.d(LOG_TAG, "NDS-exec onComplete: avant post "+songs.size()+"  "+ songs);
+                                                //todo à vérifier surement inutile maintenant
+                                                Message message = Message.obtain();
+                                                message.obj = "OK";
+                                                handler.sendMessage(message);
+                                            } else {
+                                                Log.w(LOG_TAG, "NDS-exec Error getting documents.", task1.getException());
+                                            }
+                                        });
+                            } catch (Exception e) {
+                                // Server probably invalid
+                                e.printStackTrace();
                             }
                         });
 
@@ -420,28 +381,22 @@ public class ChoraleNetWorkDataSource {
             Log.d(LOG_TAG, "NDS uploadOnPhoneBgImages: "+" "+source.getBackground() + localFileImage.getParent() + " " + filename + " " + localFileImage.getPath() + " " + localFileImage.getAbsolutePath()+" "+Thread.currentThread().getName());
 
             mStorageRef.getFile(localFileImage)
-                    .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                            // Successfully downloaded data to local file
-                            //todo modifier le texte pour l'utilisateur
-                            increment1++;
-                            if(increment1==bgSize&&aloneCreate){
-                                Log.d(LOG_TAG, "NDS onSuccess pour ne pas louper les BG: ");
-                                downloads.postValue("Done");
-                            }
-                            Log.d(LOG_TAG, "NDS onSuccess: storage upload bg "+Thread.currentThread().getName());
-                           // Toast.makeText(mContext, "Vos images de fond sont enregistrées sur votre téléphone", Toast.LENGTH_LONG).show();
-                            // ...
+                    .addOnSuccessListener(taskSnapshot -> {
+                        // Successfully downloaded data to local file
+                        //todo modifier le texte pour l'utilisateur
+                        increment1++;
+                        if(increment1==bgSize&&aloneCreate){
+                            Log.d(LOG_TAG, "NDS onSuccess pour ne pas louper les BG: ");
+                            downloads.postValue("Done");
                         }
-                    }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    // Handle failed download
-                    // ...
-                    Toast.makeText(mContext, "Il y a eu un problème de téléchargement, veuillez réessayer plus tard...", Toast.LENGTH_LONG).show();
-                }
-            });
+                        Log.d(LOG_TAG, "NDS onSuccess: storage upload bg "+Thread.currentThread().getName());
+                       // Toast.makeText(mContext, "Vos images de fond sont enregistrées sur votre téléphone", Toast.LENGTH_LONG).show();
+                        // ...
+                    }).addOnFailureListener(exception -> {
+                        // Handle failed download
+                        // ...
+                        Toast.makeText(mContext, "Il y a eu un problème de téléchargement, veuillez réessayer plus tard...", Toast.LENGTH_LONG).show();
+                    });
         }
     }
 
@@ -464,8 +419,7 @@ public class ChoraleNetWorkDataSource {
 
         final List<Song> tempList = new ArrayList<>();
 
-       // pupitreToUpload.add(pupitreUser);
-        Set<String> pupitreDownload = null;
+        Set<String> pupitreDownload;
         pupitreDownload=sharedPreferences.getStringSet(mContext.getString(R.string.pref_pupitre_key),null);
 
         if(pupitreDownload!=null) {
@@ -486,7 +440,6 @@ public class ChoraleNetWorkDataSource {
         Log.d(LOG_TAG, "NDS getListDownloadMp3: pupitre To Load "+pupitreToUpload);
 
         for (Song newSong : songs) {
-            int i = 0;
             Log.d(LOG_TAG, "NDS onComplete: newsongs "+ newSong.getSourceSongTitre()+" " + newSong.getRecordSource()+" "+newSong.getPupitre() );
             //todo tri sur le pupitre plus tard il faudra être capable de s'adapter aux préférences.faire une liste des pupitres à enregistrer
             //todo préparer une page de setUp pour mettre les infos complémentaires sur le user comme son pupitre
@@ -531,42 +484,30 @@ public class ChoraleNetWorkDataSource {
             Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: " + localFileMp3.getParent() + " " + filename + " " + localFileMp3.getPath() + " " + localFileMp3.getAbsolutePath()+" "+ mContext.getFilesDir()+" "+Thread.currentThread().getName());
 
             //todo voir comment utiliser download manager
+            //todo voir comment intégrer l'avancement des données dans un retour utilisateur
             mStorageRef.getFile(localFileMp3)
-                    .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                            // Successfully downloaded data to local file
+                    .addOnSuccessListener(taskSnapshot -> {
+                        // Successfully downloaded data to local file
+                        increment++;
+                        Log.d(LOG_TAG, "NDS onSuccess: "+Thread.currentThread().getName()+" "+ filename);
 
-                           // Toast.makeText(mContext, "Vos chants sont enregistrés sur votre téléphone", Toast.LENGTH_LONG).show();
-
-                            increment++;
-                            Log.d(LOG_TAG, "NDS onSuccess: "+Thread.currentThread().getName()+" "+ filename);
-
-                            if(increment ==mp3Size) {
-                                Log.d(LOG_TAG, "NDS onSuccess :lancement de postValue Done "+mp3Size);
-                                downloads.postValue("Done");
-                            }
-                            // ...
+                        if(increment ==mp3Size) {
+                            Log.d(LOG_TAG, "NDS onSuccess :lancement de postValue Done "+mp3Size);
+                            downloads.postValue("Done");
                         }
-                    }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    // Handle failed download
-                    // ...
-                    Toast.makeText(mContext, "Il y a eu un problème de téléchargement, veuillez réessayer plus tard...", Toast.LENGTH_LONG).show();
+                        // ...
+                    }).addOnFailureListener(exception -> {
+                        // Handle failed download
+                        // ...
+                        Toast.makeText(mContext, "Il y a eu un problème de téléchargement, veuillez réessayer plus tard...", Toast.LENGTH_LONG).show();
 
-                }
-                //todo voir comment intégrer l'avancement des données dans un retour utilisateur
-            }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
-                @Override
-                public void onProgress(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    if(taskSnapshot.getTotalByteCount()!=0) {
-                        int progress = (int) (100.0 * taskSnapshot.getBytesTransferred()) / (int) taskSnapshot.getTotalByteCount();
-                        Log.d(LOG_TAG, "NDS onProgress: " + filename + " " + progress + "%");
-                        mlistener.OnProgressLoading(progress);
-                    }
-                }
-            });
+                    }).addOnProgressListener(taskSnapshot -> {
+                        if(taskSnapshot.getTotalByteCount()!=0) {
+                            int progress = (int) (100.0 * taskSnapshot.getBytesTransferred()) / (int) taskSnapshot.getTotalByteCount();
+                            Log.d(LOG_TAG, "NDS onProgress: " + filename + " " + progress + "%");
+                            mlistener.OnProgressLoading(progress);
+                        }
+                    });
         }
 
         Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: pour voir si cela passe avant la fin des chargements");
@@ -575,7 +516,9 @@ public class ChoraleNetWorkDataSource {
     public String getCurrentPupitreStr() {
 
         currentPupitreStr=sharedPreferences.getString("pupitre","TUTTI");
-        pupitreUser=SongsUtilities.converttoPupitre(currentPupitreStr);
+        if (currentPupitreStr != null) {
+            pupitreUser=SongsUtilities.converttoPupitre(currentPupitreStr);
+        }
 
         return currentPupitreStr;
     }
@@ -593,28 +536,25 @@ public class ChoraleNetWorkDataSource {
     //todo pourquoi dans le NDS ?
     public void deleteSongsMp3OnPhone(List<Song> deletedSongsList) {
         deleted=true;
-        mExecutors.storageIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                for (Song song:deletedSongsList) {
-                    String path = song.getSongPath();
-                    File tempFile = new File(path);
-                    String name = tempFile.getName();
-                    Log.d(LOG_TAG, "NDS deleteMp3OnPhone: name "+ name);
+        mExecutors.storageIO().execute(() -> {
+            for (Song song:deletedSongsList) {
+                String path = song.getSongPath();
+                File tempFile = new File(path);
+                String name = tempFile.getName();
+                Log.d(LOG_TAG, "NDS deleteMp3OnPhone: name "+ name);
 
-                    if (tempFile.exists()) {
-                        Log.d(LOG_TAG, "NDS run: le fichier existe  donc sera supprimé !");
-                        if(mContext.deleteFile(name)){
-                            Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: mp3 effacé "+song.getSourceSongTitre());
-                        }else{
-                            Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: erreur d'effacement de Mp3 ");
-                        }
-
+                if (tempFile.exists()) {
+                    Log.d(LOG_TAG, "NDS run: le fichier existe  donc sera supprimé !");
+                    if(mContext.deleteFile(name)){
+                        Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: mp3 effacé "+song.getSourceSongTitre());
                     }else{
-                        Log.d(LOG_TAG, "NDS run: e fichier n'existe pas donc ne peut être supprimé !");
+                        Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: erreur d'effacement de Mp3 ");
                     }
-                    song.setUpdatePhoneMp3(null);
+
+                }else{
+                    Log.d(LOG_TAG, "NDS run: e fichier n'existe pas donc ne peut être supprimé !");
                 }
+                song.setUpdatePhoneMp3(null);
             }
         });
     }
@@ -622,31 +562,27 @@ public class ChoraleNetWorkDataSource {
     public void deleteBgOnPhone(List<SourceSong> oldSources) {
         //todo voir si cela fonctionne avec cela
         deleted=false;
-        mExecutors.storageIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                for (SourceSong source:oldSources) {
-                    String path = source.getBackground();
+        mExecutors.storageIO().execute(() -> {
+            for (SourceSong source:oldSources) {
+                String path = source.getBackground();
 
-                    File tempfile = new File(path);
-                    String name = tempfile.getName();
+                File tempfile = new File(path);
+                String name = tempfile.getName();
 
-                    Log.d(LOG_TAG, "NDS deleteBgOnPhone: name "+ name);
+                Log.d(LOG_TAG, "NDS deleteBgOnPhone: name "+ name);
 
-                    if(tempfile.exists()){
-                        Log.d(LOG_TAG, "NDS run: le fichier existe  donc sera supprimé !");
-                        if(mContext.deleteFile(name)){
-                            Log.d(LOG_TAG, "NDS deleteBgOnPhone: background effacé "+source.getTitre());
-                        }else{
-                            Log.d(LOG_TAG, "NDS deleteBgOnPhone: erreur d'effcement de background ");
-                        }
+                if(tempfile.exists()){
+                    Log.d(LOG_TAG, "NDS run: le fichier existe  donc sera supprimé !");
+                    if(mContext.deleteFile(name)){
+                        Log.d(LOG_TAG, "NDS deleteBgOnPhone: background effacé "+source.getTitre());
                     }else{
-                        Log.d(LOG_TAG, "NDS run: e fichier n'existe pas donc ne peut être supprimé !");
+                        Log.d(LOG_TAG, "NDS deleteBgOnPhone: erreur d'effcement de background ");
                     }
-                    source.setUpdateBgPhone(null);
+                }else{
+                    Log.d(LOG_TAG, "NDS run: e fichier n'existe pas donc ne peut être supprimé !");
                 }
+                source.setUpdateBgPhone(null);
             }
-
         });
 
 
@@ -678,32 +614,23 @@ public class ChoraleNetWorkDataSource {
         Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: " + localFileMp3.getParent() + " " + filename + " " + localFileMp3.getPath() + " " + localFileMp3.getAbsolutePath()+" "+ mContext.getFilesDir()+" "+Thread.currentThread().getName());
 
         //todo voir comment utiliser download manager
+        //todo voir comment intégrer l'avancement des données dans un retour utilisateur
         mStorageRef.getFile(localFileMp3)
-                .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                        // Successfully downloaded data to local file
+                .addOnSuccessListener(taskSnapshot -> {
+                    // Successfully downloaded data to local file
 
-                        Log.d(LOG_TAG, "NDS onSuccess single: "+Thread.currentThread().getName()+" "+ filename);
+                    Log.d(LOG_TAG, "NDS onSuccess single: "+Thread.currentThread().getName()+" "+ filename);
 
-                            downloads.postValue("SingleDownload");
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle failed download
-                // ...
-                Toast.makeText(mContext, "Il y a eu un problème de téléchargement, veuillez réessayer plus tard...", Toast.LENGTH_LONG).show();
+                        downloads.postValue("SingleDownload");
+                }).addOnFailureListener(exception -> {
+                    // Handle failed download
+                    // ...
+                    Toast.makeText(mContext, "Il y a eu un problème de téléchargement, veuillez réessayer plus tard...", Toast.LENGTH_LONG).show();
 
-            }
-            //todo voir comment intégrer l'avancement des données dans un retour utilisateur
-        }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
-            @Override
-            public void onProgress(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                int progress = (int) (100.0 * taskSnapshot.getBytesTransferred()) / (int) taskSnapshot.getTotalByteCount();
-                Log.d(LOG_TAG, "NDS onProgress: "+ filename +" "+progress+"%");
-            }
-        });
+                }).addOnProgressListener(taskSnapshot -> {
+                    int progress = (int) (100.0 * taskSnapshot.getBytesTransferred()) / (int) taskSnapshot.getTotalByteCount();
+                    Log.d(LOG_TAG, "NDS onProgress: "+ filename +" "+progress+"%");
+                });
     }
 
     //todo factorisation des parties communes
@@ -730,106 +657,90 @@ public class ChoraleNetWorkDataSource {
             Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: " + localFileMp3.getParent() + " " + filename + " " + localFileMp3.getPath() + " " + localFileMp3.getAbsolutePath()+" "+ mContext.getFilesDir()+" "+Thread.currentThread().getName());
 
             //todo voir comment utiliser download manager
+            //todo voir comment intégrer l'avancement des données dans un retour utilisateur
             mStorageRef.getFile(localFileMp3)
-                    .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                            // Successfully downloaded data to local file
-                            // Toast.makeText(mContext, "Vos chants sont enregistrés sur votre téléphone", Toast.LENGTH_LONG).show();
-                            increment++;
-                            Log.d(LOG_TAG, "NDS onSuccess: "+Thread.currentThread().getName()+" "+ filename);
+                    .addOnSuccessListener(taskSnapshot -> {
+                        // Successfully downloaded data to local file
+                        increment++;
+                        Log.d(LOG_TAG, "NDS onSuccess: "+Thread.currentThread().getName()+" "+ filename);
 
-                            if(increment ==mp3Size) {
-                                Log.d(LOG_TAG, "NDS onSuccess :lancement de postValue Done "+mp3Size);
-                                downloads.postValue("MultipleDownloads");
-                            }
-                            // ...
+                        if(increment ==mp3Size) {
+                            Log.d(LOG_TAG, "NDS onSuccess :lancement de postValue Done "+mp3Size);
+                            downloads.postValue("MultipleDownloads");
                         }
-                    }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    // Handle failed download
-                    // ...
-                    Toast.makeText(mContext, "Il y a eu un problème de téléchargement, veuillez réessayer plus tard...", Toast.LENGTH_LONG).show();
+                        // ...
+                    }).addOnFailureListener(exception -> {
+                        // Handle failed download
+                        // ...
+                        Toast.makeText(mContext, "Il y a eu un problème de téléchargement, veuillez réessayer plus tard...", Toast.LENGTH_LONG).show();
 
-                }
-                //todo voir comment intégrer l'avancement des données dans un retour utilisateur
-            }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
-                @Override
-                public void onProgress(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    if(taskSnapshot.getTotalByteCount()!=0) {
-                        int progress = (int) (100.0 * taskSnapshot.getBytesTransferred()) / (int) taskSnapshot.getTotalByteCount();
-                        Log.d(LOG_TAG, "NDS onProgress: multiple" + filename + " " + progress + "%");
+                    }).addOnProgressListener(taskSnapshot -> {
+                        if(taskSnapshot.getTotalByteCount()!=0) {
+                            int progress = (int) (100.0 * taskSnapshot.getBytesTransferred()) / (int) taskSnapshot.getTotalByteCount();
+                            Log.d(LOG_TAG, "NDS onProgress: multiple" + filename + " " + progress + "%");
 
-                    }
-                }
-            });
+                        }
+                    });
         }
     }
 
     public void deleteSingleSong(Song song) {
         deleted=true;
-        mExecutors.storageIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                    String path = song.getSongPath();
-                    File tempFile = new File(path);
-                    String name = tempFile.getName();
-                    Log.d(LOG_TAG, "NDS deleteMp3OnPhone single: name "+ name);
+        mExecutors.storageIO().execute(() -> {
+                String path = song.getSongPath();
+                File tempFile = new File(path);
+                String name = tempFile.getName();
+                Log.d(LOG_TAG, "NDS deleteMp3OnPhone single: name "+ name);
 
-                    if (tempFile.exists()) {
-                        Log.d(LOG_TAG, "NDS run: le fichier existe  donc sera supprimé single !");
-                        if(mContext.deleteFile(name)){
-                            Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: mp3 effacé single"+song.getSourceSongTitre());
-                        }else{
-                            Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: erreur d'effacement de Mp3 ");
-                        }
-
+                if (tempFile.exists()) {
+                    Log.d(LOG_TAG, "NDS run: le fichier existe  donc sera supprimé single !");
+                    if(mContext.deleteFile(name)){
+                        Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: mp3 effacé single"+song.getSourceSongTitre());
                     }else{
-                        Log.d(LOG_TAG, "NDS run: le fichier n'existe pas donc ne peut être supprimé !");
+                        Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: erreur d'effacement de Mp3 ");
                     }
-                    song.setUpdatePhoneMp3(null);
-                    song.setSongPath(null);
-                    downloads.postValue("deleteSingle");
 
-            }
+                }else{
+                    Log.d(LOG_TAG, "NDS run: le fichier n'existe pas donc ne peut être supprimé !");
+                }
+                song.setUpdatePhoneMp3(null);
+                song.setSongPath(null);
+                downloads.postValue("deleteSingle");
+
         });
 
     }
 
     public void deleteMultipleSong(List<Song> songsToDelete) {
         deleted=true;
-        mExecutors.storageIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                int incr =0;
-                int size = songsToDelete.size();
-                for (Song song:songsToDelete) {
-                    String path = song.getSongPath();
-                    File tempFile = new File(path);
-                    String name = tempFile.getName();
-                    Log.d(LOG_TAG, "NDS deleteMp3OnPhone: multiple name "+ name);
+        mExecutors.storageIO().execute(() -> {
+            int incr =0;
+            int size = songsToDelete.size();
+            for (Song song:songsToDelete) {
+                String path = song.getSongPath();
+                File tempFile = new File(path);
+                String name = tempFile.getName();
+                Log.d(LOG_TAG, "NDS deleteMp3OnPhone: multiple name "+ name);
 
-                    if (tempFile.exists()) {
-                        Log.d(LOG_TAG, "NDS run: le fichier existe  donc sera supprimé !");
-                        if(mContext.deleteFile(name)){
-                            Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: mp3 effacé multiple"+song.getSourceSongTitre());
-                            incr++;
+                if (tempFile.exists()) {
+                    Log.d(LOG_TAG, "NDS run: le fichier existe  donc sera supprimé !");
+                    if(mContext.deleteFile(name)){
+                        Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: mp3 effacé multiple"+song.getSourceSongTitre());
+                        incr++;
 
-                            if(incr==size){
-                                downloads.postValue("deleteMultiple");
-                            }
-
-                        }else{
-                            Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: erreur d'effacement de Mp3 ");
+                        if(incr==size){
+                            downloads.postValue("deleteMultiple");
                         }
 
                     }else{
-                        Log.d(LOG_TAG, "NDS run: le fichier n'existe pas donc ne peut être supprimé !");
+                        Log.d(LOG_TAG, "NDS deleteSongsMp3OnPhone: erreur d'effacement de Mp3 ");
                     }
-                    song.setUpdatePhoneMp3(null);
-                    song.setSongPath(null);
+
+                }else{
+                    Log.d(LOG_TAG, "NDS run: le fichier n'existe pas donc ne peut être supprimé !");
                 }
+                song.setUpdatePhoneMp3(null);
+                song.setSongPath(null);
             }
         });
 
@@ -840,44 +751,38 @@ public class ChoraleNetWorkDataSource {
         Log.d(LOG_TAG, "NDS getData: "+current_user_id);
         db.collection("users").document(current_user_id)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if(task.isSuccessful()){
-                            if(task.getResult().exists()){
-                                String role, pupitre,idChorale,email,nom,prenom;
-                                role =(String) task.getResult().get("role");
-                                pupitre =(String) task.getResult().get("pupitre");
-                                idChorale=(String) task.getResult().get("id_chorale");
-                                //todo voir à quoi pourront servir ces éléments (peut être dans le préférence compte)
-                                email = (String) task.getResult().get("email");
-                                nom=(String) task.getResult().get("nom");
-                                prenom=(String) task.getResult().get("prenom");
-                                editor = sharedPreferences.edit();
-                                Log.d(LOG_TAG, "NDS setUpSharedPreferences: installation"+role+" "+pupitre+" "+idChorale+" "+email+" "+nom+" "+prenom);
-                                editor.putBoolean("installation",false);
-                                editor.putString("role",role);
-                                editor.putString("idchorale",idChorale);
-                                editor.putBoolean(mContext.getString(R.string.maj_auto),true);
-                                editor.putString("pupitre",pupitre);
-                                Set<String> pupitreToDownload = new HashSet<>();
-                                pupitreToDownload.add(pupitre);
-                                editor.putStringSet(mContext.getString(R.string.pref_pupitre_key),pupitreToDownload);
-                                editor.putBoolean("initializeData",true);
-                                Log.d(LOG_TAG, "NDS setUpSharedPreferences: fin");
-                                editor.apply();
-                            }
-
-                        }else{
-                            Log.d(LOG_TAG, "NDS onComplete: help pb sur documents users");
+                .addOnCompleteListener(task -> {
+                    if(task.isSuccessful()){
+                        if(Objects.requireNonNull(task.getResult()).exists()){
+                            String role, pupitre,idChorale,email,nom,prenom;
+                            role =(String) task.getResult().get("role");
+                            pupitre =(String) task.getResult().get("pupitre");
+                            idChorale=(String) task.getResult().get("id_chorale");
+                            //todo voir à quoi pourront servir ces éléments (peut être dans le préférence compte)
+                            email = (String) task.getResult().get("email");
+                            nom=(String) task.getResult().get("nom");
+                            prenom=(String) task.getResult().get("prenom");
+                            editor = sharedPreferences.edit();
+                            Log.d(LOG_TAG, "NDS setUpSharedPreferences: installation"+role+" "+pupitre+" "+idChorale+" "+email+" "+nom+" "+prenom);
+                            editor.putBoolean("installation",false);
+                            editor.putString("role",role);
+                            editor.putString("idchorale",idChorale);
+                            editor.putBoolean(mContext.getString(R.string.maj_auto),true);
+                            editor.putString("pupitre",pupitre);
+                            Set<String> pupitreToDownload = new HashSet<>();
+                            pupitreToDownload.add(pupitre);
+                            editor.putStringSet(mContext.getString(R.string.pref_pupitre_key),pupitreToDownload);
+                            editor.putBoolean("initializeData",true);
+                            Log.d(LOG_TAG, "NDS setUpSharedPreferences: fin");
+                            editor.apply();
                         }
+
+                    }else{
+                        Log.d(LOG_TAG, "NDS onComplete: help pb sur documents users");
                     }
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
+                .addOnFailureListener(e -> {
 
-                    }
                 });
     }
 }

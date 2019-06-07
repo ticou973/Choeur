@@ -8,7 +8,6 @@ import android.arch.persistence.room.PrimaryKey;
 
 import java.util.Date;
 
-//todo mettre un contructeur avec les éléments de firebase
 
 @Entity(indices = {@Index(value = {"titre"},
         unique = true)})
@@ -27,7 +26,7 @@ public class SourceSong {
 
     @ColumnInfo(name = "duration")
     private int duration;
-//todo à retirer dès que inutile
+
     @ColumnInfo(name = "background")
     private int bgSong;
 
@@ -121,13 +120,10 @@ public class SourceSong {
         this.duration = duration;
     }
 
-    public int getBgSong() {
+    int getBgSong() {
         return bgSong;
     }
 
-    public void setBgSong(int bgSong) {
-        this.bgSong = bgSong;
-    }
 
     public String getBaseUrlOriginalSong() {
         return baseUrlOriginalSong;
@@ -137,7 +133,7 @@ public class SourceSong {
         this.baseUrlOriginalSong = baseUrlOriginalSong;
     }
 
-    public int getSourceSongId() {
+    int getSourceSongId() {
         return sourceSongId;
     }
 
@@ -167,10 +163,6 @@ public class SourceSong {
 
     public String getIdSourceSongCloud() {
         return idSourceSongCloud;
-    }
-
-    public void setIdSourceSongCloud(String idSourceSongCloud) {
-        this.idSourceSongCloud = idSourceSongCloud;
     }
 
     public Date getUpdateBgPhone() {

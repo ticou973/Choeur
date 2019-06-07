@@ -22,7 +22,7 @@ public class DialogRecordFragment extends DialogFragment {
     private RadioGroup radioGroup;
     private Pupitre pupitre;
 
-    private int position;
+
     public DialogRecordFragment() {
         // Required empty public constructor
     }
@@ -78,7 +78,7 @@ public class DialogRecordFragment extends DialogFragment {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
 
-                Log.d(SongsAdapter.TAG, "DRF onCheckedChanged:A "+pupitre+" "+position);
+                Log.d(SongsAdapter.TAG, "DRF onCheckedChanged:A "+pupitre);
 
                 switch (i){
                     case R.id.tutti_rbtn:

@@ -35,7 +35,7 @@ public class ChoraleRepository {
     private final ChoraleNetWorkDataSource mChoraleNetworkDataSource;
     private final AppExecutors mExecutors;
     private boolean mInitialized = false;
-    private Thread currentThread,t2,t1,t3,t4,t5;
+    private Thread currentThread,t2,t1,t3,t4,t5,t6;
     private Context context;
 
     //Songs
@@ -93,23 +93,22 @@ public class ChoraleRepository {
         mChoraleNetworkDataSource = choraleNetworkDataSource;
         mExecutors = executors;
 
-        t5 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                t5 = Thread.currentThread();
-                oldSourcesSongs = mSourceDao.getAllSources();
-                oldSongs=mSongDao.getAllSongs();
-                Log.d(LOG_TAG, "CR run:  old SS et song "+oldSourcesSongs.size()+" songs "+oldSongs.size());
-            }
+        t5 = new Thread(() -> {
+            t5 = Thread.currentThread();
+            oldSourcesSongs = mSourceDao.getAllSources();
+            oldSongs=mSongDao.getAllSongs();
+            Log.d(LOG_TAG, "CR run:  old SS et song "+oldSourcesSongs.size()+" songs "+oldSongs.size());
         });
         t5.start();
 
 
         final LiveData<Long> majDBCloudLong= mChoraleNetworkDataSource.getMajDBCloudLong();
+        Log.d(LOG_TAG, "CR ChoraleRepository: getmajDBCCloud "+majDBCloudLong);
+
         majDBCloudLong.observeForever(majclouddblong -> {
             //todo vérifier l'utilité de l'égalité
             majCloudDBLong = majclouddblong;
-            Log.d(LOG_TAG, "CR ChoraleRepository: majCloudLong "+ majclouddblong);
+            Log.d(LOG_TAG, "CR AlerteMaj ChoraleRepository: majCloudLong "+ majclouddblong);
 
             if(majLocalDBLong<majCloudDBLong){
                 if(oldSourcesSongs!=null&&oldSourcesSongs.size()!=0){
@@ -154,9 +153,12 @@ public class ChoraleRepository {
         Log.d(LOG_TAG, "CR ChoraleRepository: LiveData mChoraleNetworkdtasource SS "+mChoraleNetworkDataSource+" "+ networkDataSourceSongs);
         networkDataSourceSongs.observeForever(sourceSongs -> {
             //todo vérifier utilité de sourceSongs1
+            if(sourceSongs1!=null&&sourceSongs1.size()!=0){
+                Log.d(LOG_TAG, "NDS ChoraleRepository: "+sourceSongs1.size()+sourceSongs.size());
+            }
             sourceSongs1=sourceSongs;
 
-            Log.d(LOG_TAG, "CR Repository: observers Alerte cela bouge ! "+sourceSongs1+Thread.currentThread().getName());
+            Log.d(LOG_TAG, "CR Repository: observers Alerte cela bouge ! "+" "+sourceSongs1.size()+" "+sourceSongs1+Thread.currentThread().getName());
             songs = choraleNetworkDataSource.getSongs();
             Log.d(LOG_TAG, "CR ChoraleRepository LiveData: songs " +songs.size());
 
@@ -193,13 +195,10 @@ public class ChoraleRepository {
     //todo voir les factorisations possibles
     private void DoWorkInRoomBis(List<Song> songsToDownload) {
         Log.d(LOG_TAG, "CR DoWorkInRoomBis: multiple ");
-        t4 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                currentThread = Thread.currentThread();
-                syncMultipleSongDb(songsToDownload);
-                getListSongsA();
-            }
+        t4 = new Thread(() -> {
+            currentThread = Thread.currentThread();
+            syncMultipleSongDb(songsToDownload);
+            getListSongsA();
         });
         t4.start();
     }
@@ -208,26 +207,20 @@ public class ChoraleRepository {
 
     private void DoWorkInRoomBis(Song song) {
         Log.d(LOG_TAG, "CR DoWorkInRoomBis: ");
-        t3 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                currentThread = Thread.currentThread();
-                syncSingleSongDb(song);
-                getListSongsA();
-            }
+        t3 = new Thread(() -> {
+            currentThread = Thread.currentThread();
+            syncSingleSongDb(song);
+            getListSongsA();
         });
         t3.start();
     }
 
     private void DoWorkInRoomAndLists() {
 
-        t1 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                currentThread = Thread.currentThread();
-                DoWorkInRoom();
-                getListSongsA();
-            }
+        t1 = new Thread(() -> {
+            currentThread = Thread.currentThread();
+            DoWorkInRoom();
+            getListSongsA();
         });
 
         t1.start();
@@ -248,33 +241,30 @@ public class ChoraleRepository {
     }
 
     private void DoSynchronization(List<SourceSong> sourceSongs, List<Song> songs) {
-        t2 = new Thread(new Runnable() {
-            @Override
-            public void run() {
+        t2 = new Thread(() -> {
 
-                currentThread = Thread.currentThread();
-                Log.d(LOG_TAG, "CR run: currentThread "+currentThread+" "+isFromLocal);
-                if(!isFromLocal) {
-                    if(typeSS.equals("oldSS")){
-                        typeSS="modificationSS";
-                    }
-                    Log.d(LOG_TAG, "CR run: if from local avant synchronisation db "+typeSS);
-                    synchronisationLocalDataBase(sourceSongs,songs);
-
-                }else{
-                    //todo trouver une méthode un peu moins artificielle ? cf modèle architecture.
-                    Log.d(LOG_TAG, "CR run: else isFrom Local pas de synchronisation");
-                    //mis pour que alerte se déclenche
-                    mSourceDao.updateSourceSong(oldSourcesSongs.get(0));
-                    sourceSongsAfterSync=oldSourcesSongs;
-                    songsAfterSync=oldSongs;
-                    getListSongsA();
+            currentThread = Thread.currentThread();
+            Log.d(LOG_TAG, "CR run: currentThread "+currentThread+" "+isFromLocal);
+            if(!isFromLocal) {
+                if(typeSS.equals("oldSS")){
+                    typeSS="modificationSS";
                 }
-                Log.d(LOG_TAG, "CR ChoraleRepository LiveData après sync sourceSongs : "+sourceSongs.size()+ " "+sourceSongsAfterSync.size()+" "+Thread.currentThread().getName());
+                Log.d(LOG_TAG, "CR run: if from local avant synchronisation db "+typeSS);
+                synchronisationLocalDataBase(sourceSongs,songs);
 
-                for (SourceSong source:sourceSongsAfterSync) {
-                    Log.d(LOG_TAG, "CR run: sourcesSONG dans la data : "+source.getTitre());
-                }
+            }else{
+                //todo trouver une méthode un peu moins artificielle ? cf modèle architecture.
+                Log.d(LOG_TAG, "CR run: else isFrom Local pas de synchronisation");
+                //mis pour que alerte se déclenche
+                mSourceDao.updateSourceSong(oldSourcesSongs.get(0));
+                sourceSongsAfterSync=oldSourcesSongs;
+                songsAfterSync=oldSongs;
+                getListSongsA();
+            }
+            Log.d(LOG_TAG, "CR ChoraleRepository LiveData après sync sourceSongs : "+sourceSongs.size()+ " "+sourceSongsAfterSync.size()+" "+Thread.currentThread().getName());
+
+            for (SourceSong source:sourceSongsAfterSync) {
+                Log.d(LOG_TAG, "CR run: sourcesSONG dans la data : "+source.getTitre());
             }
         });
 
@@ -309,7 +299,6 @@ public class ChoraleRepository {
         typeSS="newSongOnPhone";
         songToDownload=song;
         mChoraleNetworkDataSource.downloadSingleMp3(song);
-
     }
 
     public void downloadPupitresSongs(List<Song> songsToDownload) {
@@ -779,9 +768,9 @@ public class ChoraleRepository {
             String idChorale=sharedPreferences.getString("idchorale","");
             Log.d(LOG_TAG, "CR initializeData: idchorale "+idChorale);
 
-            if(!TextUtils.isEmpty(idChorale)) {
+            if(!TextUtils.isEmpty(idChorale)&&initialisation) {
                 getMajDateLocalDataBase();
-                //lance la recherche d'un emise à jour et condition le lancement de startFetchData
+                //lance la recherche d'une mise à jour et condition le lancement de startFetchData
                 LoadMajCloudDB();
             }else{
                 Log.d(LOG_TAG, "CR initializeData: pb d'initialisation du sharedpreferences");
@@ -866,13 +855,43 @@ public class ChoraleRepository {
     }
 
     public void setRecordSongInAppDb(Song song) {
-
-        mExecutors.diskIO().execute(new Runnable() {
+        typeSS="newRecord";
+        Log.d(LOG_TAG, "CR setRecordSongInAppDb: ");
+        t6 = new Thread(new Runnable() {
             @Override
             public void run() {
-                mSongDao.insertSong(song);
+                currentThread = Thread.currentThread();
+                syncrecordedSongDb(song);
+                getListSongsA();
             }
         });
+        t6.start();
+
+
+    }
+
+    private void syncrecordedSongDb(Song song) {
+        String titre = song.getSourceSongTitre();
+        SourceSong tempSource = mSourceDao.getSourceSongByTitre(titre);
+        tempSource.setUpdateBgPhone(new Date(System.currentTimeMillis()));
+        if(song!=null) {
+            Log.d(LOG_TAG, "CR syncrecordedSongDb "+song);
+            mSongDao.insertSong(song);
+        }else{
+            Log.d(LOG_TAG, "CR syncRecordedSongDb: pb sur TempSong single");
+        }
+
+        if(tempSource!=null) {
+            mSourceDao.updateSourceSong(tempSource);
+            Log.d(LOG_TAG, "CR syncRecordedSongDb(: update single source "+" "+song.getPupitre()+" "+song.getSongPath()+" "+song.getRecordSource());
+        }else{
+            Log.d(LOG_TAG, "CR syncRecordedSongDb: pb sync single");
+        }
+
+        //chercher les Sourcesongs sur Room
+        sourceSongsAfterSync=mSourceDao.getAllSources();
+        songsAfterSync=mSongDao.getAllSongs();
+
     }
 
     public String getTypeSS() {
