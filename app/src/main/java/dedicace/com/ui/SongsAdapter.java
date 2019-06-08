@@ -54,7 +54,6 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         Song OnPlaySong(SourceSong sourceSong, Pupitre pupitre, RecordSource source);
         Song OnPlayFirstSong(int position, RecordSource recordSource);
         List<Song> OnListRecordedSongsOnPhone(int position,RecordSource recordSource);
-        List<Song> OnListRecordedSongsOnCloud(int position,RecordSource recordSource);
         void OnSaveRecordSong(Song song);
         void OnLongClickItem(int position, Song song);
         void OnLongClickDeleteItem(int adapterPosition, Song songToDelete);

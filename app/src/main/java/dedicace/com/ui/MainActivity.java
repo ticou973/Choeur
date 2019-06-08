@@ -624,18 +624,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     }
 
     @Override
-    public List<Song> OnListRecordedSongsOnCloud(int position,RecordSource recordSource) {
-
-        List<Song> cloudSongs = new ArrayList<>();
-
-        if(recordSource==RecordSource.BANDE_SON){
-
-            cloudSongs=songOnClouds.get(position);
-        }
-        return cloudSongs;
-    }
-
-    @Override
     public void OnSaveRecordSong(Song song) {
         mViewModel.setRecordSongInAppDb(song);
     }

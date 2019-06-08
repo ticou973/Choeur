@@ -484,22 +484,11 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         setButtonActivable(false,tuttiBtn,bassBtn,tenorBtn,altoBtn,sopranoBtn);
 
-        Song[] songsPhone, songsCloud;
-        /*
-          songOnCloudRecorded = mlistItemClickedListener.OnListRecordedSongsOnCloud(sourceSong,recordSource);
+        Song[] songsPhone;
 
-        if(songOnCloudRecorded!=null) {
-            Log.d(TAG, "SVH HandleListSongs: "+ songOnCloudRecorded.size());
-            songsCloud = songOnCloudRecorded.toArray(new Song[0]);
-        }else{
-            songsCloud = new Song[0];
+        if(recordSource==RecordSource.BANDE_SON) {
+            setSongCloudRecorded(recordedCloudSongs);
         }
-
-        //todo voir ce cas avec le cas différent de pupitre cf. la méthode
-        setSongCloudRecorded(songsCloud);
-
-        Log.d(TAG, "SVH HandleListSongs "+ songsCloud.length);
-        */
 
         //todo voir comment calculer le songLocalRecorded ici
           songOnPhoneRecorded = mlistItemClickedListener.OnListRecordedSongsOnPhone(getAdapterPosition(),recordSource);
