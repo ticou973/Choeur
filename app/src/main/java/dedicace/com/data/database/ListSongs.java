@@ -86,7 +86,7 @@ public class ListSongs {
 
 //        Log.d(LOG_TAG, "LS ChoraleRepository LiveData après sync SongOnPhonesBS: "+SongOnPhonesBS.size()+" "+SongOnPhonesBS.get(0).size()+" "+Thread.currentThread().getName());
         for (int i = 0; i <SongOnPhonesBS.size() ; i++) {
-            Log.d(LOG_TAG, "LS run: "+ SongOnPhonesBS.get(i));
+            Log.d(LOG_TAG, "LS run: song onPhone BS "+ SongOnPhonesBS.get(i));
         }
     }
 
@@ -162,7 +162,7 @@ public class ListSongs {
         Log.d(LOG_TAG, "LS getSongsOnPhones: (recordSourcesSize) "+RecordSources.size()+" "+Thread.currentThread().getName());
 
         /**
-         * ce sont les songs On phones une fois que la RecordSource est déterminée, ce ne sont pas toutes les chansons sur le téléphone.
+         * Ce sont les songs On phones une fois que la RecordSource est déterminée, ce ne sont pas toutes les chansons sur le téléphone.
          */
 
            for (int i = 0; i < RecordSources.size(); i++) {

@@ -206,7 +206,7 @@ public class ChoraleRepository {
 
 
     private void DoWorkInRoomBis(Song song) {
-        Log.d(LOG_TAG, "CR DoWorkInRoomBis: ");
+        Log.d(LOG_TAG, "CR DoWorkInRoomBis: single");
         t3 = new Thread(() -> {
             currentThread = Thread.currentThread();
             syncSingleSongDb(song);
@@ -320,9 +320,11 @@ public class ChoraleRepository {
     }
 
     //todo faire les factorisations
+    //todo voir comment supprimer les songs dans la db qaund nécessaire pour éviter des chansons que l'on ne reprendra plus
     private void syncMultipleSongDb(List<Song> songsToDownload) {
 
         List<Song> tempSongs = new ArrayList<>();
+        List<Song> tempSongsdelete = new ArrayList<>();
         List<SourceSong> tempSources = new ArrayList<>();
         Log.d(LOG_TAG, "CR DoWorkInRoom: sync multiple Song");
 
@@ -340,18 +342,36 @@ public class ChoraleRepository {
                 tempSong.setUpdatePhone(new Date(System.currentTimeMillis()));
                 tempSong.setSongPath(song.getSongPath());
                 tempSong.setUpdatePhoneMp3(song.getUpdatePhoneMp3());
-                tempSongs.add(tempSong);
+                if(tempSong.getSongPath()!=null) {
+                    tempSongs.add(tempSong);
+                }else{
+                    if(tempSong.getRecordSource()==RecordSource.LIVE) {
+                        tempSongsdelete.add(tempSong);
+                    }else{
+                        tempSongs.add(tempSong);
+                    }
+                }
             }else{
                 Log.d(LOG_TAG, "CR syncMultipleSongDb: pb sur TempSong");
             }
         }
 
-        if(tempSongs!=null) {
+        if(tempSongs!=null&&tempSongs.size()!=0) {
             int tempInt = mSongDao.updatesSongs(tempSongs);
             Log.d(LOG_TAG, "CR syncMultipleSongDb: nb d'update Songs "+tempInt);
+
         }else{
             Log.d(LOG_TAG, "CR syncMultipleSongDb: pb sync single");
         }
+
+        if(tempSongsdelete!=null&&tempSongsdelete.size()!=0) {
+            int tempInt2 = mSongDao.deleteSongs(tempSongsdelete);
+            Log.d(LOG_TAG, "CR syncMultipleSongDb: nb d'update Songs B "+tempInt2);
+
+        }else{
+            Log.d(LOG_TAG, "CR syncMultipleSongDb: pb sync single delete");
+        }
+
 
         if(tempSources!=null) {
             int nbUpdate=mSourceDao.upDateSourceSongs(tempSources);
@@ -359,8 +379,6 @@ public class ChoraleRepository {
         }else{
             Log.d(LOG_TAG, "CR syncMultipleSongDb: pb sync single");
         }
-
-
     }
 
     private void syncSingleSongDb(Song song) {
@@ -380,8 +398,19 @@ public class ChoraleRepository {
         }
 
         if(tempSong!=null) {
-            int tempInt = mSongDao.updateSong(tempSong);
-            Log.d(LOG_TAG, "CR syncSingleSongDb(: update single "+tempInt+" "+tempSong.getPupitre()+" "+tempSong.getSongPath());
+            if(tempSong.getSongPath()!=null) {
+                int tempInt = mSongDao.updateSong(tempSong);
+                Log.d(LOG_TAG, "CR syncSingleSongDb(: update single "+tempInt+" "+tempSong.getPupitre()+" "+tempSong.getSongPath());
+            }else{
+                if(tempSong.getRecordSource()==RecordSource.LIVE) {
+                    int tempInt2 = mSongDao.deleteSong(tempSong);
+                    Log.d(LOG_TAG, "CR syncSingleSongDb(: update sing le B " + tempInt2 + " " + tempSong.getPupitre() + " " + tempSong.getSongPath());
+                }else{
+                    int tempInt = mSongDao.updateSong(tempSong);
+                    Log.d(LOG_TAG, "CR syncSingleSongDb(: update single C"+tempInt+" "+tempSong.getPupitre()+" "+tempSong.getSongPath());
+                }
+            }
+
         }else{
             Log.d(LOG_TAG, "CR syncSingleSongDb: pb sync single");
         }
@@ -464,7 +493,7 @@ public class ChoraleRepository {
         }
 
         if(bgSourcesToDelete!=null&&bgSourcesToDelete.size()!=0) {
-            Log.d(LOG_TAG, "CR DoWorkInLocalStorage: bgSourcesTo delte "+bgSourcesToDelete);
+            Log.d(LOG_TAG, "CR DoWorkInLocalStorage: bgSourcesTo delete "+bgSourcesToDelete);
             totalBgToDelete.addAll(bgSourcesToDelete);
         }
         Log.d(LOG_TAG, "CR DoWorkInLocalStorage: "+deletedSourceSongsList+" "+bgSourcesToDelete);
@@ -510,9 +539,8 @@ public class ChoraleRepository {
 
     private void DoWorkInRoom() {
         if(deletedSongsList!=null&&deletedSongsList.size()!=0){
-            Log.d(LOG_TAG, "CR DoWorkInRoom: deletesongs");
-            mSongDao.deleteSongs(deletedSongsList);
-
+            int temp = mSongDao.deleteSongs(deletedSongsList);
+            Log.d(LOG_TAG, "CR DoWorkInRoom: deletesongs "+temp);
         }
         if(deletedSourceSongsList!=null&&deletedSourceSongsList.size()!=0){
             Log.d(LOG_TAG, "CR DoWorkInRoom: delete sourcesongs");
@@ -600,7 +628,7 @@ public class ChoraleRepository {
     }
 
     private void getModificationLists(List<SourceSong> sourceSongs, List<Song> songs){
-        Log.d(LOG_TAG, "CR getModificationLists: "+songs+" "+sourceSongs);
+        Log.d(LOG_TAG, "CR getModificationLists: "+" "+songs.size()+" "+sourceSongs.size()+" "+songs+" "+sourceSongs);
         deletedSongsList(songs);
         deletedSourceSongsList(sourceSongs);
         modifiedSongsList(songs);
@@ -611,15 +639,43 @@ public class ChoraleRepository {
 
     //todo voir pour les mettre dans SongsUtilities
     private void deletedSongsList(List<Song> songs) {
+
         for (Song oldSong:oldSongs) {
-            int i = 0;
-            for (Song song: songs) {
-                if((!oldSong.getSongIdCloud().equals(song.getSongIdCloud()))){
-                    i++;
+            if (oldSong.getRecordSource() == RecordSource.BANDE_SON) {
+                Log.d(LOG_TAG, "CR deletedSongsList: old " + oldSong.getSourceSongTitre());
+                int i = 0;
+                for (Song song : songs) {
+                    Log.d(LOG_TAG, "CR deletedSongsList: cloud " + song.getSourceSongTitre());
+                    if (oldSong == null) {
+                        Log.d(LOG_TAG, "CR deletedSongsList:  old null ");
+                    } else {
+                        if (oldSong.getSongIdCloud() != null) {
+                            Log.d(LOG_TAG, "CR deletedSongsList: songId pour old " + oldSong.getSongIdCloud());
+                        } else {
+                            Log.d(LOG_TAG, "CR deletedSongsList: songId old null " + oldSong.getSourceSongTitre() + " " + oldSong.getPupitre());
+                        }
+                    }
+                    if (song == null) {
+                        Log.d(LOG_TAG, "CR deletedSongsList: cloud song null ");
+                    } else {
+                        if (song.getSongIdCloud() != null) {
+                            Log.d(LOG_TAG, "CR deletedSongsList: songId pour  cloud " + song.getSongIdCloud());
+                        } else {
+                            Log.d(LOG_TAG, "CR deletedSongsList: songId cloud null ");
+                        }
+                    }
+                    if ((!oldSong.getSongIdCloud().equals(song.getSongIdCloud()))) {
+                        i++;
+                        Log.d(LOG_TAG, "CR deletedSongsList: increment " + i);
+                    } else {
+                        Log.d(LOG_TAG, "CR deletedSongsList: pas incrément ");
+                    }
                 }
-            }
-            if(i==songs.size()){
-                deletedSongsList.add(oldSong);
+                if (i == songs.size()) {
+                    Log.d(LOG_TAG, "CR deletedSongsList: ajout deletesong " + oldSong.getSourceSongTitre());
+                    deletedSongsList.add(oldSong);
+                }
+                Log.d(LOG_TAG, "CR deletedSongsList: fin d'une bloucle old ");
             }
         }
 
@@ -659,18 +715,20 @@ public class ChoraleRepository {
         Log.d(LOG_TAG, "CR modifiedSongsList: modified Songs List");
         for (Song song:songs) {
             for (Song oldSong: oldSongs) {
-                if(oldSong.getSongIdCloud().equals(song.getSongIdCloud())){
-                    Log.d(LOG_TAG, "CR modifiedSongsList: "+oldSong.getUpdatePhone()+" "+song.getUpdatePhone());
-                    if(oldSong.getUpdatePhone().getTime()<song.getUpdatePhone().getTime()){
-                        Log.d(LOG_TAG, "CR modifiedSongsList: ajout de modified SS "+song.getSourceSongTitre());
-                        modifiedSongsList.add(song);
-                        if(!oldSong.getUrlCloudMp3().equals(song.getUrlCloudMp3())){
-                            mp3SongsToDelete.add(oldSong);
-                            mp3SongsToDownload.add(song);
+                if (oldSong.getRecordSource() == RecordSource.BANDE_SON) {
+                    if (oldSong.getSongIdCloud().equals(song.getSongIdCloud())) {
+                        Log.d(LOG_TAG, "CR modifiedSongsList: " + oldSong.getUpdatePhone() + " " + song.getUpdatePhone());
+                        if (oldSong.getUpdatePhone().getTime() < song.getUpdatePhone().getTime()) {
+                            Log.d(LOG_TAG, "CR modifiedSongsList: ajout de modified SS " + song.getSourceSongTitre());
+                            modifiedSongsList.add(song);
+                            if (!oldSong.getUrlCloudMp3().equals(song.getUrlCloudMp3())) {
+                                mp3SongsToDelete.add(oldSong);
+                                mp3SongsToDownload.add(song);
+                            }
                         }
                     }
+                    titress.put(song.getSourceSongTitre(), oldSong.getSourceSongTitre());
                 }
-                titress.put(song.getSourceSongTitre(),oldSong.getSourceSongTitre());
             }
         }
         Log.d(LOG_TAG, "CR modifiedSongsList: "+modifiedSongsList.size());
@@ -707,7 +765,7 @@ public class ChoraleRepository {
         for(SourceSong source:bgSourcesToDelete){
             Log.d(LOG_TAG, "CR deletedSourceSongsList: "+source.getUpdateBgPhone());
             if(source.getUpdateBgPhone()!=null){
-                deletedBgSongsList.add(source)  ;
+                deletedBgSongsList.add(source);
             }
         }
     }
@@ -717,16 +775,16 @@ public class ChoraleRepository {
         for (Song song:songs) {
             int i = 0;
             for (Song oldSong: oldSongs) {
-                if(!oldSong.getSongIdCloud().equals(song.getSongIdCloud())){
-                    i++;
+                if(oldSong.getRecordSource()==RecordSource.BANDE_SON) {
+                    if (!oldSong.getSongIdCloud().equals(song.getSongIdCloud())) {
+                        i++;
+                    }
                 }
             }
             if(i==oldSongs.size()){
                 newSongsList.add(song);
             }
         }
-
-
         Log.d(LOG_TAG, "CR newSongsList: "+newSongsList.size());
     }
 

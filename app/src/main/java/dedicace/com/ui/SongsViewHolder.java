@@ -29,6 +29,7 @@ import dedicace.com.data.database.SourceSong;
 
 import static android.graphics.Color.rgb;
 
+//todo changer toute la logique des listes et importer les listes BS et Live pour chaque liste
 public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, MainActivity.OnPositiveClickListener,View.OnLongClickListener {
 
     //Element UI
@@ -71,6 +72,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private Pupitre recordPupitre;
     private String pathSave;
     private Song songToDownload, songToDelete;
+    private String origine;
 
 
     //todo prévoir d'effacer les chansons que l'on a soit même enregistré (long click et menu)
@@ -230,8 +232,15 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         this.recordSources = recordSources;
 
         if(recordSources.size()==2){
-            source=RecordSource.BANDE_SON;
-            setSourceActivable(RecordSource.LIVE);
+            if(!origine.equals("Record")) {
+                Log.d(TAG, "SVH setRecordSource: cas non Record");
+                source = RecordSource.BANDE_SON;
+                setSourceActivable(RecordSource.LIVE);
+            }else{
+                Log.d(TAG, "SVH setRecordSource: cas Record");
+                source = RecordSource.LIVE;
+                setSourceActivable(RecordSource.BANDE_SON);
+            }
         }else if(recordSources.size()==1){
             if(recordSources.get(0)==RecordSource.BANDE_SON){
                 source=RecordSource.BANDE_SON;
@@ -308,6 +317,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private void setPupitresLoadedOnPhoneVisible(Pupitre... pupitres){
         for (Pupitre pupitre: pupitres) {
             int pupitreIndex=pupitreSourceButton.indexOf(pupitre);
+            Log.d(TAG, "SVH setPupitresLoadedOnPhoneVisible: "+pupitre+" "+pupitreIndex);
             setColorButton(false,(Button) pupitreSourceButton.get(pupitreIndex+1));
         }
     }
@@ -320,7 +330,12 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             //todo voir le cas dans le changement de source ? cf. note plus bas de todo
            // if(pupitrerecorded!=pupitre){
                // Log.d(TAG, "SVH setSongCloudRecorded: "+song+" "+recordedCloudSongs);
+            if(!origine.equals("Record")) {
+                Log.d(TAG, "SVH setSongCloudRecorded: cas non record");
                 setPupitresLoadedOnCloudVisible(pupitrerecorded);
+            }else{
+                Log.d(TAG, "SVH setSongCloudRecorded: cas Record");
+            }
            // }
         }
     }
@@ -455,7 +470,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         mlistItemClickedListener.OnClickedItem(titreText,message);
     }
 
-    private void handleClickSource(RecordSource recordSource, Button button) {
+    public void handleClickSource(RecordSource recordSource, Button button) {
 
         if(button.getAlpha()==1.0f||button.getAlpha()==0.5f) {
             Log.d(TAG, "handleClickSource: ");
@@ -480,20 +495,39 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     private void HandleListSongs(RecordSource recordSource) {
 
-        Log.d(TAG, "SVH HandleListSongs début");
+        Log.d(TAG, "SVH HandleListSongs début "+recordSource);
 
         setButtonActivable(false,tuttiBtn,bassBtn,tenorBtn,altoBtn,sopranoBtn);
 
-        Song[] songsPhone;
+        Song[] songsPhone,songsCloud;
+
 
         if(recordSource==RecordSource.BANDE_SON) {
-            setSongCloudRecorded(recordedCloudSongs);
+            songOnCloudRecorded = mlistItemClickedListener.OnListRecordedSongsOnCloud(getAdapterPosition(),recordSource);
+
+            Log.d(TAG, "SVH HandleListSongs: cas recordSource "+songOnCloudRecorded);
+            if(songOnCloudRecorded!=null) {
+                Log.d(TAG, "SVH HandleListSongs: SOCR non null"+ songOnCloudRecorded.size());
+                songsCloud = songOnCloudRecorded.toArray(new Song[0]);
+            }else{
+                Log.d(TAG, "SVH HandleListSongs: cas songsOncloudrecorded null");
+                songsCloud = new Song[0];
+            }
+
+            origine="Default";
+            //todo voir ce cas avec le cas différent de pupitre cf. la méthode
+
+            setSongCloudRecorded(songsCloud);
+
+            Log.d(TAG, "SVH HandleListSongs "+ songsCloud.length);
+
+            //setSongCloudRecorded(recordedCloudSongs);
         }
 
         //todo voir comment calculer le songLocalRecorded ici
           songOnPhoneRecorded = mlistItemClickedListener.OnListRecordedSongsOnPhone(getAdapterPosition(),recordSource);
         if(songOnPhoneRecorded!=null) {
-            Log.d(TAG, "SVH HandleListSongs: "+songOnPhoneRecorded.size());
+            Log.d(TAG, "SVH HandleListSongs: phones "+songOnPhoneRecorded.size());
             songsPhone = songOnPhoneRecorded.toArray(new Song[0]);
         }else{
             songsPhone = new Song[0];
@@ -563,26 +597,53 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
 
     private void handleLongClickPupitre(Pupitre pupitre, Button button) {
-        if(button.getAlpha()==0.9f){
-            for(Song song : recordedCloudSongs){
-                if(song.getPupitre()==pupitre&&song.getSourceSongTitre().equals(sourceSong.getTitre())&&song.getRecordSource()==source){
-                    songToDownload=song;
-                    Log.d(TAG, "SVH handleLongClickPupitre:A download "+songToDownload);
+        if(source==RecordSource.BANDE_SON) {
+            if (button.getAlpha() == 0.9f) {
+                for (Song song : recordedCloudSongs) {
+                    if (song.getPupitre() == pupitre && song.getSourceSongTitre().equals(sourceSong.getTitre()) && song.getRecordSource() == source) {
+                        songToDownload = song;
+                        Log.d(TAG, "SVH handleLongClickPupitre:A download " + songToDownload);
+                    }
                 }
-            }
-            Log.d(TAG, "SVH handleLongClickPupitre: single song "+songToDownload);
-            mlistItemClickedListener.OnLongClickItem(getAdapterPosition(),songToDownload);
+                Log.d(TAG, "SVH handleLongClickPupitre: single song A" + songToDownload);
+                mlistItemClickedListener.OnLongClickItem(getAdapterPosition(), songToDownload);
 
-        }else{
-            Toast.makeText(context, "Song déjà chargée sur le téléphone", Toast.LENGTH_SHORT).show();
-            for(Song song : recordedLocalSongs){
-                if(song.getPupitre()==pupitre&&song.getSourceSongTitre().equals(sourceSong.getTitre())&&song.getRecordSource()==source){
-                    songToDelete=song;
-                    Log.d(TAG, "SVH handleLongClickPupitre:B delete "+songToDelete);
+            } else {
+                Toast.makeText(context, "Song déjà chargée sur le téléphone", Toast.LENGTH_SHORT).show();
+                for (Song song : recordedLocalSongs) {
+                    if (song.getPupitre() == pupitre && song.getSourceSongTitre().equals(sourceSong.getTitre()) && song.getRecordSource() == source) {
+                        songToDelete = song;
+                        Log.d(TAG, "SVH handleLongClickPupitre:B delete " + songToDelete);
+                    }
                 }
+                Log.d(TAG, "SVH handleLongClickPupitre: delete single song B" + songToDelete);
+                mlistItemClickedListener.OnLongClickDeleteItem(getAdapterPosition(), songToDelete);
             }
-            Log.d(TAG, "SVH handleLongClickPupitre: delete single song "+songToDelete);
-            mlistItemClickedListener.OnLongClickDeleteItem(getAdapterPosition(),songToDelete);
+        }else if(source==RecordSource.LIVE){
+            if (button.getAlpha() == 1.0f||button.getAlpha()==0.5f) {
+                songOnPhoneRecorded = mlistItemClickedListener.OnListRecordedSongsOnPhone(getAdapterPosition(),source);
+                if(songOnPhoneRecorded!=null) {
+                    Log.d(TAG, "SVH HandleListSongs: phones B"+songOnPhoneRecorded.size());
+                    recordedLocalSongs = songOnPhoneRecorded.toArray(new Song[0]);
+                }else{
+                    recordedLocalSongs = new Song[0];
+                }
+
+                Log.d(TAG, "SVH handleLongClickPupitre: B "+recordedLocalSongs.length);
+                for (Song song : recordedLocalSongs) {
+                    Log.d(TAG, "SVH handleLongClickPupitre: "+song.getSourceSongTitre()+" "+song.getPupitre()+" "+song.getRecordSource());
+                    if (song.getPupitre() == pupitre && song.getSourceSongTitre().equals(sourceSong.getTitre()) && song.getRecordSource() == source) {
+                        songToDelete = song;
+                        Log.d(TAG, "SVH handleLongClickPupitre:C delete " + songToDelete);
+                    }
+                }
+                Log.d(TAG, "SVH handleLongClickPupitre: delete single song " + songToDelete);
+                mlistItemClickedListener.OnLongClickDeleteItem(getAdapterPosition(), songToDelete);
+
+            } else {
+
+            }
+
         }
     }
 
@@ -599,32 +660,40 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             //PlayBackController
             initializePlaybackController();
         }
+        //todo revoir pour simplifier les cas null de songToPlay
             if (songToPlay != null) {
                 if(songToPlay.getPupitre()!=pupitre||songToPlay.getRecordSource()!=source){
                     Log.d(TAG, "SVH setResourceToMediaPlayer: "+songToPlay.getSourceSongTitre()+songToPlay.getPupitre());
                     calculSongToPlay(pupitre,source);
                 }
 
-                String resStrToPlay = songToPlay.getSongPath();
-                Log.d(TAG, "SVH setResourceToMediaPlayer: songPath "+resStrToPlay);
-                try {
-                    mPlayerAdapter.prepareMediaPlayer(context, resStrToPlay);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if(songToPlay!=null) {
+                    String resStrToPlay = songToPlay.getSongPath();
+                    Log.d(TAG, "SVH setResourceToMediaPlayer: songPath " + resStrToPlay);
+                    try {
+                        mPlayerAdapter.prepareMediaPlayer(context, resStrToPlay);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    isFirstTime = false;
+                }else {
+                    setTotalTime(0);
                 }
-                isFirstTime = false;
             } else {
                 setTotalTime(0);
             }
-
     }
 
     private void calculSongToPlay(Pupitre pupitre,RecordSource source) {
-        for (Song song : songOnPhoneRecorded) {
-            if (song.getPupitre() == pupitre && song.getRecordSource() == source) {
-                songToPlay = song;
-                Log.d(TAG, "SVH OnPlaySong: "+songToPlay+" "+songToPlay.getPupitre());
+        if (songOnPhoneRecorded!=null) {
+            for (Song song : songOnPhoneRecorded) {
+                if (song.getPupitre() == pupitre && song.getRecordSource() == source) {
+                    songToPlay = song;
+                    Log.d(TAG, "SVH OnPlaySong: " + songToPlay + " " + songToPlay.getPupitre());
+                }
             }
+        }else{
+            songToPlay=null;
         }
     }
 
@@ -641,11 +710,16 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                         setResourceToMediaPlayer();
                     }
                     if(!mPlayerAdapter.isPlaying()&&!isRecording) {
-                        Log.d(TAG, "SVH setPlayListener: avec animation playing" );
-                        playSongs.setImageDrawable(animation);
-                        pause=false;
-                        mPlayerAdapter.play();
-                        setChronometerStart();
+                        Log.d(TAG, "SVH setPlayListener: avec animation playing "+songToPlay);
+                        if(songToPlay!=null) {
+                            playSongs.setImageDrawable(animation);
+                            pause = false;
+                            mPlayerAdapter.play();
+                            setChronometerStart();
+                        }else{
+                            Log.d(TAG, "SVH setPlayListener: rien à jouer");
+                            Toast.makeText(context, "Pas de chanson à jouer !", Toast.LENGTH_LONG).show();
+                        }
 
                     }else if(mPlayerAdapter.isPlaying()&&!isRecording){
                         Log.d(TAG, "SVH setPlayListener: pause" );
@@ -706,7 +780,6 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         Log.d(TAG, "SVH setRecord: "+mPlayerAdapter);
 
         pathSave = mPlayerAdapter.record(recordNamePupitre);
-
     }
 
     private void setStopListener() {
@@ -821,9 +894,14 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     }
 
+
+
     /**
      * Getter et setters
      */
+    public void setOrigine(String origine) {
+        this.origine = origine;
+    }
 
     public void setTitre(String titre){ this.titre.setText(titre); }
 
@@ -840,6 +918,10 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     ImageView getPlaySongs() {
         return playSongs;
+    }
+
+    public Button getLiveBtn() {
+        return liveBtn;
     }
 
     void setListSongLocalRecorded(List<Song> songOnPhoneRecorded) {

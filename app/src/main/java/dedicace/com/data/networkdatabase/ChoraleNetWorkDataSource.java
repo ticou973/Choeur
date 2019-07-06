@@ -228,7 +228,6 @@ public class ChoraleNetWorkDataSource {
         }else{
             Log.d(LOG_TAG, "NDS getMajDateCloudDataBase: pas d'Id chorale");
         }
-
     }
 
     public void startDownloadService(List<SourceSong> bgSourcesToDownLoad, List<SourceSong> newSourceSongsList, List<Song> mp3SongsToDownload, List<Song> newSongsList){
@@ -552,7 +551,7 @@ public class ChoraleNetWorkDataSource {
                     }
 
                 }else{
-                    Log.d(LOG_TAG, "NDS run: e fichier n'existe pas donc ne peut être supprimé !");
+                    Log.d(LOG_TAG, "NDS run: le fichier n'existe pas donc ne peut être supprimé !");
                 }
                 song.setUpdatePhoneMp3(null);
             }

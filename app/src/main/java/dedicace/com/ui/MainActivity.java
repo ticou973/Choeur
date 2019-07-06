@@ -77,6 +77,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private List<List<Song>> songOnClouds;
     private List<List<Song>> SongOnPhonesLive= new ArrayList<>();
     private List<List<Song>> SongOnPhonesBS= new ArrayList<>();
+    private Pupitre pupitreToDownload;
+    private Song songToPlay;
 
     //ViewModel
     private MainActivityViewModel mViewModel;
@@ -177,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                     dialogWait.dismiss();
                                 }
                                 affichageRecyclerView(sourceSongList);
-                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnPhones, songOnClouds);
+                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds, SongOnPhonesBS,SongOnPhonesLive);
                                 break;
                             case "modificationSS":
                                 boolean deleted = mViewModel.getDeleted();
@@ -188,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                     if (dialogWait != null) {
                                         dialogWait.dismiss();
                                     }
-                                    songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnPhones, songOnClouds);
+                                    songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds,SongOnPhonesBS,SongOnPhonesLive);
 
                                 } else {
                                     //mettre un dialogue pour changer ou non
@@ -208,13 +210,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                     dialogWait.dismiss();
                                 }
                                 affichageRecyclerView(sourceSongList);
-                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnPhones, songOnClouds);
+                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds,SongOnPhonesBS,SongOnPhonesLive);
                                 break;
                             case "newSongOnPhone":
                                 Log.d(TAG, "MA onChanged: lancement du SA pour le single");
                                 affichageRecyclerView(sourceSongList);
                                 Log.d(TAG, "MA onChanged: position " + positionToDownload);
-                                songsAdapter.swapSingleSong(positionToDownload, songToPlays, songOnPhones, songOnClouds);
+                                songsAdapter.swapSingleSong(positionToDownload, songToPlay, songOnClouds,SongOnPhonesBS,SongOnPhonesLive,recordSources);
                                 break;
                             case "newSongsOnPhone":
                                 Log.d(TAG, "MA onChanged: lancement du SA pour le multiple");
@@ -222,24 +224,24 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                     dialogWait.dismiss();
                                 }
                                 affichageRecyclerView(sourceSongList);
-                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnPhones, songOnClouds);
+                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds,SongOnPhonesBS,SongOnPhonesLive);
                                 break;
                             case "newRecord":
                                 Log.d(TAG, "MA onChanged: lancement du SA pour le recordSong "+positionToRecord);
                                 affichageRecyclerView(sourceSongList);
-                                songsAdapter.swaprecordedSongs(positionToRecord, recordSources, songToPlays, songOnPhones, songOnClouds);
+                                songsAdapter.swaprecordedSongs(positionToRecord, recordSources, songToPlay, songOnClouds,SongOnPhonesBS,SongOnPhonesLive);
 
                                 break;
                             case "deleteSingleSongOnPhone":
                                 Log.d(TAG, "MA onChanged: lancement du SA pour le single (delete) ");
                                 affichageRecyclerView(sourceSongList);
                                 Log.d(TAG, "MA onChanged: position (delete) " + positionToDelete);
-                                songsAdapter.swapSingleSong(positionToDelete, songToPlays, songOnPhones, songOnClouds);
+                                songsAdapter.swapSingleDeleteSong(positionToDelete, songToPlays, songOnClouds,SongOnPhonesBS,SongOnPhonesLive,recordSources);
                                 break;
                             case "deleteMultipleSongOnPhone":
                                 Log.d(TAG, "MA onChanged: lancement du SA pour le multiple delete");
                                 affichageRecyclerView(sourceSongList);
-                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnPhones, songOnClouds);
+                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds,SongOnPhonesBS,SongOnPhonesLive);
                                 break;
                         }
                     } else {
@@ -264,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     @Override
     public void onDialogPositiveClick() {
         Log.d(TAG, "MA onDialogPositiveClick dialog positif: "+sourceSongList);
-        songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnPhones, songOnClouds);
+        songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds,SongOnPhonesBS,SongOnPhonesLive);
     }
 
     @Override
@@ -607,25 +609,38 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     }
 
     @Override
+    public List<Song> OnListRecordedSongsOnCloud(int position,RecordSource recordSource) {
+
+        List<Song> cloudSongs = new ArrayList<>();
+
+        if(recordSource==RecordSource.BANDE_SON){
+
+            cloudSongs=songOnClouds.get(position);
+        }
+        return cloudSongs;
+    }
+
+    @Override
     public List<Song> OnListRecordedSongsOnPhone(int position,RecordSource recordSource) {
 
         List<Song> phoneSongs = new ArrayList<>();
 
-        Log.d(TAG, "MA OnListRecordedSongsOnPhone: "+position);
+        Log.d(TAG, "MA OnListRecordedSongsOnPhone: "+position+" "+recordSource);
 
         if(recordSource==RecordSource.BANDE_SON){
             phoneSongs=SongOnPhonesBS.get(position);
+            Log.d(TAG, "MA OnListRecordedSongsOnPhone: phoneSongs "+phoneSongs);
 
         }else if(recordSource==RecordSource.LIVE){
 
             phoneSongs=SongOnPhonesLive.get(position);
         }
+        Log.d(TAG, "MA OnListRecordedSongsOnPhone: "+phoneSongs);
         return phoneSongs;
     }
 
     @Override
-    public void OnSaveRecordSong(Song song) {
-        mViewModel.setRecordSongInAppDb(song);
+    public void OnSaveRecordSong(Song song) {mViewModel.setRecordSongInAppDb(song);
     }
 
     /**
@@ -635,7 +650,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     @Override
     public void OnLongClickItem(int position,Song song) {
-
+        songToPlay = song;
         Log.d(TAG, "MA OnLongClickItem: "+position);
         DialogMA dialog = new DialogMA();
         Bundle args = new Bundle();
@@ -648,6 +663,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     @Override
     public void OnLongClickDeleteItem(int position, Song song) {
+
 
         Log.d(TAG, "MA OnLongClickItem B: "+position);
         DialogMA dialog = new DialogMA();
@@ -676,7 +692,11 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     @Override
     public void onDialogMADeletePositiveClick(int position, Song song) {
         positionToDelete=position;
-        mViewModel.deleteSingleSong(song);
+        if(song!=null) {
+            mViewModel.deleteSingleSong(song);
+        }else{
+            Log.d(TAG, "MA onDialogMADeletePositiveClick: chanson null");
+        }
         Toast.makeText(this, "Votre chanson est supprimé sur le téléphone", Toast.LENGTH_LONG).show();
         Log.d(TAG, "MA onDialogMAPositiveClick: suppression sur tel du single (position) "+position);
     }
@@ -689,7 +709,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     @Override
     public void onDialogMADownloadPupitresPositiveClick(List<Integer> selectedItems) {
         getListPupitresToDownloadDelete(selectedItems);
-        Log.d(TAG, "onDialogMADownloadPupitresPositiveClick: selectedItems "+selectedItems+" "+pupitresToDownloadDelete);
+        Log.d(TAG, "onDialogMADownloadPupitresPositiveClick: selectedItems "+selectedItems+" "+pupitresToDownloadDelete+" "+songOnClouds.size()+" "+songOnClouds);
         Toast.makeText(this, "Vos chansons sont en train de se charger sur le téléphone", Toast.LENGTH_SHORT).show();
         AlertBox();
 
@@ -697,15 +717,21 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         List<Song> songsToDownload = new ArrayList<>();
 
         for(Pupitre pupitre:pupitresToDownloadDelete){
-            for(List<Song> songs:songOnClouds){
-                for(Song song :songs){
-                    if(song.getPupitre()==pupitre){
-                        if(song.getUpdatePhoneMp3()==null){
-                            songsToDownload.add(song);
-                        }else{
-                            Log.d(TAG, "NDS downloadMp3PupitresSongs: déjà présent dans le phone ");
+            for(List<Song> songs:songOnClouds) {
+                Log.d(TAG, "MA onDialogMADownloadPupitresPositiveClick: songs " + songs);
+                if (songs != null) {
+                    for (Song song : songs) {
+                        Log.d(TAG, "MA onDialogMADownloadPupitresPositiveClick: song " + song);
+                        if (song.getPupitre() == pupitre) {
+                            if (song.getUpdatePhoneMp3() == null) {
+                                songsToDownload.add(song);
+                            } else {
+                                Log.d(TAG, "NDS downloadMp3PupitresSongs: déjà présent dans le phone ");
+                            }
                         }
                     }
+                }else{
+                    Log.d(TAG, "onDialogMADownloadPupitresPositiveClick: songsNull");
                 }
             }
         }
@@ -757,10 +783,12 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         List<Song> songsToDelete = new ArrayList<>();
 
         for(Pupitre pupitre:pupitresToDownloadDelete){
-            for(List<Song> songs:songOnPhones){
-                for(Song song :songs){
-                    if(song.getPupitre()==pupitre){
+            for(List<Song> songs:songOnPhones) {
+                if (songs != null) {
+                    for (Song song : songs) {
+                        if (song.getPupitre() == pupitre) {
                             songsToDelete.add(song);
+                        }
                     }
                 }
             }
@@ -789,9 +817,9 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     public void onDialogPositiveClick(DialogFragment dialog, final Pupitre pupitre) {
         Log.d(TAG, "MA onDialogPositiveClick: enregistrer " + pupitre+ " "+ positionToRecord);
         Song song = new Song(sourceSongList.get(positionToRecord).getTitre(),RecordSource.LIVE,pupitre,new Date(System.currentTimeMillis()),new Date(System.currentTimeMillis()));
+        songToPlay=song;
         mPositiveClickListener.OnRecord(song);
     }
-
 
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {

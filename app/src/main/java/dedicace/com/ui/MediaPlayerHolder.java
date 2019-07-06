@@ -154,6 +154,15 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         return pathSave;
     }
 
+    private void setupMediaRecorder() {
+        mMediaRecorder = new MediaRecorder();
+        Log.d(SongsAdapter.TAG, "MPH setupMediaRecorder: "+mMediaRecorder);
+        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        mMediaRecorder.setOutputFile(pathSave);
+    }
+
     @Override
     public void stopRecord() {
         Log.d(SongsAdapter.TAG, "MPH stopRecord: ");
@@ -320,12 +329,4 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         return duration;
     }
 
-    private void setupMediaRecorder() {
-        mMediaRecorder = new MediaRecorder();
-        Log.d(SongsAdapter.TAG, "MPH setupMediaRecorder: "+mMediaRecorder);
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        mMediaRecorder.setOutputFile(pathSave);
-    }
 }
