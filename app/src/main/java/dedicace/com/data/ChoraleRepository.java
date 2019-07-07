@@ -18,10 +18,14 @@ import dedicace.com.R;
 import dedicace.com.data.database.ListSongs;
 import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
+import dedicace.com.data.database.Saison;
+import dedicace.com.data.database.SaisonDao;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SongsDao;
 import dedicace.com.data.database.SourceSong;
 import dedicace.com.data.database.SourceSongDao;
+import dedicace.com.data.database.Spectacle;
+import dedicace.com.data.database.SpectacleDao;
 import dedicace.com.data.networkdatabase.ChoraleNetWorkDataSource;
 import dedicace.com.ui.SongsAdapter;
 
@@ -32,10 +36,12 @@ public class ChoraleRepository {
     private static ChoraleRepository sInstance;
     private final SongsDao mSongDao;
     private final SourceSongDao mSourceDao;
+    private final SaisonDao mSaisonDao;
+    private final  SpectacleDao mSpectacleDao;
     private final ChoraleNetWorkDataSource mChoraleNetworkDataSource;
     private final AppExecutors mExecutors;
     private boolean mInitialized = false;
-    private Thread currentThread,t2,t1,t3,t4,t5,t6;
+    private Thread currentThread,t2,t1,t3,t4,t5,t6, threadSaisons;
     private Context context;
 
     //Songs
@@ -54,6 +60,9 @@ public class ChoraleRepository {
     private List<Song> modifiedSongsList = new ArrayList<>();
     private List<SourceSong> bgSourcesToDelete = new ArrayList<>();
     private List<SourceSong> bgSourcesToDownLoad = new ArrayList<>();
+
+    private List<Spectacle> spectacles = new ArrayList<>();
+    private List<Saison> saisons = new ArrayList<>();
 
     private List<Song>  mp3SongsToDelete = new ArrayList<>();
     private List<Song>  mp3SongsToDownload = new ArrayList<>();
@@ -86,12 +95,19 @@ public class ChoraleRepository {
     private Song songToDelete;
 
 
-    private ChoraleRepository(SongsDao songsDao, SourceSongDao sourceSongDao, final ChoraleNetWorkDataSource choraleNetworkDataSource, AppExecutors executors) {
+    private ChoraleRepository(SongsDao songsDao, SourceSongDao sourceSongDao, SaisonDao saisonDao, SpectacleDao spectacleDao, final ChoraleNetWorkDataSource choraleNetworkDataSource, AppExecutors executors) {
         Log.d(LOG_TAG, "CR Repository: constructor");
         mSongDao = songsDao;
         mSourceDao=sourceSongDao;
+        mSaisonDao=saisonDao;
+        mSpectacleDao=spectacleDao;
         mChoraleNetworkDataSource = choraleNetworkDataSource;
         mExecutors = executors;
+
+        //todo à modifier éventuellement sur préférences veut - on regarder si on veut télécharger automatique ou non (à la demande) ou si la dernière date de maj à changer
+        context = mChoraleNetworkDataSource.getContext();
+        //todo à modifier dans le listener pour appliquer les changements
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         t5 = new Thread(() -> {
             t5 = Thread.currentThread();
@@ -100,6 +116,28 @@ public class ChoraleRepository {
             Log.d(LOG_TAG, "CR run:  old SS et song "+oldSourcesSongs.size()+" songs "+oldSongs.size());
         });
         t5.start();
+
+        final LiveData<List<Saison>> majSaisonCloud = mChoraleNetworkDataSource.getSaisonsCloud();
+        Log.d(LOG_TAG, "CR ChoraleRepository: getSaisonsCloud "+majSaisonCloud);
+
+        majSaisonCloud.observeForever(saisons -> {
+            this.saisons=saisons;
+            spectacles = mChoraleNetworkDataSource.getSpectacles();
+            majRoomDb();
+
+            String currentSaisonId = null;
+
+            for(Saison saison:saisons){
+
+                if(saison.isCurrentSaison()){
+                    currentSaisonId=saison.getIdsaisonCloud();
+                }
+            }
+
+            editor = sharedPreferences.edit();
+            editor.putString("currentSaison",currentSaisonId);
+            editor.apply();
+        });
 
 
         final LiveData<Long> majDBCloudLong= mChoraleNetworkDataSource.getMajDBCloudLong();
@@ -192,6 +230,29 @@ public class ChoraleRepository {
         });
     }
 
+    private void majRoomDb() {
+        Log.d(LOG_TAG, "CR majRoomDb: ");
+        threadSaisons = new Thread(() -> {
+            mSaisonDao.bulkInsert(saisons);
+            mSpectacleDao.bulkInsert(spectacles);
+
+
+            //todo supprimer dès que test passé
+            List<Saison> tempSaisons = mSaisonDao.getAllSaisons();
+            List<Spectacle> tempSpectacles = mSpectacleDao.getAllSpectacles();
+
+            for(Saison saison : tempSaisons) {
+                Log.d(LOG_TAG, "CR majRoomDb: saisons"+ saison.getIdsaisonCloud()+" "+ saison.getSaisonName()+ " "+ saison.getIdSpectacles()+" "+saison.getUpdatePhone()+ " "+ saison.isCurrentSaison());
+            }
+
+            for(Spectacle spectacle : tempSpectacles){
+                Log.d(LOG_TAG, "CR majRoomDb: spectacles "+ spectacle.getIdSpectacleCloud()+" "+spectacle.getSpectacleName()+" "+ spectacle.getIdTitresSongs()+ " "+spectacle.getSpectacleLieux()+ " "+ spectacle.getSpectacleDates()+ " "+ spectacle.getUpdatePhone());
+            }
+
+        });
+        threadSaisons.start();
+    }
+
     //todo voir les factorisations possibles
     private void DoWorkInRoomBis(List<Song> songsToDownload) {
         Log.d(LOG_TAG, "CR DoWorkInRoomBis: multiple ");
@@ -226,12 +287,12 @@ public class ChoraleRepository {
         t1.start();
     }
 
-    public synchronized static ChoraleRepository getInstance(SongsDao songsDao, SourceSongDao sourceSongDao,ChoraleNetWorkDataSource choraleNetworkDataSource, AppExecutors executors) {
+    public synchronized static ChoraleRepository getInstance(SongsDao songsDao, SourceSongDao sourceSongDao, SaisonDao saisonDao, SpectacleDao spectacleDao, ChoraleNetWorkDataSource choraleNetworkDataSource, AppExecutors executors) {
 
         Log.d(LOG_TAG, "CR getInstance: repository");
         if (sInstance == null) {
             synchronized (LOCK) {
-                sInstance = new ChoraleRepository(songsDao, sourceSongDao,choraleNetworkDataSource,
+                sInstance = new ChoraleRepository(songsDao, sourceSongDao, saisonDao,spectacleDao,choraleNetworkDataSource,
                         executors);
 
                 Log.d(LOG_TAG, "CR getInstance: new repository");
@@ -805,10 +866,6 @@ public class ChoraleRepository {
 
     public synchronized void initializeData() {
         Log.d(LOG_TAG, "CR initializeData: repository isfetchneeded "+mInitialized);
-        //todo à modifier éventuellement sur préférences veut - on regarder si on veut télécharger automatique ou non (à la demande) ou si la dernière date de maj à changer
-        context = mChoraleNetworkDataSource.getContext();
-        //todo à modifier dans le listener pour appliquer les changements
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         boolean initialisation = sharedPreferences.getBoolean("initializeData",false);
         // Only perform initialization once per app lifetime. If initialization has already been
         // performed, we have nothing to do in this method.
@@ -884,7 +941,14 @@ public class ChoraleRepository {
 
     public LiveData<List<SourceSong>> getSourceSongs() {
         Log.d(LOG_TAG, "CR getSourceSongs: avant initialized data "+ Thread.currentThread().getName());
+
+
+
         initializeData();
+
+
+
+
         Log.d(SongsAdapter.TAG, "CR getSourceSongs: repository après iniatialize data");
         return mSourceDao.getAllSourceSongs();
     }

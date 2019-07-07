@@ -254,6 +254,27 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        Log.d("coucou", "MA onStart: A  "+ current_user_id);
+
+
+        if(currentUser == null){
+            sendToLogin();
+
+            Log.d("coucou", "MA onCreate:B Start "+ current_user_id);
+        } else {
+            //todo à compléter (rapatrier toute la partie non null de Oncreate ici en fait.
+
+            Log.d(TAG, "MA onStart: currentuser non null");
+
+            current_user_id = Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
+            Log.d("coucou", "MA onStart C: "+ current_user_id);
+        }
+    }
+
     private void AlertBox() {
         Log.d(TAG, "MA AlertBox: ");
         dialogWait= new DialogMA();
@@ -382,28 +403,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         } else {
             showLoading();
             Log.d("coucou", "MA onCreate: showLoading");
-        }
-    }
-
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        Log.d("coucou", "MA onStart: A  "+ current_user_id);
-
-
-        if(currentUser == null){
-            sendToLogin();
-
-            Log.d("coucou", "MA onCreate:B Start "+ current_user_id);
-        } else {
-            //todo à compléter (rapatrier toute la partie non null de Oncreate ici en fait.
-
-            Log.d(TAG, "MA onStart: currentuser non null");
-
-            current_user_id = Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
-            Log.d("coucou", "MA onStart C: "+ current_user_id);
         }
     }
 

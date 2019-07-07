@@ -15,7 +15,7 @@ public class InjectorUtils {
         AppExecutors executors = AppExecutors.getInstance();
         ChoraleNetWorkDataSource networkDataSource =
                 ChoraleNetWorkDataSource.getInstance(context.getApplicationContext(), mAContext,executors);
-        return ChoraleRepository.getInstance(database.songsDao(), database.sourceSongDao(),networkDataSource, executors);
+        return ChoraleRepository.getInstance(database.songsDao(), database.sourceSongDao(),database.saisonDao(),database.spectacleDao(),networkDataSource, executors);
     }
 
     public static ChoraleNetWorkDataSource provideNetworkDataSource(Context context, Context mAContext) {

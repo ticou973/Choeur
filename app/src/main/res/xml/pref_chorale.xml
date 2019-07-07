@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--
+    <ListPreference
+        android:defaultValue=""
+        android:entries=""
+        android:entryValues=""
+        android:key=""
+        android:title="Saison en cours"/>  -->
 
     <MultiSelectListPreference
         android:defaultValue="@string/tenor_value"
@@ -15,6 +22,7 @@
         android:title="@string/charge_auto_donnees"
         android:summaryOn="@string/charge_auto_summary"
         android:summaryOff="@string/charge_manuel_summary"/>
+
 
 
 </PreferenceScreen>

@@ -1,7 +1,13 @@
 package dedicace.com.data.database;
 
 import android.arch.persistence.room.TypeConverter;
+import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class Converters {
@@ -106,4 +112,59 @@ public class Converters {
     public static Long toTimestamp(Date date) {
         return date == null ? null : date.getTime();
     }
+
+
+    @TypeConverter
+    public static ArrayList<String> fromString(String value) {
+        Type listType = new TypeToken<ArrayList<String>>() {}.getType();
+        return new Gson().fromJson(value, listType);
+    }
+    @TypeConverter
+    public static String fromArrayList(ArrayList<String> list) {
+        Gson gson = new Gson();
+        String json = gson.toJson(list);
+        return json;
+    }
+
+    @TypeConverter
+    public static ArrayList<Date> fromStringDate(String value) {
+        ArrayList<Date> dates= new ArrayList<>();
+        Type listType = new TypeToken<ArrayList<String>>() {}.getType();
+        ArrayList<String> datesString = new ArrayList();
+        datesString =new Gson().fromJson(value, listType);
+        Long dateLong;
+        Date date;
+
+        for(String dateString : datesString){
+            dateLong = Long.parseLong(dateString);
+            date = new Date(dateLong);
+            dates.add(date);
+        }
+        Log.d("coucou", "C fromStringDate: "+dates);
+
+        return dates;
+    }
+    @TypeConverter
+    public static String fromArrayListDate(ArrayList<Date> list) {
+        ArrayList<String> datesString= new ArrayList<>();
+        Long dateLong = null;
+        String dateString;
+        for(Date date:list){
+            if(date==null){
+                date=null;
+            }else{
+                dateLong=date.getTime();
+            }
+            dateString = String.valueOf(dateLong);
+
+            datesString.add(dateString);
+            Log.d("coucou", "C fromArrayListDate: "+ datesString);
+        }
+        Gson gson = new Gson();
+        String json = gson.toJson(datesString);
+        Log.d("coucou", "C fromArrayListDate: "+json);
+        return json;
+    }
 }
+
+

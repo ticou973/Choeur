@@ -8,7 +8,7 @@ import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
 import android.util.Log;
 
-@Database(entities ={Song.class, SourceSong.class}, version = 8, exportSchema = false)
+@Database(entities ={Song.class, SourceSong.class, Saison.class, Spectacle.class}, version = 10, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDataBase extends RoomDatabase {
 
@@ -36,4 +36,6 @@ public abstract class AppDataBase extends RoomDatabase {
     }
     public abstract SongsDao songsDao();
     public abstract  SourceSongDao sourceSongDao();
+    public abstract  SaisonDao saisonDao();
+    public abstract SpectacleDao spectacleDao();
 }
