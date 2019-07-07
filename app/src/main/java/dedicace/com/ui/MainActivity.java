@@ -48,7 +48,7 @@ import dedicace.com.utilities.InjectorUtils;
 import dedicace.com.utilities.SongsUtilities;
 
 //todo revoir dans tout le logiciel les new Object lorsqu'ils sont déjà définis
-public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener,DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener, DialogMajSS.DialogMajSSListener, DialogMA.DialogMAListener, ChoraleNetWorkDataSource.OnNDSListener {
+public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener,DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener, DialogMajSS.DialogMajSSListener, DialogMA.DialogMAListener, ChoraleNetWorkDataSource.OnNDSListener, DialogSpectacleFragment.DialogSpectacleFragmentListener {
 
     //UI
     private  RecyclerView recyclerView;
@@ -474,17 +474,23 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_toolbar, menu);
-
+        Log.d(TAG, "MA onCreateOptionsMenu: ");
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d(TAG, "MA onOptionsItemSelected: ");
 
         switch (item.getItemId()){
 
             case R.id.parametres:
                 launchSettingsActivity();
+                break;
+
+
+            case R.id.spectacles:
+                launchChoiceSpectacle();
                 break;
 
             case R.id.load_pupitre:
@@ -520,6 +526,25 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+        menu.add("coucou");
+
+        Log.d(TAG, "MA onPrepareOptionsMenu: ");
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    private void launchChoiceSpectacle() {
+
+        DialogFragment dialog = new DialogSpectacleFragment();
+        dialog.show(getSupportFragmentManager(),"TAG");
+        Log.d(TAG, "MA OnDialogSpectacle fragment: ");
     }
 
     private void deleteSongsPupitre() {
@@ -825,6 +850,18 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     public void onDialogNegativeClick(DialogFragment dialog) {
 
         Log.d(TAG, "MA onDialogPositiveClick: annuler");
+    }
+
+    @Override
+    public void onDialogSpectaclePositiveClick(String spectacle) {
+
+        Log.d(TAG, "MA onDialogSpectaclePositiveClick: "+spectacle);
+
+    }
+
+    @Override
+    public void onDialogSpectacleNegativeClick() {
+        Log.d(TAG, "MA onDialogPositiveSpectacleClick: annuler");
     }
 
 

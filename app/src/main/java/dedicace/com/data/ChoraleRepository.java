@@ -273,7 +273,6 @@ public class ChoraleRepository {
     }
 
     private void getListSongsA() {
-
         listSongs= new ListSongs(mSongDao,mSourceDao,sourceSongsAfterSync,songsAfterSync);
         listSongs.getSongOnClouds();
         listSongs.getSongOnPhoneBS(sourceSongsAfterSync);

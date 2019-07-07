@@ -23,6 +23,8 @@
         android:title="@string/se_déconnecter"
         app:showAsAction="never" />
 
-
-
+    <item
+        android:id="@+id/spectacles"
+        android:title="@string/tous"
+        app:showAsAction="ifRoom"/>
 </menu>

@@ -55,6 +55,7 @@
     <string name="supprimer_les_chansons_d_un_pupitre">Supprimer les chansons d\'un pupitre</string>
     <string name="maj_auto">maj_auto</string>
     <string name="modification_user">Modification User</string>
+    <string name="tous">Tous</string>
 
 
 </resources>
