@@ -13,7 +13,12 @@ public interface SaisonDao {
     @Query("SELECT * FROM saison")
     List<Saison> getAllSaisons();
 
+    @Query("SELECT * FROM saison WHERE (id_saison_cloud IN (:idSaison))")
+    Saison getSaisonById(String idSaison);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void bulkInsert(List<Saison> saisons);
+
+
 
 }

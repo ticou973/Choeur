@@ -3,7 +3,9 @@ package dedicace.com.ui;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -12,18 +14,23 @@ import android.view.View;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import dedicace.com.R;
 
 public class DialogSpectacleFragment extends DialogFragment {
     private RadioButton tousRbtn,autresRbtn;
+    private List<RadioButton> listRadioButton = new ArrayList<>();
     private RadioGroup radioGroup;
     private String spectacle;
-
+    private ArrayList<String> spectacles;
+    private SharedPreferences sharedPreferences;
+    private String currentSpectacle;
 
     public DialogSpectacleFragment() {
         // Required empty public constructor
     }
-
 
     public interface DialogSpectacleFragmentListener {
         void onDialogSpectaclePositiveClick(String spectacle);
@@ -57,35 +64,73 @@ public class DialogSpectacleFragment extends DialogFragment {
 
         View view = inflater.inflate(R.layout.fragment_dialog_spectacle, null);
 
+
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(view);
 
-        tousRbtn = view.findViewById(R.id.tous_rbtn);
-        autresRbtn = view.findViewById(R.id.autres_rbtn);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        Bundle args;
+        args = getArguments();
+        if(args!=null){
+           spectacles = args.getStringArrayList("spectaclesName");
+        }
+
+        tousRbtn= view.findViewById(R.id.tous_rbtn);
         radioGroup =view.findViewById(R.id.rg_spectacles);
 
-        tousRbtn.setChecked(true);
-        spectacle="Tous";
+        for(String spectacle:spectacles){
+            RadioButton rb = new RadioButton(getContext());
+            rb.setId(View.generateViewId());
+            rb.setText(spectacle);
+            rb.setTextColor(getResources().getColor(R.color.primaryTextColor));
+            rb.setTextSize(18);
+            radioGroup.addView(rb);
+            listRadioButton.add(rb);
+        }
+
+
+        currentSpectacle=sharedPreferences.getString("currentSpectacle","");
+
+        if (currentSpectacle.isEmpty()){
+            spectacle="Tous";
+            tousRbtn.setChecked(true);
+        }else{
+            spectacle=currentSpectacle;
+            for(RadioButton rb :listRadioButton){
+                if(rb.getText().equals(currentSpectacle)){
+                    rb.setChecked(true);
+                }
+            }
+        }
+
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
-
                 Log.d(SongsAdapter.TAG, "DSF onCheckedChanged:A "+spectacle);
+
+                Log.d("coucou", "DSF onCheckedChanged: "+i);
 
                 switch (i){
                     case R.id.tous_rbtn:
                         spectacle="Tous";
                         break;
-                    case R.id.autres_rbtn:
-                        spectacle="Autres";
-                        break;
                 }
+
+                for(RadioButton rb : listRadioButton){
+                    int indexRb = rb.getId();
+                    if(i==indexRb){
+                        spectacle=rb.getText().toString();
+                    }
+                }
+
+                Log.d(SongsAdapter.TAG, "DSF onCreateDialog: B"+spectacle);
             }
+
         });
 
-        Log.d(SongsAdapter.TAG, "DSF onCreateDialog: "+spectacle);
+        Log.d(SongsAdapter.TAG, "DSF onCreateDialog: C "+spectacle);
 
         builder.setMessage("Veuillez choisir un spectacle :");
 

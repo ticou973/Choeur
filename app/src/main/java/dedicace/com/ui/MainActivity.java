@@ -40,8 +40,10 @@ import dedicace.com.data.database.AppDataBase;
 import dedicace.com.data.database.ListSongs;
 import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
+import dedicace.com.data.database.Saison;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
+import dedicace.com.data.database.Spectacle;
 import dedicace.com.data.networkdatabase.ChoraleNetWorkDataSource;
 import dedicace.com.ui.Admin.AdminHome;
 import dedicace.com.utilities.InjectorUtils;
@@ -79,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private List<List<Song>> SongOnPhonesBS= new ArrayList<>();
     private Pupitre pupitreToDownload;
     private Song songToPlay;
+    private ArrayList<String> namesSpectacles = new ArrayList<>();
+    private String spectacle ="Tous";
 
     //ViewModel
     private MainActivityViewModel mViewModel;
@@ -99,6 +103,9 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private SharedPreferences sharedPreferences;
     private List<Pupitre> pupitresToDownloadDelete;
     private DialogFragment dialogWait;
+    private Thread threadSpectacles;
+    private AppDataBase dataBase;
+    private SharedPreferences.Editor editor;
 
 
     //todo vérifier si extras dans des intents avec HasExtras
@@ -112,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         //todo voir l'intérêt de cette première ligne
         FirebaseApp.initializeApp(this);
         mAuth = FirebaseAuth.getInstance();
+        dataBase = AppDataBase.getInstance(getApplicationContext());
         Log.d(TAG, "MA onCreate: "+mAuth);
         //UI
         mLoadingIndicator = findViewById(R.id.pb_loading_indicator);
@@ -132,6 +140,10 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             mViewModel = ViewModelProviders.of(this, mfactory).get(MainActivityViewModel.class);
             Log.d("coucou", "MA onCreate: fin du viewModel");
             setUpSharedPreferences();
+
+            //todo vérifier la position de ce current Spectacles
+            getCurrentSpectacles();
+
             sourceSongs =mViewModel.getChoeurSourceSongs();
             Log.d(TAG, "MA onCreate: getChoeurSourcesongs " + sourceSongs);
             sourceSongs.observe(this, sourceSongs -> {
@@ -535,17 +547,55 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        try {
+            threadSpectacles.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-        menu.add("coucou");
+        MenuItem spectacleItem = menu.getItem(5);
+        spectacleItem.setTitle(spectacle);
 
         Log.d(TAG, "MA onPrepareOptionsMenu: ");
 
         return super.onPrepareOptionsMenu(menu);
     }
 
+    private void getCurrentSpectacles() {
+
+        String currentSaisonStr = sharedPreferences.getString("currentSaison", "");
+        threadSpectacles = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(!currentSaisonStr.isEmpty()) {
+                    Log.d(TAG, "MA run: id saisosn courante "+ currentSaisonStr);
+                    Saison currentSaison = dataBase.saisonDao().getSaisonById(currentSaisonStr);
+                    List<String> idSpectacles = new ArrayList<>();
+
+                    idSpectacles = currentSaison.getIdSpectacles();
+
+                    Log.d(TAG, "MA run: idspectacles  "+idSpectacles);
+
+                    for (String idSpectacle : idSpectacles){
+                        Spectacle spectacle = dataBase.spectacleDao().getSpectacleById(idSpectacle);
+                        String spectacleName = spectacle.getSpectacleName();
+                        Log.d(TAG, "MA run: nom du spectacle "+ spectacleName);
+                        namesSpectacles.add(spectacleName);
+                    }
+                    Log.d(TAG, "MA run: nom des spectacles "+namesSpectacles);
+                }
+            }
+        });
+        threadSpectacles.start();
+    }
+
     private void launchChoiceSpectacle() {
 
         DialogFragment dialog = new DialogSpectacleFragment();
+        Bundle args = new Bundle();
+        args.putStringArrayList("spectaclesName",namesSpectacles);
+        Log.d(TAG, "MA launchChoiceSpectacle: noms spectacles "+namesSpectacles);
+        dialog.setArguments(args);
         dialog.show(getSupportFragmentManager(),"TAG");
         Log.d(TAG, "MA OnDialogSpectacle fragment: ");
     }
@@ -859,7 +909,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     public void onDialogSpectaclePositiveClick(String spectacle) {
 
         Log.d(TAG, "MA onDialogSpectaclePositiveClick: "+spectacle);
+        this.spectacle=spectacle;
 
+        editor = sharedPreferences.edit();
+        editor.putString("currentSpectacle",spectacle);
+        editor.apply();
+
+        invalidateOptionsMenu();
     }
 
     @Override
@@ -925,9 +981,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private void deleteDbRoom(){
         mExecutors = AppExecutors.getInstance();
         mExecutors.diskIO().execute(() -> {
-            AppDataBase database = AppDataBase.getInstance(getApplicationContext());
-            database.songsDao().deleteAll();
-            database.sourceSongDao().deleteAll();
+            dataBase.songsDao().deleteAll();
+            dataBase.sourceSongDao().deleteAll();
         });
     }
 }
