@@ -339,6 +339,10 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             Log.d(TAG, "MA onSharedPreferenceChanged: initialize ");
             mViewModel.getSourceSongs();
         }
+
+        if(key.equals("currentSaison")){
+            //todo faire le changement de saison
+        }
     }
 
     private void getListSongs() {

@@ -42,7 +42,7 @@ public class ChoraleRepository {
     private final AppExecutors mExecutors;
     private boolean mInitialized = false;
     private Thread currentThread,t2,t1,t3,t4,t5,t6, threadSaisons;
-    private Context context;
+    private static Context context;
 
     //Songs
     private List<SourceSong> sourceSongsAfterSync = new ArrayList<>();
@@ -62,7 +62,7 @@ public class ChoraleRepository {
     private List<SourceSong> bgSourcesToDownLoad = new ArrayList<>();
 
     private List<Spectacle> spectacles = new ArrayList<>();
-    private List<Saison> saisons = new ArrayList<>();
+    private static List<Saison> saisons = new ArrayList<>();
 
     private List<Song>  mp3SongsToDelete = new ArrayList<>();
     private List<Song>  mp3SongsToDownload = new ArrayList<>();
