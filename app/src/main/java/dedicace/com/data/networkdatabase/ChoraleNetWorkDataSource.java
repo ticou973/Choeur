@@ -277,7 +277,7 @@ public class ChoraleNetWorkDataSource {
                             Log.d(LOG_TAG, "NDS onComplete: sourceSongs " + Thread.currentThread().getName());
                             if (task.isSuccessful()) {
                                 for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                                    Log.d(LOG_TAG, "NDS-exec deb Oncomplete " + document.getId() + " => " + document.getData().get("maj"));
+                                    Log.d(LOG_TAG, "NDS deb Oncomplete " + document.getId() + " => " + document.getData().get("maj"));
                                     //todo voir comment écrire une seule ligne avec ToObject
 
                                     String titre, groupe, baseUrlOriginalSong, urlCloudBackground,idCloud;
@@ -302,9 +302,9 @@ public class ChoraleNetWorkDataSource {
                                     sourceSongs.add(sourceSong);
                                 }
 
-                                Log.d(LOG_TAG, "NDS-exec fetchSourceSongs: après fetch");
+                                Log.d(LOG_TAG, "NDS fetchSourceSongs: après fetch");
                             } else {
-                                Log.w(LOG_TAG, "NDS-exec Error getting documents.", task.getException());
+                                Log.w(LOG_TAG, "NDS Error getting documents.", task.getException());
                             }
 
                             try {
@@ -314,7 +314,7 @@ public class ChoraleNetWorkDataSource {
                                             Log.d(LOG_TAG, "NDS onComplete: Songs " + Thread.currentThread().getName());
                                             if (task1.isSuccessful()) {
                                                 for (QueryDocumentSnapshot document : Objects.requireNonNull(task1.getResult())) {
-                                                    Log.d(LOG_TAG, "NDS-exec " + document.getId() + " => " + document.getData().get("pupitre"));
+                                                    Log.d(LOG_TAG, "NDS " + document.getId() + " => " + document.getData().get("pupitre"));
 
                                                     final String pupitre, recordSource, urlMp3, idCloud;
                                                     final Date maj;
@@ -336,17 +336,17 @@ public class ChoraleNetWorkDataSource {
 
                                                     //todo comment faire pour faire une référence à sourceSong
                                                     titre = (String) document.getData().get("titre_song");
-                                                    Log.d(LOG_TAG, "NDS-exec : onComplete:B Songs " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
+                                                    Log.d(LOG_TAG, "NDS : onComplete:B Songs " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
                                                     Song song = new Song(idCloud,titre,sourceObj,pupitreObj,urlMp3,maj);
                                                     songs.add(song);
                                                 }
-                                                Log.d(LOG_TAG, "NDS-exec onComplete: avant post "+songs.size()+"  "+ songs);
+                                                Log.d(LOG_TAG, "NDS onComplete: avant post "+songs.size()+"  "+ songs);
                                                 //todo à vérifier surement inutile maintenant
                                                 Message message = Message.obtain();
                                                 message.obj = "OK";
                                                 handler.sendMessage(message);
                                             } else {
-                                                Log.w(LOG_TAG, "NDS-exec Error getting documents.", task1.getException());
+                                                Log.w(LOG_TAG, "NDS Error getting documents.", task1.getException());
                                             }
                                         });
                             } catch (Exception e) {

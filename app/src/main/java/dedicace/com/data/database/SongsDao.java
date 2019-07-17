@@ -18,6 +18,9 @@ public interface SongsDao {
     @Query("SELECT * FROM song WHERE (source_enregistrement IN (:source)) AND (titre_song IN (:titre))")
     List<Song> getSongsBySourceTitre(RecordSource source, String titre);
 
+    @Query("SELECT * FROM song WHERE  (titre_song IN (:titre))")
+    List<Song> getSongsByTitre(String titre);
+
     @Query("SELECT * FROM song WHERE (titre_song IN (:titre)) AND (pupitre IN (:pupitre)) AND (source_enregistrement IN (:source))")
     Song getSongsByTitrePupitreSource(String titre, Pupitre pupitre, RecordSource source);
 

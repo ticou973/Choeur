@@ -544,7 +544,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     }
 
 
-
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         try {
@@ -552,6 +551,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        String spectacle = sharedPreferences.getString("currentSpectacle","");
 
         MenuItem spectacleItem = menu.getItem(5);
         spectacleItem.setTitle(spectacle);

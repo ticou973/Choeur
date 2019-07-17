@@ -25,6 +25,8 @@ public class ListSongs {
     private SourceSongDao mSourceSongDao;
     private List<SourceSong> sourceSongs;
     private List<Song> songs;
+    private List<SourceSong> sourceSongsTemp;
+    private List<Song> songsTemp;
 
     private ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -261,5 +263,9 @@ public class ListSongs {
     public List<List<Song>> getSongOnPhoneLiveA() {
         Log.d(LOG_TAG, "LS CR getSongOnPhoneLiveA: "+SongOnPhonesLive);
         return SongOnPhonesLive;
+    }
+
+    public List<SourceSong> getSourceSongs() {
+        return sourceSongs;
     }
 }

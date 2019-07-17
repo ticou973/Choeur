@@ -21,6 +21,9 @@ public interface SourceSongDao {
     @Query("SELECT * FROM sourcesong WHERE titre in (:titre)")
     SourceSong getSourceSongByTitre(String titre);
 
+    @Query("SELECT * FROM sourcesong WHERE id_source_song in (:idTitre)")
+    SourceSong getSourceSongByIdCloud(String idTitre);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void bulkInsert(List<SourceSong> sourceSongs);
 

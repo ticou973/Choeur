@@ -92,9 +92,10 @@ public class DialogSpectacleFragment extends DialogFragment {
 
         currentSpectacle=sharedPreferences.getString("currentSpectacle","");
 
-        if (currentSpectacle.isEmpty()){
+        if (currentSpectacle.isEmpty()||currentSpectacle.equals("Tous")){
             spectacle="Tous";
             tousRbtn.setChecked(true);
+
         }else{
             spectacle=currentSpectacle;
             for(RadioButton rb :listRadioButton){
@@ -103,7 +104,6 @@ public class DialogSpectacleFragment extends DialogFragment {
                 }
             }
         }
-
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override

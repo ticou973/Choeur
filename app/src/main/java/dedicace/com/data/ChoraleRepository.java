@@ -48,7 +48,7 @@ public class ChoraleRepository {
     private List<SourceSong> sourceSongsAfterSync = new ArrayList<>();
     private List<Song> songsAfterSync = new ArrayList<>();
     private List<SourceSong> oldSourcesSongs = new ArrayList<>();
-    private  List<Song> songs;
+    private List<Song> songs;
     private List<Song> oldSongs = new ArrayList<>();
     private List<SourceSong> newSourceSongsList = new ArrayList<>();
     private List<Song> newSongsList = new ArrayList<>();
@@ -174,6 +174,7 @@ public class ChoraleRepository {
             }else{
                 //pour le cas aucune modif
                 if(oldSourcesSongs!=null&&oldSourcesSongs.size()!=0){
+                    //chemin A aucune modification et données initiales
                     isFromLocal=true;
                     typeSS="oldSS";
                     //todo voir comment retirer les arguments qui sont inutiles
@@ -314,12 +315,18 @@ public class ChoraleRepository {
                 synchronisationLocalDataBase(sourceSongs,songs);
 
             }else{
+                //chemin A : pas de modification
                 //todo trouver une méthode un peu moins artificielle ? cf modèle architecture.
                 Log.d(LOG_TAG, "CR run: else isFrom Local pas de synchronisation");
                 //mis pour que alerte se déclenche
                 mSourceDao.updateSourceSong(oldSourcesSongs.get(0));
-                sourceSongsAfterSync=oldSourcesSongs;
-                songsAfterSync=oldSongs;
+
+                List<SourceSong> oldSScurrentSpectacle = getSSCurrentSpectacle(oldSourcesSongs);
+                //sourceSongsAfterSync=oldSourcesSongs;
+                sourceSongsAfterSync=oldSScurrentSpectacle;
+                List<Song> oldSongsCurrentSpectacle = getSongCurrentSpectacle(sourceSongsAfterSync,oldSongs);
+                //songsAfterSync=oldSongs;
+                songsAfterSync=oldSongsCurrentSpectacle;
                 getListSongsA();
             }
             Log.d(LOG_TAG, "CR ChoraleRepository LiveData après sync sourceSongs : "+sourceSongs.size()+ " "+sourceSongsAfterSync.size()+" "+Thread.currentThread().getName());
@@ -333,12 +340,48 @@ public class ChoraleRepository {
         t2.start();
     }
 
+    private List<Song> getSongCurrentSpectacle(List<SourceSong> sourceSongs, List<Song> oldSongs) {
+        ArrayList<Song> currentSongs = new ArrayList<>();
+        for(SourceSong sourceSong:sourceSongs){
+            String titre = sourceSong.getTitre();
+            List<Song> songs = mSongDao.getSongsByTitre(titre);
+            currentSongs.addAll(songs);
+        }
+
+        return currentSongs;
+    }
+
+    private List<SourceSong> getSSCurrentSpectacle(List<SourceSong> oldSourcesSongs) {
+        ArrayList<SourceSong> currentSS = new ArrayList<>();
+
+        ArrayList<String> currentSSId = new ArrayList<>();
+        String currentSpectacle = sharedPreferences.getString("currentSpectacle","");
+
+        List<Spectacle> listSpectaclesDb = mSpectacleDao.getAllSpectacles();
+        Log.d(LOG_TAG, "CR getSSCurrentSpectacle: "+ listSpectaclesDb);
+
+        if(!currentSpectacle.isEmpty()){
+            if(listSpectaclesDb!=null&&listSpectaclesDb.size()!=0) {
+                for (Spectacle spectacle : listSpectaclesDb) {
+                    if (spectacle.getSpectacleName().equals(currentSpectacle)) {
+                        currentSSId=spectacle.getIdTitresSongs();
+                    }
+                }
+
+                for(String idSpectacle: currentSSId){
+                    SourceSong sourceSong = mSourceDao.getSourceSongByIdCloud(idSpectacle);
+                    currentSS.add(sourceSong);
+                }
+            }
+        }
+        return currentSS;
+    }
+
+
     private void getListSongsA() {
         listSongs= new ListSongs(mSongDao,mSourceDao,sourceSongsAfterSync,songsAfterSync);
         listSongs.getSongOnClouds();
         listSongs.getSongOnPhoneBS(sourceSongsAfterSync);
-
-        // getSongOnPhoneBS();
 
         //todo vérifier l'utilité de celui-là
         listSongs.getSongToPlaysBs();
