@@ -144,10 +144,11 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             //todo vérifier la position de ce current Spectacles
             getCurrentSpectacles();
 
+            //todo voir si cela est nécessaire d'observer toutes les SS ou cseulement celles du spectacles
             sourceSongs =mViewModel.getChoeurSourceSongs();
             Log.d(TAG, "MA onCreate: getChoeurSourcesongs " + sourceSongs);
             sourceSongs.observe(this, sourceSongs -> {
-                sourceSongList=sourceSongs;
+               // sourceSongList=sourceSongs;
 
                 Log.d(TAG, "MA onChanged: Alerte, ça bouge dans le coin !" + sourceSongs + " " + mViewModel.getChoeurSourceSongs() + " " + Thread.currentThread().getName());
 
@@ -162,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                     AlertBox();
                 }else {
                     if(!typeSS.equals("modificationSS")){
-                        Log.d(TAG, "MA onChanged: typeSS non null et alertbox");
+                        Log.d(TAG, "MA onChanged: typeSS non null et alertbox "+typeSS);
                         //mLoadingIndicator.setIndeterminate(false);
                         showLoading();
                     }
@@ -182,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 getListSongs();
 
                 if (listSongs != null) {
-                    if (recordSources.size() == sourceSongs.size() && songToPlays.size() == sourceSongs.size() && songOnPhones.size() == sourceSongs.size() && songOnClouds.size() == sourceSongs.size()) {
+                    if (recordSources.size() == sourceSongList.size() && songToPlays.size() == sourceSongList.size() && songOnPhones.size() == sourceSongList.size() && songOnClouds.size() == sourceSongList.size()) {
                         Log.d(TAG, "MA onChanged: conditions toutes réunies"+typeSS);
                         switch (typeSS) {
                             case "oldSS":
@@ -353,7 +354,23 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         }
 
         if(key.equals("currentSaison")){
-            //todo faire le changement de saison
+            getCurrentSpectacles();
+
+            if(threadSpectacles!=null){
+                try {
+                    threadSpectacles.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            Log.d(TAG, "MA onSharedPreferenceChanged: current saison");
+           // mViewModel.getSourceSongs();
+        }
+
+        if(key.equals("currentSpectacle")){
+            Log.d(TAG, "MA onSharedPreferenceChanged: currentSpectacle");
+            mViewModel.getSourceSongs();
         }
     }
 
@@ -365,6 +382,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         Log.d(TAG, "MA getListSongs: début après aller chercher listSongs "+listSongs);
 
         if(listSongs!=null) {
+            sourceSongList=listSongs.getSourceSongs();
             Log.d(TAG, "MA getListSongs: début liste ");
             songOnPhones = listSongs.getSongsOnPhonesA();
             Log.d(TAG, "MA getSongElements songOnphones: " + songOnPhones);
@@ -546,13 +564,16 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        try {
-            threadSpectacles.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+
+        if(threadSpectacles!=null) {
+            try {
+                threadSpectacles.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
-        String spectacle = sharedPreferences.getString("currentSpectacle","");
+        String spectacle = sharedPreferences.getString("currentSpectacle","Tous");
 
         MenuItem spectacleItem = menu.getItem(5);
         spectacleItem.setTitle(spectacle);
@@ -565,25 +586,37 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private void getCurrentSpectacles() {
 
         String currentSaisonStr = sharedPreferences.getString("currentSaison", "");
+        Log.d(TAG, "MA getCurrentSpectacles: "+ currentSaisonStr);
         threadSpectacles = new Thread(new Runnable() {
             @Override
             public void run() {
                 if(!currentSaisonStr.isEmpty()) {
-                    Log.d(TAG, "MA run: id saisosn courante "+ currentSaisonStr);
+                    Log.d(TAG, "MA run: id saison courante "+ currentSaisonStr);
                     Saison currentSaison = dataBase.saisonDao().getSaisonById(currentSaisonStr);
+                    Log.d(TAG, "MA run: current saison "+currentSaison);
+
                     List<String> idSpectacles = new ArrayList<>();
 
-                    idSpectacles = currentSaison.getIdSpectacles();
+                    if(currentSaison!=null) {
+                        idSpectacles = currentSaison.getIdSpectacles();
+                        Set<String> idSpectaclesSet = new HashSet<>(idSpectacles);
 
-                    Log.d(TAG, "MA run: idspectacles  "+idSpectacles);
+                        editor = sharedPreferences.edit();
+                        editor.putStringSet("currentSpectacles", idSpectaclesSet);
+                        editor.apply();
 
-                    for (String idSpectacle : idSpectacles){
-                        Spectacle spectacle = dataBase.spectacleDao().getSpectacleById(idSpectacle);
-                        String spectacleName = spectacle.getSpectacleName();
-                        Log.d(TAG, "MA run: nom du spectacle "+ spectacleName);
-                        namesSpectacles.add(spectacleName);
+                        Log.d(TAG, "MA run: idspectacles  " + idSpectacles);
+
+                        for (String idSpectacle : idSpectacles) {
+                            Spectacle spectacle = dataBase.spectacleDao().getSpectacleById(idSpectacle);
+                            String spectacleName = spectacle.getSpectacleName();
+                            Log.d(TAG, "MA run: nom du spectacle " + spectacleName);
+                            namesSpectacles.add(spectacleName);
+                        }
+                        Log.d(TAG, "MA run: nom des spectacles " + namesSpectacles);
+                    }else{
+                        Log.d(TAG, "MA run: current saison null");
                     }
-                    Log.d(TAG, "MA run: nom des spectacles "+namesSpectacles);
                 }
             }
         });

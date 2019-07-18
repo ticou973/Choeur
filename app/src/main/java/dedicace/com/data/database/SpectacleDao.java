@@ -16,6 +16,9 @@ public interface SpectacleDao {
     @Query("SELECT * FROM spectacle WHERE (id_spectacle_cloud IN (:idSpectacle))")
     Spectacle getSpectacleById(String idSpectacle);
 
+    @Query("SELECT * FROM spectacle WHERE (spectacle_name IN (:nameSpectacle))")
+    Spectacle getSpectacleByName(String nameSpectacle);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void bulkInsert(List<Spectacle> spectacles);
 }

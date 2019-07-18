@@ -89,6 +89,7 @@ public class ChoraleNetWorkDataSource {
     private List<SourceSong> newBgDownload = new ArrayList<>();
     private List<Song> mp3Download = new ArrayList<>();
     private List<Song> newMp3Download = new ArrayList<>();
+    private List<String> listIdSS = new ArrayList<>();
 
 
     //DB
@@ -276,6 +277,7 @@ public class ChoraleNetWorkDataSource {
                         .addOnCompleteListener(task -> {
                             Log.d(LOG_TAG, "NDS onComplete: sourceSongs " + Thread.currentThread().getName());
                             if (task.isSuccessful()) {
+                                getIdSS();
                                 for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                                     Log.d(LOG_TAG, "NDS deb Oncomplete " + document.getId() + " => " + document.getData().get("maj"));
                                     //todo voir comment écrire une seule ligne avec ToObject
@@ -284,22 +286,27 @@ public class ChoraleNetWorkDataSource {
                                     Date maj;
                                     int duration;
                                     Timestamp majss;
-
                                     idCloud= document.getId();
-                                    titre = (String) document.getData().get("titre");
-                                    groupe = (String) document.getData().get("groupe");
-                                    duration = ((Long) Objects.requireNonNull(document.getData().get("duration"))).intValue();
-                                    baseUrlOriginalSong = (String) document.getData().get("original_song");
 
-                                    majss = (Timestamp) document.getData().get("maj");
+                                    //todo à retirer avec IdSS après ou alors à voir avec les saisons.
+                                    if(listIdSS.contains(idCloud)) {
+                                        Log.d(LOG_TAG, "NDS fetchSongs: restriction ");
 
-                                    maj = Objects.requireNonNull(majss).toDate();
-                                    urlCloudBackground = (String) document.getData().get("background");
+                                        titre = (String) document.getData().get("titre");
+                                        groupe = (String) document.getData().get("groupe");
+                                        duration = ((Long) Objects.requireNonNull(document.getData().get("duration"))).intValue();
+                                        baseUrlOriginalSong = (String) document.getData().get("original_song");
 
-                                    Log.d(LOG_TAG, "NDS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
-                                    SourceSong sourceSong = new SourceSong(idCloud,titre,groupe,duration,urlCloudBackground,baseUrlOriginalSong,maj);
+                                        majss = (Timestamp) document.getData().get("maj");
 
-                                    sourceSongs.add(sourceSong);
+                                        maj = Objects.requireNonNull(majss).toDate();
+                                        urlCloudBackground = (String) document.getData().get("background");
+
+                                        Log.d(LOG_TAG, "NDS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
+                                        SourceSong sourceSong = new SourceSong(idCloud, titre, groupe, duration, urlCloudBackground, baseUrlOriginalSong, maj);
+
+                                        sourceSongs.add(sourceSong);
+                                    }
                                 }
 
                                 Log.d(LOG_TAG, "NDS fetchSourceSongs: après fetch");
@@ -360,6 +367,19 @@ public class ChoraleNetWorkDataSource {
                 e.printStackTrace();
             }
 
+    }
+
+
+    private void getIdSS() {
+
+        listIdSS.add("79wV0IDkEDETN7EuR8C0");
+        listIdSS.add("4IQhRKuoOcSXKryH9gEa");
+        listIdSS.add("4GwlQ71BIv5HoEB5f2Fq");
+        listIdSS.add("PSCnwqf2ZHOWoM14CwR7");
+        listIdSS.add("UmDGHBTm4jExMS1fbXnZ");
+        listIdSS.add("FSFALZaGzvpBtUtLlXXU");
+        listIdSS.add("sYhl9CmNsDRfFvSmuMpG");
+        listIdSS.add("VwpZFU1AkNO6uzctBz4Y");
     }
 
     //todo faire des download qu'avec wifi ou suivant préférences
@@ -788,9 +808,7 @@ public class ChoraleNetWorkDataSource {
                             Set<String> pupitreToDownload = new HashSet<>();
                             pupitreToDownload.add(pupitre);
                             editor.putStringSet(mContext.getString(R.string.pref_pupitre_key),pupitreToDownload);
-                            editor.putBoolean("initializeData",true);
                             Log.d(LOG_TAG, "NDS setUpSharedPreferences: fin");
-                            editor.apply();
                         }
 
                         db.collection("chorale").document(idChorale).collection("saisons")
@@ -864,6 +882,9 @@ public class ChoraleNetWorkDataSource {
                                                                 }
                                                                 Log.d(LOG_TAG, "NDS getData: spectacles "+ spectacles);
 
+
+                                                                editor.putBoolean("initializeData",true);
+                                                                editor.apply();
                                                                 mDownLoadSaisons.postValue(saisons);
 
                                                             }else{

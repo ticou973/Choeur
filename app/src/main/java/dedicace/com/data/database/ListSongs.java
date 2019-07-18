@@ -1,11 +1,14 @@
 package dedicace.com.data.database;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.Set;
 
 import dedicace.com.ui.SongsAdapter;
 
@@ -23,24 +26,112 @@ public class ListSongs {
     private List<Song> songToPlaysBs=new ArrayList<>();
     private SongsDao mSongDao;
     private SourceSongDao mSourceSongDao;
+    private SpectacleDao mSpectacleDao;
     private List<SourceSong> sourceSongs;
     private List<Song> songs;
     private List<SourceSong> sourceSongsTemp;
     private List<Song> songsTemp;
 
-    private ReadWriteLock lock = new ReentrantReadWriteLock();
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
+    private Context context;
+
 
     private static final String LOG_TAG = "coucou";
 
 
-    public ListSongs(SongsDao mSongDao, SourceSongDao mSourceSongDao, List<SourceSong> sourceSongs, List<Song> songs) {
+    public ListSongs(SongsDao mSongDao, SourceSongDao mSourceSongDao, SpectacleDao mSpectacleDao, List<SourceSong> sourceSongs, List<Song> songs, Context context) {
 
         this.mSongDao = mSongDao;
         this.mSourceSongDao = mSourceSongDao;
-        this.sourceSongs = sourceSongs;
-        this.songs = songs;
-        Log.d(LOG_TAG, "LS CR ListSongs:constructeur A "+songs.size()+"local songs"+this.songs.size());
+        this.sourceSongsTemp = sourceSongs;
+        this.songsTemp = songs;
+        this.context=context;
+        this.mSpectacleDao=mSpectacleDao;
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+        this.sourceSongs=getSSCurrentSpectacle(sourceSongsTemp);
+        this.songs=getSongCurrentSpectacle(this.sourceSongs,songsTemp);
+        Log.d(LOG_TAG, "LS CR ListSongs:constructeur A "+songs.size()+"local songs "+this.songs.size());
     }
+
+    private List<Song> getSongCurrentSpectacle(List<SourceSong> sourceSongs, List<Song> oldSongs) {
+        ArrayList<Song> currentSongs = new ArrayList<>();
+        for(SourceSong sourceSong:sourceSongs){
+            String titre = sourceSong.getTitre();
+            List<Song> songs = mSongDao.getSongsByTitre(titre);
+            currentSongs.addAll(songs);
+        }
+
+        return currentSongs;
+    }
+
+    private List<SourceSong> getSSCurrentSpectacle(List<SourceSong> sourceSongsTemp) {
+        List<SourceSong> currentSS = new ArrayList<>();
+
+        String currentSpectacleStr = sharedPreferences.getString("currentSpectacle","Tous");
+
+        if(!currentSpectacleStr.isEmpty()){
+            if(currentSpectacleStr.equals("Tous")){
+
+                currentSS=getAllSourcesSongs();
+                Log.d(LOG_TAG, "LS getSSCurrentSpectacle: Tous");
+
+            }else{
+                ArrayList<String> currentSSId;
+                Spectacle currentSpectacle = mSpectacleDao.getSpectacleByName(currentSpectacleStr);
+                Log.d(LOG_TAG, "LS getSSCurrentSpectacle: "+currentSpectacle.getSpectacleName());
+                currentSSId=currentSpectacle.getIdTitresSongs();
+
+                for(String idSource: currentSSId){
+                    SourceSong sourceSong = mSourceSongDao.getSourceSongByIdCloud(idSource);
+                    currentSS.add(sourceSong);
+                }
+            }
+        }else{
+            Log.d(LOG_TAG, "LS getSSCurrentSpectacle: pas de current spectacle ");
+        }
+
+        return currentSS;
+    }
+
+    private List<SourceSong> getAllSourcesSongs() {
+
+        Set<String> currentSpectaclesSet = sharedPreferences.getStringSet("currentSpectacles",null);
+        ArrayList<String> currentSSId;
+        Set<SourceSong> currentsourceSongs = new HashSet<>();
+
+        if(currentSpectaclesSet!=null) {
+            for (String idSpectacle : currentSpectaclesSet) {
+                Spectacle currentSpectacle = mSpectacleDao.getSpectacleById(idSpectacle);
+                currentSSId=currentSpectacle.getIdTitresSongs();
+
+                for(String idSource: currentSSId){
+                    if(currentsourceSongs.size()!=0){
+                        int i=0;
+                        for (SourceSong sourceSong : currentsourceSongs){
+                            if(!sourceSong.getIdSourceSongCloud().equals(idSource)){
+                                i++;
+                            }
+                        }
+                        if(i==currentsourceSongs.size()){
+                            SourceSong sourceSong = mSourceSongDao.getSourceSongByIdCloud(idSource);
+                            currentsourceSongs.add(sourceSong);
+                        }else{
+                            Log.d(LOG_TAG, "LS getAllSourcesSongs: doublon "+ idSource);
+                        }
+                    }else{
+                        SourceSong sourceSong = mSourceSongDao.getSourceSongByIdCloud(idSource);
+                        currentsourceSongs.add(sourceSong);
+                    }
+                }
+            }
+        }
+
+        return new ArrayList<>(currentsourceSongs);
+    }
+
 
     public void getSongOnClouds() {
         //chercher les SongsOnCloud BS
@@ -60,14 +151,14 @@ public class ListSongs {
                 }
             }
 
-        Log.d(LOG_TAG, "LS ChoraleRepository LiveData: ListSongOnCloud "+ SongOnClouds.size()+ " songs "+songs.size()+" "+SongOnClouds+" "+SongOnClouds.get(0).size()+" "+Thread.currentThread().getName());
+//        Log.d(LOG_TAG, "LS ChoraleRepository LiveData: ListSongOnCloud "+ SongOnClouds.size()+ " songs "+songs.size()+" "+SongOnClouds+" "+SongOnClouds.get(0).size()+" "+Thread.currentThread().getName());
     }
 
-    public void getSongOnPhoneBS(List<SourceSong> sourceSongsAfterSync) {
+    public void getSongOnPhoneBS() {
         //chercher les SongsOnPhoneBS after Sync
-        Log.d(LOG_TAG, "LS getSongOnPhoneBS: ssAftersync size "+sourceSongsAfterSync.size());
+        Log.d(LOG_TAG, "LS getSongOnPhoneBS: ssAftersync size "+sourceSongs.size());
 
-        for (SourceSong sourceSong: sourceSongsAfterSync){
+        for (SourceSong sourceSong: sourceSongs){
             List<Song> listBs = mSongDao.getSongsOnPhone(sourceSong.getTitre(),RecordSource.BANDE_SON);
 
             Log.d(LOG_TAG, "LS getSongOnPhoneBS: listBS "+ listBs.size());
@@ -86,7 +177,6 @@ public class ListSongs {
             }
         }
 
-//        Log.d(LOG_TAG, "LS ChoraleRepository LiveData après sync SongOnPhonesBS: "+SongOnPhonesBS.size()+" "+SongOnPhonesBS.get(0).size()+" "+Thread.currentThread().getName());
         for (int i = 0; i <SongOnPhonesBS.size() ; i++) {
             Log.d(LOG_TAG, "LS run: song onPhone BS "+ SongOnPhonesBS.get(i));
         }
@@ -205,10 +295,10 @@ public class ListSongs {
         Log.d(LOG_TAG, "LS CR run initialize Data songToPlaysLive: "+songToPlaysLive.size()+" "+songToPlaysLive);
     }
 
-    public void getSongOnPhoneLive(List<SourceSong> sourceSongsBeforeSync) {
+    public void getSongOnPhoneLive() {
         //chercher les SongsOnPhoneLive before Sync
 
-        for (SourceSong sourceSong: sourceSongsBeforeSync){
+        for (SourceSong sourceSong: sourceSongs){
             List<Song> listLive = mSongDao.getSongsOnPhone(sourceSong.getTitre(),RecordSource.LIVE);
 
             if(listLive!=null&&listLive.size()!=0){

@@ -41,7 +41,7 @@ public class ChoraleRepository {
     private final ChoraleNetWorkDataSource mChoraleNetworkDataSource;
     private final AppExecutors mExecutors;
     private boolean mInitialized = false;
-    private Thread currentThread,t2,t1,t3,t4,t5,t6, threadSaisons;
+    private Thread currentThread,t2,t1,t3,t4,t5,t6,t7, threadSaisons;
     private static Context context;
 
     //Songs
@@ -93,6 +93,7 @@ public class ChoraleRepository {
     private boolean isAuto;
     private boolean isFromLocal;
     private Song songToDelete;
+    private LiveData<Long> majDBCloudLong;
 
 
     private ChoraleRepository(SongsDao songsDao, SourceSongDao sourceSongDao, SaisonDao saisonDao, SpectacleDao spectacleDao, final ChoraleNetWorkDataSource choraleNetworkDataSource, AppExecutors executors) {
@@ -117,6 +118,7 @@ public class ChoraleRepository {
         });
         t5.start();
 
+
         final LiveData<List<Saison>> majSaisonCloud = mChoraleNetworkDataSource.getSaisonsCloud();
         Log.d(LOG_TAG, "CR ChoraleRepository: getSaisonsCloud "+majSaisonCloud);
 
@@ -125,22 +127,12 @@ public class ChoraleRepository {
             spectacles = mChoraleNetworkDataSource.getSpectacles();
             majRoomDb();
 
-            String currentSaisonId = null;
 
-            for(Saison saison:saisons){
 
-                if(saison.isCurrentSaison()){
-                    currentSaisonId=saison.getIdsaisonCloud();
-                }
-            }
 
-            editor = sharedPreferences.edit();
-            editor.putString("currentSaison",currentSaisonId);
-            editor.apply();
         });
 
-
-        final LiveData<Long> majDBCloudLong= mChoraleNetworkDataSource.getMajDBCloudLong();
+        majDBCloudLong= mChoraleNetworkDataSource.getMajDBCloudLong();
         Log.d(LOG_TAG, "CR ChoraleRepository: getmajDBCCloud "+majDBCloudLong);
 
         majDBCloudLong.observeForever(majclouddblong -> {
@@ -181,7 +173,29 @@ public class ChoraleRepository {
                     DoSynchronization(oldSourcesSongs,oldSongs);
                     Log.d(LOG_TAG, "CR run: getOldSongs et SourcesSongs : données initiales "+oldSourcesSongs+" "+oldSongs);
                 }else{
+                    //cas de réinitialisation de spectacles lors de la première installation
                     Log.d(LOG_TAG, "CR run: getOldSongs et SourcesSongs : pas de données initiales ");
+                    t7 = new Thread(() -> {
+                        t7 = Thread.currentThread();
+                        oldSourcesSongs = mSourceDao.getAllSources();
+                        oldSongs=mSongDao.getAllSongs();
+                    });
+                    t7.start();
+
+                    try {
+                        t7.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    if(oldSourcesSongs!=null&&oldSourcesSongs.size()!=0) {
+                        Log.d(LOG_TAG, "CR run:  old SS et song " + oldSourcesSongs.size() + " songs " + oldSongs.size());
+                        isFromLocal = true;
+                        typeSS = "oldSS";
+                        //todo voir comment retirer les arguments qui sont inutiles
+                        DoSynchronization(oldSourcesSongs, oldSongs);
+                        Log.d(LOG_TAG, "CR run: getOldSongs et SourcesSongs : données initiales B" + oldSourcesSongs + " " + oldSongs);
+                    }
                 }
                 Log.d(LOG_TAG, "CR ChoraleRepository: Stop startFectch pas lancé !");
             }
@@ -236,6 +250,20 @@ public class ChoraleRepository {
         threadSaisons = new Thread(() -> {
             mSaisonDao.bulkInsert(saisons);
             mSpectacleDao.bulkInsert(spectacles);
+
+            String currentSaisonId = null;
+
+            for(Saison saison:saisons){
+
+                if(saison.isCurrentSaison()){
+                    currentSaisonId=saison.getIdsaisonCloud();
+                }
+            }
+
+            Log.d(LOG_TAG, "CR ChoraleRepository: currentsaisonID"+currentSaisonId);
+            editor = sharedPreferences.edit();
+            editor.putString("currentSaison",currentSaisonId);
+            editor.apply();
 
 
             //todo supprimer dès que test passé
@@ -321,12 +349,12 @@ public class ChoraleRepository {
                 //mis pour que alerte se déclenche
                 mSourceDao.updateSourceSong(oldSourcesSongs.get(0));
 
-                List<SourceSong> oldSScurrentSpectacle = getSSCurrentSpectacle(oldSourcesSongs);
-                //sourceSongsAfterSync=oldSourcesSongs;
-                sourceSongsAfterSync=oldSScurrentSpectacle;
-                List<Song> oldSongsCurrentSpectacle = getSongCurrentSpectacle(sourceSongsAfterSync,oldSongs);
-                //songsAfterSync=oldSongs;
-                songsAfterSync=oldSongsCurrentSpectacle;
+                //List<SourceSong> oldSScurrentSpectacle = getSSCurrentSpectacle(oldSourcesSongs);
+                sourceSongsAfterSync=oldSourcesSongs;
+                //sourceSongsAfterSync=oldSScurrentSpectacle;
+               // List<Song> oldSongsCurrentSpectacle = getSongCurrentSpectacle(sourceSongsAfterSync,oldSongs);
+                songsAfterSync=oldSongs;
+               // songsAfterSync=oldSongsCurrentSpectacle;
                 getListSongsA();
             }
             Log.d(LOG_TAG, "CR ChoraleRepository LiveData après sync sourceSongs : "+sourceSongs.size()+ " "+sourceSongsAfterSync.size()+" "+Thread.currentThread().getName());
@@ -379,14 +407,14 @@ public class ChoraleRepository {
 
 
     private void getListSongsA() {
-        listSongs= new ListSongs(mSongDao,mSourceDao,sourceSongsAfterSync,songsAfterSync);
+        listSongs= new ListSongs(mSongDao,mSourceDao,mSpectacleDao,sourceSongsAfterSync,songsAfterSync,context);
         listSongs.getSongOnClouds();
-        listSongs.getSongOnPhoneBS(sourceSongsAfterSync);
+        listSongs.getSongOnPhoneBS();
 
         //todo vérifier l'utilité de celui-là
         listSongs.getSongToPlaysBs();
 
-        listSongs.getSongOnPhoneLive(sourceSongsAfterSync);
+        listSongs.getSongOnPhoneLive();
 
         listSongs.getSongToPlayLive();
 
