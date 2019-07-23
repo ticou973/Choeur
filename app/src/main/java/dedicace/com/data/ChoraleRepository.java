@@ -348,13 +348,8 @@ public class ChoraleRepository {
                 Log.d(LOG_TAG, "CR run: else isFrom Local pas de synchronisation");
                 //mis pour que alerte se déclenche
                 mSourceDao.updateSourceSong(oldSourcesSongs.get(0));
-
-                //List<SourceSong> oldSScurrentSpectacle = getSSCurrentSpectacle(oldSourcesSongs);
                 sourceSongsAfterSync=oldSourcesSongs;
-                //sourceSongsAfterSync=oldSScurrentSpectacle;
-               // List<Song> oldSongsCurrentSpectacle = getSongCurrentSpectacle(sourceSongsAfterSync,oldSongs);
                 songsAfterSync=oldSongs;
-               // songsAfterSync=oldSongsCurrentSpectacle;
                 getListSongsA();
             }
             Log.d(LOG_TAG, "CR ChoraleRepository LiveData après sync sourceSongs : "+sourceSongs.size()+ " "+sourceSongsAfterSync.size()+" "+Thread.currentThread().getName());

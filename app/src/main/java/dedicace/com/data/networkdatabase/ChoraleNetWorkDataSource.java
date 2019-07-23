@@ -14,9 +14,12 @@ import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
@@ -271,6 +274,7 @@ public class ChoraleNetWorkDataSource {
 
     //todo voir le cas où il n'y a pas de réseau pour charger les données en attente.
     void fetchSongs() {
+        Log.d(LOG_TAG, "NDS fetchSongs: début");
             try {
                 db.collection("sourceSongs")
                         .get()
@@ -304,7 +308,6 @@ public class ChoraleNetWorkDataSource {
 
                                         Log.d(LOG_TAG, "NDS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
                                         SourceSong sourceSong = new SourceSong(idCloud, titre, groupe, duration, urlCloudBackground, baseUrlOriginalSong, maj);
-
                                         sourceSongs.add(sourceSong);
                                     }
                                 }
@@ -366,6 +369,131 @@ public class ChoraleNetWorkDataSource {
                 // Server probably invalid
                 e.printStackTrace();
             }
+
+    }
+
+    void fetchSongsB(){
+        Log.d(LOG_TAG, "NDS fetchSongsB: début");
+        getIdSS();
+
+        for(String idSS : listIdSS){
+            Log.d(LOG_TAG, "NDS fetchSongsB: début boucle "+ idSS);
+
+            try{
+
+                db.collection("sourceSongs").document(idSS)
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                if(task.isSuccessful()){
+                                    if(Objects.requireNonNull(task.getResult()).exists()){
+                                        Log.d(LOG_TAG, "NDS deb Oncomplete " + idSS + " => " + task.getResult().get("maj"));
+                                        //todo voir comment écrire une seule ligne avec ToObject
+
+                                        String titre, groupe, baseUrlOriginalSong, urlCloudBackground;
+                                        Date maj;
+                                        int duration;
+                                        Timestamp majss;
+
+                                            Log.d(LOG_TAG, "NDS fetchSongs: restriction "+idSS);
+
+                                            titre = (String) task.getResult().get("titre");
+                                            groupe = (String) task.getResult().get("groupe");
+                                            duration = ((Long) Objects.requireNonNull(task.getResult().get("duration"))).intValue();
+                                            baseUrlOriginalSong = (String) task.getResult().get("original_song");
+
+                                            majss = (Timestamp) task.getResult().get("maj");
+
+                                            maj = Objects.requireNonNull(majss).toDate();
+                                            urlCloudBackground = (String) task.getResult().get("background");
+
+                                            Log.d(LOG_TAG, "NDS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
+                                            SourceSong sourceSong = new SourceSong(idSS, titre, groupe, duration, urlCloudBackground, baseUrlOriginalSong, maj);
+                                            sourceSongs.add(sourceSong);
+
+                                    }else{
+                                        Log.d(LOG_TAG, "NDS onComplete: pb get REsults doesn't exist");
+                                    }
+
+
+
+                                    try {
+                                        db.collection("songs")
+                                                .whereEqualTo("titre_song",sourceSongs.get(sourceSongs.size()-1).getTitre())
+                                                .get()
+                                                .addOnCompleteListener(task1 -> {
+                                                    Log.d(LOG_TAG, "NDS onComplete: Songs " + Thread.currentThread().getName());
+                                                    if (task1.isSuccessful()) {
+                                                        for (QueryDocumentSnapshot document : Objects.requireNonNull(task1.getResult())) {
+                                                            Log.d(LOG_TAG, "NDS " + document.getId() + " => " + document.getData().get("pupitre"));
+
+                                                            final String pupitre, recordSource, urlMp3, idCloud;
+                                                            final Date maj;
+                                                            final Timestamp majs;
+
+                                                            idCloud = document.getId();
+
+                                                            pupitre = (String) document.getData().get("pupitre");
+
+                                                            final Pupitre pupitreObj = SongsUtilities.converttoPupitre(Objects.requireNonNull(pupitre));
+
+                                                            recordSource = (String) document.getData().get("recordSource");
+                                                            final RecordSource sourceObj = SongsUtilities.convertToRecordSource(Objects.requireNonNull(recordSource));
+
+                                                            urlMp3 = (String) document.getData().get("songPath");
+
+                                                            majs= (Timestamp) document.getData().get("maj");
+                                                            maj = Objects.requireNonNull(majs).toDate() ;
+
+                                                            //todo comment faire pour faire une référence à sourceSong
+                                                            titre = (String) document.getData().get("titre_song");
+                                                            Log.d(LOG_TAG, "NDS : onComplete:B Songs " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
+                                                            Song song = new Song(idCloud,titre,sourceObj,pupitreObj,urlMp3,maj);
+                                                            songs.add(song);
+                                                        }
+                                                        Log.d(LOG_TAG, "NDS onComplete: avant post "+songs.size()+"  "+ songs);
+                                                        //todo à vérifier surement inutile maintenant
+                                                        if(idSS.equals(listIdSS.get(listIdSS.size()-1))) {
+                                                            Log.d(LOG_TAG, "NDS onComplete: condition dernier idss  remplies "+ idSS);
+                                                            Message message = Message.obtain();
+                                                            message.obj = "OK";
+                                                            handler.sendMessage(message);
+                                                        }else{
+                                                            Log.d(LOG_TAG, "NDS onComplete: condition dernier idss pas remplies "+idSS);
+                                                        }
+                                                    } else {
+                                                        Log.w(LOG_TAG, "NDS Error getting documents.", task1.getException());
+                                                    }
+                                                });
+                                    } catch (Exception e) {
+                                        // Server probably invalid
+                                        e.printStackTrace();
+                                    }
+
+                                }else{
+                                    Log.d(LOG_TAG, "NDS onComplete: pb sur les fetch SS ");
+                                }
+
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+
+                            }
+                        });
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+
+
+        }
+
+        Log.d(LOG_TAG, "NDS fetchSongsB: end boucle "+sourceSongs.size());
+
 
     }
 

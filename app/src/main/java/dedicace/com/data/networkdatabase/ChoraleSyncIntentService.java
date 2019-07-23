@@ -20,7 +20,7 @@ public class ChoraleSyncIntentService extends IntentService {
 
         switch (intent.getStringExtra("origine")) {
             case "sources":
-                networkDataSource.fetchSongs();
+                networkDataSource.fetchSongsB();
                 Log.d("coucou", "CSIS onHandleIntent: fin du travail SS " + Thread.currentThread().getName());
                 break;
             case "maj":
