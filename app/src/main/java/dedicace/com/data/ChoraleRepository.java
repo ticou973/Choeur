@@ -10,8 +10,10 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import dedicace.com.AppExecutors;
 import dedicace.com.R;
@@ -62,6 +64,7 @@ public class ChoraleRepository {
     private List<SourceSong> bgSourcesToDownLoad = new ArrayList<>();
 
     private List<Spectacle> spectacles = new ArrayList<>();
+    private List<String> listIdSpectacles = new ArrayList<>();
     private static List<Saison> saisons = new ArrayList<>();
 
     private List<Song>  mp3SongsToDelete = new ArrayList<>();
@@ -125,10 +128,8 @@ public class ChoraleRepository {
         majSaisonCloud.observeForever(saisons -> {
             this.saisons=saisons;
             spectacles = mChoraleNetworkDataSource.getSpectacles();
+            listIdSpectacles =mChoraleNetworkDataSource.getListIdSpectacles();
             majRoomDb();
-
-
-
 
         });
 
@@ -251,18 +252,10 @@ public class ChoraleRepository {
             mSaisonDao.bulkInsert(saisons);
             mSpectacleDao.bulkInsert(spectacles);
 
-            String currentSaisonId = null;
-
-            for(Saison saison:saisons){
-
-                if(saison.isCurrentSaison()){
-                    currentSaisonId=saison.getIdsaisonCloud();
-                }
-            }
-
-            Log.d(LOG_TAG, "CR ChoraleRepository: currentsaisonID"+currentSaisonId);
             editor = sharedPreferences.edit();
-            editor.putString("currentSaison",currentSaisonId);
+            Set<String> setIdSpectacles = new HashSet<>(listIdSpectacles);
+            Log.d(LOG_TAG, "CR getData: setIdSpectacles "+ setIdSpectacles);
+            editor.putStringSet("currentSpectacles", setIdSpectacles);
             editor.apply();
 
 
@@ -1091,6 +1084,10 @@ public class ChoraleRepository {
 
     public void getData(String current_user_id) {
         mChoraleNetworkDataSource.getData(current_user_id);
+    }
+
+    public Thread getThreadSaisons() {
+        return threadSaisons;
     }
 }
 

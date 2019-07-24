@@ -40,7 +40,6 @@ import dedicace.com.data.database.AppDataBase;
 import dedicace.com.data.database.ListSongs;
 import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
-import dedicace.com.data.database.Saison;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
 import dedicace.com.data.database.Spectacle;
@@ -354,6 +353,21 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         }
 
         if(key.equals("currentSaison")){
+            /*getCurrentSpectacles();
+
+            if(threadSpectacles!=null){
+                try {
+                    threadSpectacles.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            Log.d(TAG, "MA onSharedPreferenceChanged: current saison");*/
+           // mViewModel.getSourceSongs();
+        }
+
+        if(key.equals("currentSpectacles")){
             getCurrentSpectacles();
 
             if(threadSpectacles!=null){
@@ -364,8 +378,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 }
             }
 
-            Log.d(TAG, "MA onSharedPreferenceChanged: current saison");
-           // mViewModel.getSourceSongs();
+            Log.d(TAG, "MA onSharedPreferenceChanged: current spectacles ");
+
         }
 
         if(key.equals("currentSpectacle")){
@@ -585,7 +599,47 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     private void getCurrentSpectacles() {
 
-        String currentSaisonStr = sharedPreferences.getString("currentSaison", "");
+
+
+       Thread threadSaisons = mViewModel.getThreadSaisons();
+
+       if(threadSaisons!=null) {
+
+           try {
+               threadSaisons.join();
+           } catch (InterruptedException e) {
+               e.printStackTrace();
+           }
+
+           Set<String> currentSpectacles = sharedPreferences.getStringSet("currentSpectacles",null);
+
+           Log.d(TAG, "MA getCurrentSpectacles: " + currentSpectacles);
+           threadSpectacles = new Thread(new Runnable() {
+               @Override
+               public void run() {
+                   if (currentSpectacles != null) {
+                       for (String idSpectacle : currentSpectacles) {
+                           Spectacle spectacle = dataBase.spectacleDao().getSpectacleById(idSpectacle);
+                           Log.d(TAG, "MA run: getCurrentSpectacles " + spectacle);
+                           if (spectacle != null) {
+                               String spectacleName = spectacle.getSpectacleName();
+                               Log.d(TAG, "MA run: nom du spectacle " + spectacleName);
+                               namesSpectacles.add(spectacleName);
+                           } else {
+                               Log.d(TAG, "MA run: else getCurrent Spectacles null ");
+                           }
+                       }
+                   }
+               }
+           });
+           threadSpectacles.start();
+
+       }else{
+           Log.d(TAG, "MA getCurrentSpectacles: threadsaisons null");
+       }
+
+
+       /* String currentSaisonStr = sharedPreferences.getString("currentSaison", "");
         Log.d(TAG, "MA getCurrentSpectacles: "+ currentSaisonStr);
         threadSpectacles = new Thread(new Runnable() {
             @Override
@@ -601,6 +655,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                         idSpectacles = currentSaison.getIdSpectacles();
                         Set<String> idSpectaclesSet = new HashSet<>(idSpectacles);
 
+                        //todo voir pourquoi l'écrire à chaque démarrage faire dans le get data
                         editor = sharedPreferences.edit();
                         editor.putStringSet("currentSpectacles", idSpectaclesSet);
                         editor.apply();
@@ -620,7 +675,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 }
             }
         });
-        threadSpectacles.start();
+        threadSpectacles.start();*/
     }
 
     private void launchChoiceSpectacle() {

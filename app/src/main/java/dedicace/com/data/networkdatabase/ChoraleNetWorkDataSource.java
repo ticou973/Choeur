@@ -93,6 +93,8 @@ public class ChoraleNetWorkDataSource {
     private List<Song> mp3Download = new ArrayList<>();
     private List<Song> newMp3Download = new ArrayList<>();
     private List<String> listIdSS = new ArrayList<>();
+    private List<String> listIdSSTemp = new ArrayList<>();
+    private List<String> listIdSpectacles = new ArrayList<>();
 
 
     //DB
@@ -185,6 +187,9 @@ public class ChoraleNetWorkDataSource {
         return spectacles;
     }
 
+    public List<String> getListIdSpectacles() {
+        return listIdSpectacles;
+    }
 
     public void getMajDateCloudDataBase() {
 
@@ -499,7 +504,7 @@ public class ChoraleNetWorkDataSource {
 
 
     private void getIdSS() {
-
+/*
         listIdSS.add("79wV0IDkEDETN7EuR8C0");
         listIdSS.add("4IQhRKuoOcSXKryH9gEa");
         listIdSS.add("4GwlQ71BIv5HoEB5f2Fq");
@@ -507,7 +512,17 @@ public class ChoraleNetWorkDataSource {
         listIdSS.add("UmDGHBTm4jExMS1fbXnZ");
         listIdSS.add("FSFALZaGzvpBtUtLlXXU");
         listIdSS.add("sYhl9CmNsDRfFvSmuMpG");
-        listIdSS.add("VwpZFU1AkNO6uzctBz4Y");
+        listIdSS.add("VwpZFU1AkNO6uzctBz4Y");*/
+
+
+        Set<String> currentSongs = sharedPreferences.getStringSet("idSongs",null);
+        Log.d(LOG_TAG, "NDS getIdSS: idSongs "+currentSongs);
+        if(currentSongs!=null){
+            listIdSS = new ArrayList<>(currentSongs);
+
+        }else{
+            Log.d(LOG_TAG, "NDS getIdSS: pas de current saison");
+        }
     }
 
     //todo faire des download qu'avec wifi ou suivant préférences
@@ -927,7 +942,7 @@ public class ChoraleNetWorkDataSource {
                             nom=(String) task.getResult().get("nom");
                             prenom=(String) task.getResult().get("prenom");
                             editor = sharedPreferences.edit();
-                            Log.d(LOG_TAG, "NDS setUpSharedPreferences: installation"+role+" "+pupitre+" "+idChorale+" "+email+" "+nom+" "+prenom);
+                            Log.d(LOG_TAG, "NDS setUpSharedPreferences: installation "+role+" "+pupitre+" "+idChorale+" "+email+" "+nom+" "+prenom);
                             editor.putBoolean("installation",false);
                             editor.putString("role",role);
                             editor.putString("idchorale",idChorale);
@@ -956,12 +971,25 @@ public class ChoraleNetWorkDataSource {
                                             saisonName = (String) document.getData().get("nom");
                                             currentSaison=(boolean) document.getData().get("current_saison");
 
+
+
                                             majss = (Timestamp) document.getData().get("maj");
                                             maj = Objects.requireNonNull(majss).toDate();
 
                                             Log.d(LOG_TAG, "NDS onComplete:A saisons " + saisonName + " " + maj + " "+idCloud );
 
                                             idSpectacles =(ArrayList<String>) document.getData().get("spectacles");
+
+                                            if(currentSaison){
+                                                Log.d(LOG_TAG, "NDS getData: idSpectacles size"+idSpectacles.size());
+                                                editor.putString("currentSaison",idCloud);
+
+                                                if(idSpectacles!=null&&idSpectacles.size()!=0) {
+                                                    listIdSpectacles.addAll(idSpectacles);
+                                                    Log.d(LOG_TAG, "NDS getData: listIdSpectacles "+ listIdSpectacles);
+                                                }
+
+                                            }
 
                                             Log.d(LOG_TAG, "NDS onComplete:B saisons " + saisonName + " " + maj + " "+idCloud+ " "+idSpectacles+" "+ currentSaison );
 
@@ -992,6 +1020,14 @@ public class ChoraleNetWorkDataSource {
 
                                                                     idSourceSongs=(ArrayList<String>) document.getData().get("id_titres");
 
+                                                                    if(listIdSpectacles.contains(idSpectacle)){
+                                                                        for(String idSS:idSourceSongs){
+                                                                            if(!listIdSSTemp.contains(idSS)){
+                                                                                listIdSSTemp.add(idSS);
+                                                                            }
+                                                                        }
+                                                                    }
+
                                                                     spectacleLieux=(ArrayList<String>) document.getData().get("concerts_lieux");
 
                                                                     //todo voir quand il n'y a pas de concert car array Timstamp est vide et ne marche pas alors
@@ -1002,15 +1038,15 @@ public class ChoraleNetWorkDataSource {
                                                                         spectacleDates.add(date);
                                                                     }
 
-                                                                    Log.d(LOG_TAG, "NDS getData: spectacles "+ idSpectacle+ " "+ spectacleName+ " "+ idSourceSongs+ " "+ spectacleLieux+ " "+ spectacleDates+ " "+ maj );
+                                                                    Log.d(LOG_TAG, "NDS getData: spectacles "+ listIdSSTemp.size()+" "+idSpectacle+ " "+ spectacleName+ " "+ idSourceSongs+ " "+ spectacleLieux+ " "+ spectacleDates+ " "+ maj );
 
                                                                     Spectacle spectacle = new Spectacle(idSpectacle,spectacleName,idSourceSongs,spectacleLieux,spectacleDates,maj);
                                                                     spectacles.add(spectacle);
 
                                                                 }
-                                                                Log.d(LOG_TAG, "NDS getData: spectacles "+ spectacles);
+                                                                Log.d(LOG_TAG, "NDS getData: spectacles "+ spectacles+" "+listIdSSTemp.size());
 
-
+                                                                editor.putStringSet("idSongs",new HashSet<>(listIdSSTemp));
                                                                 editor.putBoolean("initializeData",true);
                                                                 editor.apply();
                                                                 mDownLoadSaisons.postValue(saisons);

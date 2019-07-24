@@ -86,6 +86,10 @@ public class MainActivityViewModel extends ViewModel {
     public void getSourceSongs() {
         choeurSourceSongs=mRepository.getSourceSongs();
     }
+
+    public Thread getThreadSaisons() {
+        return mRepository.getThreadSaisons();
+    }
 }
 
 
