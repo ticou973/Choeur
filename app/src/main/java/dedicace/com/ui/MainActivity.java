@@ -386,6 +386,11 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             Log.d(TAG, "MA onSharedPreferenceChanged: currentSpectacle");
             mViewModel.getSourceSongs();
         }
+
+        if(key.equals("role")){
+            Log.d(TAG, "MA onSharedPreferenceChanged: role ");
+            mCurrentAuthRole=sharedPreferences.getString("role","Choriste");
+        }
     }
 
     private void getListSongs() {
@@ -599,9 +604,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     private void getCurrentSpectacles() {
 
-
-
-       Thread threadSaisons = mViewModel.getThreadSaisons();
+       /* Thread threadSaisons = mViewModel.getThreadSaisons();
 
        if(threadSaisons!=null) {
 
@@ -636,7 +639,30 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
        }else{
            Log.d(TAG, "MA getCurrentSpectacles: threadsaisons null");
-       }
+       }*/
+
+        Set<String> currentSpectacles = sharedPreferences.getStringSet("currentSpectacles",null);
+
+        Log.d(TAG, "MA getCurrentSpectacles: " + currentSpectacles);
+        threadSpectacles = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (currentSpectacles != null) {
+                    for (String idSpectacle : currentSpectacles) {
+                        Spectacle spectacle = dataBase.spectacleDao().getSpectacleById(idSpectacle);
+                        Log.d(TAG, "MA run: getCurrentSpectacles " + spectacle);
+                        if (spectacle != null) {
+                            String spectacleName = spectacle.getSpectacleName();
+                            Log.d(TAG, "MA run: nom du spectacle " + spectacleName);
+                            namesSpectacles.add(spectacleName);
+                        } else {
+                            Log.d(TAG, "MA run: else getCurrent Spectacles null ");
+                        }
+                    }
+                }
+            }
+        });
+        threadSpectacles.start();
 
 
        /* String currentSaisonStr = sharedPreferences.getString("currentSaison", "");
