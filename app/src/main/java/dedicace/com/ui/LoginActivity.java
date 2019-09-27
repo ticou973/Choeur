@@ -1,7 +1,9 @@
 package dedicace.com.ui;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -31,6 +33,8 @@ public class LoginActivity extends AppCompatActivity {
     //Firebase
     private FirebaseAuth mAuth;
     public static String current_user_id;
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
 
 
     //todo gérer si 2 personnes se loggent sur un même tel
@@ -38,6 +42,8 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -98,10 +104,11 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void sendToMain() {
-
+        editor = sharedPreferences.edit();
+        editor.putBoolean("installationAuth", false);
+        editor.apply();
         Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(mainIntent);
         finish();
-
     }
 }

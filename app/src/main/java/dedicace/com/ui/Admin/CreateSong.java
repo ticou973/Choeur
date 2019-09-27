@@ -107,8 +107,6 @@ public class CreateSong extends AppCompatActivity implements DialogNewSSFragment
         idChorale=sharedPreferences.getString("idchorale"," ");
         Log.d(TAG, "onCreate: idChorale "+ idChorale );
 
-
-
         createSongInDb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

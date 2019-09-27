@@ -195,6 +195,7 @@
                 android:layout_marginStart="8dp"
                 android:fontFamily="@font/roboto"
                 android:paddingTop="0dp"
+                android:paddingEnd="4dp"
                 android:text="@string/groupe"
                 android:textColor="@color/primaryTextColor"
                 android:textSize="18sp"

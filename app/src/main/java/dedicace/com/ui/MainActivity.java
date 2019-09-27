@@ -23,7 +23,6 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -93,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     private String mCurrentAuthRole;
     private String typeSS;
-    private boolean installation;
+    private boolean installation, installationAuth;
 
 
     //Utils
@@ -114,12 +113,27 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         setContentView(R.layout.activity_main);
         Log.d("coucou", "MA onCreate: "+Thread.currentThread().getName());
 
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+        installationAuth = sharedPreferences.getBoolean("installationAuth",true);
+
         //Firebase
         //todo voir l'intérêt de cette première ligne
-        FirebaseApp.initializeApp(this);
+        //FirebaseApp.initializeApp(this);
+
+
+        if(installationAuth){
+            mAuth = FirebaseAuth.getInstance();
+            mAuth.signOut();
+        }
+
         mAuth = FirebaseAuth.getInstance();
+
         dataBase = AppDataBase.getInstance(getApplicationContext());
-        Log.d(TAG, "MA onCreate: "+mAuth);
+        if(mAuth!=null&&mAuth.getCurrentUser()!=null){
+            Log.d(TAG, "MA onCreate: "+mAuth+" "+ mAuth.getCurrentUser().getUid());
+        }
+
         //UI
         mLoadingIndicator = findViewById(R.id.pb_loading_indicator);
         recyclerView = findViewById(R.id.recyclerview_media_item);
@@ -128,8 +142,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(songsAdapter);
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
 
         if(mAuth.getCurrentUser() != null) {
             Log.d(TAG, "" + "onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
@@ -310,6 +323,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     private void setUpSharedPreferences() {
         installation = sharedPreferences.getBoolean("installation",true);
+
         if(installation){
             current_user_id=mAuth.getUid();
             getData();
@@ -603,6 +617,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     }
 
     private void getCurrentSpectacles() {
+
 
        /* Thread threadSaisons = mViewModel.getThreadSaisons();
 
