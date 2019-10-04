@@ -29,26 +29,22 @@ public class Saison {
     @ColumnInfo(name = "id_spectacles")
     private ArrayList<String> idSpectacles = new ArrayList<>();
 
-    @ColumnInfo(name = "current_saison")
-    private boolean currentSaison;
 
-
-    public Saison(int saisonId, String idsaisonCloud, String saisonName, Date updatePhone, ArrayList<String> idSpectacles, boolean currentSaison) {
+    public Saison(int saisonId, String idsaisonCloud, String saisonName, Date updatePhone, ArrayList<String> idSpectacles) {
         this.saisonId = saisonId;
         this.idsaisonCloud = idsaisonCloud;
         this.saisonName = saisonName;
         this.updatePhone = updatePhone;
         this.idSpectacles = idSpectacles;
-        this.currentSaison= currentSaison;
+
     }
 
     @Ignore
-    public Saison(String idCloud, String saisonName, List<String> idSpectacles, Date maj, boolean currentSaison) {
+    public Saison(String idCloud, String saisonName, List<String> idSpectacles, Date maj) {
         this.idsaisonCloud=idCloud;
         this.saisonName=saisonName;
         this.idSpectacles.addAll(idSpectacles);
         this.updatePhone=maj;
-        this.currentSaison=currentSaison;
     }
 
     @Ignore
@@ -93,13 +89,5 @@ public class Saison {
 
     public void setIdSpectacles(ArrayList<String> idSpectacles) {
         this.idSpectacles = idSpectacles;
-    }
-
-    public boolean isCurrentSaison() {
-        return currentSaison;
-    }
-
-    public void setCurrentSaison(boolean currentSaison) {
-        this.currentSaison = currentSaison;
     }
 }

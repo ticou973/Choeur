@@ -11,6 +11,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -95,6 +96,7 @@ public class ChoraleNetWorkDataSource {
     private List<String> listIdSS = new ArrayList<>();
     private List<String> listIdSSTemp = new ArrayList<>();
     private List<String> listIdSpectacles = new ArrayList<>();
+    private String current_saisonId;
 
 
     //DB
@@ -205,7 +207,6 @@ public class ChoraleNetWorkDataSource {
     void fetchMajClouDb() {
 
         idChorale = sharedPreferences.getString("idchorale","");
-        //idChorale="jFHncTuYleIHhZtL2PmT";
         Log.d(LOG_TAG, "NDS getMajDateCloudDataBase: "+idChorale);
 
         if(!idChorale.equals("")) {
@@ -217,19 +218,9 @@ public class ChoraleNetWorkDataSource {
                             if(Objects.requireNonNull(task.getResult()).exists()){
                             threadMaj =Thread.currentThread();
 
-                            Log.d(LOG_TAG, "NDS onComplete threadMaj: "+threadMaj+" "+task+" "+task.getResult());
-
-                            Log.d(LOG_TAG, "NDS onComplete: "+ Objects.requireNonNull(task.getResult().get("maj")).getClass().toString());
-
                             Timestamp majDCBB =(Timestamp) task.getResult().get("maj");
-                            Log.d(LOG_TAG, "NDS onComplete: "+majDCBB);
-
                             majDateCloudDataBase = Objects.requireNonNull(majDCBB).toDate();
-                            Log.d(LOG_TAG, "NDS onComplete: majDBCloud " + majDateCloudDataBase);
-
                             majCloudDBLong = majDateCloudDataBase.getTime();
-                            Log.d(LOG_TAG, "NDS onComplete: majDBCloud Long " + majCloudDBLong);
-
                             mMajDbCloudLong.postValue(majCloudDBLong);
                             }else{
                                 Log.d(LOG_TAG, "NDS onComplete: taskresult n'existe pas");
@@ -278,106 +269,7 @@ public class ChoraleNetWorkDataSource {
 
 
     //todo voir le cas où il n'y a pas de réseau pour charger les données en attente.
-    void fetchSongs() {
-        Log.d(LOG_TAG, "NDS fetchSongs: début");
-            try {
-                db.collection("sourceSongs")
-                        .get()
-                        .addOnCompleteListener(task -> {
-                            Log.d(LOG_TAG, "NDS onComplete: sourceSongs " + Thread.currentThread().getName());
-                            if (task.isSuccessful()) {
-                                getIdSS();
-                                for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                                    Log.d(LOG_TAG, "NDS deb Oncomplete " + document.getId() + " => " + document.getData().get("maj"));
-                                    //todo voir comment écrire une seule ligne avec ToObject
-
-                                    String titre, groupe, baseUrlOriginalSong, urlCloudBackground,idCloud;
-                                    Date maj;
-                                    int duration;
-                                    Timestamp majss;
-                                    idCloud= document.getId();
-
-                                    //todo à retirer avec IdSS après ou alors à voir avec les saisons.
-                                    if(listIdSS.contains(idCloud)) {
-                                        Log.d(LOG_TAG, "NDS fetchSongs: restriction ");
-
-                                        titre = (String) document.getData().get("titre");
-                                        groupe = (String) document.getData().get("groupe");
-                                        duration = ((Long) Objects.requireNonNull(document.getData().get("duration"))).intValue();
-                                        baseUrlOriginalSong = (String) document.getData().get("original_song");
-
-                                        majss = (Timestamp) document.getData().get("maj");
-
-                                        maj = Objects.requireNonNull(majss).toDate();
-                                        urlCloudBackground = (String) document.getData().get("background");
-
-                                        Log.d(LOG_TAG, "NDS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
-                                        SourceSong sourceSong = new SourceSong(idCloud, titre, groupe, duration, urlCloudBackground, baseUrlOriginalSong, maj);
-                                        sourceSongs.add(sourceSong);
-                                    }
-                                }
-
-                                Log.d(LOG_TAG, "NDS fetchSourceSongs: après fetch");
-                            } else {
-                                Log.w(LOG_TAG, "NDS Error getting documents.", task.getException());
-                            }
-
-                            try {
-                                db.collection("songs")
-                                        .get()
-                                        .addOnCompleteListener(task1 -> {
-                                            Log.d(LOG_TAG, "NDS onComplete: Songs " + Thread.currentThread().getName());
-                                            if (task1.isSuccessful()) {
-                                                for (QueryDocumentSnapshot document : Objects.requireNonNull(task1.getResult())) {
-                                                    Log.d(LOG_TAG, "NDS " + document.getId() + " => " + document.getData().get("pupitre"));
-
-                                                    final String pupitre, recordSource, urlMp3, idCloud;
-                                                    final Date maj;
-                                                    final Timestamp majs;
-
-                                                    idCloud = document.getId();
-
-                                                    pupitre = (String) document.getData().get("pupitre");
-
-                                                    final Pupitre pupitreObj = SongsUtilities.converttoPupitre(Objects.requireNonNull(pupitre));
-
-                                                    recordSource = (String) document.getData().get("recordSource");
-                                                    final RecordSource sourceObj = SongsUtilities.convertToRecordSource(Objects.requireNonNull(recordSource));
-
-                                                    urlMp3 = (String) document.getData().get("songPath");
-
-                                                    majs= (Timestamp) document.getData().get("maj");
-                                                    maj = Objects.requireNonNull(majs).toDate() ;
-
-                                                    //todo comment faire pour faire une référence à sourceSong
-                                                    titre = (String) document.getData().get("titre_song");
-                                                    Log.d(LOG_TAG, "NDS : onComplete:B Songs " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
-                                                    Song song = new Song(idCloud,titre,sourceObj,pupitreObj,urlMp3,maj);
-                                                    songs.add(song);
-                                                }
-                                                Log.d(LOG_TAG, "NDS onComplete: avant post "+songs.size()+"  "+ songs);
-                                                //todo à vérifier surement inutile maintenant
-                                                Message message = Message.obtain();
-                                                message.obj = "OK";
-                                                handler.sendMessage(message);
-                                            } else {
-                                                Log.w(LOG_TAG, "NDS Error getting documents.", task1.getException());
-                                            }
-                                        });
-                            } catch (Exception e) {
-                                // Server probably invalid
-                                e.printStackTrace();
-                            }
-                        });
-
-            } catch (Exception e) {
-                // Server probably invalid
-                e.printStackTrace();
-            }
-
-    }
-
-    void fetchSongsB(){
+    void fetchSongs(){
         Log.d(LOG_TAG, "NDS fetchSongsB: début");
         getIdSS();
 
@@ -385,7 +277,6 @@ public class ChoraleNetWorkDataSource {
             Log.d(LOG_TAG, "NDS fetchSongsB: début boucle "+ idSS);
 
             try{
-
                 db.collection("sourceSongs").document(idSS)
                         .get()
                         .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -418,7 +309,7 @@ public class ChoraleNetWorkDataSource {
                                             sourceSongs.add(sourceSong);
 
                                     }else{
-                                        Log.d(LOG_TAG, "NDS onComplete: pb get REsults doesn't exist");
+                                        Log.d(LOG_TAG, "NDS onComplete: pb get Results doesn't exist");
                                     }
 
 
@@ -493,8 +384,6 @@ public class ChoraleNetWorkDataSource {
                 e.printStackTrace();
             }
 
-
-
         }
 
         Log.d(LOG_TAG, "NDS fetchSongsB: end boucle "+sourceSongs.size());
@@ -504,16 +393,6 @@ public class ChoraleNetWorkDataSource {
 
 
     private void getIdSS() {
-/*
-        listIdSS.add("79wV0IDkEDETN7EuR8C0");
-        listIdSS.add("4IQhRKuoOcSXKryH9gEa");
-        listIdSS.add("4GwlQ71BIv5HoEB5f2Fq");
-        listIdSS.add("PSCnwqf2ZHOWoM14CwR7");
-        listIdSS.add("UmDGHBTm4jExMS1fbXnZ");
-        listIdSS.add("FSFALZaGzvpBtUtLlXXU");
-        listIdSS.add("sYhl9CmNsDRfFvSmuMpG");
-        listIdSS.add("VwpZFU1AkNO6uzctBz4Y");*/
-
 
         Set<String> currentSongs = sharedPreferences.getStringSet("idSongs",null);
         Log.d(LOG_TAG, "NDS getIdSS: idSongs "+currentSongs);
@@ -926,52 +805,87 @@ public class ChoraleNetWorkDataSource {
 
     //todo mettre des try catch
     public void getData(String current_user_id) {
-        Log.d(LOG_TAG, "NDS getData: "+current_user_id);
-        db.collection("users").document(current_user_id)
+        Log.d(LOG_TAG, "NDS getData: " + current_user_id);
+        boolean installation = sharedPreferences.getBoolean("installation", true);
+        editor = sharedPreferences.edit();
+
+        if (installation) {
+            db.collection("users").document(current_user_id)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            if (Objects.requireNonNull(task.getResult()).exists()) {
+                                String role, pupitre, idChorale, email, nom, prenom;
+                                role = (String) task.getResult().get("role");
+                                pupitre = (String) task.getResult().get("pupitre");
+                                idChorale = (String) task.getResult().get("id_chorale");
+                                this.idChorale = idChorale;
+                                //todo voir à quoi pourront servir ces éléments (peut être dans le préférence compte)
+                                email = (String) task.getResult().get("email");
+                                nom = (String) task.getResult().get("nom");
+                                prenom = (String) task.getResult().get("prenom");
+                                Log.d(LOG_TAG, "NDS setUpSharedPreferences: installation " + role + " " + pupitre + " " + idChorale + " " + email + " " + nom + " " + prenom);
+                                editor.putBoolean("installation", false);
+                                editor.putString("role", role);
+                                editor.putString("idchorale", idChorale);
+                                editor.putBoolean(mContext.getString(R.string.maj_auto), true);
+                                editor.putString("pupitre", pupitre);
+                                Set<String> pupitreToDownload = new HashSet<>();
+                                pupitreToDownload.add(pupitre);
+                                editor.putStringSet(mContext.getString(R.string.pref_pupitre_key), pupitreToDownload);
+                                Log.d(LOG_TAG, "NDS setUpSharedPreferences: fin");
+                            }
+
+                            getSaisonsSpectacles();
+
+                        } else {
+                            Log.d(LOG_TAG, "NDS onComplete: help pb sur documents users");
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+
+                    });
+        }else{
+            Log.d(LOG_TAG, "NDS getData: else");
+            getSaisonsSpectacles();
+        }
+    }
+
+    private void getSaisonsSpectacles() {
+
+        db.collection(("chorale")).document(idChorale)
                 .get()
                 .addOnCompleteListener(task -> {
-                    if(task.isSuccessful()){
-                        if(Objects.requireNonNull(task.getResult()).exists()){
-                            String role, pupitre,idChorale,email,nom,prenom;
-                            role =(String) task.getResult().get("role");
-                            pupitre =(String) task.getResult().get("pupitre");
-                            idChorale=(String) task.getResult().get("id_chorale");
-                            this.idChorale=idChorale;
-                            //todo voir à quoi pourront servir ces éléments (peut être dans le préférence compte)
-                            email = (String) task.getResult().get("email");
-                            nom=(String) task.getResult().get("nom");
-                            prenom=(String) task.getResult().get("prenom");
-                            editor = sharedPreferences.edit();
-                            Log.d(LOG_TAG, "NDS setUpSharedPreferences: installation "+role+" "+pupitre+" "+idChorale+" "+email+" "+nom+" "+prenom);
-                            editor.putBoolean("installation",false);
-                            editor.putString("role",role);
-                            editor.putString("idchorale",idChorale);
-                            editor.putBoolean(mContext.getString(R.string.maj_auto),true);
-                            editor.putString("pupitre",pupitre);
-                            Set<String> pupitreToDownload = new HashSet<>();
-                            pupitreToDownload.add(pupitre);
-                            editor.putStringSet(mContext.getString(R.string.pref_pupitre_key),pupitreToDownload);
-                            Log.d(LOG_TAG, "NDS setUpSharedPreferences: fin");
-                        }
+                    if(Objects.requireNonNull(task.getResult()).exists()){
+                        threadMaj =Thread.currentThread();
+
+                        Timestamp majDCBB =(Timestamp) task.getResult().get("maj");
+                        majDateCloudDataBase = Objects.requireNonNull(majDCBB).toDate();
+                        majCloudDBLong = majDateCloudDataBase.getTime();
+
+                        String nomChorale = (String) task.getResult().get("nom");
+                        String logoChorale = (String) task.getResult().get("logo");
+                        current_saisonId = (String) task.getResult().get("current_saison");
+
+                        editor.putString("logoChorale",logoChorale);
+                        editor.putString("nomChorale",nomChorale);
+                        editor.putString("currentSaison",current_saisonId);
 
                         db.collection("chorale").document(idChorale).collection("saisons")
                                 .get()
                                 .addOnCompleteListener(task1 -> {
                                     if(task1.isSuccessful()){
                                         for (QueryDocumentSnapshot document : Objects.requireNonNull(task1.getResult())) {
-                                            Log.d(LOG_TAG, "NDS Oncomplete saisons" + document.getId() + " => " + document.getData().get("maj"));
+                                            Log.d(LOG_TAG, "NDS Oncomplete saisons " + document.getId() + " => " + document.getData().get("maj"));
 
                                             String saisonName,idCloud;
-                                            boolean currentSaison;
                                             Date maj;
                                             Timestamp majss;
                                             ArrayList<String> idSpectacles;
 
                                             idCloud= document.getId();
+
                                             saisonName = (String) document.getData().get("nom");
-                                            currentSaison=(boolean) document.getData().get("current_saison");
-
-
 
                                             majss = (Timestamp) document.getData().get("maj");
                                             maj = Objects.requireNonNull(majss).toDate();
@@ -980,84 +894,81 @@ public class ChoraleNetWorkDataSource {
 
                                             idSpectacles =(ArrayList<String>) document.getData().get("spectacles");
 
-                                            if(currentSaison){
-                                                Log.d(LOG_TAG, "NDS getData: idSpectacles size"+idSpectacles.size());
-                                                editor.putString("currentSaison",idCloud);
+                                            if(!TextUtils.isEmpty(current_saisonId)&&current_saisonId.equals(idCloud)){
+                                                Log.d(LOG_TAG, "NDS getData: idSpectacles size "+idSpectacles.size());
 
                                                 if(idSpectacles!=null&&idSpectacles.size()!=0) {
                                                     listIdSpectacles.addAll(idSpectacles);
                                                     Log.d(LOG_TAG, "NDS getData: listIdSpectacles "+ listIdSpectacles);
                                                 }
-
                                             }
 
-                                            Log.d(LOG_TAG, "NDS onComplete:B saisons " + saisonName + " " + maj + " "+idCloud+ " "+idSpectacles+" "+ currentSaison );
+                                            Log.d(LOG_TAG, "NDS onComplete:B saisons " + saisonName + " " + maj + " "+idCloud+ " "+idSpectacles);
 
-                                            Saison saison = new Saison(idCloud,saisonName,idSpectacles,maj, currentSaison);
+                                            Saison saison = new Saison(idCloud,saisonName,idSpectacles,maj);
                                             saisons.add(saison);
                                         }
 
                                         Log.d(LOG_TAG, "NDS getData: saisons " + saisons);
 
                                         db.collection("chorale").document(idChorale).collection("spectacles")
-                                                        .get()
-                                                        .addOnCompleteListener(task2 -> {
-                                                            if (task2.isSuccessful()) {
-                                                                for (QueryDocumentSnapshot document : Objects.requireNonNull(task2.getResult())) {
+                                                .get()
+                                                .addOnCompleteListener(task2 -> {
+                                                    if (task2.isSuccessful()) {
+                                                        for (QueryDocumentSnapshot document : Objects.requireNonNull(task2.getResult())) {
 
-                                                                    String spectacleName,idSpectacle;
-                                                                    Date maj;
-                                                                    Timestamp majss;
-                                                                    ArrayList<String> idSourceSongs;
-                                                                    ArrayList<String> spectacleLieux;
-                                                                    ArrayList<Timestamp> spectaclesTimeStamps;
-                                                                    ArrayList<Date> spectacleDates= new ArrayList<>();
+                                                            String spectacleName,idSpectacle;
+                                                            Date maj;
+                                                            Timestamp majss;
+                                                            ArrayList<String> idSourceSongs;
+                                                            ArrayList<String> spectacleLieux;
+                                                            ArrayList<Timestamp> spectaclesTimeStamps;
+                                                            ArrayList<Date> spectacleDates= new ArrayList<>();
 
-                                                                    idSpectacle=document.getId();
-                                                                    spectacleName=(String) document.getData().get("nom");
-                                                                    majss=(Timestamp) document.getData().get("maj");
-                                                                    maj = Objects.requireNonNull(majss).toDate();
+                                                            idSpectacle=document.getId();
+                                                            spectacleName=(String) document.getData().get("nom");
+                                                            majss=(Timestamp) document.getData().get("maj");
+                                                            maj = Objects.requireNonNull(majss).toDate();
 
-                                                                    idSourceSongs=(ArrayList<String>) document.getData().get("id_titres");
+                                                            idSourceSongs=(ArrayList<String>) document.getData().get("id_titres");
 
-                                                                    if(listIdSpectacles.contains(idSpectacle)){
-                                                                        for(String idSS:idSourceSongs){
-                                                                            if(!listIdSSTemp.contains(idSS)){
-                                                                                listIdSSTemp.add(idSS);
-                                                                            }
-                                                                        }
+                                                            if(listIdSpectacles.contains(idSpectacle)){
+                                                                for(String idSS:idSourceSongs){
+                                                                    if(!listIdSSTemp.contains(idSS)){
+                                                                        listIdSSTemp.add(idSS);
                                                                     }
-
-                                                                    spectacleLieux=(ArrayList<String>) document.getData().get("concerts_lieux");
-
-                                                                    //todo voir quand il n'y a pas de concert car array Timstamp est vide et ne marche pas alors
-                                                                    spectaclesTimeStamps = (ArrayList<Timestamp>) document.getData().get("concerts_dates");
-
-                                                                    for(Timestamp timestamp : spectaclesTimeStamps){
-                                                                        Date date = Objects.requireNonNull(timestamp).toDate();
-                                                                        spectacleDates.add(date);
-                                                                    }
-
-                                                                    Log.d(LOG_TAG, "NDS getData: spectacles "+ listIdSSTemp.size()+" "+idSpectacle+ " "+ spectacleName+ " "+ idSourceSongs+ " "+ spectacleLieux+ " "+ spectacleDates+ " "+ maj );
-
-                                                                    Spectacle spectacle = new Spectacle(idSpectacle,spectacleName,idSourceSongs,spectacleLieux,spectacleDates,maj);
-                                                                    spectacles.add(spectacle);
-
                                                                 }
-                                                                Log.d(LOG_TAG, "NDS getData: spectacles "+ spectacles+" "+listIdSSTemp.size());
-
-                                                                editor.putStringSet("idSongs",new HashSet<>(listIdSSTemp));
-                                                                editor.putBoolean("initializeData",true);
-                                                                editor.apply();
-                                                                mDownLoadSaisons.postValue(saisons);
-
-                                                            }else{
-                                                                Log.d(LOG_TAG, "NDS onComplete: help pb sur documents spectacles");
                                                             }
 
+                                                            spectacleLieux=(ArrayList<String>) document.getData().get("concerts_lieux");
 
-                                                        }).addOnFailureListener(e -> {
-                                                        });
+                                                            //todo voir quand il n'y a pas de concert car array Timstamp est vide et ne marche pas alors
+                                                            spectaclesTimeStamps = (ArrayList<Timestamp>) document.getData().get("concerts_dates");
+
+                                                            for(Timestamp timestamp : spectaclesTimeStamps){
+                                                                Date date = Objects.requireNonNull(timestamp).toDate();
+                                                                spectacleDates.add(date);
+                                                            }
+
+                                                            Log.d(LOG_TAG, "NDS getData: spectacles "+ listIdSSTemp.size()+" "+idSpectacle+ " "+ spectacleName+ " "+ idSourceSongs+ " "+ spectacleLieux+ " "+ spectacleDates+ " "+ maj );
+
+                                                            Spectacle spectacle = new Spectacle(idSpectacle,spectacleName,idSourceSongs,spectacleLieux,spectacleDates,maj);
+                                                            spectacles.add(spectacle);
+
+                                                        }
+                                                        Log.d(LOG_TAG, "NDS getData: spectacles "+ spectacles+" "+listIdSSTemp.size());
+
+                                                        editor.putStringSet("idSongs",new HashSet<>(listIdSSTemp));
+                                                        editor.putBoolean("initializeData",true);
+                                                        editor.apply();
+                                                        mDownLoadSaisons.postValue(saisons);
+
+                                                    }else{
+                                                        Log.d(LOG_TAG, "NDS onComplete: help pb sur documents spectacles");
+                                                    }
+
+                                                }).addOnFailureListener(e -> {
+                                        });
 
                                     }else{
                                         Log.d(LOG_TAG, "NDS onComplete: help pb sur documents saisons");
@@ -1069,12 +980,13 @@ public class ChoraleNetWorkDataSource {
                                 });
 
                     }else{
-                        Log.d(LOG_TAG, "NDS onComplete: help pb sur documents users");
+                        Log.d(LOG_TAG, "NDS onComplete: taskresult n'existe pas");
                     }
-                })
-                .addOnFailureListener(e -> {
+
+                }).addOnFailureListener(e -> {
 
                 });
+
     }
 }
 

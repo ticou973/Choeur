@@ -144,7 +144,7 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
     public void onItemClick(int i) {
 
         if (origine.equals("AdminHome")||origine.equals("ModifySSDetails")) {
-            Log.d(TAG, "MSS onItemClick: "+i);
+            Log.d(TAG, "MSS onItemClick: A "+i);
         Intent startDetailsSSActivity = new Intent(ModifySourceSong.this, ModifySourceSongDetails.class);
         Bundle args = new Bundle();
         args.putString("idSS", listId.get(i));
@@ -155,7 +155,13 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
         startActivity(startDetailsSSActivity);
 
         }else if(origine.equals("CreateSong")){
-            Log.d(TAG, "MSS onItemClick: "+i);
+            Log.d(TAG, "MSS onItemClick: B"+i);
+            Intent result = new Intent();
+            result.putExtra("titreselected",listSourceSongs.get(i).getTitre());
+            setResult(RESULT_OK,result);
+            finish();
+        }else if(origine.equals("CreateSpectacle")){
+            Log.d(TAG, "MSS onItemClick: C"+i);
             Intent result = new Intent();
             result.putExtra("titreselected",listSourceSongs.get(i).getTitre());
             setResult(RESULT_OK,result);

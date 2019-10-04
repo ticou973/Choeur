@@ -104,8 +104,6 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
                 groupeSS = groupe.getText().toString();
                 backgroundSS = background.getText().toString();
 
-
-
                 if(duration.getText().toString().equals("")){
                     durationSS=0;
                 }else{

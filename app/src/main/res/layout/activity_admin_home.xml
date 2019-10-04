@@ -189,4 +189,89 @@
         android:textStyle="bold"
         app:layout_constraintBaseline_toBaselineOf="@id/btn_create_chorale"
         app:layout_constraintStart_toEndOf="@+id/btn_create_chorale" />
+
+    <TextView
+        android:id="@+id/textView37"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="60dp"
+        android:fontFamily="@font/roboto"
+        android:text="Spectacle"
+        android:textColor="@android:color/black"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView23" />
+
+    <TextView
+        android:id="@+id/textView38"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="60dp"
+        android:text="Saison"
+        android:textColor="@android:color/black"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView37" />
+
+    <Button
+        android:id="@+id/btn_create_spectacle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/secondaryColor"
+        android:fontFamily="@font/roboto"
+        android:text="créer"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView37"
+        app:layout_constraintEnd_toEndOf="@+id/btn_create_chorale"
+        app:layout_constraintStart_toStartOf="@+id/btn_create_chorale" />
+
+    <Button
+        android:id="@+id/btn_modify_spectacle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:background="@color/secondaryColor"
+        android:fontFamily="@font/roboto"
+        android:padding="10dp"
+        android:text="Modifier"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@+id/btn_create_spectacle"
+        app:layout_constraintStart_toEndOf="@+id/btn_create_spectacle" />
+
+    <Button
+        android:id="@+id/btn_create_saison"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/secondaryColor"
+        android:fontFamily="@font/roboto"
+        android:text="Créer"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView38"
+        app:layout_constraintEnd_toEndOf="@+id/btn_create_spectacle"
+        app:layout_constraintStart_toStartOf="@+id/btn_create_spectacle" />
+
+    <Button
+        android:id="@+id/btn_modify_saison"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:background="@color/secondaryColor"
+        android:fontFamily="@font/roboto"
+        android:padding="10dp"
+        android:text="Modifier"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@+id/btn_create_saison"
+        app:layout_constraintStart_toEndOf="@+id/btn_create_saison" />
 </android.support.constraint.ConstraintLayout>

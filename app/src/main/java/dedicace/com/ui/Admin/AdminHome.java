@@ -14,7 +14,7 @@ import dedicace.com.R;
 //todo prévoir un dév pour les doublons en base (pour les éviter lors des créations de ss et de songs
 public class AdminHome extends AppCompatActivity {
 
-    private Button createSS, modifySS, createSong, modifySong, createUser, modifyUser, createChorale,modifyChorale;
+    private Button createSS, modifySS, createSong, modifySong, createUser, modifyUser, createChorale,modifyChorale, createSpectacle, createSaison, modifySpectacle, modifySaison;
 
     //todo ajouter les chorales et users
     //todo penser à ajouter les gestions plus complexes de doublons en local et en base...
@@ -33,6 +33,10 @@ public class AdminHome extends AppCompatActivity {
         modifyUser=findViewById(R.id.btn_modify_user);
         createChorale=findViewById(R.id.btn_create_chorale);
         modifyChorale=findViewById(R.id.btn_modify_chorale);
+        createSpectacle= findViewById(R.id.btn_create_spectacle);
+        createSaison = findViewById(R.id.btn_create_saison);
+        modifySpectacle=findViewById(R.id.btn_modify_spectacle);
+        modifySaison = findViewById(R.id.btn_modify_saison);
 
         ActionBar actionBar = this.getSupportActionBar();
 
@@ -106,6 +110,40 @@ public class AdminHome extends AppCompatActivity {
                 Intent startModifyChoraleActivity = new Intent(AdminHome.this,ModifyChorale.class);
                 startModifyChoraleActivity.putExtra("origine","AdminHome");
                 startActivity(startModifyChoraleActivity);
+            }
+        });
+
+        createSpectacle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent startCreateSpectacleActivity = new Intent(AdminHome.this,CreateSpectacle.class);
+                startActivity(startCreateSpectacleActivity);
+
+            }
+        });
+
+        createSaison.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent startCreateSaisonActivity = new Intent(AdminHome.this,CreateSaison.class);
+                startActivity(startCreateSaisonActivity);
+            }
+        });
+
+        modifySpectacle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent startModifySpectacleActivity = new Intent(AdminHome.this,ModifySpectacle.class);
+                startModifySpectacleActivity.putExtra("origine","AdminHome");
+                startActivity(startModifySpectacleActivity);
+            }
+        });
+
+        modifySaison.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent startModifySaisonActivity = new Intent(AdminHome.this,ModifySaison.class);
+                startActivity(startModifySaisonActivity);
             }
         });
     }

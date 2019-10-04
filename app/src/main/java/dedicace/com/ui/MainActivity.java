@@ -39,6 +39,7 @@ import dedicace.com.data.database.AppDataBase;
 import dedicace.com.data.database.ListSongs;
 import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
+import dedicace.com.data.database.Saison;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
 import dedicace.com.data.database.Spectacle;
@@ -88,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     //Firebase
     private FirebaseAuth mAuth;
-    public static String current_user_id;
+    public static String current_user_id, userId;
 
     private String mCurrentAuthRole;
     private String typeSS;
@@ -130,6 +131,18 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         mAuth = FirebaseAuth.getInstance();
 
         dataBase = AppDataBase.getInstance(getApplicationContext());
+
+        Thread t5 = new Thread(() -> {
+            List<SourceSong> oldSourcesSongs = dataBase.sourceSongDao().getAllSources();
+            List<Song> oldSongs=dataBase.songsDao().getAllSongs();
+            List<Saison> oldSaisons=dataBase.saisonDao().getAllSaisons();
+            List<Spectacle> oldSpectacles=dataBase.spectacleDao().getAllSpectacles();
+            Log.d(TAG, "MA run:  old SS et song "+oldSourcesSongs.size()+" songs "+oldSongs.size()+" saisons "+oldSaisons.size()+" spectacles "+oldSpectacles.size());
+        });
+        t5.start();
+
+
+
         if(mAuth!=null&&mAuth.getCurrentUser()!=null){
             Log.d(TAG, "MA onCreate: "+mAuth+" "+ mAuth.getCurrentUser().getUid());
         }
@@ -145,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
 
         if(mAuth.getCurrentUser() != null) {
-            Log.d(TAG, "" + "onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
+            Log.d(TAG, "" + "MA onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
             OnRequestPermission();
             mfactory = InjectorUtils.provideViewModelFactory(this.getApplicationContext(),this);
             Log.d("coucou", "MA onCreate: fin de la factory");
@@ -199,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                         Log.d(TAG, "MA onChanged: conditions toutes réunies"+typeSS);
                         switch (typeSS) {
                             case "oldSS":
-                                Log.d(TAG, "MA onChanged: type OldSs");
+                                Log.d(TAG, "MA onChanged: type OldSS");
                                 if (dialogWait != null) {
                                     dialogWait.dismiss();
                                 }
@@ -296,6 +309,12 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             Log.d(TAG, "MA onStart: currentuser non null");
 
             current_user_id = Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
+
+            editor=sharedPreferences.edit();
+            editor.putString("userId",current_user_id);
+            editor.apply();
+
+            userId=sharedPreferences.getString("userId","");
             Log.d("coucou", "MA onStart C: "+ current_user_id);
         }
     }
@@ -324,8 +343,10 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private void setUpSharedPreferences() {
         installation = sharedPreferences.getBoolean("installation",true);
 
+
         if(installation){
             current_user_id=mAuth.getUid();
+
             getData();
             Log.d(TAG, "MA setUpSharedPreferences: installation "+current_user_id);
             deleteDbRoom();
@@ -585,6 +606,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 }
                 break;
 
+//todo à retirer car on ne veut pas se délogger usage à personne unique
 
             case R.id.log_out:
                 logOut();
@@ -618,47 +640,10 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     private void getCurrentSpectacles() {
 
-
-       /* Thread threadSaisons = mViewModel.getThreadSaisons();
-
-       if(threadSaisons!=null) {
-
-           try {
-               threadSaisons.join();
-           } catch (InterruptedException e) {
-               e.printStackTrace();
-           }
-
-           Set<String> currentSpectacles = sharedPreferences.getStringSet("currentSpectacles",null);
-
-           Log.d(TAG, "MA getCurrentSpectacles: " + currentSpectacles);
-           threadSpectacles = new Thread(new Runnable() {
-               @Override
-               public void run() {
-                   if (currentSpectacles != null) {
-                       for (String idSpectacle : currentSpectacles) {
-                           Spectacle spectacle = dataBase.spectacleDao().getSpectacleById(idSpectacle);
-                           Log.d(TAG, "MA run: getCurrentSpectacles " + spectacle);
-                           if (spectacle != null) {
-                               String spectacleName = spectacle.getSpectacleName();
-                               Log.d(TAG, "MA run: nom du spectacle " + spectacleName);
-                               namesSpectacles.add(spectacleName);
-                           } else {
-                               Log.d(TAG, "MA run: else getCurrent Spectacles null ");
-                           }
-                       }
-                   }
-               }
-           });
-           threadSpectacles.start();
-
-       }else{
-           Log.d(TAG, "MA getCurrentSpectacles: threadsaisons null");
-       }*/
-
         Set<String> currentSpectacles = sharedPreferences.getStringSet("currentSpectacles",null);
 
         Log.d(TAG, "MA getCurrentSpectacles: " + currentSpectacles);
+        namesSpectacles=new ArrayList<>();
         threadSpectacles = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -678,45 +663,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             }
         });
         threadSpectacles.start();
-
-
-       /* String currentSaisonStr = sharedPreferences.getString("currentSaison", "");
-        Log.d(TAG, "MA getCurrentSpectacles: "+ currentSaisonStr);
-        threadSpectacles = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if(!currentSaisonStr.isEmpty()) {
-                    Log.d(TAG, "MA run: id saison courante "+ currentSaisonStr);
-                    Saison currentSaison = dataBase.saisonDao().getSaisonById(currentSaisonStr);
-                    Log.d(TAG, "MA run: current saison "+currentSaison);
-
-                    List<String> idSpectacles = new ArrayList<>();
-
-                    if(currentSaison!=null) {
-                        idSpectacles = currentSaison.getIdSpectacles();
-                        Set<String> idSpectaclesSet = new HashSet<>(idSpectacles);
-
-                        //todo voir pourquoi l'écrire à chaque démarrage faire dans le get data
-                        editor = sharedPreferences.edit();
-                        editor.putStringSet("currentSpectacles", idSpectaclesSet);
-                        editor.apply();
-
-                        Log.d(TAG, "MA run: idspectacles  " + idSpectacles);
-
-                        for (String idSpectacle : idSpectacles) {
-                            Spectacle spectacle = dataBase.spectacleDao().getSpectacleById(idSpectacle);
-                            String spectacleName = spectacle.getSpectacleName();
-                            Log.d(TAG, "MA run: nom du spectacle " + spectacleName);
-                            namesSpectacles.add(spectacleName);
-                        }
-                        Log.d(TAG, "MA run: nom des spectacles " + namesSpectacles);
-                    }else{
-                        Log.d(TAG, "MA run: current saison null");
-                    }
-                }
-            }
-        });
-        threadSpectacles.start();*/
     }
 
     private void launchChoiceSpectacle() {

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +21,7 @@ import java.util.List;
 import dedicace.com.R;
 
 public class DialogSpectacleFragment extends DialogFragment {
-    private RadioButton tousRbtn,autresRbtn;
+    private RadioButton tousRbtn;
     private List<RadioButton> listRadioButton = new ArrayList<>();
     private RadioGroup radioGroup;
     private String spectacle;
@@ -92,7 +93,7 @@ public class DialogSpectacleFragment extends DialogFragment {
 
         currentSpectacle=sharedPreferences.getString("currentSpectacle","");
 
-        if (currentSpectacle.isEmpty()||currentSpectacle.equals("Tous")){
+        if (TextUtils.isEmpty(currentSpectacle)||currentSpectacle.equals("Tous")){
             spectacle="Tous";
             tousRbtn.setChecked(true);
 

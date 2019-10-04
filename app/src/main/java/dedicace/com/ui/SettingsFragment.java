@@ -3,12 +3,14 @@ package dedicace.com.ui;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v14.preference.MultiSelectListPreference;
 import android.support.v7.preference.CheckBoxPreference;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceScreen;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
     private CharSequence[] entries;
     private CharSequence[] entryValues;
+    private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private List<Saison> saisons = new ArrayList<>();
     private List<String> idSaisons = new ArrayList<>();
@@ -42,6 +45,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
         addPreferencesFromResource(R.xml.pref_chorale);
         Context context = getPreferenceManager().getContext();
         database = AppDataBase.getInstance(context.getApplicationContext());
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
         //gestion des summaries
         SharedPreferences sharedPreferences = getPreferenceScreen().getSharedPreferences();
@@ -88,8 +92,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
         Log.d("coucou", "SF onCreateListPreference: saisons "+saisons);
 
+        String currentSaisonId = sharedPreferences.getString("currentSaison","");
+
         for (Saison saison : saisons){
-            if(saison.isCurrentSaison()){
+            if(!TextUtils.isEmpty(currentSaisonId)&&saison.getIdsaisonCloud().equals(currentSaisonId)){
                currentSaison=saison;
             }
         }
