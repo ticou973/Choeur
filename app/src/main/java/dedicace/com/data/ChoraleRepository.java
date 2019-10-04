@@ -145,12 +145,6 @@ public class ChoraleRepository {
             spectacles = mChoraleNetworkDataSource.getSpectacles();
             listIdSpectacles =mChoraleNetworkDataSource.getListIdSpectacles();
 
-            editor = sharedPreferences.edit();
-            Set<String> setIdSpectacles = new HashSet<>(listIdSpectacles);
-            Log.d(LOG_TAG, "CR getData: setIdSpectacles "+ setIdSpectacles);
-            editor.putStringSet("currentSpectacles", setIdSpectacles);
-            editor.apply();
-
             Log.d(LOG_TAG, "CR ChoraleRepository: modifencours "+modifEnCours);
 
             //cas où il y a une modif éventuelle sur saisons et spectacles.
@@ -158,6 +152,9 @@ public class ChoraleRepository {
                 editor=sharedPreferences.edit();
                 modifEnCours=false;
                 editor.putBoolean("modifEnCours",false);
+                Set<String> setIdSpectacles = new HashSet<>(listIdSpectacles);
+                Log.d(LOG_TAG, "CR getData: setIdSpectacles "+ setIdSpectacles);
+                editor.putStringSet("currentSpectacles", setIdSpectacles);
                 editor.apply();
                 Log.d(LOG_TAG, "CR ChoraleRepository: modif en cours majSaisonCloud");
                 startFetchSongsService();
@@ -165,6 +162,8 @@ public class ChoraleRepository {
             }else {
                 majRoomDb();
             }
+
+
 
         });
 
@@ -297,6 +296,12 @@ public class ChoraleRepository {
         threadSaisons = new Thread(() -> {
             mSaisonDao.bulkInsert(saisons);
             mSpectacleDao.bulkInsert(spectacles);
+
+            editor = sharedPreferences.edit();
+            Set<String> setIdSpectacles = new HashSet<>(listIdSpectacles);
+            Log.d(LOG_TAG, "CR getData: setIdSpectacles "+ setIdSpectacles);
+            editor.putStringSet("currentSpectacles", setIdSpectacles);
+            editor.apply();
 
 
             //todo supprimer dès que test passé

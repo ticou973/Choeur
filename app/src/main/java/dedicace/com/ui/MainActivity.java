@@ -39,7 +39,6 @@ import dedicace.com.data.database.AppDataBase;
 import dedicace.com.data.database.ListSongs;
 import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
-import dedicace.com.data.database.Saison;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
 import dedicace.com.data.database.Spectacle;
@@ -131,17 +130,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         mAuth = FirebaseAuth.getInstance();
 
         dataBase = AppDataBase.getInstance(getApplicationContext());
-
-        Thread t5 = new Thread(() -> {
-            List<SourceSong> oldSourcesSongs = dataBase.sourceSongDao().getAllSources();
-            List<Song> oldSongs=dataBase.songsDao().getAllSongs();
-            List<Saison> oldSaisons=dataBase.saisonDao().getAllSaisons();
-            List<Spectacle> oldSpectacles=dataBase.spectacleDao().getAllSpectacles();
-            Log.d(TAG, "MA run:  old SS et song "+oldSourcesSongs.size()+" songs "+oldSongs.size()+" saisons "+oldSaisons.size()+" spectacles "+oldSpectacles.size());
-        });
-        t5.start();
-
-
 
         if(mAuth!=null&&mAuth.getCurrentUser()!=null){
             Log.d(TAG, "MA onCreate: "+mAuth+" "+ mAuth.getCurrentUser().getUid());
@@ -643,7 +631,9 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         Set<String> currentSpectacles = sharedPreferences.getStringSet("currentSpectacles",null);
 
         Log.d(TAG, "MA getCurrentSpectacles: " + currentSpectacles);
-        namesSpectacles=new ArrayList<>();
+        if(namesSpectacles!=null) {
+            namesSpectacles = new ArrayList<>();
+        }
         threadSpectacles = new Thread(new Runnable() {
             @Override
             public void run() {
