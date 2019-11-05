@@ -34,8 +34,7 @@ class Mp3Adapter extends RecyclerView.Adapter<Mp3Adapter.Mp3ViewHolder> {
     public Mp3ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_mp3, viewGroup, false);
 
-        Mp3ViewHolder mp3ViewHolder = new Mp3ViewHolder(view);
-        return mp3ViewHolder;
+        return new Mp3ViewHolder(view);
     }
 
     @Override
@@ -78,10 +77,10 @@ class Mp3Adapter extends RecyclerView.Adapter<Mp3Adapter.Mp3ViewHolder> {
     }
 
 
-    public class Mp3ViewHolder extends RecyclerView.ViewHolder {
+    class Mp3ViewHolder extends RecyclerView.ViewHolder {
         TextView mp3Name;
         CardView cv;
-        public Mp3ViewHolder(@NonNull View itemView) {
+        Mp3ViewHolder(@NonNull View itemView) {
             super(itemView);
             mp3Name =itemView.findViewById(R.id.mp3Name);
             cv =itemView.findViewById(R.id.cv_list_mp3);

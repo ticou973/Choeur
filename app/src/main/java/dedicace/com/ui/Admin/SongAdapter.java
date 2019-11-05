@@ -35,8 +35,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     public SongViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_song_cloud, viewGroup, false);
 
-        SongViewHolder songViewHolder = new SongViewHolder(view);
-        return songViewHolder;
+        return new SongViewHolder(view);
     }
 
     @Override
@@ -77,10 +76,10 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         }
     }
 
-    public class SongViewHolder extends RecyclerView.ViewHolder {
+    class SongViewHolder extends RecyclerView.ViewHolder {
         TextView titre,pupitre;
         CardView cv;
-        public SongViewHolder(@NonNull View itemView) {
+        SongViewHolder(@NonNull View itemView) {
             super(itemView);
             titre = itemView.findViewById(R.id.songName);
             pupitre =itemView.findViewById(R.id.songPupitre);

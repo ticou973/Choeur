@@ -45,8 +45,6 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_modify_source_song);
-
-
         ActionBar actionBar = this.getSupportActionBar();
 
         if(actionBar != null){
@@ -164,6 +162,7 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
             Log.d(TAG, "MSS onItemClick: C"+i);
             Intent result = new Intent();
             result.putExtra("titreselected",listSourceSongs.get(i).getTitre());
+            result.putExtra("idselected",listId.get(i));
             setResult(RESULT_OK,result);
             finish();
         }

@@ -76,7 +76,7 @@ public class SongsUtilities {
         return RecordSources;
     }
 
-    public static List<RecordSource> getRecordSources(String titre) {
+    private static List<RecordSource> getRecordSources(String titre) {
 
         List<RecordSource> sources= new ArrayList<>();
 

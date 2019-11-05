@@ -10,7 +10,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class Converters {
+class Converters {
 
     @TypeConverter
     public static String pupitreToCodePupitre(Pupitre pupitre) {
@@ -37,27 +37,28 @@ public class Converters {
     }
 
     @TypeConverter
-    public static Pupitre CodePupitreToPupitre (String codePupitre) {
+    public static Pupitre CodePupitreToPupitre(String codePupitre) {
 
-        if (codePupitre.equals("1_Bass")) {
+        switch (codePupitre) {
+            case "1_Bass":
 
-            return Pupitre.BASS;
+                return Pupitre.BASS;
 
-        }else if (codePupitre.equals("2_Tenor") ) {
+            case "2_Tenor":
 
-            return Pupitre.TENOR;
+                return Pupitre.TENOR;
 
-        }else if (codePupitre.equals("3_Alto")) {
+            case "3_Alto":
 
-            return Pupitre.ALTO;
+                return Pupitre.ALTO;
 
-        }else if (codePupitre.equals("4_Soprano")) {
+            case "4_Soprano":
 
-            return Pupitre.SOPRANO;
+                return Pupitre.SOPRANO;
 
-        }else if(codePupitre.equals("0_Tutti")){
+            case "0_Tutti":
 
-            return Pupitre.TUTTI;
+                return Pupitre.TUTTI;
         }
 
         return Pupitre.NA;
@@ -84,19 +85,20 @@ public class Converters {
     }
 
     @TypeConverter
-    public static RecordSource CodeRecordToRecord (String codeRecord) {
+    public static RecordSource CodeRecordToRecord(String codeRecord) {
 
-        if (codeRecord.equals("Live")) {
+        switch (codeRecord) {
+            case "Live":
 
-            return RecordSource.LIVE;
+                return RecordSource.LIVE;
 
-        }else if (codeRecord.equals("Bande Son") ) {
+            case "Bande Son":
 
-            return RecordSource.BANDE_SON;
+                return RecordSource.BANDE_SON;
 
-        }else if (codeRecord.equals("Original")) {
+            case "Original":
 
-            return RecordSource.ORIGINAL;
+                return RecordSource.ORIGINAL;
 
         }
         return RecordSource.NA;
@@ -122,8 +124,7 @@ public class Converters {
     @TypeConverter
     public static String fromArrayList(ArrayList<String> list) {
         Gson gson = new Gson();
-        String json = gson.toJson(list);
-        return json;
+        return gson.toJson(list);
     }
 
     @TypeConverter

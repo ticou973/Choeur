@@ -123,7 +123,7 @@ public class DialogMA extends DialogFragment {
 
         }else if(origine.equals("waitSongs")){
             Log.d("coucou", "DMA onCreateDialog: waitsongs");
-            builder.setMessage("Veuillez attendre la mise à jour des données... ");
+            builder.setMessage("Veuillez attendre la mise à jour des données... Lors de la première installation, cela peut prendre plusieurs minutes ! (temps de charge des chansons de votre pupitre)");
 
         } else{
             Log.d("coucou", "DMA onCreateDialog: pas de messages...");

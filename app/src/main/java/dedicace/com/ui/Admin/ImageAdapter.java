@@ -34,8 +34,7 @@ class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImagesViewHolder> {
     public ImagesViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_background, viewGroup, false);
 
-        ImagesViewHolder imagesViewHolder = new ImagesViewHolder(view);
-        return imagesViewHolder;
+        return new ImagesViewHolder(view);
     }
 
     @Override
@@ -78,10 +77,10 @@ class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImagesViewHolder> {
         }
     }
 
-    public class ImagesViewHolder extends RecyclerView.ViewHolder {
+    class ImagesViewHolder extends RecyclerView.ViewHolder {
         TextView imageName;
         CardView cv;
-        public ImagesViewHolder(@NonNull View itemView) {
+        ImagesViewHolder(@NonNull View itemView) {
             super(itemView);
             imageName = itemView.findViewById(R.id.imageName);
             cv=itemView.findViewById(R.id.cv_list_image);

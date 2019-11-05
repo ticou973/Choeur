@@ -113,10 +113,8 @@ public class DialogSpectacleFragment extends DialogFragment {
 
                 Log.d("coucou", "DSF onCheckedChanged: "+i);
 
-                switch (i){
-                    case R.id.tous_rbtn:
-                        spectacle="Tous";
-                        break;
+                if (i == R.id.tous_rbtn) {
+                    spectacle = "Tous";
                 }
 
                 for(RadioButton rb : listRadioButton){

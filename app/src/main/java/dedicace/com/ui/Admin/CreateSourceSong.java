@@ -111,7 +111,6 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
                 }
 
                 if(!titreSS.equals("")&&!groupeSS.equals("")&&!backgroundSS.equals("Selection background...")&&durationSS!=0){
-                    Log.d(TAG, "CSS onClick: conditions passées "+ titreSS+ " "+groupeSS+" "+String.valueOf(durationSS)+" "+backgroundSS);
                     insertBackgroundInCloudStorage();
 
                 }else{

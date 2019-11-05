@@ -18,13 +18,14 @@
         android:id="@+id/admin"
         android:title="@string/admin"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/log_out"
-        android:title="@string/se_déconnecter"
-        app:showAsAction="never" />
 
     <item
         android:id="@+id/spectacles"
         android:title="@string/tous"
         app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/contact"
+        android:title="@string/contact"
+        app:showAsAction="never"/>
+
 </menu>

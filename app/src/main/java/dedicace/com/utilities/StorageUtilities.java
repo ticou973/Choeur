@@ -9,19 +9,12 @@ public class StorageUtilities {
     /* Checks if external storage is available for read and write */
     public static boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
+        return Environment.MEDIA_MOUNTED.equals(state);
     }
 
     public static String getInternalPath(String nomFichier){
 
-        String path="";
-
-
-
-        return path;
+        return "";
     }
 
 
@@ -30,18 +23,14 @@ public class StorageUtilities {
         File directory = Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_MUSIC);
 
-        String path=directory.getAbsolutePath()+"/"+nomFichier+"."+extension;
-
-        return path;
+        return directory.getAbsolutePath()+"/"+nomFichier+"."+extension;
     }
 
     public static File getExternalPathFile(String nomFichier){
 
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
 
-        File file = new File(path,nomFichier);
-
-        return file;
+        return new File(path,nomFichier);
     }
 
 

@@ -37,7 +37,7 @@ import dedicace.com.utilities.StorageUtilities;
  */
 public final class MediaPlayerHolder implements PlayerAdapter {
 
-    public static final int PLAYBACK_POSITION_REFRESH_INTERVAL_MS = 1000;
+    private static final int PLAYBACK_POSITION_REFRESH_INTERVAL_MS = 1000;
 
     private Context mContext;
     private MediaPlayer mMediaPlayer;
@@ -93,7 +93,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
 
     // Implements PlaybackControl.
     @Override
-    public void prepareMediaPlayer(Context context, String resStrToPlay) throws IOException {
+    public void prepareMediaPlayer(Context context, String resStrToPlay) {
         Log.d("coucou", "MPH prepareMediaPlayer: ");
         mContext=context;
         mResourceStr =resStrToPlay;

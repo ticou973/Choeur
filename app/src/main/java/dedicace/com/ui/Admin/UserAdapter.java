@@ -32,8 +32,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_user_cloud, viewGroup, false);
 
-        UserViewHolder userViewHolder = new UserViewHolder(view);
-        return userViewHolder;
+        return new UserViewHolder(view);
     }
 
     @Override
@@ -76,11 +75,11 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     }
 
 
-    public class UserViewHolder extends RecyclerView.ViewHolder {
+    class UserViewHolder extends RecyclerView.ViewHolder {
         TextView nom,userId;
         CardView cv;
 
-        public UserViewHolder(@NonNull View itemView) {
+        UserViewHolder(@NonNull View itemView) {
             super(itemView);
             nom = itemView.findViewById(R.id.userName);
             userId =itemView.findViewById(R.id.userId);

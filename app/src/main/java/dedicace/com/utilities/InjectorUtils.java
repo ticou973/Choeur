@@ -10,7 +10,7 @@ import dedicace.com.ui.MainActivityViewModelFactory;
 
 public class InjectorUtils {
 
-    public static ChoraleRepository provideRepository(Context context,Context mAContext) {
+    private static ChoraleRepository provideRepository(Context context, Context mAContext) {
         AppDataBase database = AppDataBase.getInstance(context.getApplicationContext());
         AppExecutors executors = AppExecutors.getInstance();
         ChoraleNetWorkDataSource networkDataSource =

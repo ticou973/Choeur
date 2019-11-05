@@ -33,8 +33,7 @@ public class ChoraleAdapter extends RecyclerView.Adapter<ChoraleAdapter.ChoraleV
     public ChoraleViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_chorale_cloud, viewGroup, false);
 
-        ChoraleViewHolder choraleViewHolder = new ChoraleViewHolder(view);
-        return choraleViewHolder;
+        return new ChoraleViewHolder(view);
     }
 
     @Override
@@ -53,7 +52,7 @@ public class ChoraleAdapter extends RecyclerView.Adapter<ChoraleAdapter.ChoraleV
         TextView choraleName;
         CardView cv;
 
-        public ChoraleViewHolder(@NonNull View itemView) {
+        ChoraleViewHolder(@NonNull View itemView) {
             super(itemView);
             choraleName =itemView.findViewById(R.id.choralesNames);
             cv= itemView.findViewById(R.id.cv_list_chorale);

@@ -56,6 +56,15 @@
     <string name="maj_auto">maj_auto</string>
     <string name="modification_user">Modification User</string>
     <string name="tous">Tous</string>
+    <string name="contact">Contact</string>
+    <string name="lieu">lieu</string>
+    <string name="lieu_du_concert">Lieu du Concert</string>
+    <string name="ajout_de_concerts">Ajout de Concerts</string>
+    <string name="date_du_concert">Date du concert</string>
+    <string name="concerts">Concerts</string>
+    <string name="ajouter_dans_spectacle">Ajouter Dans Spectacle</string>
+    <string name="ajouter">Ajouter</string>
+    <string name="date">date</string>
 
 
 </resources>

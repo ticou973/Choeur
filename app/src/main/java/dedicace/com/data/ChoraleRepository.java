@@ -141,7 +141,7 @@ public class ChoraleRepository {
         Log.d(LOG_TAG, "CR ChoraleRepository: getSaisonsCloud "+majSaisonCloud);
 
         majSaisonCloud.observeForever(saisons -> {
-            this.saisons=saisons;
+            ChoraleRepository.saisons =saisons;
             spectacles = mChoraleNetworkDataSource.getSpectacles();
             listIdSpectacles =mChoraleNetworkDataSource.getListIdSpectacles();
 
@@ -1195,7 +1195,7 @@ public class ChoraleRepository {
         return mSourceDao.getAllSourceSongs();
     }
 
-    public synchronized void initializeData() {
+    private synchronized void initializeData() {
         Log.d(LOG_TAG, "CR initializeData: repository isfetchneeded "+mInitialized);
         boolean initialisation = sharedPreferences.getBoolean("initializeData",false);
         // Only perform initialization once per app lifetime. If initialization has already been
@@ -1258,7 +1258,7 @@ public class ChoraleRepository {
     }
 
 
-    public String getCurrentPupitreStr() {
+    private String getCurrentPupitreStr() {
         currentPupitreStr=mChoraleNetworkDataSource.getCurrentPupitreStr();
         Log.d(LOG_TAG, "CR getCurrentPupitreStr: "+currentPupitreStr);
         return currentPupitreStr;

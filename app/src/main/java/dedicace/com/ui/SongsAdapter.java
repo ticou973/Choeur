@@ -254,7 +254,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         notifyItemChanged(position);
     }
 
-    public static void logSources(List<SourceSong> sourceSongs, List<List<RecordSource>> RecordSources, List<Song> songToPlays, List<List<Song>> songOnClouds, List<List<Song>> SongOnPhonesBS,List<List<Song>> SongOnPhonesLive) {
+    private static void logSources(List<SourceSong> sourceSongs, List<List<RecordSource>> RecordSources, List<Song> songToPlays, List<List<Song>> songOnClouds, List<List<Song>> SongOnPhonesBS, List<List<Song>> SongOnPhonesLive) {
             Log.d(TAG, "SA logSources: size " +sourceSongs.size()+" "+RecordSources.size()+" "+songToPlays.size()+" "+songOnClouds.size()+" "+SongOnPhonesBS.size()+" "+SongOnPhonesLive.size());
             Log.d(TAG, "SA logSources: :\n sourcesSongs " + sourceSongs + "\n RecordSources " + RecordSources + "\nsongToPlays " + songToPlays + "\nSongOnClouds " + songOnClouds+ "\nSongOnPhonesBS " + SongOnPhonesBS+ "\nSongOnPhonesLive " + SongOnPhonesLive);
 

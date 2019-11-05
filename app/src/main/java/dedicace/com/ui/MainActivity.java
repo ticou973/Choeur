@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -48,10 +49,10 @@ import dedicace.com.utilities.InjectorUtils;
 import dedicace.com.utilities.SongsUtilities;
 
 //todo revoir dans tout le logiciel les new Object lorsqu'ils sont déjà définis
-public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener,DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener, DialogMajSS.DialogMajSSListener, DialogMA.DialogMAListener, ChoraleNetWorkDataSource.OnNDSListener, DialogSpectacleFragment.DialogSpectacleFragmentListener {
+public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener, DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener, DialogMajSS.DialogMajSSListener, DialogMA.DialogMAListener, ChoraleNetWorkDataSource.OnNDSListener, DialogSpectacleFragment.DialogSpectacleFragmentListener {
 
     //UI
-    private  RecyclerView recyclerView;
+    private RecyclerView recyclerView;
     private int mPosition = RecyclerView.NO_POSITION;
     private ProgressBar mLoadingIndicator;
 
@@ -70,21 +71,21 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     //todo à retirer seuelement pour les tests
     private LiveData<List<SourceSong>> sourceSongs;
     private List<SourceSong> sourceSongList = new ArrayList<>();
-    private Song  firstSongPlayed;
+    private Song firstSongPlayed;
     private List<List<RecordSource>> recordSources;
     private List<Song> songToPlays;
     private List<List<Song>> songOnPhones;
     private List<List<Song>> songOnClouds;
-    private List<List<Song>> SongOnPhonesLive= new ArrayList<>();
-    private List<List<Song>> SongOnPhonesBS= new ArrayList<>();
+    private List<List<Song>> SongOnPhonesLive = new ArrayList<>();
+    private List<List<Song>> SongOnPhonesBS = new ArrayList<>();
     private Pupitre pupitreToDownload;
     private Song songToPlay;
     private ArrayList<String> namesSpectacles = new ArrayList<>();
-    private String spectacle ="Tous";
+    private String spectacle = "Tous";
 
     //ViewModel
     private MainActivityViewModel mViewModel;
-    private  MainActivityViewModelFactory mfactory;
+    private MainActivityViewModelFactory mfactory;
 
     //Firebase
     private FirebaseAuth mAuth;
@@ -111,18 +112,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d("coucou", "MA onCreate: "+Thread.currentThread().getName());
+        Log.d("coucou", "MA onCreate: " + Thread.currentThread().getName());
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-        installationAuth = sharedPreferences.getBoolean("installationAuth",true);
+        installationAuth = sharedPreferences.getBoolean("installationAuth", true);
 
-        //Firebase
-        //todo voir l'intérêt de cette première ligne
-        //FirebaseApp.initializeApp(this);
-
-
-        if(installationAuth){
+        if (installationAuth) {
             mAuth = FirebaseAuth.getInstance();
             mAuth.signOut();
         }
@@ -131,8 +127,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
         dataBase = AppDataBase.getInstance(getApplicationContext());
 
-        if(mAuth!=null&&mAuth.getCurrentUser()!=null){
-            Log.d(TAG, "MA onCreate: "+mAuth+" "+ mAuth.getCurrentUser().getUid());
+        if (mAuth != null && mAuth.getCurrentUser() != null) {
+            Log.d(TAG, "MA onCreate: " + mAuth + " " + mAuth.getCurrentUser().getUid());
         }
 
         //UI
@@ -145,59 +141,55 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         recyclerView.setAdapter(songsAdapter);
 
 
-        if(mAuth.getCurrentUser() != null) {
+        if (mAuth.getCurrentUser() != null) {
             Log.d(TAG, "" + "MA onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
             OnRequestPermission();
-            mfactory = InjectorUtils.provideViewModelFactory(this.getApplicationContext(),this);
+            mfactory = InjectorUtils.provideViewModelFactory(this.getApplicationContext(), this);
             Log.d("coucou", "MA onCreate: fin de la factory");
             mViewModel = ViewModelProviders.of(this, mfactory).get(MainActivityViewModel.class);
             Log.d("coucou", "MA onCreate: fin du viewModel");
             setUpSharedPreferences();
 
-            //todo vérifier la position de ce current Spectacles
             getCurrentSpectacles();
 
             //todo voir si cela est nécessaire d'observer toutes les SS ou cseulement celles du spectacles
-            sourceSongs =mViewModel.getChoeurSourceSongs();
+            sourceSongs = mViewModel.getChoeurSourceSongs();
             Log.d(TAG, "MA onCreate: getChoeurSourcesongs " + sourceSongs);
             sourceSongs.observe(this, sourceSongs -> {
-               // sourceSongList=sourceSongs;
 
                 Log.d(TAG, "MA onChanged: Alerte, ça bouge dans le coin !" + sourceSongs + " " + mViewModel.getChoeurSourceSongs() + " " + Thread.currentThread().getName());
 
                 currentThread = mViewModel.getCurrentThread();
-                typeSS=mViewModel.getTypeSS();
+                typeSS = mViewModel.getTypeSS();
 
                 //permet que la listsongs de CR se calcule
-                if(typeSS==null){
+                if (typeSS == null) {
                     Log.d(TAG, "MA onChanged: typeSS null et alertbox");
-                    //mLoadingIndicator.setIndeterminate(true);
                     showLoading();
                     AlertBox();
-                }else {
-                    if(!typeSS.equals("modificationSS")){
-                        Log.d(TAG, "MA onChanged: typeSS non null et alertbox "+typeSS);
-                        //mLoadingIndicator.setIndeterminate(false);
+                } else {
+                    if (!typeSS.equals("modificationSS")) {
+                        Log.d(TAG, "MA onChanged: typeSS non null et alertbox " + typeSS);
                         showLoading();
                     }
                 }
 
-                if (sourceSongs != null && sourceSongs.size() != 0&&currentThread!=null) {
-                    Log.d(TAG, "MA onChanged: currentThread "+currentThread);
+                if (sourceSongs != null && sourceSongs.size() != 0 && currentThread != null) {
+                    Log.d(TAG, "MA onChanged: currentThread " + currentThread);
                     try {
                         currentThread.join();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                         Log.d(TAG, "MA onChanged: interrupted exception");
                     }
-                    Log.d("coucou", "MA onCreate: Thread fini "+typeSS);
+                    Log.d("coucou", "MA onCreate: Thread fini " + typeSS);
                 }
 
                 getListSongs();
 
                 if (listSongs != null) {
                     if (recordSources.size() == sourceSongList.size() && songToPlays.size() == sourceSongList.size() && songOnPhones.size() == sourceSongList.size() && songOnClouds.size() == sourceSongList.size()) {
-                        Log.d(TAG, "MA onChanged: conditions toutes réunies"+typeSS);
+                        Log.d(TAG, "MA onChanged: conditions toutes réunies" + typeSS);
                         switch (typeSS) {
                             case "oldSS":
                                 Log.d(TAG, "MA onChanged: type OldSS");
@@ -205,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                     dialogWait.dismiss();
                                 }
                                 affichageRecyclerView(sourceSongList);
-                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds, SongOnPhonesBS,SongOnPhonesLive);
+                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds, SongOnPhonesBS, SongOnPhonesLive);
                                 break;
                             case "modificationSS":
                                 boolean deleted = mViewModel.getDeleted();
@@ -216,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                     if (dialogWait != null) {
                                         dialogWait.dismiss();
                                     }
-                                    songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds,SongOnPhonesBS,SongOnPhonesLive);
+                                    songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds, SongOnPhonesBS, SongOnPhonesLive);
 
                                 } else {
                                     //mettre un dialogue pour changer ou non
@@ -236,13 +228,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                     dialogWait.dismiss();
                                 }
                                 affichageRecyclerView(sourceSongList);
-                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds,SongOnPhonesBS,SongOnPhonesLive);
+                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds, SongOnPhonesBS, SongOnPhonesLive);
                                 break;
                             case "newSongOnPhone":
                                 Log.d(TAG, "MA onChanged: lancement du SA pour le single");
                                 affichageRecyclerView(sourceSongList);
                                 Log.d(TAG, "MA onChanged: position " + positionToDownload);
-                                songsAdapter.swapSingleSong(positionToDownload, songToPlay, songOnClouds,SongOnPhonesBS,SongOnPhonesLive,recordSources);
+                                songsAdapter.swapSingleSong(positionToDownload, songToPlay, songOnClouds, SongOnPhonesBS, SongOnPhonesLive, recordSources);
                                 break;
                             case "newSongsOnPhone":
                                 Log.d(TAG, "MA onChanged: lancement du SA pour le multiple");
@@ -250,30 +242,30 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                     dialogWait.dismiss();
                                 }
                                 affichageRecyclerView(sourceSongList);
-                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds,SongOnPhonesBS,SongOnPhonesLive);
+                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds, SongOnPhonesBS, SongOnPhonesLive);
                                 break;
                             case "newRecord":
-                                Log.d(TAG, "MA onChanged: lancement du SA pour le recordSong "+positionToRecord);
+                                Log.d(TAG, "MA onChanged: lancement du SA pour le recordSong " + positionToRecord);
                                 affichageRecyclerView(sourceSongList);
-                                songsAdapter.swaprecordedSongs(positionToRecord, recordSources, songToPlay, songOnClouds,SongOnPhonesBS,SongOnPhonesLive);
+                                songsAdapter.swaprecordedSongs(positionToRecord, recordSources, songToPlay, songOnClouds, SongOnPhonesBS, SongOnPhonesLive);
 
                                 break;
                             case "deleteSingleSongOnPhone":
                                 Log.d(TAG, "MA onChanged: lancement du SA pour le single (delete) ");
                                 affichageRecyclerView(sourceSongList);
                                 Log.d(TAG, "MA onChanged: position (delete) " + positionToDelete);
-                                songsAdapter.swapSingleDeleteSong(positionToDelete, songToPlays, songOnClouds,SongOnPhonesBS,SongOnPhonesLive,recordSources);
+                                songsAdapter.swapSingleDeleteSong(positionToDelete, songToPlays, songOnClouds, SongOnPhonesBS, SongOnPhonesLive, recordSources);
                                 break;
                             case "deleteMultipleSongOnPhone":
                                 Log.d(TAG, "MA onChanged: lancement du SA pour le multiple delete");
                                 affichageRecyclerView(sourceSongList);
-                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds,SongOnPhonesBS,SongOnPhonesLive);
+                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds, SongOnPhonesBS, SongOnPhonesLive);
                                 break;
                         }
                     } else {
                         Log.d(TAG, "MA onChanged: conditions pas réunies");
                     }
-                }else{
+                } else {
                     Log.d(TAG, "MA onChanged: listsongs null ");
                 }
             });
@@ -284,13 +276,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     protected void onStart() {
         super.onStart();
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        Log.d("coucou", "MA onStart: A  "+ current_user_id);
+        Log.d("coucou", "MA onStart: A  " + current_user_id);
 
 
-        if(currentUser == null){
+        if (currentUser == null) {
             sendToLogin();
 
-            Log.d("coucou", "MA onCreate:B Start "+ current_user_id);
+            Log.d("coucou", "MA onCreate:B Start " + current_user_id);
         } else {
             //todo à compléter (rapatrier toute la partie non null de Oncreate ici en fait.
 
@@ -298,28 +290,28 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
             current_user_id = Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
 
-            editor=sharedPreferences.edit();
-            editor.putString("userId",current_user_id);
+            editor = sharedPreferences.edit();
+            editor.putString("userId", current_user_id);
             editor.apply();
 
-            userId=sharedPreferences.getString("userId","");
-            Log.d("coucou", "MA onStart C: "+ current_user_id);
+            userId = sharedPreferences.getString("userId", "");
+            Log.d("coucou", "MA onStart C: " + current_user_id);
         }
     }
 
     private void AlertBox() {
         Log.d(TAG, "MA AlertBox: ");
-        dialogWait= new DialogMA();
+        dialogWait = new DialogMA();
         Bundle args = new Bundle();
-        args.putString("origine","waitSongs");
+        args.putString("origine", "waitSongs");
         dialogWait.setArguments(args);
-        dialogWait.show(getSupportFragmentManager(),"TAG");
+        dialogWait.show(getSupportFragmentManager(), "TAG");
     }
 
     @Override
     public void onDialogPositiveClick() {
-        Log.d(TAG, "MA onDialogPositiveClick dialog positif: "+sourceSongList);
-        songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds,SongOnPhonesBS,SongOnPhonesLive);
+        Log.d(TAG, "MA onDialogPositiveClick dialog positif: " + sourceSongList);
+        songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds, SongOnPhonesBS, SongOnPhonesLive);
     }
 
     @Override
@@ -329,23 +321,23 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     }
 
     private void setUpSharedPreferences() {
-        installation = sharedPreferences.getBoolean("installation",true);
+        installation = sharedPreferences.getBoolean("installation", true);
 
 
-        if(installation){
-            current_user_id=mAuth.getUid();
+        if (installation) {
+            current_user_id = mAuth.getUid();
 
             getData();
-            Log.d(TAG, "MA setUpSharedPreferences: installation "+current_user_id);
+            Log.d(TAG, "MA setUpSharedPreferences: installation " + current_user_id);
             deleteDbRoom();
 
-        }else{
+        } else {
             Log.d(TAG, "MA setUpSharedPreferences: plus une installation ");
         }
 
-        mCurrentAuthRole=sharedPreferences.getString("role","Choriste");
+        mCurrentAuthRole = sharedPreferences.getString("role", "Choriste");
 
-        Log.d(TAG, "MA setUpSharedPreferences: idchorale "+ sharedPreferences.getString("idchorale", ""));
+        Log.d(TAG, "MA setUpSharedPreferences: idchorale " + sharedPreferences.getString("idchorale", ""));
 
     }
 
@@ -358,24 +350,24 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         //todo faire pour gérer entre autres si on veut charger les songs qui viennent d être changées
 
         Toast.makeText(this, "paramètres changés !", Toast.LENGTH_LONG).show();
-        Log.d(TAG, "MA onSharedPreferenceChanged: key "+key);
+        Log.d(TAG, "MA onSharedPreferenceChanged: key " + key);
         Set<String> pupitreAuto = new HashSet<>();
 
-        if(key.equals(getString(R.string.pref_pupitre_key))){
-            Log.d(TAG, "MA onSharedPreferenceChanged: changement pupitres auto "+sharedPreferences.getStringSet(key,pupitreAuto));
+        if (key.equals(getString(R.string.pref_pupitre_key))) {
+            Log.d(TAG, "MA onSharedPreferenceChanged: changement pupitres auto " + sharedPreferences.getStringSet(key, pupitreAuto));
             //todo voir si on propose de charger les pupitres non chargées encore
 
         }
-        if(key.equals("maj_auto")){
-            Log.d(TAG, "MA onSharedPreferenceChanged: changement maj_auto "+sharedPreferences.getBoolean(key,true));
+        if (key.equals("maj_auto")) {
+            Log.d(TAG, "MA onSharedPreferenceChanged: changement maj_auto " + sharedPreferences.getBoolean(key, true));
         }
 
-        if(key.equals("initializeData")){
+        if (key.equals("initializeData")) {
             Log.d(TAG, "MA onSharedPreferenceChanged: initialize ");
             mViewModel.getSourceSongs();
         }
 
-        if(key.equals("currentSaison")){
+        if (key.equals("currentSaison")) {
             /*getCurrentSpectacles();
 
             if(threadSpectacles!=null){
@@ -387,13 +379,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             }
 
             Log.d(TAG, "MA onSharedPreferenceChanged: current saison");*/
-           // mViewModel.getSourceSongs();
+            // mViewModel.getSourceSongs();
         }
 
-        if(key.equals("currentSpectacles")){
+        if (key.equals("currentSpectacles")) {
             getCurrentSpectacles();
 
-            if(threadSpectacles!=null){
+            if (threadSpectacles != null) {
                 try {
                     threadSpectacles.join();
                 } catch (InterruptedException e) {
@@ -405,26 +397,26 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
         }
 
-        if(key.equals("currentSpectacle")){
+        if (key.equals("currentSpectacle")) {
             Log.d(TAG, "MA onSharedPreferenceChanged: currentSpectacle");
             mViewModel.getSourceSongs();
         }
 
-        if(key.equals("role")){
+        if (key.equals("role")) {
             Log.d(TAG, "MA onSharedPreferenceChanged: role ");
-            mCurrentAuthRole=sharedPreferences.getString("role","Choriste");
+            mCurrentAuthRole = sharedPreferences.getString("role", "Choriste");
         }
     }
 
     private void getListSongs() {
         Log.d(TAG, "MA getListSongs: début");
 
-        listSongs=mViewModel.getListSongs();
+        listSongs = mViewModel.getListSongs();
 
-        Log.d(TAG, "MA getListSongs: début après aller chercher listSongs "+listSongs);
+        Log.d(TAG, "MA getListSongs: début après aller chercher listSongs " + listSongs);
 
-        if(listSongs!=null) {
-            sourceSongList=listSongs.getSourceSongs();
+        if (listSongs != null) {
+            sourceSongList = listSongs.getSourceSongs();
             Log.d(TAG, "MA getListSongs: début liste ");
             songOnPhones = listSongs.getSongsOnPhonesA();
             Log.d(TAG, "MA getSongElements songOnphones: " + songOnPhones);
@@ -433,22 +425,22 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             Log.d(TAG, "MA getSongElements recordsources: " + recordSources);
 
             songToPlays = listSongs.getSongToPlaysA();
-            Log.d(TAG, "MA getListSongs: juste après"+songToPlays);
+            Log.d(TAG, "MA getListSongs: juste après" + songToPlays);
             if (songToPlays.size() > 1) {
-      //          Log.d(TAG, "MA getSongElements songToplays: " + songToPlays + " " + songToPlays.get(0).getSourceSongTitre() + " " + songToPlays.get(0).getPupitre() + " " + songToPlays.get(1).getSourceSongTitre() + " " + songToPlays.get(1).getPupitre());
+                //          Log.d(TAG, "MA getSongElements songToplays: " + songToPlays + " " + songToPlays.get(0).getSourceSongTitre() + " " + songToPlays.get(0).getPupitre() + " " + songToPlays.get(1).getSourceSongTitre() + " " + songToPlays.get(1).getPupitre());
             }
             songOnClouds = listSongs.getSongsOnCloudsA();
             Log.d(TAG, "MA getSongElements songOnclouds: " + songOnClouds);
 
 
-            SongOnPhonesBS=listSongs.getSongOnPhoneBSA();
+            SongOnPhonesBS = listSongs.getSongOnPhoneBSA();
             Log.d(TAG, "MA getSongElements getSongOnPhoneBSA: " + SongOnPhonesBS);
 
             SongOnPhonesLive = listSongs.getSongOnPhoneLiveA();
             Log.d(TAG, "MA getSongElements getSongOnPhoneLiveA: " + SongOnPhonesLive);
 
-        }else{
-            Log.d(TAG, "MA getListSongs: est null "+listSongs);
+        } else {
+            Log.d(TAG, "MA getListSongs: est null " + listSongs);
         }
     }
 
@@ -459,19 +451,19 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             mPosition = 0;
         }
 
-        if(typeSS.equals("newSongOnPhone")){
-            mPosition =positionToDownload;
-        }else if(typeSS.equals("newRecord")){
-            mPosition=positionToRecord;
+        if (typeSS.equals("newSongOnPhone")) {
+            mPosition = positionToDownload;
+        } else if (typeSS.equals("newRecord")) {
+            mPosition = positionToRecord;
         }
 
-        Log.d(TAG, "MA affichageRecyclerView: "+mPosition);
+        Log.d(TAG, "MA affichageRecyclerView: " + mPosition);
         recyclerView.smoothScrollToPosition(mPosition);
 
         Log.d("coucou", "MA onCreate: observers - mposition " + mPosition);
         // Show the weather list or the loading screen based on whether the forecast data exists
         // and is loaded
-        if (sourceSongs != null && sourceSongs.size() != 0&&recordSources!=null&&recordSources.size()!=0) {
+        if (sourceSongs != null && sourceSongs.size() != 0 && recordSources != null && recordSources.size() != 0) {
             Log.d(TAG, "MA onChanged: Ready to affiche  !");
 
             showSongsDataView();
@@ -493,7 +485,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             mAuth.signOut();
             mAuth = null;
         }*/
-        if(sharedPreferences!=null) {
+        if (sharedPreferences != null) {
             sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
         }
     }
@@ -549,7 +541,16 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_toolbar, menu);
+        if (mAuth != null && mCurrentAuthRole.equals("Super Admin")) {
+            Log.d(TAG, "MA onCreateOptionsMenu: true");
+
+            menu.getItem(3).setVisible(true);
+        } else {
+            Log.d(TAG, "MA onCreateOptionsMenu: false");
+            menu.getItem(3).setVisible(false);
+        }
         Log.d(TAG, "MA onCreateOptionsMenu: ");
+
         return true;
     }
 
@@ -557,7 +558,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG, "MA onOptionsItemSelected: ");
 
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
 
             case R.id.parametres:
                 launchSettingsActivity();
@@ -572,34 +573,31 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
                 //todo faire les calculs pour ne prposer que les pupitres non complets
                 loadSongsPupitre();
-                Log.d(TAG, "MA onOptionsItemSelected: "+sourceSongList);
+                Log.d(TAG, "MA onOptionsItemSelected: " + sourceSongList);
                 break;
 
             case R.id.delete_pupitre:
                 //todo faire les calculs pour ne prposer que les pupitres qui ont des chansons à supprimer
-
                 deleteSongsPupitre();
                 break;
 
             case R.id.admin:
-                //todo stocker le super Admin ainsi que la chorale et son Id
-                if(mAuth!=null&&mCurrentAuthRole.equals("Super Admin")){
-                    Toast.makeText(this, "Vous êtes "+mCurrentAuthRole, Toast.LENGTH_SHORT).show();
-                    Intent  startAdminHomeActivity = new Intent(this, AdminHome.class);
-                    startActivity(startAdminHomeActivity);
 
-                }else{
-                    //todo vérifier que l'item est caché dans le cas non admin
-                    item.setVisible(false);
+                Toast.makeText(this, "Vous êtes " + mCurrentAuthRole, Toast.LENGTH_SHORT).show();
+                Intent startAdminHomeActivity = new Intent(this, AdminHome.class);
+                startActivity(startAdminHomeActivity);
+                break;
+
+            case R.id.contact:
+                String[] adresses={"thierryc973@gmail.com"};
+                Intent contactMail = new Intent(Intent.ACTION_SENDTO);
+                contactMail.setData(Uri.parse("mailto:")); // only email apps should handle this
+                contactMail.putExtra(Intent.EXTRA_EMAIL, adresses);
+                contactMail.putExtra(Intent.EXTRA_SUBJECT, "Remarques sur l'application Korale");
+                if (contactMail.resolveActivity(getPackageManager()) != null) {
+                    startActivity(contactMail);
                 }
                 break;
-
-//todo à retirer car on ne veut pas se délogger usage à personne unique
-
-            case R.id.log_out:
-                logOut();
-                break;
-
         }
         return super.onOptionsItemSelected(item);
     }
@@ -608,7 +606,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
 
-        if(threadSpectacles!=null) {
+        if (threadSpectacles != null) {
             try {
                 threadSpectacles.join();
             } catch (InterruptedException e) {
@@ -616,9 +614,9 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             }
         }
 
-        String spectacle = sharedPreferences.getString("currentSpectacle","Tous");
+        String spectacle = sharedPreferences.getString("currentSpectacle", "Tous");
 
-        MenuItem spectacleItem = menu.getItem(5);
+        MenuItem spectacleItem = menu.getItem(4);
         spectacleItem.setTitle(spectacle);
 
         Log.d(TAG, "MA onPrepareOptionsMenu: ");
@@ -628,10 +626,10 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     private void getCurrentSpectacles() {
 
-        Set<String> currentSpectacles = sharedPreferences.getStringSet("currentSpectacles",null);
+        Set<String> currentSpectacles = sharedPreferences.getStringSet("currentSpectacles", null);
 
         Log.d(TAG, "MA getCurrentSpectacles: " + currentSpectacles);
-        if(namesSpectacles!=null) {
+        if (namesSpectacles != null) {
             namesSpectacles = new ArrayList<>();
         }
         threadSpectacles = new Thread(new Runnable() {
@@ -659,10 +657,10 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
         DialogFragment dialog = new DialogSpectacleFragment();
         Bundle args = new Bundle();
-        args.putStringArrayList("spectaclesName",namesSpectacles);
-        Log.d(TAG, "MA launchChoiceSpectacle: noms spectacles "+namesSpectacles);
+        args.putStringArrayList("spectaclesName", namesSpectacles);
+        Log.d(TAG, "MA launchChoiceSpectacle: noms spectacles " + namesSpectacles);
         dialog.setArguments(args);
-        dialog.show(getSupportFragmentManager(),"TAG");
+        dialog.show(getSupportFragmentManager(), "TAG");
         Log.d(TAG, "MA OnDialogSpectacle fragment: ");
     }
 
@@ -670,67 +668,66 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         Log.d(TAG, "MA deleteSongsPupitre: ");
         DialogFragment dialog = new DialogMA();
         Bundle args = new Bundle();
-        args.putString("origine","deletePupitres");
+        args.putString("origine", "deletePupitres");
         dialog.setArguments(args);
-        dialog.show(getSupportFragmentManager(),"TAG");
+        dialog.show(getSupportFragmentManager(), "TAG");
     }
 
     private void loadSongsPupitre() {
         Log.d(TAG, "MA loadSongsPupitre: ");
         DialogFragment dialog = new DialogMA();
         Bundle args = new Bundle();
-        args.putString("origine","downloadPupitres");
+        args.putString("origine", "downloadPupitres");
         dialog.setArguments(args);
-        dialog.show(getSupportFragmentManager(),"TAG");
+        dialog.show(getSupportFragmentManager(), "TAG");
 
     }
 
     private void launchSettingsActivity() {
-        Intent  startSettingsActivity = new Intent(this, SettingsActivity.class);
+        Intent startSettingsActivity = new Intent(this, SettingsActivity.class);
         startActivity(startSettingsActivity);
     }
 
 
     /**
      * Méthode passée dans le listener dans l'adapter
-     *
      */
 
 
     @Override
     public void OnClickedItem(String titre, String message) {
 
-        if(mToast!=null){
+        if (mToast != null) {
             mToast.cancel();
         }
-        mToast=Toast.makeText(this, message +"-"+titre, Toast.LENGTH_SHORT);
+        mToast = Toast.makeText(this, message + "-" + titre, Toast.LENGTH_SHORT);
         mToast.show();
     }
 
 
     @Override
     public Song OnPlaySong(SourceSong sourceSong, Pupitre pupitre, RecordSource source) {
-        Log.d(TAG, "MA OnPlaySong: au secours "+sourceSong+ " "+sourceSong.getTitre()+" "+ pupitre+ " "+source+" "+sourceSongList);
+        Log.d(TAG, "MA OnPlaySong: au secours " + sourceSong + " " + sourceSong.getTitre() + " " + pupitre + " " + source + " " + sourceSongList);
 
         Song songToPlay = null;
 
-        for(SourceSong sourceSong1:sourceSongList){
-            Log.d(TAG, "MA OnPlaySong: "+sourceSong1.getTitre());
+        for (SourceSong sourceSong1 : sourceSongList) {
+            Log.d(TAG, "MA OnPlaySong: " + sourceSong1.getTitre());
         }
 
         int indexSourceSong = sourceSongList.indexOf(sourceSong);
-        Log.d(TAG, "MA OnPlaySong: index "+indexSourceSong);
+        Log.d(TAG, "MA OnPlaySong: index " + indexSourceSong);
 
-        if(source ==RecordSource.BANDE_SON) {
+        if (source == RecordSource.BANDE_SON) {
             Log.d(TAG, "MA OnPlaySong: BS");
             for (Song song : SongOnPhonesBS.get(indexSourceSong)) {
-                Log.d(TAG, "MA OnPlaySong: "+song.getPupitre());
+                Log.d(TAG, "MA OnPlaySong: " + song.getPupitre());
                 if (song.getPupitre() == pupitre && song.getRecordSource() == source) {
                     songToPlay = song;
-                    Log.d(TAG, "MA OnPlaySong: "+songToPlay+" "+songToPlay.getPupitre());
+                    Log.d(TAG, "MA OnPlaySong: " + songToPlay + " " + songToPlay.getPupitre());
                 }
             }
-        }else if(source ==RecordSource.LIVE) {
+        } else if (source == RecordSource.LIVE) {
             for (Song song : SongOnPhonesLive.get(indexSourceSong)) {
                 if (song.getPupitre() == pupitre && song.getRecordSource() == source) {
                     songToPlay = song;
@@ -743,89 +740,89 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     @Override
     public Song OnPlayFirstSong(final int position, final RecordSource recordSource) {
 
-        if(recordSource ==RecordSource.BANDE_SON) {
-            firstSongPlayed=SongOnPhonesBS.get(position).get(0);
-        }else if(recordSource ==RecordSource.LIVE) {
-            firstSongPlayed=SongOnPhonesLive.get(position).get(0);
+        if (recordSource == RecordSource.BANDE_SON) {
+            firstSongPlayed = SongOnPhonesBS.get(position).get(0);
+        } else if (recordSource == RecordSource.LIVE) {
+            firstSongPlayed = SongOnPhonesLive.get(position).get(0);
         }
-        Log.d(TAG, "MA OnPlayFirstSong: "+firstSongPlayed);
+        Log.d(TAG, "MA OnPlayFirstSong: " + firstSongPlayed);
         return firstSongPlayed;
     }
 
     @Override
-    public List<Song> OnListRecordedSongsOnCloud(int position,RecordSource recordSource) {
+    public List<Song> OnListRecordedSongsOnCloud(int position, RecordSource recordSource) {
 
         List<Song> cloudSongs = new ArrayList<>();
 
-        if(recordSource==RecordSource.BANDE_SON){
+        if (recordSource == RecordSource.BANDE_SON) {
 
-            cloudSongs=songOnClouds.get(position);
+            cloudSongs = songOnClouds.get(position);
         }
         return cloudSongs;
     }
 
     @Override
-    public List<Song> OnListRecordedSongsOnPhone(int position,RecordSource recordSource) {
+    public List<Song> OnListRecordedSongsOnPhone(int position, RecordSource recordSource) {
 
         List<Song> phoneSongs = new ArrayList<>();
 
-        Log.d(TAG, "MA OnListRecordedSongsOnPhone: "+position+" "+recordSource);
+        Log.d(TAG, "MA OnListRecordedSongsOnPhone: " + position + " " + recordSource);
 
-        if(recordSource==RecordSource.BANDE_SON){
-            phoneSongs=SongOnPhonesBS.get(position);
-            Log.d(TAG, "MA OnListRecordedSongsOnPhone: phoneSongs "+phoneSongs);
+        if (recordSource == RecordSource.BANDE_SON) {
+            phoneSongs = SongOnPhonesBS.get(position);
+            Log.d(TAG, "MA OnListRecordedSongsOnPhone: phoneSongs " + phoneSongs);
 
-        }else if(recordSource==RecordSource.LIVE){
+        } else if (recordSource == RecordSource.LIVE) {
 
-            phoneSongs=SongOnPhonesLive.get(position);
+            phoneSongs = SongOnPhonesLive.get(position);
         }
-        Log.d(TAG, "MA OnListRecordedSongsOnPhone: "+phoneSongs);
+        Log.d(TAG, "MA OnListRecordedSongsOnPhone: " + phoneSongs);
         return phoneSongs;
     }
 
     @Override
-    public void OnSaveRecordSong(Song song) {mViewModel.setRecordSongInAppDb(song);
+    public void OnSaveRecordSong(Song song) {
+        mViewModel.setRecordSongInAppDb(song);
     }
 
     /**
      * gestion du long click pour téléchargement single
-     *
      */
 
     @Override
-    public void OnLongClickItem(int position,Song song) {
+    public void OnLongClickItem(int position, Song song) {
         songToPlay = song;
-        Log.d(TAG, "MA OnLongClickItem: "+position);
+        Log.d(TAG, "MA OnLongClickItem: " + position);
         DialogMA dialog = new DialogMA();
         Bundle args = new Bundle();
-        args.putString("origine","downloadSingle");
-        args.putInt("position",position);
+        args.putString("origine", "downloadSingle");
+        args.putInt("position", position);
         dialog.setArguments(args);
         dialog.setSong(song);
-        dialog.show(getSupportFragmentManager(),"TAG");
+        dialog.show(getSupportFragmentManager(), "TAG");
     }
 
     @Override
     public void OnLongClickDeleteItem(int position, Song song) {
 
 
-        Log.d(TAG, "MA OnLongClickItem B: "+position);
+        Log.d(TAG, "MA OnLongClickItem B: " + position);
         DialogMA dialog = new DialogMA();
         Bundle args = new Bundle();
-        args.putString("origine","deleteSingle");
-        args.putInt("position",position);
+        args.putString("origine", "deleteSingle");
+        args.putInt("position", position);
         dialog.setArguments(args);
         dialog.setSong(song);
-        dialog.show(getSupportFragmentManager(),"TAG");
+        dialog.show(getSupportFragmentManager(), "TAG");
     }
 
     @Override
     public void onDialogMAPositiveClick(int position, Song song) {
-        positionToDownload=position;
+        positionToDownload = position;
         mLoadingIndicator.setVisibility(View.VISIBLE);
         mViewModel.downloadSingleSong(song);
         Toast.makeText(this, "Votre chanson est en train de se charger sur le téléphone", Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "MA onDialogMAPositiveClick: chargement sur tel du single (position) "+position);
+        Log.d(TAG, "MA onDialogMAPositiveClick: chargement sur tel du single (position) " + position);
     }
 
     @Override
@@ -835,14 +832,14 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     @Override
     public void onDialogMADeletePositiveClick(int position, Song song) {
-        positionToDelete=position;
-        if(song!=null) {
+        positionToDelete = position;
+        if (song != null) {
             mViewModel.deleteSingleSong(song);
-        }else{
+        } else {
             Log.d(TAG, "MA onDialogMADeletePositiveClick: chanson null");
         }
         Toast.makeText(this, "Votre chanson est supprimé sur le téléphone", Toast.LENGTH_LONG).show();
-        Log.d(TAG, "MA onDialogMAPositiveClick: suppression sur tel du single (position) "+position);
+        Log.d(TAG, "MA onDialogMAPositiveClick: suppression sur tel du single (position) " + position);
     }
 
     @Override
@@ -853,15 +850,15 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     @Override
     public void onDialogMADownloadPupitresPositiveClick(List<Integer> selectedItems) {
         getListPupitresToDownloadDelete(selectedItems);
-        Log.d(TAG, "onDialogMADownloadPupitresPositiveClick: selectedItems "+selectedItems+" "+pupitresToDownloadDelete+" "+songOnClouds.size()+" "+songOnClouds);
+        Log.d(TAG, "onDialogMADownloadPupitresPositiveClick: selectedItems " + selectedItems + " " + pupitresToDownloadDelete + " " + songOnClouds.size() + " " + songOnClouds);
         Toast.makeText(this, "Vos chansons sont en train de se charger sur le téléphone", Toast.LENGTH_SHORT).show();
         AlertBox();
 
         mLoadingIndicator.setVisibility(View.VISIBLE);
         List<Song> songsToDownload = new ArrayList<>();
 
-        for(Pupitre pupitre:pupitresToDownloadDelete){
-            for(List<Song> songs:songOnClouds) {
+        for (Pupitre pupitre : pupitresToDownloadDelete) {
+            for (List<Song> songs : songOnClouds) {
                 Log.d(TAG, "MA onDialogMADownloadPupitresPositiveClick: songs " + songs);
                 if (songs != null) {
                     for (Song song : songs) {
@@ -874,37 +871,37 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                             }
                         }
                     }
-                }else{
+                } else {
                     Log.d(TAG, "onDialogMADownloadPupitresPositiveClick: songsNull");
                 }
             }
         }
         mLoadingIndicator.setVisibility(View.VISIBLE);
-        Log.d(TAG, "MA onDialogMADownloadPupitresPositiveClick: "+songsToDownload);
+        Log.d(TAG, "MA onDialogMADownloadPupitresPositiveClick: " + songsToDownload);
         mViewModel.downloadPupitresSongs(songsToDownload);
 
     }
 
     private void getListPupitresToDownloadDelete(List<Integer> selectedItems) {
-        pupitresToDownloadDelete=new ArrayList<>();
+        pupitresToDownloadDelete = new ArrayList<>();
 
-        for(int itemId :selectedItems){
+        for (int itemId : selectedItems) {
             String pupitreToLoad = null;
-            switch(itemId){
-                case 0 :
-                    pupitreToLoad="TUTTI";
+            switch (itemId) {
+                case 0:
+                    pupitreToLoad = "TUTTI";
                     break;
-                case 1 :
-                    pupitreToLoad="BASSE";
+                case 1:
+                    pupitreToLoad = "BASSE";
                     break;
-                case 2 :
-                    pupitreToLoad="TENOR";
+                case 2:
+                    pupitreToLoad = "TENOR";
                     break;
-                case 3 :
-                    pupitreToLoad="ALTO";
+                case 3:
+                    pupitreToLoad = "ALTO";
                     break;
-                case 4 :
-                    pupitreToLoad="SOPRANO";
+                case 4:
+                    pupitreToLoad = "SOPRANO";
                     break;
             }
             if (pupitreToLoad != null) {
@@ -921,13 +918,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     @Override
     public void onDialogMADeletePupitresPositiveClick(List<Integer> selectedItems) {
         getListPupitresToDownloadDelete(selectedItems);
-        Log.d(TAG, "onDialogMADeletePupitresPositiveClick: selectedItems "+selectedItems+" "+pupitresToDownloadDelete);
+        Log.d(TAG, "onDialogMADeletePupitresPositiveClick: selectedItems " + selectedItems + " " + pupitresToDownloadDelete);
         Toast.makeText(this, "Vos chansons sont en train d'être supprimer de votre téléphone", Toast.LENGTH_SHORT).show();
 
         List<Song> songsToDelete = new ArrayList<>();
 
-        for(Pupitre pupitre:pupitresToDownloadDelete){
-            for(List<Song> songs:songOnPhones) {
+        for (Pupitre pupitre : pupitresToDownloadDelete) {
+            for (List<Song> songs : songOnPhones) {
                 if (songs != null) {
                     for (Song song : songs) {
                         if (song.getPupitre() == pupitre) {
@@ -937,7 +934,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 }
             }
         }
-        Log.d(TAG, "MA onDialogMADownloadPupitresPositiveClick: "+songsToDelete);
+        Log.d(TAG, "MA onDialogMADownloadPupitresPositiveClick: " + songsToDelete);
         mViewModel.deletePupitresSongs(songsToDelete);
     }
 
@@ -949,19 +946,19 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     @Override
     public void OnDialogRecord(int position, SongsViewHolder songsViewHolder) {
-        this.positionToRecord=position;
-        mPositiveClickListener=songsViewHolder;
+        this.positionToRecord = position;
+        mPositiveClickListener = songsViewHolder;
         DialogFragment dialog = new DialogRecordFragment();
-        dialog.show(getSupportFragmentManager(),"TAG");
+        dialog.show(getSupportFragmentManager(), "TAG");
         Log.d(TAG, "MA OnDialogRecord: ");
     }
 
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog, final Pupitre pupitre) {
-        Log.d(TAG, "MA onDialogPositiveClick: enregistrer " + pupitre+ " "+ positionToRecord);
-        Song song = new Song(sourceSongList.get(positionToRecord).getTitre(),RecordSource.LIVE,pupitre,new Date(System.currentTimeMillis()),new Date(System.currentTimeMillis()));
-        songToPlay=song;
+        Log.d(TAG, "MA onDialogPositiveClick: enregistrer " + pupitre + " " + positionToRecord);
+        Song song = new Song(sourceSongList.get(positionToRecord).getTitre(), RecordSource.LIVE, pupitre, new Date(System.currentTimeMillis()), new Date(System.currentTimeMillis()));
+        songToPlay = song;
         mPositiveClickListener.OnRecord(song);
     }
 
@@ -974,11 +971,11 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     @Override
     public void onDialogSpectaclePositiveClick(String spectacle) {
 
-        Log.d(TAG, "MA onDialogSpectaclePositiveClick: "+spectacle);
-        this.spectacle=spectacle;
+        Log.d(TAG, "MA onDialogSpectaclePositiveClick: " + spectacle);
+        this.spectacle = spectacle;
 
         editor = sharedPreferences.edit();
-        editor.putString("currentSpectacle",spectacle);
+        editor.putString("currentSpectacle", spectacle);
         editor.apply();
 
         invalidateOptionsMenu();
@@ -990,13 +987,14 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     }
 
 
-    /** Permission pour le stockage externe
+    /**
+     * Permission pour le stockage externe
      * Permission utilisée suivant les versions
      */
     @Override
     public void OnRequestPermission() {
         Log.d(TAG, "MA OnRequestPermission: entrée");
-        if(!checkPermissionFromDevice()){
+        if (!checkPermissionFromDevice()) {
             Log.d(TAG, "MA OnRequestPermission: request permission");
             requestPermission();
         }
@@ -1004,17 +1002,17 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     private void requestPermission() {
         ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.RECORD_AUDIO},
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO},
                 REQUEST_PERMISSION_CODE);
         Log.d(TAG, "MA requestPermission: ");
     }
 
     private boolean checkPermissionFromDevice() {
-        int write_external_storage_result = ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        int record_audio_result = ContextCompat.checkSelfPermission(this,Manifest.permission.RECORD_AUDIO);
+        int write_external_storage_result = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int record_audio_result = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
 
-        Log.d(TAG, "MA checkPermissionFromDevice: "+(write_external_storage_result==PackageManager.PERMISSION_GRANTED &&record_audio_result==PackageManager.PERMISSION_GRANTED));
-        return write_external_storage_result==PackageManager.PERMISSION_GRANTED &&record_audio_result==PackageManager.PERMISSION_GRANTED;
+        Log.d(TAG, "MA checkPermissionFromDevice: " + (write_external_storage_result == PackageManager.PERMISSION_GRANTED && record_audio_result == PackageManager.PERMISSION_GRANTED));
+        return write_external_storage_result == PackageManager.PERMISSION_GRANTED && record_audio_result == PackageManager.PERMISSION_GRANTED;
 
     }
 
@@ -1041,10 +1039,11 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     //todo à renommer
     public interface OnPositiveClickListener {
         void OnRecord(Song song);
+
         void OndeleteSong();
     }
 
-    private void deleteDbRoom(){
+    private void deleteDbRoom() {
         mExecutors = AppExecutors.getInstance();
         mExecutors.diskIO().execute(() -> {
             dataBase.songsDao().deleteAll();

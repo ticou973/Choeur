@@ -38,8 +38,7 @@ public class MainActivityViewModel extends ViewModel {
 
 
     public Thread getCurrentThread() {
-        Thread currentThread = mRepository.getCurrentThread();
-        return currentThread;
+        return mRepository.getCurrentThread();
     }
 
     public ListSongs getListSongs() {

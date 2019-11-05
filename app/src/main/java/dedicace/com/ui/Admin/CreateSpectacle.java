@@ -5,40 +5,60 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import dedicace.com.R;
 
-public class CreateSpectacle extends AppCompatActivity {
+public class CreateSpectacle extends AppCompatActivity implements DialogNewSSFragment.DialogNewSSListener{
 
     private Button addTitres, addConcerts, createSpectacleInDb, selectChorale;
     private EditText nomSpectacle, nomChorale;
     private TextView listTitres;
-    private String nomSpectacleStr, idChorale, titreSong, nomChoraleStr;
+    private String nomSpectacleStr, idChorale, titreSong, idSong, nomChoraleStr;
+    private ArrayList<String> lieux = new ArrayList();
+    private ArrayList<Date> dates = new ArrayList<>();
+    private List<String> titres = new ArrayList<>();
+    private List<String> listIds = new ArrayList<>();
+    private long[] datesLong;
+    private List<String> datesStr = new ArrayList<>();
     private static final String TAG ="coucou";
     private static final int REQUEST_CODE_B = 200;
     private static final int REQUEST_CODE_C = 300;
+    private static final int REQUEST_CODE_D = 400;
+
 
     private SharedPreferences sharedPreferences;
 
     private StorageReference mStorageRef;
     private FirebaseFirestore db;
 
-    private List<String> titres = new ArrayList<>();
+
 
 
 
@@ -71,6 +91,44 @@ public class CreateSpectacle extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                nomSpectacleStr = nomSpectacle.getText().toString();
+                nomChoraleStr = nomChorale.getText().toString();
+
+                Log.d(TAG, "CS nClick: create in DB "+ nomSpectacleStr+" "+nomChoraleStr+ " "+idChorale+" "+titres+ " "+listIds+" "+ lieux+" "+dates);
+                if(!TextUtils.isEmpty(nomSpectacleStr)&&!TextUtils.isEmpty(nomChoraleStr)&&listIds!=null&&listIds.size()!=0){
+
+                    Map<String,Object> spectacle = new HashMap<>();
+                    spectacle.put("nom",nomSpectacleStr);
+                    if(lieux==null||lieux.size()==0) {
+                        lieux.add("");
+                    }
+                    if(dates==null||dates.size()==0) {
+                        dates.add(null);
+                    }
+
+                    spectacle.put("concerts_lieux", lieux);
+                    spectacle.put("concerts_dates",dates);
+                    spectacle.put("id_titres",listIds);
+                    spectacle.put("maj", Timestamp.now());
+
+                    db.collection("chorale").document(idChorale).collection("spectacles")
+                            .add(spectacle)
+                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                @Override
+                                public void onSuccess(DocumentReference documentReference) {
+                                    Log.d(TAG, "CS DocumentSnapshot added with ID: " + documentReference.getId());
+                                    newSpectacle();
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.d(TAG, "CS Error adding document", e);
+                                }
+                            });
+                }else {
+                    Log.d(TAG, "CS onClick: else create in Db ");
+                }
             }
         });
 
@@ -88,7 +146,7 @@ public class CreateSpectacle extends AppCompatActivity {
             public void onClick(View view) {
                 Intent startAddConcert= new Intent(CreateSpectacle.this,AddConcert.class);
                 startAddConcert.putExtra("origine","CreateSpectacle");
-                startActivityForResult(startAddConcert,REQUEST_CODE_B);
+                startActivityForResult(startAddConcert,REQUEST_CODE_D);
             }
         });
 
@@ -103,9 +161,17 @@ public class CreateSpectacle extends AppCompatActivity {
 
     }
 
+    private void newSpectacle() {
+        DialogFragment dialog = new DialogNewSSFragment();
+        dialog.show(getSupportFragmentManager(),"TAG");
+
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        Log.d(TAG, "CS onActivityResult: "+ requestCode+ " "+resultCode+" "+data);
 
         if(resultCode== Activity.RESULT_OK) {
 
@@ -114,9 +180,12 @@ public class CreateSpectacle extends AppCompatActivity {
                 Log.d(TAG, "CSP onActivityResult: request_codeB");
                 if (data != null) {
                     titreSong = data.getStringExtra("titreselected");
+                    idSong = data.getStringExtra("idselected");
+
                 }
-                Log.d(TAG, "CS onActivityResult: request_codeB " + titreSong);
+                Log.d(TAG, "CS onActivityResult: request_codeB " + titreSong+" "+idSong);
                 titres.add(titreSong);
+                listIds.add(idSong);
 
                 StringBuilder sb = new StringBuilder(" ");
                 String newLine = System.getProperty("line.separator");
@@ -126,7 +195,6 @@ public class CreateSpectacle extends AppCompatActivity {
                     i++;
 
                     String listTitres = i+". "+titre+newLine;
-
                     sb.append(listTitres+newLine);
 
                 }
@@ -142,10 +210,50 @@ public class CreateSpectacle extends AppCompatActivity {
                 }
 
                 nomChorale.setText(nomChoraleStr);
+            }else if(requestCode==REQUEST_CODE_D){
+
+                if(data!=null){
+
+                    lieux = data.getStringArrayListExtra("lieuxconcerts");
+                    datesStr = data.getStringArrayListExtra("datesconcerts");
+
+                    for (String dateStr: datesStr){
+
+                        dates.add(new Date(Long.parseLong(dateStr)));
+                    }
+
+                    Log.d(TAG, "CS onActivityResult: "+lieux+" "+ dates);
+                }
             }
 
         }else{
-            Log.d(TAG, "CSP onActivityResult: petit problème au retour ");
+
+            Log.d(TAG, "CSP onActivityResult: petit problème au retour "+resultCode);
         }
+    }
+
+    @Override
+    public void onDialogPositiveClick() {
+        nomChorale.setText("");
+        nomSpectacle.setText("");
+        listTitres.setText("");
+        titres.clear();
+        listIds.clear();
+        lieux.clear();
+        dates.clear();
+    }
+
+    @Override
+    public void onDialogNegativeClick() {
+        finish();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id==android.R.id.home){
+            NavUtils.navigateUpFromSameTask(this);
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -33,8 +33,7 @@ class SourceSongAdapter extends RecyclerView.Adapter<SourceSongAdapter.SourceSon
     @Override
     public SourceSongViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_ss_cloud, viewGroup, false);
-        SourceSongViewHolder sourceSongViewHolder = new SourceSongViewHolder(view);
-        return sourceSongViewHolder;
+        return new SourceSongViewHolder(view);
     }
 
     @Override
@@ -75,12 +74,12 @@ class SourceSongAdapter extends RecyclerView.Adapter<SourceSongAdapter.SourceSon
         }
     }
 
-    public class SourceSongViewHolder extends RecyclerView.ViewHolder {
+    class SourceSongViewHolder extends RecyclerView.ViewHolder {
 
         TextView titre;
         CardView cv;
 
-        public SourceSongViewHolder(@NonNull View itemView) {
+        SourceSongViewHolder(@NonNull View itemView) {
             super(itemView);
             titre = itemView.findViewById(R.id.sourceSongName);
             cv=itemView.findViewById(R.id.cv_list_source_song);
