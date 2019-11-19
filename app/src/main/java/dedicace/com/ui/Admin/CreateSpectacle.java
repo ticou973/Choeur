@@ -51,15 +51,10 @@ public class CreateSpectacle extends AppCompatActivity implements DialogNewSSFra
     private static final int REQUEST_CODE_B = 200;
     private static final int REQUEST_CODE_C = 300;
     private static final int REQUEST_CODE_D = 400;
-
-
     private SharedPreferences sharedPreferences;
 
     private StorageReference mStorageRef;
     private FirebaseFirestore db;
-
-
-
 
 
     @Override
@@ -81,6 +76,8 @@ public class CreateSpectacle extends AppCompatActivity implements DialogNewSSFra
         if(actionBar != null){
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
+        Log.d(TAG, "CS onCreate: ");
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
         db = FirebaseFirestore.getInstance();
@@ -135,6 +132,7 @@ public class CreateSpectacle extends AppCompatActivity implements DialogNewSSFra
         addTitres.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d(TAG, "CS onClick: ");
                 Intent startModifySSActivity = new Intent(CreateSpectacle.this,ModifySourceSong.class);
                 startModifySSActivity.putExtra("origine","CreateSpectacle");
                 startActivityForResult(startModifySSActivity,REQUEST_CODE_B);
@@ -159,6 +157,26 @@ public class CreateSpectacle extends AppCompatActivity implements DialogNewSSFra
             }
         });
 
+    }
+
+    private void modifyMajChorale() {
+        Map<String,Object> data = new HashMap<>();
+        data.put("maj",Timestamp.now());
+
+        db.collection("chorale").document(idChorale)
+                .update(data)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "CSS onSuccess: maj chorale done");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "CSS onSuccess: maj chorale failed");
+                    }
+                });
     }
 
     private void newSpectacle() {

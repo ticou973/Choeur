@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private ListSongs listSongs;
     private Thread currentThread;
 
-    //todo à retirer seuelement pour les tests
+    //todo à retirer seulement pour les tests
     private LiveData<List<SourceSong>> sourceSongs;
     private List<SourceSong> sourceSongList = new ArrayList<>();
     private Song firstSongPlayed;
@@ -117,8 +117,10 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         installationAuth = sharedPreferences.getBoolean("installationAuth", true);
+        mCurrentAuthRole = sharedPreferences.getString("role", "Choriste");
 
         if (installationAuth) {
+            Log.d(TAG, "MA onCreate: installationAuth "+ mAuth);
             mAuth = FirebaseAuth.getInstance();
             mAuth.signOut();
         }
@@ -140,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(songsAdapter);
 
+        //todo problème de mAuth, peut être directement mettre la version de sharedPreferences
 
         if (mAuth.getCurrentUser() != null) {
             Log.d(TAG, "" + "MA onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
@@ -152,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
             getCurrentSpectacles();
 
-            //todo voir si cela est nécessaire d'observer toutes les SS ou cseulement celles du spectacles
+            //todo voir si cela est nécessaire d'observer toutes les SS ou seulement celles du spectacles
             sourceSongs = mViewModel.getChoeurSourceSongs();
             Log.d(TAG, "MA onCreate: getChoeurSourcesongs " + sourceSongs);
             sourceSongs.observe(this, sourceSongs -> {
@@ -334,8 +337,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         } else {
             Log.d(TAG, "MA setUpSharedPreferences: plus une installation ");
         }
-
-        mCurrentAuthRole = sharedPreferences.getString("role", "Choriste");
 
         Log.d(TAG, "MA setUpSharedPreferences: idchorale " + sharedPreferences.getString("idchorale", ""));
 
@@ -541,6 +542,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_toolbar, menu);
+
         if (mAuth != null && mCurrentAuthRole.equals("Super Admin")) {
             Log.d(TAG, "MA onCreateOptionsMenu: true");
 

@@ -145,7 +145,7 @@ public class ChoraleRepository {
             spectacles = mChoraleNetworkDataSource.getSpectacles();
             listIdSpectacles =mChoraleNetworkDataSource.getListIdSpectacles();
 
-            Log.d(LOG_TAG, "CR ChoraleRepository: modifencours "+modifEnCours);
+            Log.d(LOG_TAG, "CR ChoraleRepository: modifencours "+modifEnCours+" "+listIdSpectacles);
 
             //cas où il y a une modif éventuelle sur saisons et spectacles.
             if(modifEnCours){
@@ -156,15 +156,12 @@ public class ChoraleRepository {
                 Log.d(LOG_TAG, "CR getData: setIdSpectacles "+ setIdSpectacles);
                 editor.putStringSet("currentSpectacles", setIdSpectacles);
                 editor.apply();
-                Log.d(LOG_TAG, "CR ChoraleRepository: modif en cours majSaisonCloud");
+                Log.d(LOG_TAG, "CR ChoraleRepository: modif en cours majSaisonCloud ");
                 startFetchSongsService();
 
             }else {
                 majRoomDb();
             }
-
-
-
         });
 
         majDBCloudLong= mChoraleNetworkDataSource.getMajDBCloudLong();
@@ -193,6 +190,7 @@ public class ChoraleRepository {
                     Log.d(LOG_TAG, "CR ChoraleRepository: userID "+ userId);
 
                     if(!TextUtils.isEmpty(userId)) {
+                        Log.d(LOG_TAG, "CR ChoraleRepository: getData");
                         modifEnCours=true;
                         mChoraleNetworkDataSource.getData(userId);
                     }else{
@@ -663,8 +661,10 @@ public class ChoraleRepository {
         for(Spectacle spectacle:oldSpectacles){
             listOldIdSpectacles.add(spectacle.getIdSpectacleCloud());
         }
+
+        Log.d(LOG_TAG, "CR deletedSpectaclesList: new "+listIdSpectacles.size()+" old "+listOldIdSpectacles.size());
         for(String oldSpectacleStr :listOldIdSpectacles){
-            Log.d(LOG_TAG, "CR deletedSpectaclesList: oldSpectacles "+listOldIdSpectacles.size());
+            Log.d(LOG_TAG, "CR deletedSpectaclesList: oldSpectacles "+listOldIdSpectacles.size()+" "+oldSpectacleStr);
             if(!listIdSpectacles.contains(oldSpectacleStr)){
                 for(Spectacle spectacle:oldSpectacles){
                     if(spectacle.getIdSpectacleCloud().equals(oldSpectacleStr)){
@@ -779,6 +779,7 @@ public class ChoraleRepository {
     //todo voir pour les mettre dans SongsUtilities
     private void deletedSongsList(List<Song> songs) {
 
+        //todo il doit y avoir des méthodes moins énergivores
         for (Song oldSong:oldSongs) {
             if (oldSong.getRecordSource() == RecordSource.BANDE_SON) {
                 int i = 0;
@@ -797,14 +798,14 @@ public class ChoraleRepository {
             }
         }
 
-        Log.d(LOG_TAG, "CR deletedSongsList:  "+deletedSongsList.size());
+        Log.d(LOG_TAG, "CR deletedSongsList: 1er bilan song "+deletedSongsList.size());
         for (Song song:deletedSongsList) {
-            Log.d(LOG_TAG, "CR deletedSongsList: "+song.getSourceSongTitre()+" "+song.getUpdatePhoneMp3());
+            Log.d(LOG_TAG, "CR deletedSongsList: intermédiaire"+song.getSourceSongTitre()+" "+song.getUpdatePhoneMp3());
             if(song.getUpdatePhoneMp3()!=null){
                 deletedMp3SongsList.add(song);
             }
         }
-        Log.d(LOG_TAG, "CR deletedSongsList: "+deletedMp3SongsList);
+        Log.d(LOG_TAG, "CR deletedSongsList : finalMP3 "+deletedMp3SongsList);
     }
 
     private void deletedSourceSongsList(List<SourceSong> sources) {

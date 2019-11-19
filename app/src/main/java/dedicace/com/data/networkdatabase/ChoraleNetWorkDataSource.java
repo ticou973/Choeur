@@ -205,7 +205,6 @@ public class ChoraleNetWorkDataSource {
 
 
     void fetchMajClouDb() {
-
         idChorale = sharedPreferences.getString("idchorale","");
         Log.d(LOG_TAG, "NDS getMajDateCloudDataBase: "+idChorale);
 
@@ -398,7 +397,6 @@ public class ChoraleNetWorkDataSource {
         Log.d(LOG_TAG, "NDS getIdSS: idSongs "+currentSongs);
         if(currentSongs!=null){
             listIdSS = new ArrayList<>(currentSongs);
-
         }else{
             Log.d(LOG_TAG, "NDS getIdSS: pas de current saison");
         }
@@ -799,8 +797,6 @@ public class ChoraleNetWorkDataSource {
                 song.setSongPath(null);
             }
         });
-
-
     }
 
     //todo mettre des try catch
@@ -859,6 +855,8 @@ public class ChoraleNetWorkDataSource {
                     if(Objects.requireNonNull(task.getResult()).exists()){
                         threadMaj =Thread.currentThread();
 
+                        //todo peut être ne pas aller chercher car inutile si pas en initialisation
+
                         Timestamp majDCBB =(Timestamp) task.getResult().get("maj");
                         majDateCloudDataBase = Objects.requireNonNull(majDCBB).toDate();
                         majCloudDBLong = majDateCloudDataBase.getTime();
@@ -910,6 +908,8 @@ public class ChoraleNetWorkDataSource {
                                         }
 
                                         Log.d(LOG_TAG, "NDS getData: saisons " + saisons);
+
+                                        //todo un peu gros de prendre tous les spectacles connaissant les saisons (faire une query sur les spectacles concernés)
 
                                         db.collection("chorale").document(idChorale).collection("spectacles")
                                                 .get()
