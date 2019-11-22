@@ -155,6 +155,11 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
             getCurrentSpectacles();
 
+
+            //todo à retirer pour test
+
+            compareData();
+
             //todo voir si cela est nécessaire d'observer toutes les SS ou seulement celles du spectacles
             sourceSongs = mViewModel.getChoeurSourceSongs();
             Log.d(TAG, "MA onCreate: getChoeurSourcesongs " + sourceSongs);
@@ -275,6 +280,51 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         }
     }
 
+    //todo à supprimer dès que test terminé
+    private void compareData() {
+        List<SourceSong> testSSCloud = new ArrayList<>();
+        List<Song> testSongCloud = new ArrayList<>();
+
+        testSSCloud=mViewModel.getSS();
+        testSongCloud = mViewModel.getSongCloud();
+
+        Log.d("Test1", testSSCloud.size()+" song Cloud"+testSongCloud.size());
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+
+                List<SourceSong> testSS = new ArrayList<>();
+                List<SourceSong> testSSCloud = new ArrayList<>();
+                List<Song> testSong = new ArrayList<>();
+                List<Song> testSongCloud = new ArrayList<>();
+
+                testSS = dataBase.sourceSongDao().getAllSources();
+                testSong = dataBase.songsDao().getAllSongs();
+
+
+
+                Log.d("Test1", "testSS: "+testSS.size());
+
+                for(SourceSong sourceSong:testSS){
+                    Log.d("Test1", "SS local "+ sourceSong.getTitre());
+                }
+
+
+                Log.d("Test1", "Song Local "+ testSong.size());
+                for(Song song: testSong){
+                    Log.d("Test1", "Song Local "+ song.getSourceSongTitre()+ " "+song.getPupitre());
+                }
+
+            }
+        });
+
+        thread.start();
+
+
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -285,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         if (currentUser == null) {
             sendToLogin();
 
-            Log.d("coucou", "MA onCreate:B Start " + current_user_id);
+            Log.d("coucou", "MA onSTart:B Start " + current_user_id);
         } else {
             //todo à compléter (rapatrier toute la partie non null de Oncreate ici en fait.
 

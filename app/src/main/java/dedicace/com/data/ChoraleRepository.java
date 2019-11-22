@@ -170,7 +170,7 @@ public class ChoraleRepository {
         majDBCloudLong.observeForever(majclouddblong -> {
             //todo vérifier l'utilité de l'égalité
             majCloudDBLong = majclouddblong;
-            Log.d(LOG_TAG, "CR AlerteMaj ChoraleRepository: majCloudLong "+ majclouddblong);
+            Log.d(LOG_TAG, "CR Alerte Maj ChoraleRepository: majCloudLong "+ majclouddblong);
 
             if(majLocalDBLong<majCloudDBLong){
                 if(oldSourcesSongs!=null&&oldSourcesSongs.size()!=0){
@@ -401,43 +401,6 @@ public class ChoraleRepository {
 
         Log.d(LOG_TAG, "CR DoSynchronization: juste avant T2 start");
         t2.start();
-    }
-
-    private List<Song> getSongCurrentSpectacle(List<SourceSong> sourceSongs, List<Song> oldSongs) {
-        ArrayList<Song> currentSongs = new ArrayList<>();
-        for(SourceSong sourceSong:sourceSongs){
-            String titre = sourceSong.getTitre();
-            List<Song> songs = mSongDao.getSongsByTitre(titre);
-            currentSongs.addAll(songs);
-        }
-
-        return currentSongs;
-    }
-
-    private List<SourceSong> getSSCurrentSpectacle(List<SourceSong> oldSourcesSongs) {
-        ArrayList<SourceSong> currentSS = new ArrayList<>();
-
-        ArrayList<String> currentSSId = new ArrayList<>();
-        String currentSpectacle = sharedPreferences.getString("currentSpectacle","");
-
-        List<Spectacle> listSpectaclesDb = mSpectacleDao.getAllSpectacles();
-        Log.d(LOG_TAG, "CR getSSCurrentSpectacle: "+ listSpectaclesDb);
-
-        if(!currentSpectacle.isEmpty()){
-            if(listSpectaclesDb!=null&&listSpectaclesDb.size()!=0) {
-                for (Spectacle spectacle : listSpectaclesDb) {
-                    if (spectacle.getSpectacleName().equals(currentSpectacle)) {
-                        currentSSId=spectacle.getIdTitresSongs();
-                    }
-                }
-
-                for(String idSpectacle: currentSSId){
-                    SourceSong sourceSong = mSourceDao.getSourceSongByIdCloud(idSpectacle);
-                    currentSS.add(sourceSong);
-                }
-            }
-        }
-        return currentSS;
     }
 
 
@@ -787,7 +750,7 @@ public class ChoraleRepository {
                     if ((!oldSong.getSongIdCloud().equals(song.getSongIdCloud()))) {
                         i++;
                     } else {
-                        Log.d(LOG_TAG, "CR deletedSongsList: pas incrément ");
+                        Log.d(LOG_TAG, "CR deletedSongsList: pas incrément "+song.getSourceSongTitre()+" "+song.getPupitre());
                     }
                 }
                 if (i == songs.size()) {
@@ -1329,6 +1292,20 @@ public class ChoraleRepository {
 
     public Thread getThreadSaisons() {
         return threadSaisons;
+    }
+
+
+
+
+    //todo à supprimer dès que test terminé
+    public List<SourceSong> getSS() {
+        Log.d("Test1", "getSS: CR");
+        return mChoraleNetworkDataSource.getSS();
+    }
+
+    public List<Song> getSongCloud() {
+        Log.d("Test1", "getSongCloud: CR");
+        return mChoraleNetworkDataSource.getSongCloud();
     }
 }
 
