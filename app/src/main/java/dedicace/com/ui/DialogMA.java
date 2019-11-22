@@ -14,13 +14,13 @@ import java.util.List;
 import dedicace.com.R;
 import dedicace.com.data.database.Song;
 
-public class DialogMA extends DialogFragment {
+public class DialogMA extends DialogFragment  {
     private String origine;
     private Song song, songToDelete;
     private String messageIntro;
     private String messagePositif;
     private String messageNegatif;
-    private int position;
+    private int position,nbSong,nbSongTotal;
     private List<Integer> selectedItems= new ArrayList<>();
 
     public DialogMA() {
@@ -38,7 +38,9 @@ public class DialogMA extends DialogFragment {
         void onDialogMADeletePupitresNegativeClick();
     }
 
+
     private DialogMAListener mListener;
+
 
     @Override
     public void onAttach(Context context) {
@@ -48,6 +50,7 @@ public class DialogMA extends DialogFragment {
         // the callback interface. If not, it throws an exception
         try {
             mListener = (DialogMAListener) context;
+
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
                     + " doit implémenter BasicDialogListener");
@@ -59,6 +62,9 @@ public class DialogMA extends DialogFragment {
         Bundle args = getArguments();
         origine = args.getString("origine","");
         position =args.getInt("position",0);
+        nbSong = args.getInt("nombreSongs",0);
+        nbSongTotal = args.getInt("nombreTotalSongs",0);
+
 
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -124,6 +130,11 @@ public class DialogMA extends DialogFragment {
         }else if(origine.equals("waitSongs")){
             Log.d("coucou", "DMA onCreateDialog: waitsongs");
             builder.setMessage("Veuillez attendre la mise à jour des données... Lors de la première installation, cela peut prendre plusieurs minutes ! (temps de charge des chansons de votre pupitre)");
+
+        }else if(origine.equals("progress")){
+            Log.d("coucou", "DMA onCreateDialog: progress "+nbSong+ " "+nbSongTotal);
+
+            builder.setMessage("Veuillez attendre la mise à jour des données..."+nbSong+"/"+nbSongTotal+" chansons chargées sur votre téléphone !");
 
         } else{
             Log.d("coucou", "DMA onCreateDialog: pas de messages...");

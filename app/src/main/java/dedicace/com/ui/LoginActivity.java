@@ -44,16 +44,21 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        mAuth = FirebaseAuth.getInstance();
-
         loginEmailText = findViewById(R.id.reg_email);
         loginPassText = findViewById(R.id.reg_confirm_pass);
         loginBtn = findViewById(R.id.login_btn);
         loginProgress = findViewById(R.id.login_progress);
         Log.d("coucou", "LA Login onCreate: ");
 
+        mAuth = FirebaseAuth.getInstance();
 
+        if(mAuth.getCurrentUser()!=null){
+            Log.d("coucou", "LA onCreate: current user non null");
+            mAuth.signOut();
+            mAuth = FirebaseAuth.getInstance();
+        }
+
+        Log.d("coucou", "LA onCreate: pas installationAuth "+ mAuth);
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -61,31 +66,45 @@ public class LoginActivity extends AppCompatActivity {
 
                 String loginEmail = loginEmailText.getText().toString();
                 String loginPass = loginPassText.getText().toString();
+
+                editor = sharedPreferences.edit();
+                editor.putString("loginEmail",loginEmail);
+                editor.putString("loginMdp",loginPass);
+                editor.apply();
+
                 Log.d("coucou", "LA onClick: "+loginEmail+" "+loginPass);
 
                 if(!TextUtils.isEmpty(loginEmail) && !TextUtils.isEmpty(loginPass)){
                     loginProgress.setVisibility(View.VISIBLE);
                     Log.d("coucou", "LA onClick: go Auth");
 
-                    mAuth.signInWithEmailAndPassword(loginEmail, loginPass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
+                    signIn(loginEmail, loginPass);
 
-                            if(task.isSuccessful()){
-                                FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                                current_user_id = currentUser.getUid();
-                                Log.d("coucou", "LA onComplete Login: "+current_user_id);
-
-                                sendToMain();
-
-                            } else {
-                                String errorMessage = task.getException().getMessage();
-                                Toast.makeText(LoginActivity.this, "Error : " + errorMessage, Toast.LENGTH_LONG).show();
-                            }
-                            loginProgress.setVisibility(View.INVISIBLE);
-                        }
-                    });
                 }
+            }
+        });
+    }
+
+    private void signIn(String loginEmail, String loginPass) {
+        mAuth.signInWithEmailAndPassword(loginEmail, loginPass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+
+                if(task.isSuccessful()){
+                    Log.d("coucou", "LA onComplete: signIn réussi ");
+                    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                    current_user_id = currentUser.getUid();
+                    Log.d("coucou", "LA onComplete Login: "+current_user_id);
+                    editor = sharedPreferences.edit();
+                    editor.putString("userId", current_user_id);
+                    editor.apply();
+                    sendToMain();
+
+                } else {
+                    String errorMessage = task.getException().getMessage();
+                    Toast.makeText(LoginActivity.this, "Error : " + errorMessage, Toast.LENGTH_LONG).show();
+                }
+                loginProgress.setVisibility(View.INVISIBLE);
             }
         });
     }
@@ -104,9 +123,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void sendToMain() {
-        editor = sharedPreferences.edit();
-        editor.putBoolean("installationAuth", false);
-        editor.apply();
         Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(mainIntent);
         finish();

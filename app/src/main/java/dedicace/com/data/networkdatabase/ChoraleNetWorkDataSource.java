@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import dedicace.com.AppExecutors;
 import dedicace.com.R;
@@ -104,6 +105,7 @@ public class ChoraleNetWorkDataSource {
 
     private List<String> listIdSpectacles = new ArrayList<>();
     private String current_saisonId;
+    private DialogFragment dialogWait;
 
 
     //DB
@@ -113,7 +115,6 @@ public class ChoraleNetWorkDataSource {
     private String current_user_id;
     private Pupitre pupitreUser;
     private FirebaseAuth mAuth;
-
 
     private Date majDateCloudDataBase;
     private String idChorale;
@@ -144,13 +145,15 @@ public class ChoraleNetWorkDataSource {
         Log.d(LOG_TAG, "NetworkDataSource: constructor " + mDownloaderSourceSongs);
         db = FirebaseFirestore.getInstance();
         mStorage = FirebaseStorage.getInstance();
-        Log.d(LOG_TAG, "NDS ChoraleNetWorkDataSource: constructor ref de storage et db");
-        mAuth=FirebaseAuth.getInstance();
+        mAuth = FirebaseAuth.getInstance();
         current_user_id= Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
-        Log.d(LOG_TAG, "NDS ChoraleNetWorkDataSource: constructor "+ current_user_id);
+
         workerThread = new WorkerThread();
         sharedPreferences =PreferenceManager.getDefaultSharedPreferences(mContext);
+        current_user_id =sharedPreferences.getString("userId", "");
         dialog = new DialogDownload();
+        Log.d(LOG_TAG, "NDS ChoraleNetWorkDataSource: constructor ref de storage et db");
+        Log.d(LOG_TAG, "NDS ChoraleNetWorkDataSource: constructor "+ current_user_id);
 
         //todo voir si cela fonctionne dans tous les cas et supprimer si pas utile dans le progress
         if(mAContext!=context){
@@ -399,6 +402,7 @@ public class ChoraleNetWorkDataSource {
 
     public interface OnNDSListener {
         void OnProgressLoading(int progress);
+        void OnProgressSongs(int nbSong, int nbSongTotal);
     }
 
     /**
@@ -518,8 +522,10 @@ public class ChoraleNetWorkDataSource {
         Log.d(LOG_TAG, "NDS fetchSongsB: début");
         getIdSS();
 
+        AtomicInteger entier= new AtomicInteger();
+
         for(String idSS : listIdSS){
-            Log.d(LOG_TAG, "NDS fetchSongsB: début boucle "+ idSS);
+            Log.d(LOG_TAG, "NDS fetchSongsB: début boucle "+ idSS+" "+entier+" "+listIdSS.size());
 
             try{
                 db.collection("sourceSongs").document(idSS)
@@ -555,7 +561,6 @@ public class ChoraleNetWorkDataSource {
                                     Log.d(LOG_TAG, "NDS onComplete: pb get Results doesn't exist");
                                 }
 
-
                                 try {
                                     db.collection("songs")
                                             .whereEqualTo("titre_song",sourceSongs.get(sourceSongs.size()-1).getTitre())
@@ -589,17 +594,30 @@ public class ChoraleNetWorkDataSource {
                                                         Log.d(LOG_TAG, "NDS : onComplete:B Songs " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
                                                         Song song = new Song(idCloud,titre,sourceObj,pupitreObj,urlMp3,maj);
                                                         songs.add(song);
+
+                                                        Log.d("coucou", "fetchSongs: entier "+entier);
                                                     }
                                                     Log.d(LOG_TAG, "NDS onComplete: avant post "+songs.size()+"  "+ songs);
                                                     //todo à vérifier surement inutile maintenant
-                                                    if(idSS.equals(listIdSS.get(listIdSS.size()-1))) {
+                                                    /*if(idSS.equals(listIdSS.get(listIdSS.size()-1))) {
                                                         Log.d(LOG_TAG, "NDS onComplete: condition dernier idss  remplies "+ idSS);
                                                         Message message = Message.obtain();
                                                         message.obj = "OK";
                                                         handler.sendMessage(message);
                                                     }else{
                                                         Log.d(LOG_TAG, "NDS onComplete: condition dernier idss pas remplies "+idSS);
+                                                    }*/
+                                                    entier.getAndIncrement();
+
+                                                    if(entier.get()==listIdSS.size()) {
+                                                        Log.d(LOG_TAG, "NDS onComplete: condition dernier idss  remplies "+ idSS+" "+entier.get());
+                                                        Message message = Message.obtain();
+                                                        message.obj = "OK";
+                                                        handler.sendMessage(message);
+                                                    }else{
+                                                        Log.d(LOG_TAG, "NDS onComplete: condition dernier idss pas remplies "+idSS);
                                                     }
+
                                                 } else {
                                                     Log.w(LOG_TAG, "NDS Error getting documents.", task1.getException());
                                                 }
@@ -785,7 +803,8 @@ public class ChoraleNetWorkDataSource {
                     .addOnSuccessListener(taskSnapshot -> {
                         // Successfully downloaded data to local file
                         increment++;
-                        Log.d(LOG_TAG, "NDS onSuccess: "+Thread.currentThread().getName()+" "+ filename);
+                        Log.d(LOG_TAG, "NDS onSuccess: "+Thread.currentThread().getName()+" "+ filename+" entier "+ increment);
+                        mlistener.OnProgressSongs(increment, mp3Size);
 
                         if(increment ==mp3Size) {
                             Log.d(LOG_TAG, "NDS onSuccess :lancement de postValue Done "+mp3Size);

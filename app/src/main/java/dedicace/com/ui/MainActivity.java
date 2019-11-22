@@ -16,6 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,14 +25,15 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import dedicace.com.AppExecutors;
@@ -88,12 +90,12 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private MainActivityViewModelFactory mfactory;
 
     //Firebase
+    public static String current_user_id;
     private FirebaseAuth mAuth;
-    public static String current_user_id, userId;
-
     private String mCurrentAuthRole;
     private String typeSS;
-    private boolean installation, installationAuth;
+    private boolean installation;
+    private boolean installationAuth;
 
 
     //Utils
@@ -116,21 +118,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-        installationAuth = sharedPreferences.getBoolean("installationAuth", true);
         mCurrentAuthRole = sharedPreferences.getString("role", "Choriste");
-
-        if (installationAuth) {
-            Log.d(TAG, "MA onCreate: installationAuth "+ mAuth);
-            mAuth = FirebaseAuth.getInstance();
-            mAuth.signOut();
-        }
-
-        mAuth = FirebaseAuth.getInstance();
-
+        current_user_id =sharedPreferences.getString("userId", "");
+        installationAuth = sharedPreferences.getBoolean("installationAuth", true);
         dataBase = AppDataBase.getInstance(getApplicationContext());
 
-        if (mAuth != null && mAuth.getCurrentUser() != null) {
-            Log.d(TAG, "MA onCreate: " + mAuth + " " + mAuth.getCurrentUser().getUid());
+        if (!TextUtils.isEmpty(current_user_id)) {
+            Log.d(TAG, "MA onCreate: current user Id " + current_user_id);
         }
 
         //UI
@@ -142,10 +136,54 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(songsAdapter);
 
-        //todo problème de mAuth, peut être directement mettre la version de sharedPreferences
+        if(!installationAuth){
+            mAuth = FirebaseAuth.getInstance();
 
-        if (mAuth.getCurrentUser() != null) {
-            Log.d(TAG, "" + "MA onCreate: avant Onrequest permission" + mAuth.getCurrentUser());
+            if(mAuth.getCurrentUser()!=null){
+                Log.d("coucou", "MA onCreate: current user non null");
+                mAuth.signOut();
+                mAuth = FirebaseAuth.getInstance();
+            }
+
+            Log.d("coucou", "MA onCreate: installationAuth "+ mAuth+" "+installationAuth);
+            String loginEmail = sharedPreferences.getString("loginEmail","");
+            String loginPass = sharedPreferences.getString("loginMdp","");
+
+            Log.d("coucou", "MA onCreate: login et mdp connus "+ loginEmail+" "+loginPass);
+
+            if(!TextUtils.isEmpty(loginEmail)&&!TextUtils.isEmpty(loginPass)){
+                mAuth.signInWithEmailAndPassword(loginEmail, loginPass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+
+                        if(task.isSuccessful()){
+                            Log.d(TAG, "MA onComplete: login automatique");
+                            visualisation();
+
+                        } else {
+                            String errorMessage = task.getException().getMessage();
+                            Toast.makeText(MainActivity.this, "Error : " + errorMessage, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+            }else{
+                Toast.makeText(this, "Pb de connexion", Toast.LENGTH_SHORT).show();
+                Log.d("coucou", "LA onCreate: pb de reconnexion");
+            }
+
+        }else{
+            Log.d(TAG, "MA onCreate: visualisation");
+            editor = sharedPreferences.edit();
+            editor.putBoolean("installationAuth", false);
+            editor.apply();
+            visualisation();
+        }
+
+    }
+
+    private void visualisation() {
+        if (!TextUtils.isEmpty(current_user_id)) {
+            Log.d(TAG, "" + "MA onCreate: avant Onrequest permission " + current_user_id);
             OnRequestPermission();
             mfactory = InjectorUtils.provideViewModelFactory(this.getApplicationContext(), this);
             Log.d("coucou", "MA onCreate: fin de la factory");
@@ -294,16 +332,11 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             @Override
             public void run() {
 
-
                 List<SourceSong> testSS = new ArrayList<>();
-                List<SourceSong> testSSCloud = new ArrayList<>();
                 List<Song> testSong = new ArrayList<>();
-                List<Song> testSongCloud = new ArrayList<>();
 
                 testSS = dataBase.sourceSongDao().getAllSources();
                 testSong = dataBase.songsDao().getAllSongs();
-
-
 
                 Log.d("Test1", "testSS: "+testSS.size());
 
@@ -316,38 +349,26 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 for(Song song: testSong){
                     Log.d("Test1", "Song Local "+ song.getSourceSongTitre()+ " "+song.getPupitre());
                 }
-
             }
         });
 
         thread.start();
-
-
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         Log.d("coucou", "MA onStart: A  " + current_user_id);
 
-
-        if (currentUser == null) {
+        //todo à voir si utile du coup ?
+        if (TextUtils.isEmpty(current_user_id)) {
             sendToLogin();
 
             Log.d("coucou", "MA onSTart:B Start " + current_user_id);
         } else {
-            //todo à compléter (rapatrier toute la partie non null de Oncreate ici en fait.
 
             Log.d(TAG, "MA onStart: currentuser non null");
 
-            current_user_id = Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
-
-            editor = sharedPreferences.edit();
-            editor.putString("userId", current_user_id);
-            editor.apply();
-
-            userId = sharedPreferences.getString("userId", "");
             Log.d("coucou", "MA onStart C: " + current_user_id);
         }
     }
@@ -376,9 +397,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private void setUpSharedPreferences() {
         installation = sharedPreferences.getBoolean("installation", true);
 
-
         if (installation) {
-            current_user_id = mAuth.getUid();
 
             getData();
             Log.d(TAG, "MA setUpSharedPreferences: installation " + current_user_id);
@@ -400,7 +419,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         //todo faire pour gérer entre autres si on veut charger les songs qui viennent d être changées
 
-        Toast.makeText(this, "paramètres changés !", Toast.LENGTH_LONG).show();
         Log.d(TAG, "MA onSharedPreferenceChanged: key " + key);
         Set<String> pupitreAuto = new HashSet<>();
 
@@ -530,12 +548,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //todo voir où le mettre pour une bonne utilisation
-        /*if(mAuth!=null) {
-            Log.d(TAG, "onStop: MA logout");
-            mAuth.signOut();
-            mAuth = null;
-        }*/
+
         if (sharedPreferences != null) {
             sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
         }
@@ -546,11 +559,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
         startActivity(loginIntent);
         finish();
-    }
-
-    private void logOut() {
-        mAuth.signOut();
-        sendToLogin();
     }
 
 
@@ -593,7 +601,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_toolbar, menu);
 
-        if (mAuth != null && mCurrentAuthRole.equals("Super Admin")) {
+        if (!TextUtils.isEmpty(current_user_id) && mCurrentAuthRole.equals("Super Admin")) {
             Log.d(TAG, "MA onCreateOptionsMenu: true");
 
             menu.getItem(3).setVisible(true);
@@ -1087,6 +1095,24 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     }
 
+    @Override
+    public void OnProgressSongs(int nbSong, int nbSongTotal) {
+        if(dialogWait!=null){
+        dialogWait.dismiss();
+        }
+        dialogWait = new DialogMA();
+        Bundle args = new Bundle();
+        args.putString("origine", "progress");
+        args.putInt("nombreSongs",nbSong);
+        args.putInt("nombreTotalSongs",nbSongTotal);
+        dialogWait.setArguments(args);
+        dialogWait.show(getSupportFragmentManager(), "TAG");
+
+        Log.d(TAG, "MA OnProgressSongs: il y a "+nbSong+" sur "+nbSongTotal+ "chansons chargées sur votre téléphone");
+        //Toast.makeText(this, nbSong+ "/"+nbSongTotal+" chansons téléchargées", Toast.LENGTH_SHORT).show();
+    }
+
+
 
     //todo à renommer
     public interface OnPositiveClickListener {
@@ -1102,6 +1128,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             dataBase.sourceSongDao().deleteAll();
         });
     }
+
 }
 
 
