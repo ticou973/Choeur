@@ -15,12 +15,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
@@ -161,245 +158,6 @@ public class ChoraleNetWorkDataSource {
         }
     }
 
-    //todo supprimer dès que trouver le problème
-    public List<SourceSong> getSS() {
-        Log.d("Test1", "getSS: NDS début");
-        db.collection("chorale").document("jFHncTuYleIHhZtL2PmT").collection("saisons")
-                .get()
-                .addOnCompleteListener(task1 -> {
-                    if(task1.isSuccessful()){
-                        for (QueryDocumentSnapshot document : Objects.requireNonNull(task1.getResult())) {
-                            //Log.d("Test1", "NDS Oncomplete saisons " + document.getId() + " => " + document.getData().get("maj"));
-
-                            String saisonName,idCloud;
-                            Date maj;
-                            Timestamp majss;
-                            ArrayList<String> idSpectacles;
-
-                            idCloud= document.getId();
-
-                            saisonName = (String) document.getData().get("nom");
-
-                            majss = (Timestamp) document.getData().get("maj");
-                            maj = Objects.requireNonNull(majss).toDate();
-
-                            //Log.d("Test1", "NDS onComplete:A saisons " + saisonName + " " + maj + " "+idCloud );
-
-                            idSpectacles =(ArrayList<String>) document.getData().get("spectacles");
-
-
-                                //Log.d("Test1", "NDS getData: idSpectacles size "+idSpectacles.size());
-
-                                if(idSpectacles!=null&&idSpectacles.size()!=0) {
-                                    listIdSpectacles1.addAll(idSpectacles);
-                                    Log.d("Test1", "NDS getData: listIdSpectacles "+ listIdSpectacles1);
-                                }
-
-
-                           // Log.d("Test1", "NDS onComplete:B saisons " + saisonName + " " + maj + " "+idCloud+ " "+idSpectacles);
-                        }
-
-                        Log.d("Test1", "NDS getData: saisons ");
-
-                        //todo un peu gros de prendre tous les spectacles connaissant les saisons (faire une query sur les spectacles concernés)
-
-                        db.collection("chorale").document("jFHncTuYleIHhZtL2PmT").collection("spectacles")
-                                .get()
-                                .addOnCompleteListener(task2 -> {
-                                    if (task2.isSuccessful()) {
-                                        for (QueryDocumentSnapshot document : Objects.requireNonNull(task2.getResult())) {
-
-                                            String spectacleName,idSpectacle;
-                                            Date maj;
-                                            Timestamp majss;
-                                            ArrayList<String> idSourceSongs;
-                                            ArrayList<String> spectacleLieux;
-                                            ArrayList<Timestamp> spectaclesTimeStamps;
-                                            ArrayList<Date> spectacleDates= new ArrayList<>();
-
-                                            idSpectacle=document.getId();
-                                            spectacleName=(String) document.getData().get("nom");
-                                            majss=(Timestamp) document.getData().get("maj");
-                                            maj = Objects.requireNonNull(majss).toDate();
-
-
-                                            idSourceSongs=(ArrayList<String>) document.getData().get("id_titres");
-
-                                            //Log.d("Test1", "getSS specacles : NDS  "+idSpectacle+" "+spectacleName+" "+idSourceSongs);
-
-
-                                            if(listIdSpectacles1.contains(idSpectacle)){
-                                                for(String idSS:idSourceSongs){
-                                                    if(!listIdSSTemp1.contains(idSS)){
-                                                        listIdSSTemp1.add(idSS);
-                                                    }
-                                                }
-                                            }
-
-                                            spectacleLieux=(ArrayList<String>) document.getData().get("concerts_lieux");
-
-                                            //todo voir quand il n'y a pas de concert car array Timstamp est vide et ne marche pas alors
-                                            spectaclesTimeStamps = (ArrayList<Timestamp>) document.getData().get("concerts_dates");
-
-                                            for(Timestamp timestamp : spectaclesTimeStamps){
-                                                Date date = Objects.requireNonNull(timestamp).toDate();
-                                                spectacleDates.add(date);
-                                            }
-
-                                           // Log.d("Test1", "NDS getData: spectacles "+ listIdSSTemp1.size()+" "+idSpectacle+ " "+ spectacleName+ " "+ idSourceSongs+ " "+ spectacleLieux+ " "+ spectacleDates+ " "+ maj );
-
-                                        }
-
-                                        for(String idSS : listIdSSTemp1){
-                                            //Log.d("Test1", "NDS fetchSongsB: début boucle "+ idSS);
-
-                                            try{
-                                                db.collection("sourceSongs").document(idSS)
-                                                        .get()
-                                                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                                if(task.isSuccessful()){
-                                                                    if(Objects.requireNonNull(task.getResult()).exists()){
-                                                                        Log.d("Test", "NDS deb Oncomplete " + idSS + " => " + task.getResult().get("maj"));
-                                                                        //todo voir comment écrire une seule ligne avec ToObject
-
-                                                                        String titre, groupe, baseUrlOriginalSong, urlCloudBackground;
-                                                                        Date maj;
-                                                                        int duration;
-                                                                        Timestamp majss;
-
-                                                                       // Log.d("Test1", "NDS fetchSongs: restriction "+idSS);
-
-                                                                        titre = (String) task.getResult().get("titre");
-                                                                        groupe = (String) task.getResult().get("groupe");
-                                                                        duration = ((Long) Objects.requireNonNull(task.getResult().get("duration"))).intValue();
-                                                                        baseUrlOriginalSong = (String) task.getResult().get("original_song");
-
-                                                                        majss = (Timestamp) task.getResult().get("maj");
-
-                                                                        maj = Objects.requireNonNull(majss).toDate();
-                                                                        urlCloudBackground = (String) task.getResult().get("background");
-
-                                                                       // Log.d("Test1", "NDS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
-                                                                        SourceSong sourceSong = new SourceSong(idSS, titre, groupe, duration, urlCloudBackground, baseUrlOriginalSong, maj);
-                                                                        sourceSongs1.add(sourceSong);
-
-                                                                    }else{
-                                                                        Log.d("Test1", "NDS onComplete: pb get Results doesn't exist");
-                                                                    }
-
-
-
-                                                                    try {
-                                                                        db.collection("songs")
-                                                                                .whereEqualTo("titre_song",sourceSongs1.get(sourceSongs1.size()-1).getTitre())
-                                                                                .get()
-                                                                                .addOnCompleteListener(task1 -> {
-                                                                                   // Log.d("Test1", "NDS onComplete: Songs " + Thread.currentThread().getName());
-                                                                                    if (task1.isSuccessful()) {
-                                                                                        for (QueryDocumentSnapshot document : Objects.requireNonNull(task1.getResult())) {
-                                                                                           // Log.d("Test1", "NDS " + document.getId() + " => " + document.getData().get("pupitre"));
-
-                                                                                            final String pupitre, recordSource, urlMp3, idCloud;
-                                                                                            final Date maj;
-                                                                                            final Timestamp majs;
-
-                                                                                            idCloud = document.getId();
-
-                                                                                            pupitre = (String) document.getData().get("pupitre");
-
-                                                                                            final Pupitre pupitreObj = SongsUtilities.converttoPupitre(Objects.requireNonNull(pupitre));
-
-                                                                                            recordSource = (String) document.getData().get("recordSource");
-                                                                                            final RecordSource sourceObj = SongsUtilities.convertToRecordSource(Objects.requireNonNull(recordSource));
-
-                                                                                            urlMp3 = (String) document.getData().get("songPath");
-
-                                                                                            majs= (Timestamp) document.getData().get("maj");
-                                                                                            maj = Objects.requireNonNull(majs).toDate() ;
-
-                                                                                            //todo comment faire pour faire une référence à sourceSong
-                                                                                            titre = (String) document.getData().get("titre_song");
-                                                                                            //Log.d("Test1", "NDS : onComplete:B Songs " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
-                                                                                            Song song = new Song(idCloud,titre,sourceObj,pupitreObj,urlMp3,maj);
-                                                                                            songs1.add(song);
-                                                                                        }
-                                                                                        Log.d("Test1", "NDS onComplete: avant post "+songs1.size()+"  "+ songs1);
-                                                                                        //todo à vérifier surement inutile maintenant
-                                                                                        if(idSS.equals(listIdSSTemp1.get(listIdSSTemp1.size()-1))) {
-                                                                                            Log.d("Test1", "NDS onComplete: condition dernier idss  remplies "+ idSS);
-
-                                                                                            Log.d("Test1", "testSSCloud: "+sourceSongs1.size());
-
-                                                                                            for(SourceSong sourceSong:sourceSongs1){
-                                                                                                Log.d("Test1", "SS Cloud "+ sourceSong.getTitre());
-                                                                                            }
-
-                                                                                            Log.d("Test1", "Song Cloud"+ songs1.size());
-                                                                                            for(Song song: songs1){
-                                                                                                Log.d("Test1", "Song Cloud "+ song.getSourceSongTitre()+" "+song.getPupitre());
-                                                                                            }
-
-                                                                                        }else{
-                                                                                            Log.d("Test1", "NDS onComplete: condition dernier idss pas remplies "+idSS);
-                                                                                        }
-                                                                                    } else {
-                                                                                        Log.w("Test1", "NDS Error getting documents.", task1.getException());
-                                                                                    }
-                                                                                });
-                                                                    } catch (Exception e) {
-                                                                        // Server probably invalid
-                                                                        e.printStackTrace();
-                                                                    }
-
-                                                                }else{
-                                                                    Log.d("Test1", "NDS onComplete: pb sur les fetch SS ");
-                                                                }
-
-                                                            }
-                                                        })
-                                                        .addOnFailureListener(new OnFailureListener() {
-                                                            @Override
-                                                            public void onFailure(@NonNull Exception e) {
-
-                                                            }
-                                                        });
-
-                                            }catch (Exception e){
-                                                e.printStackTrace();
-                                            }
-
-                                        }
-
-                                        Log.d("Test1", "NDS fetchSongsB: end boucle "+sourceSongs.size());
-
-
-
-
-                                    }else{
-                                        Log.d("Test1", "NDS onComplete: help pb sur documents spectacles");
-                                    }
-
-                                }).addOnFailureListener(e -> {
-                        });
-
-                    }else{
-                        Log.d("Test1", "NDS onComplete: help pb sur documents saisons");
-                    }
-
-                })
-                .addOnFailureListener(e -> {
-
-                });
-
-        return sourceSongs1;
-    }
-
-    public List<Song> getSongCloud() {
-        return songs1;
-    }
-
     public interface OnNDSListener {
         void OnProgressLoading(int progress);
         void OnProgressSongs(int nbSong, int nbSongTotal);
@@ -450,9 +208,7 @@ public class ChoraleNetWorkDataSource {
         intentToFetchMaj.putExtra("origine","maj");
         mContext.startService(intentToFetchMaj);
         Log.d(LOG_TAG, "NDS Service created pour maj");
-
     }
-
 
     void fetchMajClouDb() {
         idChorale = sharedPreferences.getString("idchorale","");
@@ -610,6 +366,9 @@ public class ChoraleNetWorkDataSource {
                                                     entier.getAndIncrement();
 
                                                     if(entier.get()==listIdSS.size()) {
+                                                        for(Song song : songs){
+                                                            Log.d(LOG_TAG, "NDS fetchSongs: list songs "+song.getSourceSongTitre()+" "+song.getPupitre());
+                                                        }
                                                         Log.d(LOG_TAG, "NDS onComplete: condition dernier idss  remplies "+ idSS+" "+entier.get());
                                                         Message message = Message.obtain();
                                                         message.obj = "OK";
@@ -978,6 +737,7 @@ public class ChoraleNetWorkDataSource {
                         // Successfully downloaded data to local file
                         increment++;
                         Log.d(LOG_TAG, "NDS onSuccess: "+Thread.currentThread().getName()+" "+ filename);
+                        mlistener.OnProgressSongs(increment, mp3Size);
 
                         if(increment ==mp3Size) {
                             Log.d(LOG_TAG, "NDS onSuccess :lancement de postValue Done "+mp3Size);

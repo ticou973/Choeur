@@ -90,20 +90,6 @@ public class MainActivityViewModel extends ViewModel {
         return mRepository.getThreadSaisons();
     }
 
-
-
-
-    //todo à supprimer dès que test terminé
-
-    public List<SourceSong> getSS() {
-        Log.d("Test1", "getSS: MAVM");
-        return mRepository.getSS();
-    }
-
-    public List<Song> getSongCloud() {
-        Log.d("Test1", "getSongCloud: MAVM");
-        return mRepository.getSongCloud();
-    }
 }
 
 

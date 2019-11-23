@@ -36,9 +36,7 @@ import dedicace.com.utilities.StorageUtilities;
  * so that {@link MainActivity} can control music playback.
  */
 public final class MediaPlayerHolder implements PlayerAdapter {
-
     private static final int PLAYBACK_POSITION_REFRESH_INTERVAL_MS = 1000;
-
     private Context mContext;
     private MediaPlayer mMediaPlayer;
     private MediaRecorder mMediaRecorder;
@@ -50,14 +48,10 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     private int duration;
     private String pathSave="";
 
-
-
     //todo voir quand mettre les release du mediaplayer et mediarecorder(voir doc de ref)
-
     public MediaPlayerHolder(Context context) {
         mContext = context.getApplicationContext();
     }
-
     /**
      * Once the {@link MediaPlayer} is released, it can't be used again, and another one has to be
      * created. In the onStop() method of the {@link MainActivity} the {@link MediaPlayer} is
@@ -71,19 +65,15 @@ public final class MediaPlayerHolder implements PlayerAdapter {
             mMediaPlayer = new MediaPlayer();
             Log.d(SongsAdapter.TAG, "MPH initializeMediaPlayer: après création "+mMediaPlayer);
 
-            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mediaPlayer) {
-                    stopUpdatingCallbackWithPosition(true);
-                    Log.d(SongsAdapter.TAG, "MPH onCompletion: ");
+            mMediaPlayer.setOnCompletionListener(mediaPlayer -> {
+                stopUpdatingCallbackWithPosition(true);
+                Log.d(SongsAdapter.TAG, "MPH onCompletion: ");
 
-                    if (mPlaybackInfoListener != null) {
-                        mPlaybackInfoListener.onStateChanged(PlaybackInfoListener.State.COMPLETED);
-                        mPlaybackInfoListener.onPlaybackCompleted();
-                    }
+                if (mPlaybackInfoListener != null) {
+                    mPlaybackInfoListener.onStateChanged(PlaybackInfoListener.State.COMPLETED);
+                    mPlaybackInfoListener.onPlaybackCompleted();
                 }
             });
-
         }
     }
 
@@ -106,7 +96,6 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         }
         Log.d("coucou", "MPH prepareMediaPlayer: SetData done ! ");
 
-
         Log.d("coucou", "MPH prepareMediaPlayer: avant prepare ! ");
 
         try {
@@ -118,7 +107,6 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         mMediaPlayer.setOnPreparedListener(mediaPlayer -> {
             Log.d("coucou", "MPH prepareMediaPlayer: On prepared juste avant la duration");
             //duration = mediaPlayer.getDuration();
-
             initializeProgressCallback();
         });
 
@@ -195,7 +183,6 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         }
     }
 
-
     @Override
     public void release() {
         if (mMediaPlayer != null) {
@@ -212,7 +199,6 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         }
         return false;
     }
-
 
     @Override
     public void play() {
@@ -267,12 +253,9 @@ public final class MediaPlayerHolder implements PlayerAdapter {
             mExecutor = Executors.newSingleThreadScheduledExecutor();
         }
         if (mSeekbarPositionUpdateTask == null) {
-            mSeekbarPositionUpdateTask = new Runnable() {
-                @Override
-                public void run() {
-                    Log.d("coucou", "MPH run: startUpdatingCallbackwithPosition "+mMediaPlayer.isPlaying());
-                    updateProgressCallbackTask();
-                }
+            mSeekbarPositionUpdateTask = () -> {
+                Log.d("coucou", "MPH run: startUpdatingCallbackwithPosition "+mMediaPlayer.isPlaying());
+                updateProgressCallbackTask();
             };
         }
         mExecutor.scheduleAtFixedRate(
@@ -325,8 +308,6 @@ public final class MediaPlayerHolder implements PlayerAdapter {
 
     @Override
     public int getDuration() {
-
         return duration;
     }
-
 }

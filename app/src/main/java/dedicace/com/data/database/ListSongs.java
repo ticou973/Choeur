@@ -3,9 +3,12 @@ package dedicace.com.data.database;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,11 +52,15 @@ public class ListSongs {
         this.context=context;
         this.mSpectacleDao=mSpectacleDao;
 
+        for(Song song : songsTemp){
+            Log.d(LOG_TAG, "LS constructor list songs "+song.getSourceSongTitre()+" "+song.getPupitre());
+        }
+
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         this.sourceSongs=getSSCurrentSpectacle(sourceSongsTemp);
         this.songs=getSongCurrentSpectacle(this.sourceSongs,songsTemp);
-        Log.d(LOG_TAG, "LS CR ListSongs:constructeur A "+songs.size()+"local songs "+this.songs.size());
+        Log.d(LOG_TAG, "LS CR ListSongs:constructeur A "+songs.size()+" local songs "+this.songs.size());
     }
 
     private List<Song> getSongCurrentSpectacle(List<SourceSong> sourceSongs, List<Song> oldSongs) {
@@ -72,12 +79,13 @@ public class ListSongs {
 
         String currentSpectacleStr = sharedPreferences.getString("currentSpectacle","Tous");
 
-        if(!currentSpectacleStr.isEmpty()){
+        if(!TextUtils.isEmpty(currentSpectacleStr)){
             if(currentSpectacleStr.equals("Tous")){
 
                 currentSS=getAllSourcesSongs();
                 Log.d(LOG_TAG, "LS getSSCurrentSpectacle: Tous");
 
+                Collections.sort(currentSS,new comparatorSS());
             }else{
                 ArrayList<String> currentSSId;
                 Spectacle currentSpectacle = mSpectacleDao.getSpectacleByName(currentSpectacleStr);
@@ -93,12 +101,14 @@ public class ListSongs {
             Log.d(LOG_TAG, "LS getSSCurrentSpectacle: pas de current spectacle ");
         }
 
+
         return currentSS;
     }
 
     private List<SourceSong> getAllSourcesSongs() {
 
         Set<String> currentSpectaclesSet = sharedPreferences.getStringSet("currentSpectacles",null);
+        Log.d("coucou", "LS getAllSourcesSongs: currentSpectaclesSet "+currentSpectaclesSet);
         ArrayList<String> currentSSId;
         Set<SourceSong> currentsourceSongs = new HashSet<>();
 
@@ -106,6 +116,7 @@ public class ListSongs {
             for (String idSpectacle : currentSpectaclesSet) {
                 Spectacle currentSpectacle = mSpectacleDao.getSpectacleById(idSpectacle);
                 currentSSId=currentSpectacle.getIdTitresSongs();
+                Log.d(LOG_TAG, "LS getAllSourcesSongs: currenspectacleId "+currentSpectacle.getSpectacleName()+" currentSSid"+currentSSId);
 
                 for(String idSource: currentSSId){
                     if(currentsourceSongs.size()!=0){
@@ -119,7 +130,7 @@ public class ListSongs {
                             SourceSong sourceSong = mSourceSongDao.getSourceSongByIdCloud(idSource);
                             currentsourceSongs.add(sourceSong);
                         }else{
-                            Log.d(LOG_TAG, "LS getAllSourcesSongs: doublon "+ idSource);
+                            Log.d(LOG_TAG, "LS getAllSourcesSongs: doublon différents spectacles "+ idSource);
                         }
                     }else{
                         SourceSong sourceSong = mSourceSongDao.getSourceSongByIdCloud(idSource);
@@ -151,6 +162,17 @@ public class ListSongs {
                 }
             }
 
+            if(SongOnClouds!=null) {
+                Log.d(LOG_TAG, "LS getSongOnClouds: "+SongOnClouds.size());
+            }
+
+        for(List<Song> songList : SongOnClouds){
+            if(songList!=null) {
+                for (Song song : songList) {
+                    Log.d(LOG_TAG, "LS getSongsOncloud: listOnClouds " + song.getSourceSongTitre() + " " + song.getPupitre());
+                }
+            }
+        }
 //        Log.d(LOG_TAG, "LS ChoraleRepository LiveData: ListSongOnCloud "+ SongOnClouds.size()+ " songs "+songs.size()+" "+SongOnClouds+" "+SongOnClouds.get(0).size()+" "+Thread.currentThread().getName());
     }
 
@@ -171,7 +193,6 @@ public class ListSongs {
 
             if(listBs!=null&&listBs.size()!=0){
                 SongOnPhonesBS.add(listBs);
-
             }else{
                 SongOnPhonesBS.add(null);
             }
@@ -357,5 +378,20 @@ public class ListSongs {
 
     public List<SourceSong> getSourceSongs() {
         return sourceSongs;
+    }
+
+    public class comparatorSS implements Comparator<SourceSong> {
+        public comparatorSS() {
+        }
+
+        @Override
+        public int compare(SourceSong sourceSong, SourceSong sourceSong1) {
+            return sourceSong.getIdSourceSongCloud().compareTo(sourceSong1.getIdSourceSongCloud());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return false;
+        }
     }
 }

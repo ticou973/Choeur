@@ -134,13 +134,20 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         songsViewHolder.setRecordSource(recordSources);
         recordSource = songsViewHolder.getSource();
 
-        Log.d(TAG, "SA initRecordSongs: recordSource "+recordSource);
     }
 
     private void initDataSongs(SongsViewHolder songsViewHolder,int position) {
         Log.d(TAG, "SA initDataSongs: ");
 
         Song[] songsPhone, songsCloud;
+
+        for(List<Song> songList : songOnClouds){
+            if(songList!=null) {
+                for (Song song : songList) {
+                    Log.d(TAG, "SVH initDataSongs: listOnClouds " + song.getSourceSongTitre() + " " + song.getPupitre());
+                }
+            }
+        }
 
         songOnCloudRecorded = songOnClouds.get(position);
         if(songOnCloudRecorded!=null) {
@@ -151,6 +158,10 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
             songsCloud = new Song[0];
         }
         Log.d(TAG, "SA initDataSongs: songsCloud "+ songsCloud.length+" "+ Arrays.toString(songsCloud));
+
+        for(Song song:songsCloud){
+            Log.d(TAG, "SVH initDataSongs: "+song.getSourceSongTitre()+" "+song.getPupitre());
+        }
 
             songsViewHolder.setValueCloudSongRecorded(songsCloud);
             songsViewHolder.setListSongCloudRecorded(songOnCloudRecorded);
@@ -210,6 +221,13 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         this.SongOnPhonesBS=SongOnPhonesBS;
         this.SongOnPhonesLive=SongOnPhonesLive;
         origine="Default";
+        for(List<Song> songList : songOnClouds){
+            if(songList!=null) {
+                for (Song song : songList) {
+                    Log.d(TAG, "SVH swap: listOnClouds first list " + song.getSourceSongTitre() + " " + song.getPupitre());
+                }
+            }
+        }
         notifyDataSetChanged();
     }
 
@@ -223,6 +241,13 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         this.SongOnPhonesLive=SongOnPhonesLive;
         this.RecordSources=recordSources;
         origine="Single";
+        for(List<Song> songList : songOnClouds){
+            if(songList!=null) {
+                for (Song song : songList) {
+                    Log.d(TAG, "SVH swap: listOnClouds " + song.getSourceSongTitre() + " " + song.getPupitre());
+                }
+            }
+        }
         notifyItemChanged(position);
     }
 
@@ -235,6 +260,13 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         this.SongOnPhonesLive=SongOnPhonesLive;
         this.RecordSources=recordSources;
         origine="Default";
+        for(List<Song> songList : songOnClouds){
+            if(songList!=null) {
+                for (Song song : songList) {
+                    Log.d(TAG, "SVH swap: listOnClouds " + song.getSourceSongTitre() + " " + song.getPupitre());
+                }
+            }
+        }
         notifyItemChanged(position);
     }
 
@@ -251,6 +283,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         this.SongOnPhonesBS=SongOnPhonesBS;
         this.SongOnPhonesLive=SongOnPhonesLive;
         origine="Record";
+
         notifyItemChanged(position);
     }
 

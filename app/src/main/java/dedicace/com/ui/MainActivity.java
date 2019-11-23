@@ -193,12 +193,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
             getCurrentSpectacles();
 
-
-            //todo à retirer pour test
-
-            compareData();
-
-            //todo voir si cela est nécessaire d'observer toutes les SS ou seulement celles du spectacles
             sourceSongs = mViewModel.getChoeurSourceSongs();
             Log.d(TAG, "MA onCreate: getChoeurSourcesongs " + sourceSongs);
             sourceSongs.observe(this, sourceSongs -> {
@@ -267,7 +261,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                 }
                                 break;
                             case "newSS":
-                                //todo à terme mettre en place quelque chose qui montre l'évolution du chargement
                                 Toast.makeText(MainActivity.this, "Veuillez patienter le temps de mettre en place toutes les chansons...", Toast.LENGTH_LONG).show();
                                 Log.d(TAG, "MA onChanged: newSS ");
                                 if (dialogWait != null) {
@@ -280,6 +273,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                 Log.d(TAG, "MA onChanged: lancement du SA pour le single");
                                 affichageRecyclerView(sourceSongList);
                                 Log.d(TAG, "MA onChanged: position " + positionToDownload);
+                                for(List<Song> songList : songOnClouds){
+                                    if(songList!=null) {
+                                        for (Song song : songList) {
+                                            Log.d(TAG, "MA initDataSongs: listOnClouds " + song.getSourceSongTitre() + " " + song.getPupitre());
+                                        }
+                                    }
+                                }
                                 songsAdapter.swapSingleSong(positionToDownload, songToPlay, songOnClouds, SongOnPhonesBS, SongOnPhonesLive, recordSources);
                                 break;
                             case "newSongsOnPhone":
@@ -299,6 +299,13 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                             case "deleteSingleSongOnPhone":
                                 Log.d(TAG, "MA onChanged: lancement du SA pour le single (delete) ");
                                 affichageRecyclerView(sourceSongList);
+                                for(List<Song> songList : songOnClouds){
+                                    if(songList!=null) {
+                                        for (Song song : songList) {
+                                            Log.d(TAG, "MA initDataSongs: listOnClouds " + song.getSourceSongTitre() + " " + song.getPupitre());
+                                        }
+                                    }
+                                }
                                 Log.d(TAG, "MA onChanged: position (delete) " + positionToDelete);
                                 songsAdapter.swapSingleDeleteSong(positionToDelete, songToPlays, songOnClouds, SongOnPhonesBS, SongOnPhonesLive, recordSources);
                                 break;
@@ -316,43 +323,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 }
             });
         }
-    }
-
-    //todo à supprimer dès que test terminé
-    private void compareData() {
-        List<SourceSong> testSSCloud = new ArrayList<>();
-        List<Song> testSongCloud = new ArrayList<>();
-
-        testSSCloud=mViewModel.getSS();
-        testSongCloud = mViewModel.getSongCloud();
-
-        Log.d("Test1", testSSCloud.size()+" song Cloud"+testSongCloud.size());
-
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                List<SourceSong> testSS = new ArrayList<>();
-                List<Song> testSong = new ArrayList<>();
-
-                testSS = dataBase.sourceSongDao().getAllSources();
-                testSong = dataBase.songsDao().getAllSongs();
-
-                Log.d("Test1", "testSS: "+testSS.size());
-
-                for(SourceSong sourceSong:testSS){
-                    Log.d("Test1", "SS local "+ sourceSong.getTitre());
-                }
-
-
-                Log.d("Test1", "Song Local "+ testSong.size());
-                for(Song song: testSong){
-                    Log.d("Test1", "Song Local "+ song.getSourceSongTitre()+ " "+song.getPupitre());
-                }
-            }
-        });
-
-        thread.start();
     }
 
     @Override
@@ -486,7 +456,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
         if (listSongs != null) {
             sourceSongList = listSongs.getSourceSongs();
-            Log.d(TAG, "MA getListSongs: début liste ");
+            Log.d(TAG, "MA getListSongs: début liste "+sourceSongList);
             songOnPhones = listSongs.getSongsOnPhonesA();
             Log.d(TAG, "MA getSongElements songOnphones: " + songOnPhones);
             Log.d(TAG, "MA getListSongs: avant recordResources");
@@ -911,7 +881,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     public void onDialogMADownloadPupitresPositiveClick(List<Integer> selectedItems) {
         getListPupitresToDownloadDelete(selectedItems);
         Log.d(TAG, "onDialogMADownloadPupitresPositiveClick: selectedItems " + selectedItems + " " + pupitresToDownloadDelete + " " + songOnClouds.size() + " " + songOnClouds);
-        Toast.makeText(this, "Vos chansons sont en train de se charger sur le téléphone", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Vos chansons sont en train de se charger sur le téléphone", Toast.LENGTH_SHORT).show();
         AlertBox();
 
         mLoadingIndicator.setVisibility(View.VISIBLE);
@@ -1046,7 +1016,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         Log.d(TAG, "MA onDialogPositiveSpectacleClick: annuler");
     }
 
-
     /**
      * Permission pour le stockage externe
      * Permission utilisée suivant les versions
@@ -1092,7 +1061,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     @Override
     public void OnProgressLoading(int progress) {
         mLoadingIndicator.setProgress(progress);
-
     }
 
     @Override
@@ -1112,8 +1080,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         //Toast.makeText(this, nbSong+ "/"+nbSongTotal+" chansons téléchargées", Toast.LENGTH_SHORT).show();
     }
 
-
-
     //todo à renommer
     public interface OnPositiveClickListener {
         void OnRecord(Song song);
@@ -1128,7 +1094,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             dataBase.sourceSongDao().deleteAll();
         });
     }
-
 }
 
 

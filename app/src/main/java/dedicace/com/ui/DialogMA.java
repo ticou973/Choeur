@@ -69,6 +69,7 @@ public class DialogMA extends DialogFragment  {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         if(origine.equals("downloadSingle")) {
+            Log.d("coucou", "DMA onCreateDialog:  download single "+position);
             messageIntro = "Voulez-vous charger cette chanson sur votre téléphone ?";
             messagePositif = "Oui";
             messageNegatif = "Non";

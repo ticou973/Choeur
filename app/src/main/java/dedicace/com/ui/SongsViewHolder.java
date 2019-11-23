@@ -272,10 +272,13 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     }
 
     void setSongToPlay(Song songToPlay) {
+        Log.d(TAG, "SVH setSongToPlay: "+pupitre);
         if(pupitre != Pupitre.NA&&source !=RecordSource.NA) {
+            Log.d(TAG, "SVH setSongToPlay: "+source);
            setSongRecorded(songToPlay);
         }
         this.songToPlay=songToPlay;
+        Log.d(TAG, "SVH setSongToPlay: "+songToPlay);
         if(songToPlay!=null) {
             pupitre = songToPlay.getPupitre();
             setCurrentSongActive(pupitre);
@@ -605,7 +608,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                         Log.d(TAG, "SVH handleLongClickPupitre:A download " + songToDownload);
                     }
                 }
-                Log.d(TAG, "SVH handleLongClickPupitre: single song A" + songToDownload);
+                Log.d(TAG, "SVH handleLongClickPupitre: single song A " + songToDownload+ " "+songToDownload.getSourceSongTitre()+" "+songToDownload.getPupitre());
                 mlistItemClickedListener.OnLongClickItem(getAdapterPosition(), songToDownload);
 
             } else {

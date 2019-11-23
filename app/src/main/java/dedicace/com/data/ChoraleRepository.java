@@ -256,6 +256,9 @@ public class ChoraleRepository {
 
             Log.d(LOG_TAG, "CR Repository: observers Alerte cela bouge ! "+" "+sourceSongs1.size()+" "+sourceSongs1+Thread.currentThread().getName());
             songs = choraleNetworkDataSource.getSongs();
+            for(Song song : songs){
+                Log.d(LOG_TAG, "CR fetchSongs: list songs "+song.getSourceSongTitre()+" "+song.getPupitre());
+            }
             Log.d(LOG_TAG, "CR ChoraleRepository LiveData: songs " +songs.size());
 
             isFromLocal=false;
@@ -405,6 +408,9 @@ public class ChoraleRepository {
 
 
     private void getListSongsA() {
+        for(Song song : songsAfterSync){
+            Log.d(LOG_TAG, "CR GetList list songs "+song.getSourceSongTitre()+" "+song.getPupitre());
+        }
         listSongs= new ListSongs(mSongDao,mSourceDao,mSpectacleDao,sourceSongsAfterSync,songsAfterSync,context);
         listSongs.getSongOnClouds();
         listSongs.getSongOnPhoneBS();
@@ -1292,20 +1298,6 @@ public class ChoraleRepository {
 
     public Thread getThreadSaisons() {
         return threadSaisons;
-    }
-
-
-
-
-    //todo à supprimer dès que test terminé
-    public List<SourceSong> getSS() {
-        Log.d("Test1", "getSS: CR");
-        return mChoraleNetworkDataSource.getSS();
-    }
-
-    public List<Song> getSongCloud() {
-        Log.d("Test1", "getSongCloud: CR");
-        return mChoraleNetworkDataSource.getSongCloud();
     }
 
 }
