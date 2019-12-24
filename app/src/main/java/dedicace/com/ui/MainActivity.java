@@ -84,6 +84,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private Song songToPlay;
     private ArrayList<String> namesSpectacles = new ArrayList<>();
     private String spectacle = "Tous";
+    private boolean isMediaPlaying = false;
+    private boolean isMediaPausing = true;
 
     //ViewModel
     private MainActivityViewModel mViewModel;
@@ -103,10 +105,12 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private AppExecutors mExecutors;
     private SharedPreferences sharedPreferences;
     private List<Pupitre> pupitresToDownloadDelete;
-    private DialogFragment dialogWait;
+    private DialogMA dialogWait;
     private Thread threadSpectacles;
     private AppDataBase dataBase;
     private SharedPreferences.Editor editor;
+
+
 
 
     //todo vérifier si extras dans des intents avec HasExtras
@@ -236,14 +240,24 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                                 if (dialogWait != null) {
                                     dialogWait.dismiss();
                                 }
-                                affichageRecyclerView(sourceSongList);
-                                songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds, SongOnPhonesBS, SongOnPhonesLive);
+                                if(sourceSongList.size()!=0) {
+                                    Log.d(TAG, "MA visualisation: if old");
+                                    affichageRecyclerView(sourceSongList);
+                                    songsAdapter.swapSongs(sourceSongList, recordSources, songToPlays, songOnClouds, SongOnPhonesBS, SongOnPhonesLive);
+                                }else{
+                                    Log.d(TAG, "MA oldSS:else ");
+                                    editor = sharedPreferences.edit();
+                                    editor.putString("currentSpectacle", "Tous");
+                                    editor.apply();
+                                    invalidateOptionsMenu();
+                                }
                                 break;
                             case "modificationSS":
                                 boolean deleted = mViewModel.getDeleted();
                                 if (deleted) {
+                                    Log.d(TAG, "MA visualisation: modificationSS" );
                                     //todo voir pour différé la suppression
-                                    Log.d(TAG, "MA deleted: " + sourceSongList + sourceSongList.get(0).getUrlCloudBackground());
+                                  //  Log.d(TAG, "MA deleted: " + sourceSongList + sourceSongList.get(0).getUrlCloudBackground());
                                     Toast.makeText(MainActivity.this, "Des éléments ont été spprimés de votre liste de chansons.", Toast.LENGTH_SHORT).show();
                                     if (dialogWait != null) {
                                         dialogWait.dismiss();
@@ -422,6 +436,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         }
 
         if (key.equals("currentSpectacles")) {
+            Log.d(TAG, "MA onSharedPreferenceChanged: currentSpectacles");
             getCurrentSpectacles();
 
             if (threadSpectacles != null) {
@@ -587,20 +602,16 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG, "MA onOptionsItemSelected: ");
-
         switch (item.getItemId()) {
-
             case R.id.parametres:
                 launchSettingsActivity();
                 break;
-
 
             case R.id.spectacles:
                 launchChoiceSpectacle();
                 break;
 
             case R.id.load_pupitre:
-
                 //todo faire les calculs pour ne prposer que les pupitres non complets
                 loadSongsPupitre();
                 Log.d(TAG, "MA onOptionsItemSelected: " + sourceSongList);
@@ -612,7 +623,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 break;
 
             case R.id.admin:
-
                 Toast.makeText(this, "Vous êtes " + mCurrentAuthRole, Toast.LENGTH_SHORT).show();
                 Intent startAdminHomeActivity = new Intent(this, AdminHome.class);
                 startActivity(startAdminHomeActivity);
@@ -649,32 +659,31 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         MenuItem spectacleItem = menu.getItem(4);
         spectacleItem.setTitle(spectacle);
 
-        Log.d(TAG, "MA onPrepareOptionsMenu: ");
+        Log.d(TAG, "MA onPrepareOptionsMenu: "+spectacle+" "+spectacleItem.getTitle());
 
         return super.onPrepareOptionsMenu(menu);
     }
 
     private void getCurrentSpectacles() {
-
         Set<String> currentSpectacles = sharedPreferences.getStringSet("currentSpectacles", null);
-
         Log.d(TAG, "MA getCurrentSpectacles: " + currentSpectacles);
         if (namesSpectacles != null) {
             namesSpectacles = new ArrayList<>();
         }
+
         threadSpectacles = new Thread(new Runnable() {
             @Override
             public void run() {
                 if (currentSpectacles != null) {
                     for (String idSpectacle : currentSpectacles) {
                         Spectacle spectacle = dataBase.spectacleDao().getSpectacleById(idSpectacle);
-                        Log.d(TAG, "MA run: getCurrentSpectacles " + spectacle);
+                        Log.d(TAG, "MA run: getCurrentSpectacles " + idSpectacle+" "+spectacle);
                         if (spectacle != null) {
                             String spectacleName = spectacle.getSpectacleName();
                             Log.d(TAG, "MA run: nom du spectacle " + spectacleName);
                             namesSpectacles.add(spectacleName);
                         } else {
-                            Log.d(TAG, "MA run: else getCurrent Spectacles null ");
+                            Log.d(TAG, "MA run: else getCurrent Spectacles null "+idSpectacle);
                         }
                     }
                 }
@@ -684,11 +693,10 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     }
 
     private void launchChoiceSpectacle() {
-
+        Log.d(TAG, "MA launchChoiceSpectacle: noms spectacles " + namesSpectacles);
         DialogFragment dialog = new DialogSpectacleFragment();
         Bundle args = new Bundle();
         args.putStringArrayList("spectaclesName", namesSpectacles);
-        Log.d(TAG, "MA launchChoiceSpectacle: noms spectacles " + namesSpectacles);
         dialog.setArguments(args);
         dialog.show(getSupportFragmentManager(), "TAG");
         Log.d(TAG, "MA OnDialogSpectacle fragment: ");
@@ -845,6 +853,28 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         dialog.setSong(song);
         dialog.show(getSupportFragmentManager(), "TAG");
     }
+
+    @Override
+    public void setPlaying(boolean playing) {
+        isMediaPlaying=playing;
+
+    }
+
+    @Override
+    public boolean isPlaying() {
+        return isMediaPlaying;
+    }
+
+    @Override
+    public void setPausing(boolean pausing) {
+        isMediaPausing=pausing;
+    }
+
+    @Override
+    public boolean isPausing() {
+        return isMediaPausing;
+    }
+
 
     @Override
     public void onDialogMAPositiveClick(int position, Song song) {
@@ -1078,6 +1108,11 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
         Log.d(TAG, "MA OnProgressSongs: il y a "+nbSong+" sur "+nbSongTotal+ "chansons chargées sur votre téléphone");
         //Toast.makeText(this, nbSong+ "/"+nbSongTotal+" chansons téléchargées", Toast.LENGTH_SHORT).show();
+       // Log.d(TAG, "MA OnProgressSongs: il y a "+nbSong+" sur "+nbSongTotal+ "chansons chargées sur votre téléphone");
+
+        //dialogWait.putProgress(nbSong,nbSongTotal);
+
+
     }
 
     //todo à renommer

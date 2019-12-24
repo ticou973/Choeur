@@ -146,6 +146,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         mMediaRecorder = new MediaRecorder();
         Log.d(SongsAdapter.TAG, "MPH setupMediaRecorder: "+mMediaRecorder);
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        //todo voir si on puet mettre autre chose que 3GPP
         mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
         mMediaRecorder.setOutputFile(pathSave);

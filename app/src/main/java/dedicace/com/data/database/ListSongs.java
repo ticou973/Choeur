@@ -89,12 +89,15 @@ public class ListSongs {
             }else{
                 ArrayList<String> currentSSId;
                 Spectacle currentSpectacle = mSpectacleDao.getSpectacleByName(currentSpectacleStr);
-                Log.d(LOG_TAG, "LS getSSCurrentSpectacle: "+currentSpectacle.getSpectacleName());
-                currentSSId=currentSpectacle.getIdTitresSongs();
-
-                for(String idSource: currentSSId){
-                    SourceSong sourceSong = mSourceSongDao.getSourceSongByIdCloud(idSource);
-                    currentSS.add(sourceSong);
+                if(currentSpectacle!=null) {
+                    Log.d(LOG_TAG, "LS getSSCurrentSpectacle: " + currentSpectacle.getSpectacleName());
+                    currentSSId = currentSpectacle.getIdTitresSongs();
+                    for(String idSource: currentSSId){
+                        SourceSong sourceSong = mSourceSongDao.getSourceSongByIdCloud(idSource);
+                        currentSS.add(sourceSong);
+                    }
+                }else{
+                    Log.d(LOG_TAG, "LS getSSCurrentSpectacle: le spectacle n'existe pas ");
                 }
             }
         }else{
@@ -106,40 +109,58 @@ public class ListSongs {
     }
 
     private List<SourceSong> getAllSourcesSongs() {
+        List<Spectacle> allSpectacles = mSpectacleDao.getAllSpectacles();
+        for(Spectacle spectacle:allSpectacles){
+            Log.d(LOG_TAG, "LS getAllSourcesSongs: listSpectacles room "+spectacle.getSpectacleName()+" "+spectacle.getIdSpectacleCloud());
+        }
 
         Set<String> currentSpectaclesSet = sharedPreferences.getStringSet("currentSpectacles",null);
         Log.d("coucou", "LS getAllSourcesSongs: currentSpectaclesSet "+currentSpectaclesSet);
-        ArrayList<String> currentSSId;
+        ArrayList<String> currentSSId = null;
         Set<SourceSong> currentsourceSongs = new HashSet<>();
 
         if(currentSpectaclesSet!=null) {
             for (String idSpectacle : currentSpectaclesSet) {
-                Spectacle currentSpectacle = mSpectacleDao.getSpectacleById(idSpectacle);
-                currentSSId=currentSpectacle.getIdTitresSongs();
-                Log.d(LOG_TAG, "LS getAllSourcesSongs: currenspectacleId "+currentSpectacle.getSpectacleName()+" currentSSid"+currentSSId);
 
+                Spectacle currentSpectacle = mSpectacleDao.getSpectacleById(idSpectacle);
+                Log.d(LOG_TAG, "LS getAllSourcesSongs: début 1er fort "+idSpectacle+" "+currentSpectacle);
+                if(currentSpectacle!=null) {
+                    currentSSId = currentSpectacle.getIdTitresSongs();
+                    Log.d(LOG_TAG, "LS getAllSourcesSongs: currenspectacleId "+currentSpectacle.getSpectacleName()+" currentSSid"+currentSSId);
+                }else{
+                    Log.d(LOG_TAG, "LS getAllSourcesSongs: cas null pour currentSpectacle");
+                }
+                
                 for(String idSource: currentSSId){
+                    Log.d(LOG_TAG, "LS getAllSourcesSongs: début boucle "+ idSource);
                     if(currentsourceSongs.size()!=0){
+                        Log.d(LOG_TAG, "LS getAllSourcesSongs: if "+" "+currentsourceSongs.size());
+
                         int i=0;
                         for (SourceSong sourceSong : currentsourceSongs){
+                            Log.d(LOG_TAG, "LS getAllSourcesSongs: début boucle B "+" "+sourceSong.getTitre()+" "+sourceSong);
                             if(!sourceSong.getIdSourceSongCloud().equals(idSource)){
                                 i++;
+                                Log.d(LOG_TAG, "LS getAllSourcesSongs: début boucle dans if "+i+" "+sourceSong.getTitre()+" "+sourceSong);
                             }
                         }
                         if(i==currentsourceSongs.size()){
                             SourceSong sourceSong = mSourceSongDao.getSourceSongByIdCloud(idSource);
                             currentsourceSongs.add(sourceSong);
+                            Log.d(LOG_TAG, "LS getAllSourcesSongs: if currentSongsSize"+sourceSong.getTitre()+ " "+currentsourceSongs.size());
                         }else{
                             Log.d(LOG_TAG, "LS getAllSourcesSongs: doublon différents spectacles "+ idSource);
                         }
                     }else{
                         SourceSong sourceSong = mSourceSongDao.getSourceSongByIdCloud(idSource);
                         currentsourceSongs.add(sourceSong);
+                        Log.d(LOG_TAG, "LS getAllSourcesSongs: else "+ sourceSong.getTitre()+" "+currentsourceSongs.size());
                     }
                 }
             }
         }
 
+        Log.d(LOG_TAG, "LS getAllSourcesSongs: fin "+currentsourceSongs.size());
         return new ArrayList<>(currentsourceSongs);
     }
 

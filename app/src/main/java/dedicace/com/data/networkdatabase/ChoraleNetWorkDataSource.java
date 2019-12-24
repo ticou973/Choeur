@@ -405,8 +405,6 @@ public class ChoraleNetWorkDataSource {
         }
 
         Log.d(LOG_TAG, "NDS fetchSongsB: end boucle "+sourceSongs.size());
-
-
     }
 
 
@@ -922,7 +920,7 @@ public class ChoraleNetWorkDataSource {
                                                 }
                                             }
 
-                                            Log.d(LOG_TAG, "NDS onComplete:B saisons " + saisonName + " " + maj + " "+idCloud+ " "+idSpectacles);
+                                            Log.d(LOG_TAG, "NDS onComplete:B saisons " + saisonName + " " + maj + " "+idCloud+ " "+idSpectacles+" "+listIdSpectacles.size());
 
                                             Saison saison = new Saison(idCloud,saisonName,idSpectacles,maj);
                                             saisons.add(saison);
@@ -937,7 +935,6 @@ public class ChoraleNetWorkDataSource {
                                                 .addOnCompleteListener(task2 -> {
                                                     if (task2.isSuccessful()) {
                                                         for (QueryDocumentSnapshot document : Objects.requireNonNull(task2.getResult())) {
-
                                                             String spectacleName,idSpectacle;
                                                             Date maj;
                                                             Timestamp majss;
@@ -952,15 +949,6 @@ public class ChoraleNetWorkDataSource {
                                                             maj = Objects.requireNonNull(majss).toDate();
 
                                                             idSourceSongs=(ArrayList<String>) document.getData().get("id_titres");
-
-                                                            if(listIdSpectacles.contains(idSpectacle)){
-                                                                for(String idSS:idSourceSongs){
-                                                                    if(!listIdSSTemp.contains(idSS)){
-                                                                        listIdSSTemp.add(idSS);
-                                                                    }
-                                                                }
-                                                            }
-
                                                             spectacleLieux=(ArrayList<String>) document.getData().get("concerts_lieux");
 
                                                             //todo voir quand il n'y a pas de concert car array Timstamp est vide et ne marche pas alors
@@ -970,12 +958,18 @@ public class ChoraleNetWorkDataSource {
                                                                 Date date = Objects.requireNonNull(timestamp).toDate();
                                                                 spectacleDates.add(date);
                                                             }
-
+                                                            if(listIdSpectacles.contains(idSpectacle)){
+                                                                Log.d(LOG_TAG, "NDS getSaisonsSpectacles: contains idSpectacle "+ idSpectacle+ idSourceSongs.size());
+                                                                for(String idSS:idSourceSongs){
+                                                                    if(!listIdSSTemp.contains(idSS)){
+                                                                        Log.d(LOG_TAG, "NDS getSaisonsSpectacles: contains idSS "+idSS);
+                                                                        listIdSSTemp.add(idSS);
+                                                                    }
+                                                                }
+                                                                Spectacle spectacle = new Spectacle(idSpectacle,spectacleName,idSourceSongs,spectacleLieux,spectacleDates,maj);
+                                                                spectacles.add(spectacle);
+                                                            }
                                                             Log.d(LOG_TAG, "NDS getData: spectacles "+ listIdSSTemp.size()+" "+idSpectacle+ " "+ spectacleName+ " "+ idSourceSongs+ " "+ spectacleLieux+ " "+ spectacleDates+ " "+ maj );
-
-                                                            Spectacle spectacle = new Spectacle(idSpectacle,spectacleName,idSourceSongs,spectacleLieux,spectacleDates,maj);
-                                                            spectacles.add(spectacle);
-
                                                         }
                                                         Log.d(LOG_TAG, "NDS getData: spectacles "+ spectacles+" "+listIdSSTemp.size());
 

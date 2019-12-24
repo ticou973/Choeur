@@ -10,11 +10,12 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import dedicace.com.R;
 import dedicace.com.data.database.Song;
 
-public class DialogMA extends DialogFragment  {
+public class DialogMA extends DialogFragment {
     private String origine;
     private Song song, songToDelete;
     private String messageIntro;
@@ -22,9 +23,14 @@ public class DialogMA extends DialogFragment  {
     private String messageNegatif;
     private int position,nbSong,nbSongTotal;
     private List<Integer> selectedItems= new ArrayList<>();
+    private AlertDialog.Builder builder;
 
-    public DialogMA() {
+    public DialogMA() { }
 
+    public void putProgress(int nbSong, int nbSongTotal) {
+        builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
+        builder.setMessage("Veuillez attendre la mise à jour des données..."+nbSong+"/"+nbSongTotal+" chansons chargées sur votre téléphone !");
+        builder.create();
     }
 
     public interface DialogMAListener {
@@ -37,7 +43,6 @@ public class DialogMA extends DialogFragment  {
         void onDialogMADeletePupitresPositiveClick(List<Integer> selectedItems);
         void onDialogMADeletePupitresNegativeClick();
     }
-
 
     private DialogMAListener mListener;
 
@@ -67,7 +72,7 @@ public class DialogMA extends DialogFragment  {
 
 
         // Use the Builder class for convenient dialog construction
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder = new AlertDialog.Builder(getActivity());
         if(origine.equals("downloadSingle")) {
             Log.d("coucou", "DMA onCreateDialog:  download single "+position);
             messageIntro = "Voulez-vous charger cette chanson sur votre téléphone ?";
@@ -189,7 +194,5 @@ public class DialogMA extends DialogFragment  {
         this.song = song;
         Log.d("coucou", "DMA setSong: "+song);
     }
-
-
 
 }

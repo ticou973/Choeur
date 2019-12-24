@@ -61,6 +61,11 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
         void OnSaveRecordSong(Song song);
         void OnLongClickItem(int position, Song song);
         void OnLongClickDeleteItem(int adapterPosition, Song songToDelete);
+        void setPlaying(boolean playing);
+        boolean isPlaying();
+        void setPausing(boolean pausing);
+        boolean isPausing();
+
     }
 
     @NonNull

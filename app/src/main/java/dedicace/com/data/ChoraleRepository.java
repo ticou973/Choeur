@@ -145,21 +145,19 @@ public class ChoraleRepository {
             spectacles = mChoraleNetworkDataSource.getSpectacles();
             listIdSpectacles =mChoraleNetworkDataSource.getListIdSpectacles();
 
-            Log.d(LOG_TAG, "CR ChoraleRepository: modifencours "+modifEnCours+" "+listIdSpectacles);
+            Log.d(LOG_TAG, "CR ChoraleRepository: modifencours "+modifEnCours+" "+listIdSpectacles+" "+spectacles);
 
             //cas où il y a une modif éventuelle sur saisons et spectacles.
             if(modifEnCours){
-                editor=sharedPreferences.edit();
                 modifEnCours=false;
+                editor=sharedPreferences.edit();
                 editor.putBoolean("modifEnCours",false);
-                Set<String> setIdSpectacles = new HashSet<>(listIdSpectacles);
-                Log.d(LOG_TAG, "CR getData: setIdSpectacles "+ setIdSpectacles);
-                editor.putStringSet("currentSpectacles", setIdSpectacles);
                 editor.apply();
                 Log.d(LOG_TAG, "CR ChoraleRepository: modif en cours majSaisonCloud ");
                 startFetchSongsService();
 
             }else {
+                Log.d(LOG_TAG, "CR ChoraleRepository: pas de modification en cours ");
                 majRoomDb();
             }
         });
@@ -286,8 +284,6 @@ public class ChoraleRepository {
             }else {
                 Log.d(LOG_TAG, "CR ChoraleRepository: il faut encore attendre... ");
             }
-
-
         });
     }
 
@@ -300,7 +296,7 @@ public class ChoraleRepository {
 
             editor = sharedPreferences.edit();
             Set<String> setIdSpectacles = new HashSet<>(listIdSpectacles);
-            Log.d(LOG_TAG, "CR getData: setIdSpectacles "+ setIdSpectacles);
+            Log.d(LOG_TAG, "CR getData: setIdSpectacles B"+ setIdSpectacles);
             editor.putStringSet("currentSpectacles", setIdSpectacles);
             editor.apply();
 
@@ -353,6 +349,13 @@ public class ChoraleRepository {
         t1 = new Thread(() -> {
             currentThread = Thread.currentThread();
             DoWorkInRoom();
+
+            editor=sharedPreferences.edit();
+            Set<String> setIdSpectacles = new HashSet<>(listIdSpectacles);
+            Log.d(LOG_TAG, "CR doworkInRoomandlists: setIdSpectacles A"+ setIdSpectacles);
+            editor.putStringSet("currentSpectacles", setIdSpectacles);
+            editor.apply();
+
             getListSongsA();
         });
 
@@ -375,14 +378,13 @@ public class ChoraleRepository {
 
     private void DoSynchronization(List<SourceSong> sourceSongs, List<Song> songs) {
         t2 = new Thread(() -> {
-
             currentThread = Thread.currentThread();
             Log.d(LOG_TAG, "CR run: currentThread "+currentThread+" "+isFromLocal);
             if(!isFromLocal) {
                 if(typeSS.equals("oldSS")){
                     typeSS="modificationSS";
                 }
-                Log.d(LOG_TAG, "CR run: if from local avant synchronisation db "+typeSS);
+                Log.d(LOG_TAG, "CR run: if from local avant synchronisation db "+typeSS+" "+spectacles.size());
                 synchronisationLocalDataBase(sourceSongs,songs);
 
             }else{
@@ -568,6 +570,8 @@ public class ChoraleRepository {
         editor.putLong("majDB",majCloudDBLong);
         editor.apply();
 
+        Log.d(LOG_TAG, "CR synchronisationLocalDataBase: "+spectacles.size());
+
         if(!typeSS.equals("newSS")) {
             getModificationListsSaisonSpectacle();
         }
@@ -583,7 +587,7 @@ public class ChoraleRepository {
     }
 
     private void getModificationListsSaisonSpectacle() {
-        Log.d(LOG_TAG, "CR getModificationListsSaisonSpectacle: "+saisons+" "+ spectacles);
+        Log.d(LOG_TAG, "CR getModificationListsSaisonSpectacle: "+saisons+" "+ spectacles.size()+" "+spectacles);
         deletedSaisonsList();
         deletedSpectaclesList();
         modifiedSaisonsList();
@@ -621,13 +625,16 @@ public class ChoraleRepository {
 
 
     private void deletedSpectaclesList() {
+        Log.d(LOG_TAG, "CR deletedSpectaclesList: list "+ spectacles.size()+" "+oldSpectacles.size());
         List<String> listIdSpectacles = new ArrayList<>();
         List<String> listOldIdSpectacles = new ArrayList<>();
         for(Spectacle spectacle:spectacles){
+            Log.d(LOG_TAG, "CR deletedSpectaclesList: new "+spectacle.getSpectacleName());
             listIdSpectacles.add(spectacle.getIdSpectacleCloud());
         }
 
         for(Spectacle spectacle:oldSpectacles){
+            Log.d(LOG_TAG, "CR deletedSpectaclesList: old "+spectacle.getSpectacleName());
             listOldIdSpectacles.add(spectacle.getIdSpectacleCloud());
         }
 
@@ -711,13 +718,16 @@ public class ChoraleRepository {
 
 
     private void newSpectaclesList() {
+        Log.d(LOG_TAG, "CR newSpectaclesList: list "+ spectacles.size()+" "+oldSpectacles.size());
         List<String> listIdSpectacles = new ArrayList<>();
         List<String> listOldIdSpectacles = new ArrayList<>();
         for(Spectacle spectacle:spectacles){
+            Log.d(LOG_TAG, "CR newSpectaclesList: new "+spectacle.getSpectacleName());
             listIdSpectacles.add(spectacle.getIdSpectacleCloud());
         }
 
         for(Spectacle spectacle:oldSpectacles){
+            Log.d(LOG_TAG, "CR newSpectaclesList: Old"+spectacle.getSpectacleName());
             listOldIdSpectacles.add(spectacle.getIdSpectacleCloud());
         }
 
@@ -725,13 +735,15 @@ public class ChoraleRepository {
             Log.d(LOG_TAG, "CR newSpectaclesList: spectacles "+listIdSpectacles.size());
             if(!listOldIdSpectacles.contains(spectacleStr)){
                 for(Spectacle spectacle:spectacles){
+                    Log.d(LOG_TAG, "CR newSpectaclesList: C "+spectacle.getSpectacleName());
                     if(spectacle.getIdSpectacleCloud().equals(spectacleStr)){
+                        Log.d(LOG_TAG, "CR newSpectaclesList: D "+spectacle.getSpectacleName());
                         newSpectaclesList.add(spectacle);
                     }
                 }
             }
         }
-        Log.d(LOG_TAG, "CR newSpectaclesList: new spectacles "+newSpectaclesList.size());
+        Log.d(LOG_TAG, "CR newSpectaclesList: new spectacles "+newSpectaclesList.size()+" "+spectacles.size()+" "+oldSpectacles.size());
     }
 
 
@@ -997,7 +1009,7 @@ public class ChoraleRepository {
 
         if(deletedSpectaclesList!=null&&deletedSpectaclesList.size()!=0){
             int temp = mSpectacleDao.deleteSpectacles(deletedSpectaclesList);
-            Log.d(LOG_TAG, "CR DoWorkInRoom: delete spectacles"+ temp);
+            Log.d(LOG_TAG, "CR DoWorkInRoom: delete spectacles "+ temp);
         }
 
         if(modifiedSourceSongsList!=null&&modifiedSourceSongsList.size()!=0){
@@ -1215,10 +1227,8 @@ public class ChoraleRepository {
     }
 
     private boolean isFetchNeeded() {
-
         isAuto = sharedPreferences.getBoolean(context.getString(R.string.maj_auto),true);
         Log.d(LOG_TAG, "CR isFetchNeeded: condition "+isAuto);
-
         return isAuto;
     }
 

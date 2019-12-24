@@ -52,6 +52,9 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private Song[] recordedCloudSongs, recordedLocalSongs;
 
     private ArrayList pupitreSourceButton = new ArrayList();
+    private boolean isMediaPlaying;
+    private boolean isMediaPausing;
+
 
     //Mediaplayer
     private PlayerAdapter mPlayerAdapter;
@@ -73,7 +76,6 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private String pathSave;
     private Song songToDownload, songToDelete;
     private String origine;
-
 
     //todo prévoir d'effacer les chansons que l'on a soit même enregistré (long click et menu)
     //todo voir pour suppprimer le listener
@@ -167,10 +169,12 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     private void initializePlaybackController() {
         //todo voir comment récupérer plutôt le context de l'application
+
         MediaPlayerHolder mMediaPlayerHolder = new MediaPlayerHolder((Context) mlistItemClickedListener);
 
         mMediaPlayerHolder.setPlaybackInfoListener(new PlaybackListener());
         mPlayerAdapter = mMediaPlayerHolder;
+        Log.d(TAG, "SVH initializePlaybackController: "+mPlayerAdapter);
     }
 
     private void initializeSeekbar() {
@@ -706,19 +710,30 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
         if(pupitre==Pupitre.NA||source==RecordSource.NA){
             Toast.makeText((Context) mlistItemClickedListener, "Il manque la chanson demandée !", Toast.LENGTH_SHORT).show();
         }else{
-            Log.d(TAG, "SVH setPlayListener: avant firstTime "+isFirstTime );
+            Log.d(TAG, "SVH setPlayListener: avant firstTime " +isMediaPlaying);
                     if(isFirstTime) {
                         Log.d(TAG, "SVH setPlayListener: si firstTime" );
                         //Fournit et parépare le Mediaplayer
                         setResourceToMediaPlayer();
                     }
                     if(!mPlayerAdapter.isPlaying()&&!isRecording) {
-                        Log.d(TAG, "SVH setPlayListener: avec animation playing "+songToPlay);
+                        Log.d(TAG, "SVH setPlayListener: avec animation playing "+songToPlay+" "+mPlayerAdapter);
                         if(songToPlay!=null) {
-                            playSongs.setImageDrawable(animation);
-                            pause = false;
-                            mPlayerAdapter.play();
-                            setChronometerStart();
+                            isMediaPlaying=mlistItemClickedListener.isPlaying();
+                            isMediaPausing=mlistItemClickedListener.isPausing();
+                            Log.d("Hello", "SVH setPlayListener: "+isMediaPlaying+ " "+isMediaPausing);
+                            if(!isMediaPlaying||isMediaPausing) {
+                                mlistItemClickedListener.setPlaying(true);
+                                Log.d("Hello", "SVH setPlayListener: "+mlistItemClickedListener.isPlaying());
+                                playSongs.setImageDrawable(animation);
+                                mlistItemClickedListener.setPausing(false);
+                                pause = false;
+                                mPlayerAdapter.play();
+                                setChronometerStart();
+                            }else{
+                                Toast.makeText(context, "Une autre chanson est en lecture !", Toast.LENGTH_SHORT).show();
+                            }
+
                         }else{
                             Log.d(TAG, "SVH setPlayListener: rien à jouer");
                             Toast.makeText(context, "Pas de chanson à jouer !", Toast.LENGTH_LONG).show();
@@ -727,6 +742,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                     }else if(mPlayerAdapter.isPlaying()&&!isRecording){
                         Log.d(TAG, "SVH setPlayListener: pause" );
                         playSongs.setImageResource(R.drawable.ic_pause_orange);
+                        mlistItemClickedListener.setPausing(true);
                         pause = true;
                         mPlayerAdapter.pause();
                         setChronometerPause();
@@ -800,8 +816,10 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                     e.printStackTrace();
                 }
                 setChronometerStop();
+                mlistItemClickedListener.setPlaying(false);
             }
         }
+        Log.d("Hello", "SVH setStopListener: "+mlistItemClickedListener.isPlaying());
     }
 
     private void stopRecord(){
