@@ -138,10 +138,10 @@ public class ListSongs {
 
                         int i=0;
                         for (SourceSong sourceSong : currentsourceSongs){
-                            Log.d(LOG_TAG, "LS getAllSourcesSongs: début boucle B "+" "+sourceSong.getTitre()+" "+sourceSong);
+                           // Log.d(LOG_TAG, "LS getAllSourcesSongs: début boucle B "+" "+sourceSong.getTitre()+" "+sourceSong);
                             if(!sourceSong.getIdSourceSongCloud().equals(idSource)){
                                 i++;
-                                Log.d(LOG_TAG, "LS getAllSourcesSongs: début boucle dans if "+i+" "+sourceSong.getTitre()+" "+sourceSong);
+                              //  Log.d(LOG_TAG, "LS getAllSourcesSongs: début boucle dans if "+i+" "+sourceSong.getTitre()+" "+sourceSong);
                             }
                         }
                         if(i==currentsourceSongs.size()){
@@ -190,7 +190,7 @@ public class ListSongs {
         for(List<Song> songList : SongOnClouds){
             if(songList!=null) {
                 for (Song song : songList) {
-                    Log.d(LOG_TAG, "LS getSongsOncloud: listOnClouds " + song.getSourceSongTitre() + " " + song.getPupitre());
+                //    Log.d(LOG_TAG, "LS getSongsOncloud: listOnClouds " + song.getSourceSongTitre() + " " + song.getPupitre());
                 }
             }
         }
@@ -204,11 +204,11 @@ public class ListSongs {
         for (SourceSong sourceSong: sourceSongs){
             List<Song> listBs = mSongDao.getSongsOnPhone(sourceSong.getTitre(),RecordSource.BANDE_SON);
 
-            Log.d(LOG_TAG, "LS getSongOnPhoneBS: listBS "+ listBs.size());
+           // Log.d(LOG_TAG, "LS getSongOnPhoneBS: listBS "+ listBs.size());
 
             if(listBs!=null){
                 for (int i = 0; i <listBs.size() ; i++) {
-                    Log.d(LOG_TAG, "LS getSongOnPhoneBS: listBs songs "+listBs.get(i).getSourceSongTitre()+" "+listBs.get(i).getPupitre()+" "+listBs.get(i).getUrlCloudMp3());
+                  //  Log.d(LOG_TAG, "LS getSongOnPhoneBS: listBs songs "+listBs.get(i).getSourceSongTitre()+" "+listBs.get(i).getPupitre()+" "+listBs.get(i).getUrlCloudMp3());
                 }
             }
 
@@ -220,7 +220,7 @@ public class ListSongs {
         }
 
         for (int i = 0; i <SongOnPhonesBS.size() ; i++) {
-            Log.d(LOG_TAG, "LS run: song onPhone BS "+ SongOnPhonesBS.get(i));
+          //  Log.d(LOG_TAG, "LS run: song onPhone BS "+ SongOnPhonesBS.get(i));
         }
     }
 
@@ -272,7 +272,7 @@ public class ListSongs {
             sources.add(RecordSource.NA);
         }
 
-        Log.d(LOG_TAG, "LS getRecordSources titre : "+sources+ " "+ titre+" "+Thread.currentThread().getName());
+       // Log.d(LOG_TAG, "LS getRecordSources titre : "+sources+ " "+ titre+" "+Thread.currentThread().getName());
         return sources;
     }
 

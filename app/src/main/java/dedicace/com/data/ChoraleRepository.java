@@ -4,10 +4,12 @@ import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -599,26 +601,75 @@ public class ChoraleRepository {
     private void deletedSaisonsList() {
         List<String> listIdSaisons = new ArrayList<>();
         List<String> listOldIdSaisons = new ArrayList<>();
+        List<Saison> listRestOldSaison = new ArrayList<>();
+
+        //Patch gestion des doublons sur Room (patch pour erreur ancienne)
+
+        List<Saison> oldTest = new ArrayList<>();
+        oldTest=oldSaisons;
+
+        for(Saison saison : oldTest){
+            Log.d(LOG_TAG, "CR deletedSaisonsList: oldtest 1 "+saison.getSaisonId()+ " "+saison.getIdsaisonCloud());
+            for(Saison saison1 :oldTest){
+                Log.d(LOG_TAG, "CR deletedSaisonsList: oldtest 2 "+saison1.getSaisonId()+ " "+saison1.getIdsaisonCloud());
+
+                if(saison.getIdsaisonCloud().equals(saison1.getIdsaisonCloud())&&saison.getSaisonId()!=saison1.getSaisonId()){
+                    Log.d(LOG_TAG, "CR deletedSaisonsList: oldtest 3 "+saison.getSaisonId()+ " "+saison.getIdsaisonCloud());
+
+                    if(!listRestOldSaison.contains(saison1)) {
+                        Log.d(LOG_TAG, "CR deletedSaisonsList: oldtest 4 "+saison.getSaisonId()+ " "+saison.getIdsaisonCloud());
+                        listRestOldSaison.add(saison);
+                        break;
+                    }
+                }
+            }
+        }
+//        Log.d(LOG_TAG, "CR deletedSaisonsList: oldtest B"+listRestOldSaison.size()+ " "+listRestOldSaison+" "+listRestOldSaison.get(0).getSaisonId());
+
+        for(Saison saison:listRestOldSaison){
+            oldTest.remove(saison);
+        }
+
+        Log.d(LOG_TAG, "CR deletedSaisonsList: "+oldTest.size()+" "+oldTest.get(0).getSaisonId());
+
+        deletedSaisonsList.addAll(listRestOldSaison);
+
+
+        //gestion des saisons à supprimer (Normal)
+
         for(Saison saison:saisons){
+            Log.d(LOG_TAG, "CR deletedSaisonsList: new "+ saison.getSaisonName()+" "+saison.getIdsaisonCloud());
             listIdSaisons.add(saison.getIdsaisonCloud());
         }
 
         for(Saison saison:oldSaisons){
+            Log.d(LOG_TAG, "CR deletedSaisonsList: idlocal "+saison.getSaisonId()+ saison.getUpdatePhone());
+            Log.d(LOG_TAG, "CR deletedSaisonsList: old "+ saison.getSaisonName()+" "+saison.getIdsaisonCloud()+" "+saison.getSaisonId());
             listOldIdSaisons.add(saison.getIdsaisonCloud());
         }
 
+
+        Log.d(LOG_TAG, "CR deletedSaisonsList: A "+listIdSaisons.size()+" "+listOldIdSaisons.size()+" "+saisons.size()+" "+oldSaisons.size()+" "+listOldIdSaisons);
         for(String oldStrSaison :listOldIdSaisons){
-            Log.d(LOG_TAG, "CR deletedSaisonsList: oldSaisons "+ listOldIdSaisons.size());
+            Log.d(LOG_TAG, "CR deletedSaisonsList: coucou");
+            Log.d(LOG_TAG, "CR deletedSaisonsList: oldSaisons "+ listOldIdSaisons.size()+" "+oldStrSaison);
 
             if(!listIdSaisons.contains(oldStrSaison)){
+                Log.d(LOG_TAG, "CR deletedSaisonsList: coucou2");
                 Log.d(LOG_TAG, "CR deletedSaisonsList: ajout dans la list de deleteSaison ");
                 for(Saison saison:oldSaisons){
+                    Log.d(LOG_TAG, "CR deletedSaisonsList: coucou3");
+                    Log.d(LOG_TAG, "CR deletedSaisonsList: "+saison.getSaisonName());
                     if(saison.getIdsaisonCloud().equals(oldStrSaison)){
+                        Log.d(LOG_TAG, "CR deletedSaisonsList: coucou4");
+                        Log.d(LOG_TAG, "CR deletedSaisonsList: addlist deleted saisosn");
                         deletedSaisonsList.add(saison);
                     }
                 }
             }
         }
+
+        //gestion des doublons
 
         Log.d(LOG_TAG, "CR deletedSaisonsList: deleted saisons "+deletedSaisonsList.size());
     }
@@ -628,12 +679,54 @@ public class ChoraleRepository {
         Log.d(LOG_TAG, "CR deletedSpectaclesList: list "+ spectacles.size()+" "+oldSpectacles.size());
         List<String> listIdSpectacles = new ArrayList<>();
         List<String> listOldIdSpectacles = new ArrayList<>();
+        List<Spectacle> listRestOldSpectacle = new ArrayList<>();
+
+
+
+        //patch doublon
+        List<Spectacle> oldTest = new ArrayList<>();
+        oldTest=oldSpectacles;
+
+        for(Spectacle spectacle : oldTest){
+            Log.d(LOG_TAG, "CR deletedSpectaclesList: oldtest 1 "+spectacle.getSpectacleId()+ " "+spectacle.getIdSpectacleCloud());
+            for(Spectacle spectacle1 :oldTest){
+                Log.d(LOG_TAG, "CR deletedSpectaclesList: oldtest 2 "+spectacle1.getSpectacleId()+ " "+spectacle1.getIdSpectacleCloud());
+
+                if(spectacle.getIdSpectacleCloud().equals(spectacle1.getIdSpectacleCloud())&&spectacle.getSpectacleId()!=spectacle1.getSpectacleId()){
+                    Log.d(LOG_TAG, "CR deletedSpectaclesList: oldtest 3 "+spectacle.getSpectacleId()+ " "+spectacle.getIdSpectacleCloud());
+
+                    if(!listRestOldSpectacle.contains(spectacle1)) {
+                        Log.d(LOG_TAG, "CR deletedSpectaclessList: oldtest 4 "+spectacle.getSpectacleId()+ " "+spectacle.getIdSpectacleCloud());
+                        listRestOldSpectacle.add(spectacle);
+                        break;
+                    }
+                }
+            }
+        }
+       // Log.d(LOG_TAG, "CR deletedSpectaclesList: oldtest B"+listRestOldSpectacle.size()+ " "+listRestOldSpectacle+" "+listRestOldSpectacle.get(0).getSpectacleId());
+
+
+        for(Spectacle spectacle:listRestOldSpectacle){
+            oldTest.remove(spectacle);
+        }
+
+        Log.d(LOG_TAG, "CR deletedSpectaclesList: "+oldTest.size()+" "+oldTest.get(0).getSpectacleId());
+
+        for(Spectacle spectacle :oldTest){
+            Log.d(LOG_TAG, "CR deletedSpectaclesList: liste restante "+spectacle.getSpectacleId()+" "+spectacle.getSpectacleName());
+        }
+
+        deletedSpectaclesList.addAll(listRestOldSpectacle);
+
+        //gestion deleted saisons normal
+
         for(Spectacle spectacle:spectacles){
             Log.d(LOG_TAG, "CR deletedSpectaclesList: new "+spectacle.getSpectacleName());
             listIdSpectacles.add(spectacle.getIdSpectacleCloud());
         }
 
         for(Spectacle spectacle:oldSpectacles){
+            Log.d(LOG_TAG, "CR deletedSpectaclesList: idlocal "+spectacle.getSpectacleId()+ spectacle.getUpdatePhone());
             Log.d(LOG_TAG, "CR deletedSpectaclesList: old "+spectacle.getSpectacleName());
             listOldIdSpectacles.add(spectacle.getIdSpectacleCloud());
         }
@@ -718,7 +811,7 @@ public class ChoraleRepository {
 
 
     private void newSpectaclesList() {
-        Log.d(LOG_TAG, "CR newSpectaclesList: list "+ spectacles.size()+" "+oldSpectacles.size());
+        Log.d(LOG_TAG, "CR newSpectaclesList: list "+ spectacles.size()+" "+ oldSpectacles.size());
         List<String> listIdSpectacles = new ArrayList<>();
         List<String> listOldIdSpectacles = new ArrayList<>();
         for(Spectacle spectacle:spectacles){
@@ -1010,6 +1103,17 @@ public class ChoraleRepository {
         if(deletedSpectaclesList!=null&&deletedSpectaclesList.size()!=0){
             int temp = mSpectacleDao.deleteSpectacles(deletedSpectaclesList);
             Log.d(LOG_TAG, "CR DoWorkInRoom: delete spectacles "+ temp);
+
+            String currentSpectacle = sharedPreferences.getString("currentSpectacle","Tous");
+            for(Spectacle spectacle:deletedSpectaclesList){
+                Log.d(LOG_TAG, "CR DoWorkInRoom: boucle deleted "+ spectacle.getSpectacleName());
+                if(currentSpectacle.equals(spectacle.getSpectacleName())){
+                    Log.d(LOG_TAG, "CR DoWorkInRoom:spectacle deleted "+currentSpectacle);
+                    editor =sharedPreferences.edit();
+                    editor.putBoolean("spectacleDeleted", true);
+                    editor.apply();
+                }
+            }
         }
 
         if(modifiedSourceSongsList!=null&&modifiedSourceSongsList.size()!=0){
@@ -1308,6 +1412,24 @@ public class ChoraleRepository {
 
     public Thread getThreadSaisons() {
         return threadSaisons;
+    }
+
+    public class ComparatorSaison implements Comparator<Saison> {
+
+        public ComparatorSaison() {
+        }
+
+        @Override
+        public int compare(Saison saison, Saison saison1) {
+            String saisonStr = String.valueOf(saison.getSaisonId());
+            String saisonStr1 = String.valueOf(saison1.getSaisonId());
+            return saisonStr1.compareTo(saisonStr);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            return false;
+        }
     }
 
 }

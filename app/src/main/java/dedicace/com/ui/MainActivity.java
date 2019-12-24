@@ -411,6 +411,21 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             //todo voir si on propose de charger les pupitres non chargées encore
 
         }
+
+        if (key.equals("spectacleDeleted")){
+            Log.d(TAG, "MA onSharedPreferenceChanged: key deletedspectacles");
+            boolean deletedSpectacles = sharedPreferences.getBoolean("spectacleDeleted",false);
+            if(deletedSpectacles){
+                Log.d(TAG, "MA onSharedPreferenceChanged: spectacle deleted ");
+                Toast.makeText(this, "Spectacle supprimé, veuillez patienter", Toast.LENGTH_LONG).show();
+                editor = sharedPreferences.edit();
+                editor.putString("currentSpectacle", "Tous");
+                editor.apply();
+                invalidateOptionsMenu();
+            }else{
+                Log.d(TAG, "MA onSharedPreferenceChanged: nothing happened spectacle deleted");
+            }
+        }
         if (key.equals("maj_auto")) {
             Log.d(TAG, "MA onSharedPreferenceChanged: changement maj_auto " + sharedPreferences.getBoolean(key, true));
         }
