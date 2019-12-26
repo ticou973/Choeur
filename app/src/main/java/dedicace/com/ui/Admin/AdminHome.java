@@ -133,7 +133,7 @@ public class AdminHome extends AppCompatActivity {
         modifySpectacle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent startModifySpectacleActivity = new Intent(AdminHome.this,ModifySpectacle.class);
+                Intent startModifySpectacleActivity = new Intent(AdminHome.this,ChooseChorale.class);
                 startModifySpectacleActivity.putExtra("origine","AdminHome");
                 startActivity(startModifySpectacleActivity);
             }

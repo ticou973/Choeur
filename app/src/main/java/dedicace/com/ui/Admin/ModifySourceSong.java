@@ -87,7 +87,7 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            Log.d(TAG, "MSS onComplete: sourceSongs " + Thread.currentThread().getName());
+                            Log.d(TAG, "MSp onComplete: sourceSongs " + Thread.currentThread().getName());
                             if (task.isSuccessful()) {
                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                     Log.d(TAG, "NDS-exec deb Oncomplete " + document.getId() + " => " + document.getData().get("maj"));

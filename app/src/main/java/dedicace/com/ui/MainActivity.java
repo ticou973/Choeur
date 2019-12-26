@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private Thread threadSpectacles;
     private AppDataBase dataBase;
     private SharedPreferences.Editor editor;
+    boolean deletedSpectacles;
 
 
 
@@ -127,6 +128,14 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         installationAuth = sharedPreferences.getBoolean("installationAuth", true);
         dataBase = AppDataBase.getInstance(getApplicationContext());
 
+        if(sharedPreferences.getBoolean("spectacleDeleted",false)) {
+            editor = sharedPreferences.edit();
+            editor.putBoolean("spectacleDeleted",false);
+            editor.apply();
+        }
+
+        Log.d(TAG, "MA onCreate:  deletedspectacle "+deletedSpectacles);
+
         if (!TextUtils.isEmpty(current_user_id)) {
             Log.d(TAG, "MA onCreate: current user Id " + current_user_id);
         }
@@ -139,6 +148,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(songsAdapter);
+
+
 
         if(!installationAuth){
             mAuth = FirebaseAuth.getInstance();
@@ -420,6 +431,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 Toast.makeText(this, "Spectacle supprimé, veuillez patienter", Toast.LENGTH_LONG).show();
                 editor = sharedPreferences.edit();
                 editor.putString("currentSpectacle", "Tous");
+                editor.putBoolean("spectacleDeleted",false);
                 editor.apply();
                 invalidateOptionsMenu();
             }else{

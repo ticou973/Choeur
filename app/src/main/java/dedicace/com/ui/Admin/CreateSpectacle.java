@@ -159,6 +159,7 @@ public class CreateSpectacle extends AppCompatActivity implements DialogNewSSFra
 
     }
 
+
     private void modifyMajChorale() {
         Map<String,Object> data = new HashMap<>();
         data.put("maj",Timestamp.now());
@@ -182,7 +183,6 @@ public class CreateSpectacle extends AppCompatActivity implements DialogNewSSFra
     private void newSpectacle() {
         DialogFragment dialog = new DialogNewSSFragment();
         dialog.show(getSupportFragmentManager(),"TAG");
-
     }
 
     @Override

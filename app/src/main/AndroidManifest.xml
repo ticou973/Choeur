@@ -2,18 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="dedicace.com">
 
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true">
-
+        <activity android:name=".ui.Admin.GenList"></activity>
         <activity
             android:name=".ui.MainActivity"
             android:launchMode="singleTop"
@@ -34,11 +29,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <service
-            android:name=".data.networkdatabase.ChoraleSyncIntentService"
-            android:exported="false" />
-
         <activity
             android:name=".ui.SettingsActivity"
             android:label="preferences"
@@ -119,8 +109,8 @@
             android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.Admin.CreateSpectacle"
-            android:screenOrientation="portrait"
             android:parentActivityName=".ui.Admin.AdminHome"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.Admin.CreateSaison"
@@ -134,17 +124,32 @@
             android:name=".ui.Admin.ModifySpectacle"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
-
         <activity
             android:name=".ui.Admin.AddConcert"
-            android:screenOrientation="portrait"
             android:parentActivityName=".ui.Admin.CreateSpectacle"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
             <meta-data
-            android:name="android.support.PARENT_ACTIVITY"
-            android:value=".ui.Admin.CreateSpectacle" />
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.CreateSpectacle" />
         </activity>
+        <activity
+            android:name=".ui.Admin.ModifySpectaclesDetails"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".ui.Admin.ChooseChorale"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
 
+        <service
+            android:name=".data.networkdatabase.ChoraleSyncIntentService"
+            android:exported="false" />
     </application>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 </manifest>

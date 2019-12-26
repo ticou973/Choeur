@@ -402,7 +402,7 @@ public class ChoraleRepository {
             Log.d(LOG_TAG, "CR ChoraleRepository LiveData après sync sourceSongs : "+sourceSongs.size()+ " "+sourceSongsAfterSync.size()+" "+Thread.currentThread().getName());
 
             for (SourceSong source:sourceSongsAfterSync) {
-                Log.d(LOG_TAG, "CR run: sourcesSONG dans la data : "+source.getTitre());
+               // Log.d(LOG_TAG, "CR run: sourcesSONG dans la data : "+source.getTitre());
             }
         });
 
@@ -413,7 +413,7 @@ public class ChoraleRepository {
 
     private void getListSongsA() {
         for(Song song : songsAfterSync){
-            Log.d(LOG_TAG, "CR GetList list songs "+song.getSourceSongTitre()+" "+song.getPupitre());
+          //  Log.d(LOG_TAG, "CR GetList list songs "+song.getSourceSongTitre()+" "+song.getPupitre());
         }
         listSongs= new ListSongs(mSongDao,mSourceDao,mSpectacleDao,sourceSongsAfterSync,songsAfterSync,context);
         listSongs.getSongOnClouds();
@@ -609,15 +609,15 @@ public class ChoraleRepository {
         oldTest=oldSaisons;
 
         for(Saison saison : oldTest){
-            Log.d(LOG_TAG, "CR deletedSaisonsList: oldtest 1 "+saison.getSaisonId()+ " "+saison.getIdsaisonCloud());
+           // Log.d(LOG_TAG, "CR deletedSaisonsList: oldtest 1 "+saison.getSaisonId()+ " "+saison.getIdsaisonCloud());
             for(Saison saison1 :oldTest){
-                Log.d(LOG_TAG, "CR deletedSaisonsList: oldtest 2 "+saison1.getSaisonId()+ " "+saison1.getIdsaisonCloud());
+              //  Log.d(LOG_TAG, "CR deletedSaisonsList: oldtest 2 "+saison1.getSaisonId()+ " "+saison1.getIdsaisonCloud());
 
                 if(saison.getIdsaisonCloud().equals(saison1.getIdsaisonCloud())&&saison.getSaisonId()!=saison1.getSaisonId()){
-                    Log.d(LOG_TAG, "CR deletedSaisonsList: oldtest 3 "+saison.getSaisonId()+ " "+saison.getIdsaisonCloud());
+                    //Log.d(LOG_TAG, "CR deletedSaisonsList: oldtest 3 "+saison.getSaisonId()+ " "+saison.getIdsaisonCloud());
 
                     if(!listRestOldSaison.contains(saison1)) {
-                        Log.d(LOG_TAG, "CR deletedSaisonsList: oldtest 4 "+saison.getSaisonId()+ " "+saison.getIdsaisonCloud());
+                    //    Log.d(LOG_TAG, "CR deletedSaisonsList: oldtest 4 "+saison.getSaisonId()+ " "+saison.getIdsaisonCloud());
                         listRestOldSaison.add(saison);
                         break;
                     }
@@ -688,15 +688,15 @@ public class ChoraleRepository {
         oldTest=oldSpectacles;
 
         for(Spectacle spectacle : oldTest){
-            Log.d(LOG_TAG, "CR deletedSpectaclesList: oldtest 1 "+spectacle.getSpectacleId()+ " "+spectacle.getIdSpectacleCloud());
+            //Log.d(LOG_TAG, "CR deletedSpectaclesList: oldtest 1 "+spectacle.getSpectacleId()+ " "+spectacle.getIdSpectacleCloud());
             for(Spectacle spectacle1 :oldTest){
-                Log.d(LOG_TAG, "CR deletedSpectaclesList: oldtest 2 "+spectacle1.getSpectacleId()+ " "+spectacle1.getIdSpectacleCloud());
+              //  Log.d(LOG_TAG, "CR deletedSpectaclesList: oldtest 2 "+spectacle1.getSpectacleId()+ " "+spectacle1.getIdSpectacleCloud());
 
                 if(spectacle.getIdSpectacleCloud().equals(spectacle1.getIdSpectacleCloud())&&spectacle.getSpectacleId()!=spectacle1.getSpectacleId()){
-                    Log.d(LOG_TAG, "CR deletedSpectaclesList: oldtest 3 "+spectacle.getSpectacleId()+ " "+spectacle.getIdSpectacleCloud());
+                  //  Log.d(LOG_TAG, "CR deletedSpectaclesList: oldtest 3 "+spectacle.getSpectacleId()+ " "+spectacle.getIdSpectacleCloud());
 
                     if(!listRestOldSpectacle.contains(spectacle1)) {
-                        Log.d(LOG_TAG, "CR deletedSpectaclessList: oldtest 4 "+spectacle.getSpectacleId()+ " "+spectacle.getIdSpectacleCloud());
+                    //    Log.d(LOG_TAG, "CR deletedSpectaclessList: oldtest 4 "+spectacle.getSpectacleId()+ " "+spectacle.getIdSpectacleCloud());
                         listRestOldSpectacle.add(spectacle);
                         break;
                     }
@@ -861,14 +861,14 @@ public class ChoraleRepository {
                     if ((!oldSong.getSongIdCloud().equals(song.getSongIdCloud()))) {
                         i++;
                     } else {
-                        Log.d(LOG_TAG, "CR deletedSongsList: pas incrément "+song.getSourceSongTitre()+" "+song.getPupitre());
+                      //  Log.d(LOG_TAG, "CR deletedSongsList: pas incrément "+song.getSourceSongTitre()+" "+song.getPupitre());
                     }
                 }
                 if (i == songs.size()) {
                     Log.d(LOG_TAG, "CR deletedSongsList: ajout deletesong " + oldSong.getSourceSongTitre());
                     deletedSongsList.add(oldSong);
                 }
-                Log.d(LOG_TAG, "CR deletedSongsList: fin d'une bloucle old ");
+              //  Log.d(LOG_TAG, "CR deletedSongsList: fin d'une bloucle old ");
             }
         }
 
@@ -1101,9 +1101,9 @@ public class ChoraleRepository {
         }
 
         if(deletedSpectaclesList!=null&&deletedSpectaclesList.size()!=0){
+            Log.d(LOG_TAG, "CR DoWorkInRoom: avant "+sharedPreferences.getBoolean("spectacleDeleted",false));
             int temp = mSpectacleDao.deleteSpectacles(deletedSpectaclesList);
             Log.d(LOG_TAG, "CR DoWorkInRoom: delete spectacles "+ temp);
-
             String currentSpectacle = sharedPreferences.getString("currentSpectacle","Tous");
             for(Spectacle spectacle:deletedSpectaclesList){
                 Log.d(LOG_TAG, "CR DoWorkInRoom: boucle deleted "+ spectacle.getSpectacleName());
@@ -1112,6 +1112,8 @@ public class ChoraleRepository {
                     editor =sharedPreferences.edit();
                     editor.putBoolean("spectacleDeleted", true);
                     editor.apply();
+
+                    Log.d(LOG_TAG, "CR DoWorkInRoom: après "+sharedPreferences.getBoolean("spectacleDeleted",false));
                 }
             }
         }
