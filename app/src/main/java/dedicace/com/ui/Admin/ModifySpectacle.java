@@ -23,6 +23,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import dedicace.com.R;
 import dedicace.com.data.database.Spectacle;
@@ -43,6 +44,10 @@ public class ModifySpectacle extends AppCompatActivity implements SpectacleAdapt
     private boolean newIntent = false;
     private String idChorale;
     private String nomChoraleStr;
+    private ArrayList<String> oldTitresNameStr = new ArrayList<>();
+    private Intent startDetailsSpectaclesActivity;
+    private Bundle args= new Bundle();
+    private int entier;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,25 +154,56 @@ public class ModifySpectacle extends AppCompatActivity implements SpectacleAdapt
         }
     }
 
+    private void getTitresSong(ArrayList<String> listTitres) {
+        entier=0;
+        for(String idTitre:listTitres){
+
+            db.collection("sourceSongs").document(idTitre)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if(task.isSuccessful()){
+                            entier++;
+                            Log.d(TAG, "MSp onComplete: réussi getTitresSong "+listTitres.lastIndexOf(idTitre)+"/"+listTitres.size());
+
+                            if(Objects.requireNonNull(task.getResult()).exists()){
+                                String name = (String) task.getResult().get("titre");
+                                oldTitresNameStr.add(name);
+                                Log.d(TAG, "MSp getTitresSong: réussi "+name);
+
+                                if(entier ==listTitres.size()){
+                                    Log.d(TAG, "MSp getTitresSong: if"+oldTitresNameStr);
+                                    args.putStringArrayList("OldTitresNames",oldTitresNameStr);
+                                    startDetailsSpectaclesActivity.putExtra("bundleSpectacle", args);
+                                    startActivity(startDetailsSpectaclesActivity);
+                                }
+                            }
+
+                        }else{
+                            Log.d(TAG, "MSp onComplete: failure getTitresSong ");
+                        }
+
+                    }).addOnFailureListener(e -> Log.d(TAG, "MSpD onFailure: getTitresSongs"));
+        }
+    }
+
     @Override
     public void onItemClick(int i) {
         if (origine.equals("ChooseChorale")) {
             Log.d(TAG, "MSp onItemClick: A "+i);
-            Intent startDetailsSpectaclesActivity = new Intent(ModifySpectacle.this, ModifySpectaclesDetails.class);
-            Bundle args = new Bundle();
+            startDetailsSpectaclesActivity = new Intent(ModifySpectacle.this, ModifySpectaclesDetails.class);
             args.putString("idSpectacle", listId.get(i));
             args.putString("oldNom", listSpectacles.get(i).getSpectacleName());
             args.putStringArrayList("oldLieux", listSpectacles.get(i).getSpectacleLieux());
-            args.putStringArrayList("oldTitres",listSpectacles.get(i).getIdTitresSongs());
             args.putString("idChorale",idChorale);
-
             ArrayList<String> datesLongStr = new ArrayList<String>();
             for(Date date :listSpectacles.get(i).getSpectacleDates()){
                datesLongStr.add(String.valueOf(date.getTime()));
             }
             args.putStringArrayList("datesLong",datesLongStr);
-            startDetailsSpectaclesActivity.putExtra("bundleSpectacle", args);
-            startActivity(startDetailsSpectaclesActivity);
+
+            args.putStringArrayList("oldTitres",listSpectacles.get(i).getIdTitresSongs());
+
+            getTitresSong(listSpectacles.get(i).getIdTitresSongs());
         }
     }
 

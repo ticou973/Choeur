@@ -158,7 +158,7 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
             result.putExtra("titreselected",listSourceSongs.get(i).getTitre());
             setResult(RESULT_OK,result);
             finish();
-        }else if(origine.equals("CreateSpectacle")){
+        }else if(origine.equals("CreateSpectacle")||origine.equals("GenList")){
             Log.d(TAG, "MSS onItemClick: C"+i);
             Intent result = new Intent();
             result.putExtra("titreselected",listSourceSongs.get(i).getTitre());

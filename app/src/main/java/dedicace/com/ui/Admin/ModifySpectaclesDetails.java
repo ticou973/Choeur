@@ -33,7 +33,8 @@ import dedicace.com.R;
 
 public class ModifySpectaclesDetails extends AppCompatActivity implements DialogSuppFragment.DialogSuppListener{
     private String oldNomStr, oldIdSpectacleStr;
-    private ArrayList<String> oldLieuxStr,oldTitreStr,olddatesLongStr;
+    private ArrayList<String> oldLieuxStr,oldTitreStr,olddatesLongStr,newLieuxStr,newTitreStr,newdatesLongStr;
+    private ArrayList<String> oldTitresNameStr,newTitresNameStr;
     private TextView oldNom, oldLieux, oldDates, oldTitres, newLieux, newDates, newTitres;
     private EditText newNom;
     private Button modifTitres, modifConcerts, suppSpectacle, modifSpectacle;
@@ -60,9 +61,9 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
         oldLieux = findViewById(R.id.tv_modif_spectacle_old_lieux);
         oldDates = findViewById(R.id.tv_modif_spectacles_old_dates);
         oldTitres = findViewById(R.id.tv_modif_spectacle_old_titres);
-        newLieux = findViewById(R.id.tv_modif_spectacle_new_lieux);
-        newDates = findViewById(R.id.tv_modif_spectacle_new_dates);
-        newTitres = findViewById(R.id.tv_modif_spectacle_new_titres);
+        newLieux = findViewById(R.id.tv_modif_spectacle_new_lieux2);
+        newDates = findViewById(R.id.tv_modif_spectacle_new_dates2);
+        newTitres = findViewById(R.id.tv_modif_spectacle_new_titres2);
         newNom = findViewById(R.id.et_modif_spectacle_new_nom);
         modifTitres = findViewById(R.id.btn_modif_spectacle_modif_titres);
         modifConcerts = findViewById(R.id.btn_modif_spectacle_modif_concerts);
@@ -71,35 +72,31 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
 
         db = FirebaseFirestore.getInstance();
 
+        clearLists();
+
         getIntentBundle();
 
         completeOld();
 
-        suppSpectacle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DialogFragment dialogFragment = new DialogSuppFragment();
-                dialogFragment.show(getSupportFragmentManager(),TAG);
-            }
+        suppSpectacle.setOnClickListener(view -> {
+            DialogFragment dialogFragment = new DialogSuppFragment();
+            dialogFragment.show(getSupportFragmentManager(),TAG);
         });
 
-        modifTitres.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent startActivityList = new Intent(ModifySpectaclesDetails.this,GenList.class);
-                startActivityList.putStringArrayListExtra("titres",oldTitreStr);
-                startActivityForResult(startActivityList,REQUEST_CODE);
-            }
+        modifTitres.setOnClickListener(view -> {
+            Intent startActivityList = new Intent(ModifySpectaclesDetails.this,GenList.class);
+            startActivityList.putStringArrayListExtra("titres",oldTitreStr);
+            startActivityList.putStringArrayListExtra("oldTitreNames",oldTitresNameStr);
+            startActivityList.putExtra("origine","modifTitres");
+            startActivityForResult(startActivityList,REQUEST_CODE);
         });
 
-        modifConcerts.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent startActivityList = new Intent(ModifySpectaclesDetails.this,GenList.class);
-                startActivityList.putStringArrayListExtra("lieux",oldLieuxStr);
-                startActivityList.putStringArrayListExtra("datesLong",olddatesLongStr);
-                startActivityForResult(startActivityList,REQUEST_CODEB);
-            }
+        modifConcerts.setOnClickListener(view -> {
+            Intent startActivityList = new Intent(ModifySpectaclesDetails.this,GenList.class);
+            startActivityList.putStringArrayListExtra("lieux",oldLieuxStr);
+            startActivityList.putStringArrayListExtra("datesLong",olddatesLongStr);
+            startActivityList.putExtra("origine","modifConcerts");
+            startActivityForResult(startActivityList,REQUEST_CODEB);
         });
 
         modifSpectacle.setOnClickListener(new View.OnClickListener() {
@@ -110,13 +107,39 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
         });
     }
 
+    private void clearLists() {
+        if(oldTitresNameStr!=null){
+            oldTitresNameStr.clear();
+        }
+        if(oldTitreStr!=null){
+            oldTitreStr.clear();
+        }
+        if(olddatesLongStr!=null){
+            olddatesLongStr.clear();
+        }
+        if(oldLieuxStr!=null){
+            oldLieuxStr.clear();
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode== Activity.RESULT_OK){
             if(requestCode==REQUEST_CODE){
                 if (data != null) {
+                    newTitreStr=data.getStringArrayListExtra("listGenModif");
+                    newTitresNameStr=data.getStringArrayListExtra("listGenCompModif");
 
+                    StringBuilder sb = new StringBuilder(" ");
+                    String newLine = System.getProperty("line.separator");
+                    int i=0;
+                    for(String titre:newTitresNameStr){
+                        i++;
+                        String listTitres = i+". "+titre+newLine;
+                        sb.append(listTitres+newLine);
+                    }
+                    newTitres.setText(sb.toString());
                 }
 
             }else if(requestCode==REQUEST_CODEB){
@@ -131,13 +154,14 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
         }
     }
 
+
     private void completeOld() {
         oldNom.setText(oldNomStr);
 
         StringBuilder sb = new StringBuilder(" ");
         String newLine = System.getProperty("line.separator");
         int i=0;
-        for(String titre:oldTitreStr){
+        for(String titre:oldTitresNameStr){
             i++;
             String listTitres = i+". "+titre+newLine;
             sb.append(listTitres+newLine);
@@ -150,26 +174,26 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
         int j=0;
         for(String lieu:oldLieuxStr){
             j++;
-            String listLieux = i+". "+lieu+newLine;
+            String listLieux = j+". "+lieu+newLine;
             sb1.append(listLieux+newLine);
         }
 
-        Log.d(TAG, "MspD completed Old: lieux"+ sb.toString() );
+        Log.d(TAG, "MspD completed Old: lieux"+ sb1.toString() );
         oldLieux.setText(sb1.toString());
 
         StringBuilder sb2 = new StringBuilder(" ");
         int k=0;
-        for(String dateLongStr:oldLieuxStr){
+        for(String dateLongStr:olddatesLongStr){
             k++;
             long dateLong = Long.parseLong(dateLongStr);
             Date date = new Date(dateLong);
 
-            String listDates = i+". "+date.toString()+newLine;
+            String listDates = k+". "+date.toString()+newLine;
             sb2.append(listDates+newLine);
         }
 
-        Log.d(TAG, "MspD completed Old: lieux"+ sb.toString() );
-        oldDates.setText(sb2.toString());
+        Log.d(TAG, "MspD completed Old: dates"+ sb2.subSequence(0,24).toString() );
+        oldDates.setText(sb2.subSequence(0,24).toString());
     }
 
     private void getIntentBundle() {
@@ -179,10 +203,11 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
         oldNomStr=args.getString("oldNom");
         oldIdSpectacleStr = args.getString("idSpectacle");
         oldLieuxStr = args.getStringArrayList("oldLieux");
-        oldTitreStr = args.getStringArrayList("oldTitres");
         olddatesLongStr =args.getStringArrayList("datesLong");
         idChorale = args.getString("idChorale");
-        Log.d(TAG, "MSpD getIntentBundle: "+oldIdSpectacleStr+" "+oldNomStr+" "+oldTitreStr+" "+oldLieuxStr+" "+olddatesLongStr);
+        oldTitreStr = args.getStringArrayList("oldTitres");
+        oldTitresNameStr=args.getStringArrayList("OldTitresNames");
+        Log.d(TAG, "MSpD getIntentBundle: "+oldIdSpectacleStr+" "+oldNomStr+" "+oldTitreStr+" "+oldLieuxStr+" "+olddatesLongStr+" "+idChorale+" "+oldTitresNameStr);
     }
 
     @Override
@@ -213,8 +238,8 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
                             .addOnCompleteListener(task1 -> {
 
                                 if(task1.isSuccessful()) {
-                                    Log.d(TAG, "MSpD onComplete: réussi ");
-                                    Toast.makeText(ModifySpectaclesDetails.this, "Réussi ", Toast.LENGTH_SHORT).show();
+                                    Log.d(TAG, "MSpD onComplete: spectacles in saison réussi ");
+                                    Toast.makeText(ModifySpectaclesDetails.this, "Réussi saison", Toast.LENGTH_SHORT).show();
                                 }else{
                                     Log.d(TAG, "MSp onComplete: pb dans le onComplete");
                                 }
@@ -246,6 +271,7 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "MSpD OnSucess: suppSpectacles");
+                        Toast.makeText(ModifySpectaclesDetails.this, "Réussi spectacle", Toast.LENGTH_SHORT).show();
 
                     }
                 }).addOnFailureListener(new OnFailureListener() {

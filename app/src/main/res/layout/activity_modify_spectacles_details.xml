@@ -87,51 +87,6 @@
         app:layout_constraintStart_toStartOf="@+id/textView48" />
 
     <TextView
-        android:id="@+id/tv_modif_spectacle_new_titres"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:fontFamily="@font/roboto"
-        android:hint="new titres"
-        android:inputType="textPersonName"
-        android:textColor="@android:color/black"
-        android:textSize="14sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/tv_modif_spectacle_old_titres"
-        app:layout_constraintEnd_toEndOf="@+id/textView48"
-        app:layout_constraintHorizontal_bias="0.493"
-        app:layout_constraintStart_toStartOf="@+id/textView48" />
-
-    <TextView
-        android:id="@+id/tv_modif_spectacle_new_lieux"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:fontFamily="@font/roboto"
-        android:hint="new lieux"
-        android:inputType="textPersonName"
-        android:textColor="@android:color/black"
-        android:textSize="14sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/tv_modif_spectacle_old_lieux"
-        app:layout_constraintEnd_toEndOf="@+id/textView48"
-        app:layout_constraintHorizontal_bias="0.48"
-        app:layout_constraintStart_toStartOf="@+id/textView48" />
-
-    <TextView
-        android:id="@+id/tv_modif_spectacle_new_dates"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:fontFamily="@font/roboto"
-        android:hint="new dates"
-        android:inputType="textPersonName"
-        android:textColor="@android:color/black"
-        android:textSize="14sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/tv_modif_spectacles_old_dates"
-        app:layout_constraintEnd_toEndOf="@+id/textView48"
-        app:layout_constraintHorizontal_bias="0.48"
-        app:layout_constraintStart_toStartOf="@+id/textView48" />
-
-    <TextView
         android:id="@+id/textView53"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -160,63 +115,62 @@
         android:id="@+id/tv_modif_spectacle_old_titres"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/roboto"
         android:text="oldTitres"
         android:textColor="@android:color/black"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView53"
-        app:layout_constraintEnd_toEndOf="@+id/tv_modif_spectacle_old_nom"
-        app:layout_constraintStart_toStartOf="@+id/tv_modif_spectacle_old_nom" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView53" />
 
     <Button
         android:id="@+id/btn_modif_spectacle_modif_titres"
-        android:layout_width="79dp"
-        android:layout_height="34dp"
+        android:layout_width="91dp"
+        android:layout_height="45dp"
         android:layout_marginTop="8dp"
         android:text="Modifier"
         android:textColor="@android:color/black"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="@+id/tv_modif_spectacle_new_titres"
-        app:layout_constraintStart_toStartOf="@+id/tv_modif_spectacle_new_titres"
-        app:layout_constraintTop_toBottomOf="@+id/tv_modif_spectacle_new_titres" />
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@+id/tv_modif_spectacle_new_titres2"
+        app:layout_constraintTop_toBottomOf="@+id/tv_modif_spectacle_new_titres2" />
 
     <Button
         android:id="@+id/btn_modif_spectacle_modif_concerts"
-        android:layout_width="79dp"
-        android:layout_height="34dp"
+        android:layout_width="91dp"
+        android:layout_height="45dp"
         android:layout_marginTop="8dp"
         android:text="Modifier"
         android:textColor="@android:color/black"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="@+id/tv_modif_spectacle_new_titres"
-        app:layout_constraintHorizontal_bias="0.484"
-        app:layout_constraintStart_toStartOf="@+id/tv_modif_spectacle_new_titres"
-        app:layout_constraintTop_toBottomOf="@+id/tv_modif_spectacle_new_dates" />
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@+id/tv_modif_spectacle_new_dates2"
+        app:layout_constraintTop_toBottomOf="@+id/tv_modif_spectacle_new_dates2" />
 
     <TextView
         android:id="@+id/textView57"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="40dp"
         android:fontFamily="@font/roboto"
         android:text="Lieux"
         android:textColor="@android:color/black"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_modif_spectacle_modif_titres" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_modif_spectacle_old_titres" />
 
     <TextView
         android:id="@+id/tv_modif_spectacle_old_lieux"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/roboto"
         android:text="old Lieux"
         android:textColor="@android:color/black"
         android:textSize="14sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView57"
-        app:layout_constraintEnd_toEndOf="@+id/tv_modif_spectacle_old_titres"
-        app:layout_constraintStart_toStartOf="@+id/tv_modif_spectacle_old_titres" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView57" />
 
     <TextView
         android:id="@+id/textView59"
@@ -230,18 +184,19 @@
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView57" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_modif_spectacle_old_lieux" />
 
     <TextView
         android:id="@+id/tv_modif_spectacles_old_dates"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/roboto"
         android:text="old Dates"
         android:textColor="@android:color/black"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView59"
-        app:layout_constraintEnd_toEndOf="@+id/tv_modif_spectacle_old_lieux"
-        app:layout_constraintStart_toStartOf="@+id/tv_modif_spectacle_old_lieux" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView59" />
 
     <Button
         android:id="@+id/btn_supp_spectacle"
@@ -271,6 +226,36 @@
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_modif_spectacle_modif_concerts" />
+
+    <TextView
+        android:id="@+id/tv_modif_spectacle_new_titres2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="New Titres"
+        android:textColor="@android:color/black"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_modif_spectacle_old_titres"
+        app:layout_constraintStart_toStartOf="@+id/et_modif_spectacle_new_nom" />
+
+    <TextView
+        android:id="@+id/tv_modif_spectacle_new_lieux2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="New Lieux"
+        android:textColor="@android:color/black"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_modif_spectacle_old_lieux"
+        app:layout_constraintStart_toStartOf="@+id/tv_modif_spectacle_new_titres2" />
+
+    <TextView
+        android:id="@+id/tv_modif_spectacle_new_dates2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="new Dates"
+        android:textColor="@android:color/black"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_modif_spectacles_old_dates"
+        app:layout_constraintStart_toStartOf="@+id/tv_modif_spectacle_new_lieux2" />
 
 </android.support.constraint.ConstraintLayout>
 
