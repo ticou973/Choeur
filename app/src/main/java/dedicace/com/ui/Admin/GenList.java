@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -18,6 +19,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 import dedicace.com.R;
 
@@ -29,10 +32,15 @@ public class GenList extends AppCompatActivity {
     private LinearLayoutManager layoutManager;
     private ArrayList<String> listGen = new ArrayList<>();
     private ArrayList<String> listGenComp = new ArrayList<>();
+    private ArrayList<String> listGenTemp = new ArrayList<>();
+
+    private ArrayList<String> lieux = new ArrayList();
+    private ArrayList<Date> dates = new ArrayList<>();
+    private List<String> datesStr = new ArrayList<>();
     private static final String TAG ="coucou";
     private final static int REQUEST_CODE=100;
-    private String titreSong;
-    private String idSong;
+    private final static int REQUEST_CODEB=200;
+    private String titreSong,idSong, origine;
     private int position;
 
 
@@ -55,9 +63,10 @@ public class GenList extends AppCompatActivity {
                 int position_target = target.getAdapterPosition();
                 Collections.swap(listGen,position_dragged,position_target);
                 Collections.swap(listGenComp,position_dragged,position_target);
+                Collections.swap(listGenTemp,position_dragged,position_target);
 
                 genAdapter.notifyItemMoved(position_dragged,position_target);
-                Log.d(TAG, "GL onMove: "+listGen+" "+listGenComp);
+                Log.d(TAG, "GL onMove: "+listGen+" "+listGenComp+" "+listGenTemp);
                 return false;
             }
 
@@ -66,8 +75,9 @@ public class GenList extends AppCompatActivity {
 
                 listGen.remove(viewHolder.getAdapterPosition());
                 listGenComp.remove(viewHolder.getAdapterPosition());
+                listGenTemp.remove(viewHolder.getAdapterPosition());
                 genAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
-                Log.d(TAG, "GL onSwiped: "+listGen+" "+listGenComp);
+                Log.d(TAG, "GL onSwiped: "+listGen+" "+listGenComp+" "+listGenTemp);
             }
         });
 
@@ -80,7 +90,11 @@ public class GenList extends AppCompatActivity {
         fab.setOnClickListener(view -> {
             Log.d(TAG, "GL onCreate: On Click fab");
             Intent result = new Intent();
-            result.putStringArrayListExtra("listGenModif",listGen);
+            if(origine.equals("modifTitres")) {
+                result.putStringArrayListExtra("listGenModif", listGen);
+            }else{
+                result.putStringArrayListExtra("listGenModif", listGenTemp);
+            }
             result.putStringArrayListExtra("listGenCompModif",listGenComp);
             setResult(RESULT_OK,result);
             finish();
@@ -88,16 +102,29 @@ public class GenList extends AppCompatActivity {
     }
 
     private void getBundleIntent() {
+        listGen.clear();
+        listGenComp.clear();
+        listGenTemp.clear();
         Intent intent = getIntent();
         Log.d(TAG, "GL getBundleIntent: ");
         if(intent!=null) {
+            origine =intent.getStringExtra("origine");
             if (intent.getStringExtra("origine").equals("modifTitres")) {
                 listGen.addAll(intent.getStringArrayListExtra("titres"));
                 listGenComp.addAll(intent.getStringArrayListExtra("oldTitreNames"));
-                Log.d(TAG, "GL getBundleIntent: "+listGenComp+" "+listGen);
+                listGenTemp.addAll(intent.getStringArrayListExtra("oldTitreNames"));
+                Log.d(TAG, "GL Titres getBundleIntent: "+listGenComp+" "+listGen+" "+listGenTemp);
 
-            } else if (intent.getStringArrayListExtra("origine").equals("modifConcerts")) {
+            } else if (intent.getStringExtra("origine").equals("modifConcerts")) {
+                listGenComp.addAll(intent.getStringArrayListExtra("lieux"));
+                listGenTemp.addAll(intent.getStringArrayListExtra("datesLong"));
+                Log.d(TAG, "GL concerts getBundleIntent: 1 "+listGenComp+" "+listGen+" "+listGenTemp);
+                for(String datelong:listGenTemp){
+                    long datel= Long.parseLong(datelong);
+                    listGen.add(new Date(datel).toString());
+                }
 
+                Log.d(TAG, "GL concerts getBundleIntent: "+listGenComp+" "+listGen+" "+listGenTemp);
             }
         }
     }
@@ -119,6 +146,7 @@ public class GenList extends AppCompatActivity {
         @Override
         public void onBindViewHolder(@NonNull GenViewHolder genViewHolder, int i) {
             genViewHolder.genName.setText(listGenComp.get(i));
+            genViewHolder.genSubName.setText(listGen.get(i));
         }
 
         @Override
@@ -128,18 +156,36 @@ public class GenList extends AppCompatActivity {
     }
 
     private class GenViewHolder extends RecyclerView.ViewHolder {
-        TextView genName;
+        TextView genName,genSubName;
+        CardView cvGen;
         public GenViewHolder(@NonNull View itemView) {
             super(itemView);
             genName = itemView.findViewById(R.id.genName);
+            genSubName = itemView.findViewById(R.id.genSubName);
+            cvGen = itemView.findViewById(R.id.cv_list_gen);
             genName.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
                     position = getAdapterPosition();
-                    Intent startModifySSActivity = new Intent(GenList.this,ModifySourceSong.class);
-                    startModifySSActivity.putExtra("origine","GenList");
-                    startActivityForResult(startModifySSActivity,REQUEST_CODE);
+                    Log.d(TAG, "GL onLongClick: "+position);
+                    if(origine.equals("modifTitres")) {
+                        Intent startModifySSActivity = new Intent(GenList.this, ModifySourceSong.class);
+                        startModifySSActivity.putExtra("origine", "GenList");
+                        startActivityForResult(startModifySSActivity, REQUEST_CODE);
+                    }else if(origine.equals("modifConcerts")) {
+                        Log.d(TAG, "GL onLongClick: modifconcerts");
+                        Intent startAddConcert = new Intent(GenList.this, AddConcert.class);
+                        startAddConcert.putExtra("origine", "GenList");
+                        startActivityForResult(startAddConcert,REQUEST_CODEB);
+                    }
                     return false;
+                }
+            });
+
+            genName.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.d(TAG, "GL onClick: pour modif");
                 }
             });
         }
@@ -159,6 +205,27 @@ public class GenList extends AppCompatActivity {
                     listGen.add(position,idSong);
 
                     genAdapter.notifyItemInserted(position);
+                    Log.d(TAG, "GL onActivityResult: request_codeB " + titreSong+" "+idSong+" "+listGenComp+" "+ listGen);
+                }
+            } else if (requestCode==REQUEST_CODEB) {
+                if(data!= null){
+                    Log.d(TAG, "GL onActivityResult: ");
+
+                        lieux = data.getStringArrayListExtra("lieuxconcerts");
+                        datesStr = data.getStringArrayListExtra("datesconcerts");
+
+                        for (String dateStr: datesStr){
+                            dates.add(new Date(Long.parseLong(dateStr)));
+                        }
+                        Log.d(TAG, "GL onActivityResult: "+lieux+" "+ dates);
+                    for(String lieu:lieux) {
+                        int index = lieux.indexOf(lieu);
+                        listGenComp.add(position,lieu);
+                        listGen.add(position,dates.get(index).toString());
+                        listGenTemp.add(position,String.valueOf(dates.get(index).getTime()));
+                        genAdapter.notifyItemInserted(position);
+                    }
+
                     Log.d(TAG, "GL onActivityResult: request_codeB " + titreSong+" "+idSong+" "+listGenComp+" "+ listGen);
                 }
             }

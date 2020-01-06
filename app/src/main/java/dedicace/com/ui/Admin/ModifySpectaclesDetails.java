@@ -2,11 +2,14 @@ package dedicace.com.ui.Admin;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -32,12 +35,13 @@ import java.util.Objects;
 import dedicace.com.R;
 
 public class ModifySpectaclesDetails extends AppCompatActivity implements DialogSuppFragment.DialogSuppListener{
-    private String oldNomStr, oldIdSpectacleStr;
+    private String oldNomStr, oldIdSpectacleStr, newNomStr;
     private ArrayList<String> oldLieuxStr,oldTitreStr,olddatesLongStr,newLieuxStr,newTitreStr,newdatesLongStr;
     private ArrayList<String> oldTitresNameStr,newTitresNameStr;
     private TextView oldNom, oldLieux, oldDates, oldTitres, newLieux, newDates, newTitres;
     private EditText newNom;
     private Button modifTitres, modifConcerts, suppSpectacle, modifSpectacle;
+    private Map<String,Object> spectacle;
 
     private FirebaseFirestore db;
 
@@ -85,24 +89,90 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
 
         modifTitres.setOnClickListener(view -> {
             Intent startActivityList = new Intent(ModifySpectaclesDetails.this,GenList.class);
-            startActivityList.putStringArrayListExtra("titres",oldTitreStr);
-            startActivityList.putStringArrayListExtra("oldTitreNames",oldTitresNameStr);
-            startActivityList.putExtra("origine","modifTitres");
+            if(newTitreStr!=null&&newTitreStr.size()!=0){
+                startActivityList.putStringArrayListExtra("titres", newTitreStr);
+                startActivityList.putStringArrayListExtra("oldTitreNames", newTitresNameStr);
+
+            }else {
+                startActivityList.putStringArrayListExtra("titres", oldTitreStr);
+                startActivityList.putStringArrayListExtra("oldTitreNames", oldTitresNameStr);
+            }
+            startActivityList.putExtra("origine", "modifTitres");
             startActivityForResult(startActivityList,REQUEST_CODE);
         });
 
         modifConcerts.setOnClickListener(view -> {
             Intent startActivityList = new Intent(ModifySpectaclesDetails.this,GenList.class);
-            startActivityList.putStringArrayListExtra("lieux",oldLieuxStr);
-            startActivityList.putStringArrayListExtra("datesLong",olddatesLongStr);
+            if(newLieuxStr!=null&&newLieuxStr.size()!=0){
+                startActivityList.putStringArrayListExtra("lieux", newLieuxStr);
+                startActivityList.putStringArrayListExtra("datesLong", newdatesLongStr);
+
+            }else {
+                startActivityList.putStringArrayListExtra("lieux", oldLieuxStr);
+                startActivityList.putStringArrayListExtra("datesLong", olddatesLongStr);
+            }
+
             startActivityList.putExtra("origine","modifConcerts");
             startActivityForResult(startActivityList,REQUEST_CODEB);
         });
 
         modifSpectacle.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onClick(View view) {
+                newNomStr = newNom.getText().toString();
+                if(!TextUtils.isEmpty(newNomStr)||(newLieuxStr!=null&&newLieuxStr.size()!=0)||(newTitreStr!=null&&newTitreStr.size()!=0)){
+                    spectacle = new HashMap<>();
+                    spectacle.put("maj",Timestamp.now());
 
+                    if(!TextUtils.isEmpty(newNomStr)){
+                        Log.d(TAG, "MSpD onClick: putNom");
+                        spectacle.put("nom",newNomStr);
+                    }
+
+                    if(newLieuxStr!=null&&newLieuxStr.size()!=0){
+                        spectacle.put("concerts_lieux",newLieuxStr);
+
+                        ArrayList<Date> dates = new ArrayList<>();
+
+                        for (String dateLongStr:newdatesLongStr){
+                            Log.d(TAG, "MSpD onClick: newDates "+dateLongStr);
+                            dates.add(new Date(Long.parseLong(dateLongStr)));
+                        }
+                        Log.d(TAG, "MSpD onClick: putLieux et dates ");
+                        spectacle.put("concerts_dates",dates);
+                    }
+
+                    if(newTitreStr!=null&&newTitreStr.size()!=0){
+                        Log.d(TAG, "MSpD onClick: puttitre");
+                        spectacle.put("id_titres",newTitreStr);
+                    }
+
+                    insertSpectacleInDb();
+                }
+
+            }
+        });
+    }
+
+    private void insertSpectacleInDb() {
+        Log.d(TAG, "MSpD insertSpectacleInDb: ");
+        db.collection("chorale").document(idChorale).collection("spectacles").document(oldIdSpectacleStr)
+                .update(spectacle)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "MSpD onSuccess: OK");
+                        modifyMajChorale();
+                        Intent startMSp = new Intent(ModifySpectaclesDetails.this,ChooseChorale.class);
+                        startMSp.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        startActivity(startMSp);
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "MSpD onSuccess: maj spectacle failed");
             }
         });
     }
@@ -144,6 +214,29 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
 
             }else if(requestCode==REQUEST_CODEB){
                 if (data != null) {
+                    newLieuxStr=data.getStringArrayListExtra("listGenCompModif");
+                    newdatesLongStr=data.getStringArrayListExtra("listGenModif");
+
+                    StringBuilder sb = new StringBuilder(" ");
+                    String newLine = System.getProperty("line.separator");
+                    int i=0;
+                    for(String lieu:newLieuxStr){
+                        i++;
+                        String listLieu = i+". "+lieu+newLine;
+                        sb.append(listLieu+newLine);
+                    }
+                    newLieux.setText(sb.toString());
+
+                    StringBuilder sb1 = new StringBuilder(" ");
+                    int j=0;
+                    for(String date:newdatesLongStr){
+                        long dateLong = Long.parseLong(date);
+                        Date date1 = new Date(dateLong);
+                        j++;
+                        String listTitres = j+". "+date1.toString()+newLine;
+                        sb1.append(listTitres+newLine);
+                    }
+                    newDates.setText(sb1.toString());
 
                 }
             }else if(requestCode==REQUEST_CODEC){
@@ -184,16 +277,18 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
         StringBuilder sb2 = new StringBuilder(" ");
         int k=0;
         for(String dateLongStr:olddatesLongStr){
+            Log.d(TAG, "MSpD completeOld: "+dateLongStr);
             k++;
             long dateLong = Long.parseLong(dateLongStr);
             Date date = new Date(dateLong);
 
-            String listDates = k+". "+date.toString()+newLine;
+            Log.d(TAG, "MSpD completeOld: "+date);
+            String listDates = k+". "+date.toString().substring(0,20)+newLine;
             sb2.append(listDates+newLine);
         }
 
         Log.d(TAG, "MspD completed Old: dates"+ sb2.subSequence(0,24).toString() );
-        oldDates.setText(sb2.subSequence(0,24).toString());
+        oldDates.setText(sb2.toString());
     }
 
     private void getIntentBundle() {

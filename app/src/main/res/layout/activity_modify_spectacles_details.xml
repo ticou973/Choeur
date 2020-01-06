@@ -41,7 +41,7 @@
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/modifSpectacle" />
+        app:layout_constraintTop_toBottomOf="@+id/btn_supp_spectacle" />
 
     <TextView
         android:id="@+id/textView48"
@@ -90,14 +90,14 @@
         android:id="@+id/textView53"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="60dp"
         android:text="Titres"
         android:textColor="@android:color/black"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView52" />
+        app:layout_constraintTop_toBottomOf="@+id/btn_modif_spectacle_modif_concerts" />
 
     <TextView
         android:id="@+id/tv_modif_spectacle_old_nom"
@@ -157,7 +157,7 @@
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_modif_spectacle_old_titres" />
+        app:layout_constraintTop_toBottomOf="@+id/textView52" />
 
     <TextView
         android:id="@+id/tv_modif_spectacle_old_lieux"
@@ -177,7 +177,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="36dp"
         android:fontFamily="@font/roboto"
         android:text="Dates"
         android:textColor="@android:color/black"
@@ -216,7 +216,7 @@
         android:id="@+id/btn_modify_spectacle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="20dp"
         android:layout_marginEnd="24dp"
         android:background="@color/secondaryColor"
         android:fontFamily="@font/roboto"
@@ -225,7 +225,7 @@
         android:textColor="@android:color/black"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_modif_spectacle_modif_concerts" />
+        app:layout_constraintTop_toBottomOf="@+id/modifSpectacle" />
 
     <TextView
         android:id="@+id/tv_modif_spectacle_new_titres2"

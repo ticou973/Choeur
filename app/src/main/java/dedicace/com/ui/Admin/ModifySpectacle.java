@@ -45,6 +45,7 @@ public class ModifySpectacle extends AppCompatActivity implements SpectacleAdapt
     private String idChorale;
     private String nomChoraleStr;
     private ArrayList<String> oldTitresNameStr = new ArrayList<>();
+    private ArrayList<String> sortOldTitresNameStr = new ArrayList<>();
     private Intent startDetailsSpectaclesActivity;
     private Bundle args= new Bundle();
     private int entier;
@@ -156,8 +157,13 @@ public class ModifySpectacle extends AppCompatActivity implements SpectacleAdapt
 
     private void getTitresSong(ArrayList<String> listTitres) {
         entier=0;
-        for(String idTitre:listTitres){
 
+        //todo voir une méthode plus esthétique ?
+        for (int i = 0; i < listTitres.size(); i++) {
+            oldTitresNameStr.add("A supprimer");
+        }
+
+        for(String idTitre:listTitres){
             db.collection("sourceSongs").document(idTitre)
                     .get()
                     .addOnCompleteListener(task -> {
@@ -167,7 +173,8 @@ public class ModifySpectacle extends AppCompatActivity implements SpectacleAdapt
 
                             if(Objects.requireNonNull(task.getResult()).exists()){
                                 String name = (String) task.getResult().get("titre");
-                                oldTitresNameStr.add(name);
+                                oldTitresNameStr.add(listTitres.indexOf(idTitre),name);
+                                oldTitresNameStr.remove("A supprimer");
                                 Log.d(TAG, "MSp getTitresSong: réussi "+name);
 
                                 if(entier ==listTitres.size()){
