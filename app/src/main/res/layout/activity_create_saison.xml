@@ -6,21 +6,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primaryColor"
-    tools:context=".ui.Admin.CreateSpectacle">
+    tools:context=".ui.Admin.CreateSaison">
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/textView39"
+            android:id="@+id/tvCreaSaison"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
             android:fontFamily="@font/roboto"
-            android:text="Création de Spectacle"
+            android:text="@string/creation_de_saisons"
             android:textColor="@color/secondaryColor"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -29,52 +29,39 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/textView40"
+            android:id="@+id/tvNomSaisonText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="40dp"
             android:text="Nom"
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_select_chorale_spectacle" />
+            app:layout_constraintTop_toBottomOf="@+id/btn_select_chorale_saison" />
 
         <TextView
-            android:id="@+id/textView42"
+            android:id="@+id/tvSpectaclesText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="40dp"
             android:fontFamily="@font/roboto"
-            android:text="Titres"
+            android:text="Spectacles"
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView40" />
+            app:layout_constraintTop_toBottomOf="@+id/tvNomSaisonText" />
 
-        <TextView
-            android:id="@+id/textView43"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="20dp"
-            android:fontFamily="@font/roboto"
-            android:text="Concerts"
-            android:textColor="@android:color/black"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView42" />
 
         <Button
-            android:id="@+id/btn_create_spectacle_db"
+            android:id="@+id/btn_create_saison_db"
             android:layout_width="246dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="40dp"
             android:layout_marginEnd="8dp"
             android:background="@color/secondaryColor"
             android:fontFamily="@font/roboto"
@@ -86,10 +73,10 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_add_concerts" />
+            app:layout_constraintTop_toBottomOf="@+id/btn_add_spectacles_saison" />
 
         <EditText
-            android:id="@+id/et_nom_spectacle"
+            android:id="@+id/et_nom_saison"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="45dp"
@@ -98,82 +85,58 @@
             android:hint="nom..."
             android:inputType="textPersonName"
             android:textColor="@android:color/black"
-            app:layout_constraintBaseline_toBaselineOf="@+id/textView40"
+            app:layout_constraintBaseline_toBaselineOf="@+id/tvNomSaisonText"
             app:layout_constraintEnd_toEndOf="parent" />
 
         <Button
-            android:id="@+id/btn_add_titres"
+            android:id="@+id/btn_add_spectacles_saison"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Ajouter"
-            app:layout_constraintBaseline_toBaselineOf="@+id/textView42"
-            app:layout_constraintStart_toStartOf="@+id/et_nom_spectacle" />
+            app:layout_constraintBaseline_toBaselineOf="@+id/tvSpectaclesText"
+            app:layout_constraintEnd_toEndOf="@+id/et_nom_saison"
+            app:layout_constraintStart_toStartOf="@+id/et_nom_saison" />
 
-        <Button
-            android:id="@+id/btn_voir_Titres"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="45dp"
-            android:text="Voir"
-            app:layout_constraintBaseline_toBaselineOf="@+id/btn_add_titres"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <Button
-            android:id="@+id/btn_add_concerts"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Ajouter"
-            app:layout_constraintBaseline_toBaselineOf="@+id/textView43"
-            app:layout_constraintStart_toStartOf="@+id/btn_add_titres" />
-
-        <Button
-            android:id="@+id/btn_voir_concerts"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="45dp"
-            android:text="Voir"
-            app:layout_constraintBaseline_toBaselineOf="@+id/btn_add_concerts"
-            app:layout_constraintEnd_toEndOf="parent" />
 
         <TextView
-            android:id="@+id/textView44"
+            android:id="@+id/tvChoraleText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="50dp"
             android:fontFamily="@font/roboto"
             android:text="Chorale"
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView39" />
+            app:layout_constraintTop_toBottomOf="@+id/tvCreaSaison" />
 
         <EditText
-            android:id="@+id/et_select_chorale_spectacle"
+            android:id="@+id/et_select_chorale_saison"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="45dp"
             android:ems="10"
             android:inputType="textPersonName"
             android:text="Selection Chorale..."
-            app:layout_constraintBaseline_toBaselineOf="@+id/textView44"
+            app:layout_constraintBaseline_toBaselineOf="@+id/tvChoraleText"
             app:layout_constraintEnd_toEndOf="parent" />
 
         <Button
-            android:id="@+id/btn_select_chorale_spectacle"
+            android:id="@+id/btn_select_chorale_saison"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="@string/selection"
             android:textColor="@android:color/black"
             android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="@+id/et_select_chorale_spectacle"
-            app:layout_constraintStart_toStartOf="@+id/et_select_chorale_spectacle"
-            app:layout_constraintTop_toBottomOf="@+id/et_select_chorale_spectacle" />
+            app:layout_constraintEnd_toEndOf="@+id/et_select_chorale_saison"
+            app:layout_constraintStart_toStartOf="@+id/et_select_chorale_saison"
+            app:layout_constraintTop_toBottomOf="@+id/et_select_chorale_saison" />
 
         <TextView
-            android:id="@+id/tv_list_titres_spectacle"
+            android:id="@+id/tv_list_noms_spectacle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -182,11 +145,11 @@
             android:ems="10"
             android:inputType="textMultiLine"
             android:nestedScrollingEnabled="false"
-            android:text="Spectacles"
+            android:text="Saisons"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_create_spectacle_db" />
+            app:layout_constraintTop_toBottomOf="@+id/btn_create_saison_db" />
 
 
 

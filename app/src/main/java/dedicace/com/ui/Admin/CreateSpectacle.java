@@ -2,9 +2,7 @@ package dedicace.com.ui.Admin;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -24,8 +22,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,15 +41,11 @@ public class CreateSpectacle extends AppCompatActivity implements DialogNewSSFra
     private ArrayList<Date> dates = new ArrayList<>();
     private List<String> titres = new ArrayList<>();
     private List<String> listIds = new ArrayList<>();
-    private long[] datesLong;
     private List<String> datesStr = new ArrayList<>();
     private static final String TAG ="coucou";
     private static final int REQUEST_CODE_B = 200;
     private static final int REQUEST_CODE_C = 300;
     private static final int REQUEST_CODE_D = 400;
-    private SharedPreferences sharedPreferences;
-
-    private StorageReference mStorageRef;
     private FirebaseFirestore db;
 
 
@@ -69,7 +61,7 @@ public class CreateSpectacle extends AppCompatActivity implements DialogNewSSFra
         selectChorale=findViewById(R.id.btn_select_chorale_spectacle);
         nomChorale=findViewById(R.id.et_select_chorale_spectacle);
         listTitres=findViewById(R.id.tv_list_titres_spectacle);
-        selectChorale=findViewById(R.id.btn_select_chorale_spectacle);
+
 
         ActionBar actionBar = this.getSupportActionBar();
 
@@ -79,10 +71,7 @@ public class CreateSpectacle extends AppCompatActivity implements DialogNewSSFra
 
         Log.d(TAG, "CS onCreate: ");
 
-        mStorageRef = FirebaseStorage.getInstance().getReference();
         db = FirebaseFirestore.getInstance();
-
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         createSpectacleInDb.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,7 +80,7 @@ public class CreateSpectacle extends AppCompatActivity implements DialogNewSSFra
                 nomSpectacleStr = nomSpectacle.getText().toString();
                 nomChoraleStr = nomChorale.getText().toString();
 
-                Log.d(TAG, "CS nClick: create in DB "+ nomSpectacleStr+" "+nomChoraleStr+ " "+idChorale+" "+titres+ " "+listIds+" "+ lieux+" "+dates);
+                Log.d(TAG, "CS Click: create in DB "+ nomSpectacleStr+" "+nomChoraleStr+ " "+idChorale+" "+titres+ " "+listIds+" "+ lieux+" "+dates);
                 if(!TextUtils.isEmpty(nomSpectacleStr)&&!TextUtils.isEmpty(nomChoraleStr)&&listIds!=null&&listIds.size()!=0){
 
                     Map<String,Object> spectacle = new HashMap<>();
@@ -129,32 +118,23 @@ public class CreateSpectacle extends AppCompatActivity implements DialogNewSSFra
             }
         });
 
-        addTitres.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "CS onClick: ");
-                Intent startModifySSActivity = new Intent(CreateSpectacle.this,ModifySourceSong.class);
-                startModifySSActivity.putExtra("origine","CreateSpectacle");
-                startActivityForResult(startModifySSActivity,REQUEST_CODE_B);
-            }
+        addTitres.setOnClickListener(view -> {
+            Log.d(TAG, "CS onClick: ");
+            Intent startModifySSActivity = new Intent(CreateSpectacle.this,ModifySourceSong.class);
+            startModifySSActivity.putExtra("origine","CreateSpectacle");
+            startActivityForResult(startModifySSActivity,REQUEST_CODE_B);
         });
 
-        addConcerts.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent startAddConcert= new Intent(CreateSpectacle.this,AddConcert.class);
-                startAddConcert.putExtra("origine","CreateSpectacle");
-                startActivityForResult(startAddConcert,REQUEST_CODE_D);
-            }
+        addConcerts.setOnClickListener(view -> {
+            Intent startAddConcert= new Intent(CreateSpectacle.this,AddConcert.class);
+            startAddConcert.putExtra("origine","CreateSpectacle");
+            startActivityForResult(startAddConcert,REQUEST_CODE_D);
         });
 
-        selectChorale.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent startModifySSActivity = new Intent(CreateSpectacle.this,ModifyChorale.class);
-                startModifySSActivity.putExtra("origine","CreateSpectacle");
-                startActivityForResult(startModifySSActivity,REQUEST_CODE_C);
-            }
+        selectChorale.setOnClickListener(view -> {
+            Intent startModifySSActivity = new Intent(CreateSpectacle.this,ModifyChorale.class);
+            startModifySSActivity.putExtra("origine","CreateSpectacle");
+            startActivityForResult(startModifySSActivity,REQUEST_CODE_C);
         });
 
     }

@@ -211,6 +211,13 @@ public class ModifySpectacle extends AppCompatActivity implements SpectacleAdapt
             args.putStringArrayList("oldTitres",listSpectacles.get(i).getIdTitresSongs());
 
             getTitresSong(listSpectacles.get(i).getIdTitresSongs());
+        }else if(origine.equals("CreateSaison")){
+            Log.d(TAG, "MSp onItemClick: C"+i);
+            Intent result = new Intent();
+            result.putExtra("nomselected",listSpectacles.get(i).getSpectacleName());
+            result.putExtra("idselected",listId.get(i));
+            setResult(RESULT_OK,result);
+            finish();
         }
     }
 

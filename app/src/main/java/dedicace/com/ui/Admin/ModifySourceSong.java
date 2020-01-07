@@ -55,11 +55,6 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
 
         origine = intent.getStringExtra("origine");
 
-        //todo voir l'utilité de new Intent ?
-        /*
-        if(origine.equals("ModifySSDetails")){
-            newIntent=true;
-        }*/
 
         fab = findViewById(R.id.fab_SS);
 
