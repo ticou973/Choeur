@@ -136,7 +136,7 @@ public class AdminHome extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent startModifySpectacleActivity = new Intent(AdminHome.this,ChooseChorale.class);
-                startModifySpectacleActivity.putExtra("origine","AdminHome");
+                startModifySpectacleActivity.putExtra("origine","AdminHomeModifSpectacle");
                 startActivity(startModifySpectacleActivity);
             }
         });
@@ -144,7 +144,8 @@ public class AdminHome extends AppCompatActivity {
         modifySaison.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent startModifySaisonActivity = new Intent(AdminHome.this,ModifySaison.class);
+                Intent startModifySaisonActivity = new Intent(AdminHome.this,ChooseChorale.class);
+                startModifySaisonActivity.putExtra("origine","AdminHomeModifSaison");
                 startActivity(startModifySaisonActivity);
             }
         });

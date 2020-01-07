@@ -2,23 +2,19 @@ package dedicace.com.ui.Admin;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -48,11 +44,9 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
 
     private static final String TAG ="coucou";
     private String idChorale;
-    private ArrayList<String> listIdSpectacles = new ArrayList<>();
-    private ArrayList<String> listIdSaisons = new ArrayList<>();
     private final static int REQUEST_CODE=100;
     private final static int REQUEST_CODEB=200;
-    private final static int REQUEST_CODEC=300;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,42 +110,38 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
             startActivityForResult(startActivityList,REQUEST_CODEB);
         });
 
-        modifSpectacle.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @Override
-            public void onClick(View view) {
-                newNomStr = newNom.getText().toString();
-                if(!TextUtils.isEmpty(newNomStr)||(newLieuxStr!=null&&newLieuxStr.size()!=0)||(newTitreStr!=null&&newTitreStr.size()!=0)){
-                    spectacle = new HashMap<>();
-                    spectacle.put("maj",Timestamp.now());
+        modifSpectacle.setOnClickListener(view -> {
+            newNomStr = newNom.getText().toString();
+            if(!TextUtils.isEmpty(newNomStr)||(newLieuxStr!=null&&newLieuxStr.size()!=0)||(newTitreStr!=null&&newTitreStr.size()!=0)){
+                spectacle = new HashMap<>();
+                spectacle.put("maj",Timestamp.now());
 
-                    if(!TextUtils.isEmpty(newNomStr)){
-                        Log.d(TAG, "MSpD onClick: putNom");
-                        spectacle.put("nom",newNomStr);
-                    }
-
-                    if(newLieuxStr!=null&&newLieuxStr.size()!=0){
-                        spectacle.put("concerts_lieux",newLieuxStr);
-
-                        ArrayList<Date> dates = new ArrayList<>();
-
-                        for (String dateLongStr:newdatesLongStr){
-                            Log.d(TAG, "MSpD onClick: newDates "+dateLongStr);
-                            dates.add(new Date(Long.parseLong(dateLongStr)));
-                        }
-                        Log.d(TAG, "MSpD onClick: putLieux et dates ");
-                        spectacle.put("concerts_dates",dates);
-                    }
-
-                    if(newTitreStr!=null&&newTitreStr.size()!=0){
-                        Log.d(TAG, "MSpD onClick: puttitre");
-                        spectacle.put("id_titres",newTitreStr);
-                    }
-
-                    insertSpectacleInDb();
+                if(!TextUtils.isEmpty(newNomStr)){
+                    Log.d(TAG, "MSpD onClick: putNom");
+                    spectacle.put("nom",newNomStr);
                 }
 
+                if(newLieuxStr!=null&&newLieuxStr.size()!=0){
+                    spectacle.put("concerts_lieux",newLieuxStr);
+
+                    ArrayList<Date> dates = new ArrayList<>();
+
+                    for (String dateLongStr:newdatesLongStr){
+                        Log.d(TAG, "MSpD onClick: newDates "+dateLongStr);
+                        dates.add(new Date(Long.parseLong(dateLongStr)));
+                    }
+                    Log.d(TAG, "MSpD onClick: putLieux et dates ");
+                    spectacle.put("concerts_dates",dates);
+                }
+
+                if(newTitreStr!=null&&newTitreStr.size()!=0){
+                    Log.d(TAG, "MSpD onClick: puttitre");
+                    spectacle.put("id_titres",newTitreStr);
+                }
+
+                insertSpectacleInDb();
             }
+
         });
     }
 
@@ -159,22 +149,14 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
         Log.d(TAG, "MSpD insertSpectacleInDb: ");
         db.collection("chorale").document(idChorale).collection("spectacles").document(oldIdSpectacleStr)
                 .update(spectacle)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "MSpD onSuccess: OK");
-                        modifyMajChorale();
-                        Intent startMSp = new Intent(ModifySpectaclesDetails.this,ChooseChorale.class);
-                        startMSp.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                        startActivity(startMSp);
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "MSpD onSuccess: OK");
+                    modifyMajChorale();
+                    Intent startMSp = new Intent(ModifySpectaclesDetails.this,ChooseChorale.class);
+                    startMSp.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(startMSp);
 
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d(TAG, "MSpD onSuccess: maj spectacle failed");
-            }
-        });
+                }).addOnFailureListener(e -> Log.d(TAG, "MSpD onSuccess: maj spectacle failed"));
     }
 
     private void clearLists() {
@@ -239,10 +221,6 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
                     newDates.setText(sb1.toString());
 
                 }
-            }else if(requestCode==REQUEST_CODEC){
-                if (data != null) {
-
-                }
             }
         }
     }
@@ -305,16 +283,6 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
         Log.d(TAG, "MSpD getIntentBundle: "+oldIdSpectacleStr+" "+oldNomStr+" "+oldTitreStr+" "+oldLieuxStr+" "+olddatesLongStr+" "+idChorale+" "+oldTitresNameStr);
     }
 
-    @Override
-    public void onDialogSuppPositiveClick() {
-        SuppSpectaclesInSaisons();
-        suppSpectacles();
-        modifyMajChorale();
-        Intent startModifySpectacleActivity = new Intent(ModifySpectaclesDetails.this,ChooseChorale.class);
-        startModifySpectacleActivity.putExtra("origine","AdminHome");
-        startModifySpectacleActivity.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(startModifySpectacleActivity);
-    }
 
     private void SuppSpectaclesInSaisons() {
         CollectionReference saisonRef = db.collection("chorale").document(idChorale).collection("saisons");
@@ -350,31 +318,18 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
                 Log.d(TAG, "MSpD SuppSpectaclesInSaisons: help pb sur doc saisons ");
             }
 
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d(TAG, "MSpD onFailure: pas de correspondance");
-            }
-        });
+        }).addOnFailureListener(e -> Log.d(TAG, "MSpD onFailure: pas de correspondance"));
     }
 
     private void suppSpectacles() {
         CollectionReference spectacleRef = db.collection("chorale").document(idChorale).collection("spectacles");
         spectacleRef.document(oldIdSpectacleStr)
                 .delete()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "MSpD OnSucess: suppSpectacles");
-                        Toast.makeText(ModifySpectaclesDetails.this, "Réussi spectacle", Toast.LENGTH_SHORT).show();
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "MSpD OnSucess: suppSpectacles");
+                    Toast.makeText(ModifySpectaclesDetails.this, "Réussi spectacle deleted", Toast.LENGTH_SHORT).show();
 
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d(TAG, "MSpD OnFailure: suppSpectacles");
-            }
-        });
+                }).addOnFailureListener(e -> Log.d(TAG, "MSpD OnFailure: suppSpectacles"));
     }
 
     private void modifyMajChorale() {
@@ -383,23 +338,24 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
 
         db.collection("chorale").document(idChorale)
                 .update(data)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "MSpD onSuccess: maj chorale done");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "MSSD onSuccess: maj chorale failed");
-                    }
-                });
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "MSpD onSuccess: maj chorale done"))
+                .addOnFailureListener(e -> Log.d(TAG, "MSpD onSFailure: maj chorale failed"));
+    }
+
+    @Override
+    public void onDialogSuppPositiveClick() {
+        SuppSpectaclesInSaisons();
+        suppSpectacles();
+        modifyMajChorale();
+        Intent startModifySpectacleActivity = new Intent(ModifySpectaclesDetails.this,ChooseChorale.class);
+        startModifySpectacleActivity.putExtra("origine","AdminHomeModifSpectacle");
+        startModifySpectacleActivity.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(startModifySpectacleActivity);
     }
 
     @Override
     public void onDialogSuppNegativeClick() {
-        Toast.makeText(this, "Vous avez souhaitez ne pas supprimer cette Source Song", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Vous avez souhaitez ne pas supprimer ce spectacle", Toast.LENGTH_SHORT).show();
         finish();
     }
 }

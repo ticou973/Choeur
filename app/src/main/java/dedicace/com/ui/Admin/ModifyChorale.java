@@ -133,7 +133,7 @@ public class ModifyChorale extends AppCompatActivity implements ChoraleAdapter.O
     public void onItemClick(int i) {
 
         if (origine.equals("AdminHome")||origine.equals("ModifyChoraleDetails")) {
-            Log.d(TAG, "MC onItemClick: "+i);
+            Log.d(TAG, "MC onItemClick: "+i+" "+origine);
             Intent startDetailsChoraleActivity = new Intent(ModifyChorale.this, ModifyChoraleDetails.class);
             Bundle args = new Bundle();
             args.putString("idChorale", listId.get(i));
@@ -142,7 +142,7 @@ public class ModifyChorale extends AppCompatActivity implements ChoraleAdapter.O
             startActivity(startDetailsChoraleActivity);
 
         }else if(origine.equals("CreateUser")||origine.equals("CreateSpectacle")||origine.equals("ChooseChorale")||origine.equals("CreateSaison")){
-            Log.d(TAG, "MC onItemClick: "+i);
+            Log.d(TAG, "MC onItemClick: 1"+i+ " "+origine);
             Intent result = new Intent();
             result.putExtra("idselected",listId.get(i));
             result.putExtra("nomChorale",listChorales.get(i));

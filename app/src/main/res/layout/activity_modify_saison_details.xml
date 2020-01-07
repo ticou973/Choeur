@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primaryColor"
+    tools:context=".ui.Admin.ModifySaisonDetails">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:id="@+id/btn_modif_saison_modif_nom_spectacle"
+            android:layout_width="91dp"
+            android:layout_height="45dp"
+            android:layout_marginTop="50dp"
+            android:text="Modifier"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="@+id/tv_modif_saison_new_nom_spectacles"
+            app:layout_constraintTop_toBottomOf="@+id/tv_modif_saison_new_nom_spectacles" />
+
+        <Button
+            android:id="@+id/btn_supp_saison"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="28dp"
+            android:background="@color/secondaryColor"
+            android:fontFamily="@font/roboto"
+            android:padding="10dp"
+            android:text="@string/supprimer"
+            android:textColor="@android:color/black"
+            android:textSize="24sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/btn_modify_saison"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/btn_modify_saison"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="24dp"
+            android:background="@color/secondaryColor"
+            android:fontFamily="@font/roboto"
+            android:padding="10dp"
+            android:text="Modifier"
+            android:textColor="@android:color/black"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/modifSpectacle" />
+
+        <EditText
+            android:id="@+id/et_modif_saison_new_nom"
+            android:layout_width="112dp"
+            android:layout_height="37dp"
+            android:ems="10"
+            android:fontFamily="@font/roboto"
+            android:hint="new name"
+            android:inputType="textPersonName"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/tv_modif_saison_old_nom"
+            app:layout_constraintEnd_toEndOf="@+id/newModifSaisonText"
+            app:layout_constraintStart_toStartOf="@+id/newModifSaisonText" />
+
+        <TextView
+            android:id="@+id/modifSpectacle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/roboto"
+            android:text="Modification de Saison"
+            android:textColor="@color/secondaryColor"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/oldModifSaisonText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="124dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/roboto"
+            android:text="Old"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_supp_saison" />
+
+        <TextView
+            android:id="@+id/newModifSaisonText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="88dp"
+            android:fontFamily="@font/roboto"
+            android:text="New"
+            android:textAlignment="center"
+            android:textAllCaps="false"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_modify_saison" />
+
+        <TextView
+            android:id="@+id/nomSaisonText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="40dp"
+            android:fontFamily="@font/roboto"
+            android:text="Nom"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/oldModifSaisonText" />
+
+        <TextView
+            android:id="@+id/nomSpectaclesModifSaisonsText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="40dp"
+            android:text="Spectacles"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/nomSaisonText" />
+
+        <TextView
+            android:id="@+id/tv_modif_saison_old_nom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto"
+            android:text="old name"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/nomSaisonText"
+            app:layout_constraintEnd_toEndOf="@+id/oldModifSaisonText"
+            app:layout_constraintStart_toStartOf="@+id/oldModifSaisonText" />
+
+        <TextView
+            android:id="@+id/tv_modif_saison_old_noms_spectacles"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/roboto"
+            android:text="oldSpectacles"
+            android:textColor="@android:color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/nomSpectaclesModifSaisonsText" />
+
+        <TextView
+            android:id="@+id/tv_modif_saison_new_nom_spectacles"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto"
+            android:text="New pectacles"
+            android:textColor="@android:color/black"
+            app:layout_constraintBaseline_toBaselineOf="@+id/tv_modif_saison_old_noms_spectacles"
+            app:layout_constraintStart_toStartOf="@+id/et_modif_saison_new_nom" />
+
+
+    </android.support.constraint.ConstraintLayout>
+
+</ScrollView>

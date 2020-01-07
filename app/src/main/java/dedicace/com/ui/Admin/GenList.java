@@ -40,7 +40,8 @@ public class GenList extends AppCompatActivity {
     private static final String TAG ="coucou";
     private final static int REQUEST_CODE=100;
     private final static int REQUEST_CODEB=200;
-    private String titreSong,idSong, origine;
+    private final static int REQUEST_CODEC=300;
+    private String titreSong,idSong, origine, idChorale, nomChoraleStr,idSpectacle,nomSpectacle;
     private int position;
 
 
@@ -90,7 +91,7 @@ public class GenList extends AppCompatActivity {
         fab.setOnClickListener(view -> {
             Log.d(TAG, "GL onCreate: On Click fab");
             Intent result = new Intent();
-            if(origine.equals("modifTitres")) {
+            if(origine.equals("modifTitres")||origine.equals("modifNomsSaisons")) {
                 result.putStringArrayListExtra("listGenModif", listGen);
             }else{
                 result.putStringArrayListExtra("listGenModif", listGenTemp);
@@ -109,13 +110,13 @@ public class GenList extends AppCompatActivity {
         Log.d(TAG, "GL getBundleIntent: ");
         if(intent!=null) {
             origine =intent.getStringExtra("origine");
-            if (intent.getStringExtra("origine").equals("modifTitres")) {
+            if (origine.equals("modifTitres")) {
                 listGen.addAll(intent.getStringArrayListExtra("titres"));
                 listGenComp.addAll(intent.getStringArrayListExtra("oldTitreNames"));
                 listGenTemp.addAll(intent.getStringArrayListExtra("oldTitreNames"));
                 Log.d(TAG, "GL Titres getBundleIntent: "+listGenComp+" "+listGen+" "+listGenTemp);
 
-            } else if (intent.getStringExtra("origine").equals("modifConcerts")) {
+            } else if (origine.equals("modifConcerts")) {
                 listGenComp.addAll(intent.getStringArrayListExtra("lieux"));
                 listGenTemp.addAll(intent.getStringArrayListExtra("datesLong"));
                 Log.d(TAG, "GL concerts getBundleIntent: 1 "+listGenComp+" "+listGen+" "+listGenTemp);
@@ -125,6 +126,15 @@ public class GenList extends AppCompatActivity {
                 }
 
                 Log.d(TAG, "GL concerts getBundleIntent: "+listGenComp+" "+listGen+" "+listGenTemp);
+            } else if (origine.equals("modifNomsSaisons")){
+                listGen.addAll(intent.getStringArrayListExtra("nomsSpectacles"));
+                listGenComp.addAll(intent.getStringArrayListExtra("oldSpectaclesNames"));
+                listGenTemp.addAll(intent.getStringArrayListExtra("oldSpectaclesNames"));
+
+                Bundle args;
+                args = intent.getBundleExtra("bundleChorale");
+                idChorale= args.getString("idChorale");
+                nomChoraleStr =args.getString("nomChoraleStr");
             }
         }
     }
@@ -163,31 +173,33 @@ public class GenList extends AppCompatActivity {
             genName = itemView.findViewById(R.id.genName);
             genSubName = itemView.findViewById(R.id.genSubName);
             cvGen = itemView.findViewById(R.id.cv_list_gen);
-            genName.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    position = getAdapterPosition();
-                    Log.d(TAG, "GL onLongClick: "+position);
-                    if(origine.equals("modifTitres")) {
-                        Intent startModifySSActivity = new Intent(GenList.this, ModifySourceSong.class);
-                        startModifySSActivity.putExtra("origine", "GenList");
-                        startActivityForResult(startModifySSActivity, REQUEST_CODE);
-                    }else if(origine.equals("modifConcerts")) {
-                        Log.d(TAG, "GL onLongClick: modifconcerts");
-                        Intent startAddConcert = new Intent(GenList.this, AddConcert.class);
-                        startAddConcert.putExtra("origine", "GenList");
-                        startActivityForResult(startAddConcert,REQUEST_CODEB);
-                    }
-                    return false;
+            genName.setOnLongClickListener(view -> {
+                position = getAdapterPosition();
+                Log.d(TAG, "GL onLongClick: "+position);
+                if(origine.equals("modifTitres")) {
+                    Intent startModifySSActivity = new Intent(GenList.this, ModifySourceSong.class);
+                    startModifySSActivity.putExtra("origine", "GenList");
+                    startActivityForResult(startModifySSActivity, REQUEST_CODE);
+                }else if(origine.equals("modifConcerts")) {
+                    Log.d(TAG, "GL onLongClick: modifconcerts");
+                    Intent startAddConcert = new Intent(GenList.this, AddConcert.class);
+                    startAddConcert.putExtra("origine", "GenList");
+                    startActivityForResult(startAddConcert,REQUEST_CODEB);
+                }else if(origine.equals("modifNomsSaisons")){
+                    Log.d(TAG, "GL onLongClick: modifNomsSpectacles");
+                    Intent startModifSpectacle = new Intent(GenList.this, ModifySpectacle.class);
+                    startModifSpectacle.putExtra("origine", "GenList");
+                    Bundle args = new Bundle();
+                    args.putString("idChorale",idChorale);
+                    args.putString("nomChorale",nomChoraleStr);
+                    args.putString("origine","GenList");
+                    startModifSpectacle.putExtra("bundleChorale",args);
+                    startActivityForResult(startModifSpectacle,REQUEST_CODEC);
                 }
+                return false;
             });
 
-            genName.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Log.d(TAG, "GL onClick: pour modif");
-                }
-            });
+            genName.setOnClickListener(view -> Log.d(TAG, "GL onClick: pour modif"));
         }
     }
 
@@ -203,13 +215,14 @@ public class GenList extends AppCompatActivity {
 
                     listGenComp.add(position,titreSong);
                     listGen.add(position,idSong);
+                    listGenTemp.add(position,titreSong);
 
                     genAdapter.notifyItemInserted(position);
                     Log.d(TAG, "GL onActivityResult: request_codeB " + titreSong+" "+idSong+" "+listGenComp+" "+ listGen);
                 }
             } else if (requestCode==REQUEST_CODEB) {
                 if(data!= null){
-                    Log.d(TAG, "GL onActivityResult: ");
+                    Log.d(TAG, "GL onActivityResult: 1");
 
                         lieux = data.getStringArrayListExtra("lieuxconcerts");
                         datesStr = data.getStringArrayListExtra("datesconcerts");
@@ -227,6 +240,23 @@ public class GenList extends AppCompatActivity {
                     }
 
                     Log.d(TAG, "GL onActivityResult: request_codeB " + titreSong+" "+idSong+" "+listGenComp+" "+ listGen);
+                }
+            }else if (requestCode==REQUEST_CODEC) {
+                if (data != null) {
+                    Log.d(TAG, "GL onActivityResult: 2 ");
+
+                    idSpectacle=data.getStringExtra("idselected");
+                    nomSpectacle=data.getStringExtra("nomselected");
+
+                    Log.d(TAG, "GL onActivityResult: 2" + idSpectacle + " " + nomSpectacle);
+
+                    listGenComp.add(position,nomSpectacle);
+                    listGen.add(position,idSpectacle);
+                    listGenTemp.add(position,nomSpectacle);
+
+                    genAdapter.notifyItemInserted(position);
+
+                    Log.d(TAG, "GL onActivityResult: request_codeC " +listGenComp + " " + listGen);
                 }
             }
         }

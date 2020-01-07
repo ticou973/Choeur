@@ -13,36 +13,40 @@ import android.widget.TextView;
 import java.util.List;
 
 import dedicace.com.R;
-import dedicace.com.data.database.Spectacle;
+import dedicace.com.data.database.Saison;
 
-class SpectacleAdapter extends RecyclerView.Adapter<SpectacleAdapter.SpectacleViewHolder>{
+public class SaisonAdapter extends RecyclerView.Adapter<SaisonAdapter.SaisonViewHolder> {
 
-    private List<Spectacle> listSpectacles;
+    private List<Saison> listSaisons;
     private OnItemListener mListener;
     private static final String TAG="coucou";
 
-    public SpectacleAdapter(List<Spectacle> listSpectacles) {
-        this.listSpectacles = listSpectacles;
+    public SaisonAdapter(List<Saison> listSaisons) {
+        this.listSaisons = listSaisons;
     }
 
     public interface OnItemListener {
         void onItemClick(int i);
     }
 
+
     @NonNull
     @Override
-    public SpectacleViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_spectacle_cloud,viewGroup,false);
-        return new SpectacleViewHolder(view);
+    public SaisonViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_saison_cloud,viewGroup,false);
+        return new SaisonViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull SpectacleViewHolder spectacleViewHolder, int i) {
-        spectacleViewHolder.nom.setText(listSpectacles.get(i).getSpectacleName());
+    public void onBindViewHolder(@NonNull SaisonViewHolder saisonViewHolder, int i) {
+        saisonViewHolder.nom.setText(listSaisons.get(i).getSaisonName());
     }
 
     @Override
-    public int getItemCount() { return listSpectacles.size(); }
+    public int getItemCount() {
+        return listSaisons.size();
+    }
 
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
@@ -50,8 +54,8 @@ class SpectacleAdapter extends RecyclerView.Adapter<SpectacleAdapter.SpectacleVi
 
         Context context = recyclerView.getContext();
 
-        if (context instanceof SpectacleAdapter.OnItemListener) {
-            mListener = (SpectacleAdapter.OnItemListener) context;
+        if (context instanceof SaisonAdapter.OnItemListener) {
+            mListener = (SaisonAdapter.OnItemListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -64,28 +68,27 @@ class SpectacleAdapter extends RecyclerView.Adapter<SpectacleAdapter.SpectacleVi
         mListener = null;
     }
 
-
-    private void selectSpectacle(int i) {
-        if(mListener!=null){
-            mListener.onItemClick(i);
-        }
-    }
-
-    public class SpectacleViewHolder extends RecyclerView.ViewHolder {
+    public class SaisonViewHolder extends RecyclerView.ViewHolder {
         TextView nom;
         CardView cv;
-        public SpectacleViewHolder(@NonNull View itemView) {
+        public SaisonViewHolder(@NonNull View itemView) {
             super(itemView);
-            nom = itemView.findViewById(R.id.spectacleName);
-            cv=itemView.findViewById(R.id.cv_list_spectacle);
+
+            nom = itemView.findViewById(R.id.saisonName);
+            cv=itemView.findViewById(R.id.cv_list_saisons);
 
             cv.setOnClickListener(view -> {
                 Log.d(TAG, "SpA onClick: "+getAdapterPosition());
                 int i = getAdapterPosition();
-                selectSpectacle(i);
+                selectSaison(i);
             });
+
+        }
+
+        private void selectSaison(int i) {
+            if(mListener!=null){
+                mListener.onItemClick(i);
+            }
         }
     }
-
-
 }

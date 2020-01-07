@@ -11,16 +11,24 @@ import dedicace.com.R;
 public class ChooseChorale extends AppCompatActivity {
 
     private static final int REQUEST_CODE_A = 100;
-    private String idChorale, nomChoraleStr;
+    private String idChorale, nomChoraleStr,origine;
+    private Intent startModify;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_chorale);
 
+        getIntentOrigine();
+
         Intent startModifyChorale = new Intent(ChooseChorale.this,ModifyChorale.class);
         startModifyChorale.putExtra("origine","ChooseChorale");
         startActivityForResult(startModifyChorale,REQUEST_CODE_A);
+    }
+
+    private void getIntentOrigine() {
+        Intent intent = getIntent();
+        origine = intent.getStringExtra("origine");
     }
 
     @Override
@@ -33,13 +41,17 @@ public class ChooseChorale extends AppCompatActivity {
                     idChorale = data.getStringExtra("idselected");
                     nomChoraleStr=data.getStringExtra("nomChorale");
 
-                    Intent startModifySpectacle = new Intent(ChooseChorale.this,ModifySpectacle.class);
+                    if(origine.equals("AdminHomeModifSpectacle")){
+                        startModify = new Intent(ChooseChorale.this,ModifySpectacle.class);
+                    }else if(origine.equals("AdminHomeModifSaison")){
+                        startModify = new Intent(ChooseChorale.this,ModifySaison.class);
+                    }
                     Bundle args = new Bundle();
                     args.putString("idChorale",idChorale);
                     args.putString("nomChorale",nomChoraleStr);
                     args.putString("origine","ChooseChorale");
-                    startModifySpectacle.putExtra("bundleChorale",args);
-                    startActivity(startModifySpectacle);
+                    startModify.putExtra("bundleChorale",args);
+                    startActivity(startModify);
                 }
             }
         }
