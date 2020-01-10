@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -39,7 +38,6 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,13 +46,10 @@ import dedicace.com.R;
 
 public class CreateSong extends AppCompatActivity implements DialogNewSSFragment.DialogNewSSListener {
     private static final int REQUEST_CODE_B = 200;
-    private Button createSongInDb,selectMp3, selectTitre;
     private TextView fileMp3,titre;
     private RadioGroup rgb;
-    private RadioButton rbTutti,rbBass,rbTenor,rbAlto,rbSoprano;
+    private RadioButton rbTutti;
     private static final String TAG ="coucou";
-    private static List<String> listFilesMp3 = new ArrayList<>();
-    private List<String> listPath = new ArrayList<>();
     private File[] listFiles;
     private String[] listMp3;
     private int mp3Selected;
@@ -65,10 +60,9 @@ public class CreateSong extends AppCompatActivity implements DialogNewSSFragment
     private String pupitreSong;
     private String mp3Song;
     private Uri downloadUrl;
-    private Uri fileSelected;
     private String idChorale;
     private String idSourceSong;
-    private List<String> listIds = new ArrayList<>();
+
 
 
     private SharedPreferences sharedPreferences;
@@ -81,17 +75,13 @@ public class CreateSong extends AppCompatActivity implements DialogNewSSFragment
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_song);
 
-        createSongInDb = findViewById(R.id.btn_create_song_db);
-        selectMp3 = findViewById(R.id.btn_select_mp3);
+        Button createSongInDb = findViewById(R.id.btn_create_song_db);
+        Button selectMp3 = findViewById(R.id.btn_select_mp3);
         titre = findViewById(R.id.tv_titre_song);
         fileMp3 = findViewById(R.id.tv_mp3);
-        selectTitre=findViewById(R.id.btn_select_titre);
+        Button selectTitre = findViewById(R.id.btn_select_titre);
         rgb=findViewById(R.id.rgb);
         rbTutti=findViewById(R.id.rb_tutti_cs);
-        rbBass=findViewById(R.id.rb_bass_cs);
-        rbTenor=findViewById(R.id.rb_tenor_cs);
-        rbAlto=findViewById(R.id.rb_alto_cs);
-        rbSoprano=findViewById(R.id.rb_soprano_cs);
         rbTutti.setChecked(true);
 
         ActionBar actionBar = this.getSupportActionBar();
@@ -102,10 +92,6 @@ public class CreateSong extends AppCompatActivity implements DialogNewSSFragment
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
         db = FirebaseFirestore.getInstance();
-
-        sharedPreferences =PreferenceManager.getDefaultSharedPreferences(this);
-        idChorale=sharedPreferences.getString("idchorale"," ");
-        Log.d(TAG, "onCreate: idChorale "+ idChorale );
 
         createSongInDb.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -208,7 +194,7 @@ public class CreateSong extends AppCompatActivity implements DialogNewSSFragment
     }
 
     private void insertMp3InCloudStorage() {
-        fileSelected = Uri.fromFile(new File(pathSelected));
+        Uri fileSelected = Uri.fromFile(new File(pathSelected));
         StorageReference mp3Ref = mStorageRef.child("songs/fichier_mp3/"+fileNameSelected);
 
         UploadTask uploadTask = mp3Ref.putFile(fileSelected);
@@ -381,13 +367,7 @@ public class CreateSong extends AppCompatActivity implements DialogNewSSFragment
         if(file.exists()){
             listFiles = file.listFiles();
 
-            for (File mp3:listFiles) {
-                Log.d(TAG, "CS selectMp3: "+mp3.getName());
-                listFilesMp3.add(mp3.getName());
-                listPath.add(mp3.getAbsolutePath());
-            }
-
-            Log.d(TAG, "CSS selectMp3: "+listFilesMp3.size()+" "+listFiles.length);
+            Log.d(TAG, "CSS selectMp3: "+listFiles.length);
 
             listMp3 = new String[listFiles.length];
 

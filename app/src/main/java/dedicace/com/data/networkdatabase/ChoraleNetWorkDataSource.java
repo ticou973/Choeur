@@ -354,15 +354,7 @@ public class ChoraleNetWorkDataSource {
                                                         Log.d("coucou", "fetchSongs: entier "+entier);
                                                     }
                                                     Log.d(LOG_TAG, "NDS onComplete: avant post "+songs.size()+"  "+ songs);
-                                                    //todo à vérifier surement inutile maintenant
-                                                    /*if(idSS.equals(listIdSS.get(listIdSS.size()-1))) {
-                                                        Log.d(LOG_TAG, "NDS onComplete: condition dernier idss  remplies "+ idSS);
-                                                        Message message = Message.obtain();
-                                                        message.obj = "OK";
-                                                        handler.sendMessage(message);
-                                                    }else{
-                                                        Log.d(LOG_TAG, "NDS onComplete: condition dernier idss pas remplies "+idSS);
-                                                    }*/
+
                                                     entier.getAndIncrement();
 
                                                     if(entier.get()==listIdSS.size()) {

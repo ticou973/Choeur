@@ -1,7 +1,6 @@
 package dedicace.com.ui.Admin;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -39,8 +38,6 @@ import dedicace.com.R;
 
 //todo faire un process complet pour envoi d'email et vérification
 public class CreateUser extends AppCompatActivity implements DialogNewSSFragment.DialogNewSSListener{
-
-    private SharedPreferences sharedPreferences;
 
     //Firebase
     private StorageReference mStorageRef;

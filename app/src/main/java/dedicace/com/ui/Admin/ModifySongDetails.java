@@ -10,23 +10,17 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -45,7 +39,6 @@ import dedicace.com.data.database.Song;
 public class ModifySongDetails extends AppCompatActivity implements DialogSuppFragment.DialogSuppListener {
     private TextView oldTitre, oldPupitre, oldSource, oldMp3, newMp3;
     private EditText newPupitre, newSource;
-    private Button suppSong, modifySong, selectMp3;
 
     private String[] listMp3s;
     private static List<String> listFilesMp3 = new ArrayList<>();
@@ -82,9 +75,9 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
         newMp3= findViewById(R.id.tv_mp3_new_modify);
         newPupitre= findViewById(R.id.et_pupitre_new);
         newSource= findViewById(R.id.et_source_new);
-        suppSong= findViewById(R.id.btn_supp_song);
-        modifySong= findViewById(R.id.btn_modify_song);
-        selectMp3= findViewById(R.id.btn_select_new_mp3);
+        Button suppSong = findViewById(R.id.btn_supp_song);
+        Button modifySong = findViewById(R.id.btn_modify_song);
+        Button selectMp3 = findViewById(R.id.btn_select_new_mp3);
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
         db = FirebaseFirestore.getInstance();
@@ -99,43 +92,32 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
 
         getLists();
 
-        suppSong.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DialogFragment dialogFragment = new DialogSuppFragment();
-                dialogFragment.show(getSupportFragmentManager(),TAG);
-            }
+        suppSong.setOnClickListener(view -> {
+            DialogFragment dialogFragment = new DialogSuppFragment();
+            dialogFragment.show(getSupportFragmentManager(),TAG);
         });
 
         //todo à remettre lorsque modify sera possible ou pas?
-        modifySong.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        modifySong.setOnClickListener(view -> {
 
-                Toast.makeText(ModifySongDetails.this, "Option A venir...", Toast.LENGTH_SHORT).show();
-                //obligatoire
+            Toast.makeText(ModifySongDetails.this, "Option A venir...", Toast.LENGTH_SHORT).show();
+            //obligatoire
 
-               /* newPupitreStr = newPupitre.getText().toString();
-                newMp3Str = newMp3.getText().toString();
-                newSourceStr = newSource.getText().toString();
+           /* newPupitreStr = newPupitre.getText().toString();
+            newMp3Str = newMp3.getText().toString();
+            newSourceStr = newSource.getText().toString();
 
-                if(!newPupitreStr.equals("")||!newSourceStr.equals("")||!newMp3Str.equals(getString(R.string.select_mp3))){
-                    Log.d(TAG, "MSD onClick: conditions passées "+ " "+newPupitreStr+" "+newSourceStr+" "+newMp3Str);
-                    insertSonginDb();
+            if(!newPupitreStr.equals("")||!newSourceStr.equals("")||!newMp3Str.equals(getString(R.string.select_mp3))){
+                Log.d(TAG, "MSD onClick: conditions passées "+ " "+newPupitreStr+" "+newSourceStr+" "+newMp3Str);
+                insertSonginDb();
 
-                }else{
-                    Toast.makeText(ModifySongDetails.this, "Il manque des éléments pour insérer", Toast.LENGTH_SHORT).show();
-                }*/
-            }
+            }else{
+                Toast.makeText(ModifySongDetails.this, "Il manque des éléments pour insérer", Toast.LENGTH_SHORT).show();
+            }*/
         });
 
 
-        selectMp3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                selectMp3();
-            }
-        });
+        selectMp3.setOnClickListener(view -> selectMp3());
 
     }
 
@@ -176,45 +158,28 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
 
         UploadTask uploadTask = mp3Ref.putFile(fileSelected);
 
-        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Log.d(TAG, "MSD onSuccess: bravo c'est uploadé");
-
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle unsuccessful uploads
-                        // ...
-                        Log.d(TAG, "MSD onFailure: dommage c'est raté");
-                    }
+        uploadTask.addOnSuccessListener(taskSnapshot -> Log.d(TAG, "MSD onSuccess: bravo c'est uploadé"))
+                .addOnFailureListener(exception -> {
+                    Log.d(TAG, "MSD onFailure: dommage c'est raté");
                 });
 
 
-        uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-            @Override
-            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                if (!task.isSuccessful()) {
-                    throw task.getException();
-                }
-                // Continue with the task to get the download URL
-                return mp3Ref.getDownloadUrl();
+        uploadTask.continueWithTask(task -> {
+            if (!task.isSuccessful()) {
+                throw task.getException();
             }
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
-                if (task.isSuccessful()) {
-                    downloadUrl = task.getResult();
-                    song.put("songPath",downloadUrl.toString());
-                    insertCloud();
-                    Log.d(TAG, "CSS onComplete: "+downloadUrl);
-                } else {
-                    // Handle failures
-                    // ...
-                    Log.d(TAG, "CSS onComplete: Il y a eu un pb");
-                }
+            // Continue with the task to get the download URL
+            return mp3Ref.getDownloadUrl();
+        }).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                downloadUrl = task.getResult();
+                song.put("songPath",downloadUrl.toString());
+                insertCloud();
+                Log.d(TAG, "CSS onComplete: "+downloadUrl);
+            } else {
+                // Handle failures
+                // ...
+                Log.d(TAG, "CSS onComplete: Il y a eu un pb");
             }
         });
 
@@ -225,27 +190,19 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
         Log.d(TAG, "MSD insertCloud: "+song);
         db.collection("songs").document(idSong)
                 .update(song)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "MSD onSuccess: maj song done");
-                        File file = new File(pathSelected);
-                        if(file.delete()){
-                            Log.d(TAG, "MSD onSuccess: le fichier est supprimé du local");
-                        }else{
-                            Log.d(TAG, "MSD onSuccess: problème de suppression en local du fichier");
-                        }
-                        modifyMajChorale();
-                        modifyMajSourceSong();
-                        finish();
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "MSD onSuccess: maj song done");
+                    File file = new File(pathSelected);
+                    if(file.delete()){
+                        Log.d(TAG, "MSD onSuccess: le fichier est supprimé du local");
+                    }else{
+                        Log.d(TAG, "MSD onSuccess: problème de suppression en local du fichier");
                     }
+                    modifyMajChorale();
+                    modifyMajSourceSong();
+                    finish();
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "MSSD onSuccess: maj chorale failed");
-                    }
-                });
+                .addOnFailureListener(e -> Log.d(TAG, "MSSD onSuccess: maj chorale failed"));
 
     }
 
@@ -315,12 +272,7 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
     private void suppSong() {
         db.collection("songs").document(idSong)
                 .delete()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "MSD onSuccess: réussi Song supprimée");
-                    }
-                })
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "MSD onSuccess: réussi Song supprimée"))
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
@@ -337,41 +289,28 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
         CollectionReference sourceSongRef=db.collection("sourceSongs");
         Query query = sourceSongRef.whereEqualTo("titre",oldTitreStr);
 
-        query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if(task.isSuccessful()){
+        query.get().addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
 
-                    List<DocumentSnapshot> documents =  task.getResult().getDocuments();
+                List<DocumentSnapshot> documents =  task.getResult().getDocuments();
 
-                    if(documents.size()==1){
-                        idSourceSong=documents.get(0).getId();
-                        Log.d(TAG, "MSD onComplete: il y a 1 SS correspondante "+idSourceSong);
+                if(documents.size()==1){
+                    idSourceSong=documents.get(0).getId();
+                    Log.d(TAG, "MSD onComplete: il y a 1 SS correspondante "+idSourceSong);
 
-                        Map<String,Object> data = new HashMap<>();
-                        data.put("maj",Timestamp.now());
-                        db.collection("sourceSongs").document(idSourceSong)
-                                .update(data)
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Log.d(TAG, "MSD onSuccess: maj SS done");
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Log.d(TAG, "CS onFailure: maj SS failed");
-                                    }
-                                });
-                    }else{
-                        Log.d(TAG, "MSD onComplete: il n'y a pas de SS correspondante");
-                    }
-                    Log.d(TAG, "MSD onDialogPositiveClick: "+query);
-
+                    Map<String,Object> data = new HashMap<>();
+                    data.put("maj",Timestamp.now());
+                    db.collection("sourceSongs").document(idSourceSong)
+                            .update(data)
+                            .addOnSuccessListener(aVoid -> Log.d(TAG, "MSD onSuccess: maj SS done"))
+                            .addOnFailureListener(e -> Log.d(TAG, "CS onFailure: maj SS failed"));
                 }else{
-                    Log.d(TAG, "MSD onComplete: pb dans la query");
+                    Log.d(TAG, "MSD onComplete: il n'y a pas de SS correspondante");
                 }
+                Log.d(TAG, "MSD onDialogPositiveClick: "+query);
+
+            }else{
+                Log.d(TAG, "MSD onComplete: pb dans la query");
             }
         });
 
@@ -383,18 +322,8 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
 
         db.collection("chorale").document(idChorale)
                 .update(data)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "MSD onSuccess: maj chorale done");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "MSD onSuccess: maj chorale failed");
-                    }
-                });
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "MSD onSuccess: maj chorale done"))
+                .addOnFailureListener(e -> Log.d(TAG, "MSD onSuccess: maj chorale failed"));
 
     }
 

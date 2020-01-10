@@ -2,11 +2,9 @@ package dedicace.com.ui.Admin;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -15,19 +13,13 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageException;
@@ -35,21 +27,18 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import dedicace.com.R;
 
 public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFragment.DialogNewSSListener, OnFailureListener {
 
-    private Button createSSInDb,selectBackground;
     private EditText titre, groupe, duration;
     private TextView background;
     private static final String TAG ="coucou";
-    private static List<String> listFilesImage = new ArrayList<>();
-    private List<String> listPath = new ArrayList<>();
     private File[] listFiles;
     private String[] listImages;
     private int imageSelected;
@@ -60,12 +49,7 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
     private String groupeSS;
     private String backgroundSS;
     private Uri downloadUrl;
-    private Uri fileSelected;
-    private String idChorale;
-
     private int durationSS;
-
-    private SharedPreferences sharedPreferences;
 
     private StorageReference mStorageRef;
     private FirebaseFirestore db;
@@ -75,8 +59,8 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_source_song);
 
-        createSSInDb = findViewById(R.id.btn_create_ss_db);
-        selectBackground = findViewById(R.id.btn_select_background);
+        Button createSSInDb = findViewById(R.id.btn_create_ss_db);
+        Button selectBackground = findViewById(R.id.btn_select_background);
         titre = findViewById(R.id.et_titre_ss);
         groupe = findViewById(R.id.et_groupe_ss);
         duration = findViewById(R.id.et_duration_ss);
@@ -91,42 +75,35 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
         mStorageRef = FirebaseStorage.getInstance().getReference();
         db = FirebaseFirestore.getInstance();
 
-        sharedPreferences =PreferenceManager.getDefaultSharedPreferences(this);
-        idChorale=sharedPreferences.getString("idchorale"," ");
-        Log.d(TAG, "onCreate: idChorale "+ idChorale );
 
 
-        createSSInDb.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //obligatoire
-                titreSS = titre.getText().toString();
-                groupeSS = groupe.getText().toString();
-                backgroundSS = background.getText().toString();
+        createSSInDb.setOnClickListener(view -> {
+            //obligatoire
+            titreSS = titre.getText().toString();
+            groupeSS = groupe.getText().toString();
+            backgroundSS = background.getText().toString();
 
-                if(duration.getText().toString().equals("")){
-                    durationSS=0;
-                }else{
-                    durationSS = Integer.parseInt(duration.getText().toString());
-                }
+            if(duration.getText().toString().equals("")){
+                durationSS=0;
+            }else{
+                durationSS = Integer.parseInt(duration.getText().toString());
+            }
 
-                if(!titreSS.equals("")&&!groupeSS.equals("")&&!backgroundSS.equals("Selection background...")&&durationSS!=0){
-                    insertBackgroundInCloudStorage();
+            if(!titreSS.equals("")&&!groupeSS.equals("")&&!backgroundSS.equals("Selection background...")&&durationSS!=0){
+                insertBackgroundInCloudStorage();
 
-                }else{
-                    Toast.makeText(CreateSourceSong.this, "Il manque des éléments", Toast.LENGTH_SHORT).show();
-                }
+            }else{
+                Toast.makeText(CreateSourceSong.this, "Il manque des éléments", Toast.LENGTH_SHORT).show();
             }
         });
 
-        selectBackground.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getLists();
-                selectBackground();
-            }
+        selectBackground.setOnClickListener(view -> {
+            getLists();
+            selectBackground();
         });
     }
+
+
 
     //todo compléter le storage utilities pour chercher les lists sur le téléphone ou cloud
      private void getLists() {
@@ -143,16 +120,11 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
         if(file.exists()) {
             listFiles = file.listFiles();
 
-            Log.d(TAG, "CSS getLists: " + listFiles);
+            Log.d(TAG, "CSS getLists: " + Arrays.toString(listFiles));
 
             if (listFiles != null && listFiles.length != 0) {
-                for (File image : listFiles) {
-                    Log.d(TAG, "CSS selectBackground: " + image.getName());
-                    listFilesImage.add(image.getName());
-                    listPath.add(image.getAbsolutePath());
-                }
 
-                Log.d(TAG, "CSS selectBackground: " + listFilesImage.size() + " " + listFiles.length);
+                Log.d(TAG, "CSS selectBackground: " + " " + listFiles.length);
 
                 listImages = new String[listFiles.length];
 
@@ -166,57 +138,33 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
             }
         }
 
-    //    Log.d(TAG, "CSS : selectBackground: "+ listImages.length);
     }
 
     private void insertBackgroundInCloudStorage() {
 
-        fileSelected = Uri.fromFile(new File(pathSelected));
+        Uri fileSelected = Uri.fromFile(new File(pathSelected));
         StorageReference imageRef = mStorageRef.child("songs/photos_background/"+fileNameSelected);
 
         UploadTask uploadTask = imageRef.putFile(fileSelected);
 
-        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Log.d(TAG, "CSS onSuccess: bravo c'est uploadé");
-
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle unsuccessful uploads
-                        // ...
-                        Log.d(TAG, "CSS onFailure: dommage c'est raté");
-                    }
-                });
+        uploadTask.addOnSuccessListener(taskSnapshot -> Log.d(TAG, "CSS onSuccess: bravo c'est uploadé"))
+                .addOnFailureListener(exception -> Log.d(TAG, "CSS onFailure: dommage c'est raté"));
 
 
-        uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-            @Override
-            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                if (!task.isSuccessful()) {
-                    throw task.getException();
-                }
-
-
-                // Continue with the task to get the download URL
-                return imageRef.getDownloadUrl();
+        uploadTask.continueWithTask(task -> {
+            if (!task.isSuccessful()) {
+                throw Objects.requireNonNull(task.getException());
             }
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
-                if (task.isSuccessful()) {
-                    downloadUrl = task.getResult();
-                    insertSSinDb();
-                    Log.d(TAG, "CSS onComplete: "+downloadUrl);
-                } else {
-                    // Handle failures
 
-                    // ...
-                    Log.d(TAG, "CSS onComplete: Il y a eu un pb "+task.getException().getMessage());
-                }
+            // Continue with the task to get the download URL
+            return imageRef.getDownloadUrl();
+        }).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                downloadUrl = task.getResult();
+                insertSSinDb();
+                Log.d(TAG, "CSS onComplete: "+downloadUrl);
+            } else {
+                Log.d(TAG, "CSS onComplete: Il y a eu un pb "+ Objects.requireNonNull(task.getException()).getMessage());
             }
         });
     }
@@ -255,6 +203,7 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
                     Log.d(TAG, "CSS onCreate: " + pathSelected);
                 }
             }
+
         }else{
             Log.d(TAG, "CSS onActivityResult: petit problème au retour ");
         }
@@ -271,48 +220,20 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
 
         db.collection("sourceSongs")
                 .add(sourceSong)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                        File file = new File(pathSelected);
-                        if(file.delete()){
-                            Log.d(TAG, "CSS onSuccess: le fichier est supprimé du local");
-                        }else{
-                            Log.d(TAG, "CSS onSuccess: problème de suppression en local du fichier");
-                        }
+                .addOnSuccessListener(documentReference -> {
+                    Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                    File file = new File(pathSelected);
+                    if(file.delete()){
+                        Log.d(TAG, "CSS onSuccess: le fichier est supprimé du local");
+                    }else{
+                        Log.d(TAG, "CSS onSuccess: problème de suppression en local du fichier");
+                    }
 
-                        modifyMajChorale();
-                        newSS();
-                    }
+                    newSS();
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "CSS Error adding document", e);
-                    }
-                });
+                .addOnFailureListener(e -> Log.d(TAG, "CSS Error adding document", e));
     }
 
-    private void modifyMajChorale() {
-        Map<String,Object> data = new HashMap<>();
-        data.put("maj",Timestamp.now());
-
-        db.collection("chorale").document(idChorale)
-                .update(data)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "CSS onSuccess: maj chorale done");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "CSS onSuccess: maj chorale failed");
-                    }
-                });
-    }
 
     @Override
     public void onDialogPositiveClick() {
