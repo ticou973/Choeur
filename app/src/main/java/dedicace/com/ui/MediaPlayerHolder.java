@@ -44,7 +44,6 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     private PlaybackInfoListener mPlaybackInfoListener;
     private ScheduledExecutorService mExecutor;
     private Runnable mSeekbarPositionUpdateTask;
-    private int i=0;
     private int duration;
     private String pathSave="";
 
@@ -77,7 +76,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
         }
     }
 
-    public void setPlaybackInfoListener(PlaybackInfoListener listener) {
+    void setPlaybackInfoListener(PlaybackInfoListener listener) {
         mPlaybackInfoListener = listener;
     }
 
@@ -280,7 +279,6 @@ public final class MediaPlayerHolder implements PlayerAdapter {
 
             }
         }
-        i=0;
     }
 
     private void updateProgressCallbackTask() {

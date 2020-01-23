@@ -47,7 +47,11 @@
             android:name=".ui.Admin.CreateSourceSong"
             android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.AdminHome" />
+        </activity>
         <activity
             android:name=".ui.Admin.ChooseBackground"
             android:screenOrientation="portrait"
@@ -56,16 +60,29 @@
             android:name=".ui.Admin.ModifySourceSong"
             android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.AdminHome" />
+        </activity>
         <activity
             android:name=".ui.Admin.ModifySourceSongDetails"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.AdminHome" />
+        </activity>
+
         <activity
             android:name=".ui.Admin.CreateSong"
             android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.AdminHome" />
+        </activity>
         <activity
             android:name=".ui.Admin.ChooseMp3"
             android:screenOrientation="portrait"
@@ -74,49 +91,92 @@
             android:name=".ui.Admin.ModifySong"
             android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.AdminHome" />
+        </activity>
         <activity
             android:name=".ui.Admin.ModifySongDetails"
+            android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.AdminHome" />
+        </activity>
         <activity
             android:name=".ui.Admin.CreateUser"
             android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.AdminHome" />
+        </activity>
         <activity
             android:name=".ui.Admin.CreateChorale"
             android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.AdminHome" />
+        </activity>
         <activity
             android:name=".ui.Admin.ModifyChorale"
             android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.AdminHome" />
+        </activity>
         <activity
             android:name=".ui.Admin.ModifyUserDetails"
+            android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme">
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value=".ui.Admin.AdminHome" />
+    </activity>
         <activity
             android:name=".ui.Admin.ModifyUser"
             android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.AdminHome" />
+        </activity>
         <activity
             android:name=".ui.Admin.ModifyChoraleDetails"
+            android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.AdminHome" />
+        </activity>
         <activity
             android:name=".ui.Admin.CreateSpectacle"
             android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.AdminHome" />
+        </activity>
         <activity
             android:name=".ui.Admin.CreateSaison"
             android:parentActivityName=".ui.Admin.AdminHome"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.AdminHome" />
+        </activity>
         <activity
             android:name=".ui.Admin.ModifySpectacle"
             android:screenOrientation="portrait"

@@ -281,7 +281,7 @@ public class ChoraleNetWorkDataSource {
         AtomicInteger entier= new AtomicInteger();
 
         for(String idSS : listIdSS){
-            Log.d(LOG_TAG, "NDS fetchSongsB: début boucle "+ idSS+" "+entier+" "+listIdSS.size());
+           // Log.d(LOG_TAG, "NDS fetchSongsB: début boucle "+ idSS+" "+entier+" "+listIdSS.size());
 
             try{
                 db.collection("sourceSongs").document(idSS)
@@ -297,7 +297,7 @@ public class ChoraleNetWorkDataSource {
                                     int duration;
                                     Timestamp majss;
 
-                                        Log.d(LOG_TAG, "NDS fetchSongs: restriction "+idSS);
+                                       // Log.d(LOG_TAG, "NDS fetchSongs: restriction "+idSS);
 
                                         titre = (String) task.getResult().get("titre");
                                         groupe = (String) task.getResult().get("groupe");
@@ -309,7 +309,7 @@ public class ChoraleNetWorkDataSource {
                                         maj = Objects.requireNonNull(majss).toDate();
                                         urlCloudBackground = (String) task.getResult().get("background");
 
-                                        Log.d(LOG_TAG, "NDS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
+                                       // Log.d(LOG_TAG, "NDS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
                                         SourceSong sourceSong = new SourceSong(idSS, titre, groupe, duration, urlCloudBackground, baseUrlOriginalSong, maj);
                                         sourceSongs.add(sourceSong);
 
@@ -325,7 +325,7 @@ public class ChoraleNetWorkDataSource {
                                                 Log.d(LOG_TAG, "NDS onComplete: Songs " + Thread.currentThread().getName());
                                                 if (task1.isSuccessful()) {
                                                     for (QueryDocumentSnapshot document : Objects.requireNonNull(task1.getResult())) {
-                                                        Log.d(LOG_TAG, "NDS " + document.getId() + " => " + document.getData().get("pupitre"));
+                                                       // Log.d(LOG_TAG, "NDS " + document.getId() + " => " + document.getData().get("pupitre"));
 
                                                         final String pupitre, recordSource, urlMp3, idCloud;
                                                         final Date maj;
@@ -347,20 +347,20 @@ public class ChoraleNetWorkDataSource {
 
                                                         //todo comment faire pour faire une référence à sourceSong
                                                         titre = (String) document.getData().get("titre_song");
-                                                        Log.d(LOG_TAG, "NDS : onComplete:B Songs " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
+                                                        //Log.d(LOG_TAG, "NDS : onComplete:B Songs " + titre + " " + sourceObj + " " + pupitreObj + " " + maj);
                                                         Song song = new Song(idCloud,titre,sourceObj,pupitreObj,urlMp3,maj);
                                                         songs.add(song);
 
-                                                        Log.d("coucou", "fetchSongs: entier "+entier);
+                                                       // Log.d("coucou", "fetchSongs: entier "+entier);
                                                     }
                                                     Log.d(LOG_TAG, "NDS onComplete: avant post "+songs.size()+"  "+ songs);
 
                                                     entier.getAndIncrement();
 
                                                     if(entier.get()==listIdSS.size()) {
-                                                        for(Song song : songs){
+                                                      /*  for(Song song : songs){
                                                             Log.d(LOG_TAG, "NDS fetchSongs: list songs "+song.getSourceSongTitre()+" "+song.getPupitre());
-                                                        }
+                                                        }*/
                                                         Log.d(LOG_TAG, "NDS onComplete: condition dernier idss  remplies "+ idSS+" "+entier.get());
                                                         Message message = Message.obtain();
                                                         message.obj = "OK";
@@ -383,11 +383,8 @@ public class ChoraleNetWorkDataSource {
                             }
 
                         })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
+                        .addOnFailureListener(e -> {
 
-                            }
                         });
 
             }catch (Exception e){

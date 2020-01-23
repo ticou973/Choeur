@@ -100,7 +100,7 @@ public class Song {
         this.updatePhone = updatePhone;
     }
 
-    int getSongId() {
+    public int getSongId() {
         return songId;
     }
 
@@ -163,5 +163,4 @@ public class Song {
     public String getSongIdCloud() {
         return songIdCloud;
     }
-
 }

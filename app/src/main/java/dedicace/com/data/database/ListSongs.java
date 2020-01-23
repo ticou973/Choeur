@@ -17,7 +17,6 @@ import dedicace.com.ui.SongsAdapter;
 
 public class ListSongs {
 
-    //todo vérifier si le fait d'avoir enlever final au 4 premiers posent un problème
     private  List<List<Song>> SongsOnPhones= new ArrayList<>();
     private  List<List<Song>> SongOnClouds=new ArrayList<>();
     private  List<List<RecordSource>> RecordSources=new ArrayList<>();
@@ -36,7 +35,6 @@ public class ListSongs {
     private List<Song> songsTemp;
 
     private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
     private Context context;
 
 
@@ -52,10 +50,6 @@ public class ListSongs {
         this.context=context;
         this.mSpectacleDao=mSpectacleDao;
 
-        for(Song song : songsTemp){
-            Log.d(LOG_TAG, "LS constructor list songs "+song.getSourceSongTitre()+" "+song.getPupitre());
-        }
-
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         this.sourceSongs=getSSCurrentSpectacle(sourceSongsTemp);
@@ -70,7 +64,6 @@ public class ListSongs {
             List<Song> songs = mSongDao.getSongsByTitre(titre);
             currentSongs.addAll(songs);
         }
-
         return currentSongs;
     }
 
@@ -123,7 +116,7 @@ public class ListSongs {
             for (String idSpectacle : currentSpectaclesSet) {
 
                 Spectacle currentSpectacle = mSpectacleDao.getSpectacleById(idSpectacle);
-                Log.d(LOG_TAG, "LS getAllSourcesSongs: début 1er fort "+idSpectacle+" "+currentSpectacle);
+                Log.d(LOG_TAG, "LS getAllSourcesSongs: début 1er for "+idSpectacle+" "+currentSpectacle);
                 if(currentSpectacle!=null) {
                     currentSSId = currentSpectacle.getIdTitresSongs();
                     Log.d(LOG_TAG, "LS getAllSourcesSongs: currenspectacleId "+currentSpectacle.getSpectacleName()+" currentSSid"+currentSSId);
@@ -138,7 +131,7 @@ public class ListSongs {
 
                         int i=0;
                         for (SourceSong sourceSong : currentsourceSongs){
-                           // Log.d(LOG_TAG, "LS getAllSourcesSongs: début boucle B "+" "+sourceSong.getTitre()+" "+sourceSong);
+                            Log.d(LOG_TAG, "LS getAllSourcesSongs: début boucle B "+" "+sourceSong.getTitre()+" "+sourceSong);
                             if(!sourceSong.getIdSourceSongCloud().equals(idSource)){
                                 i++;
                               //  Log.d(LOG_TAG, "LS getAllSourcesSongs: début boucle dans if "+i+" "+sourceSong.getTitre()+" "+sourceSong);
@@ -151,10 +144,15 @@ public class ListSongs {
                         }else{
                             Log.d(LOG_TAG, "LS getAllSourcesSongs: doublon différents spectacles "+ idSource);
                         }
-                    }else{
+                    }else {
                         SourceSong sourceSong = mSourceSongDao.getSourceSongByIdCloud(idSource);
                         currentsourceSongs.add(sourceSong);
-                        Log.d(LOG_TAG, "LS getAllSourcesSongs: else "+ sourceSong.getTitre()+" "+currentsourceSongs.size());
+                        if (sourceSong != null) {
+                            Log.d(LOG_TAG, "LS getAllSourcesSongs: else " + sourceSong.getTitre() + " " + currentsourceSongs.size());
+                        }else{
+                            Log.d(LOG_TAG, "LS getAllSourcesSongs: ss null");
+                        }
+
                     }
                 }
             }
@@ -167,7 +165,6 @@ public class ListSongs {
 
     public void getSongOnClouds() {
         //chercher les SongsOnCloud BS
-
             for (SourceSong sourceSong : sourceSongs) {
                 List<Song> listSongbyTitre = new ArrayList<>();
 
@@ -190,7 +187,7 @@ public class ListSongs {
         for(List<Song> songList : SongOnClouds){
             if(songList!=null) {
                 for (Song song : songList) {
-                //    Log.d(LOG_TAG, "LS getSongsOncloud: listOnClouds " + song.getSourceSongTitre() + " " + song.getPupitre());
+                  Log.d(LOG_TAG, "LS getSongsOncloud: listOnClouds " + song.getSourceSongTitre() + " " + song.getPupitre());
                 }
             }
         }
@@ -204,11 +201,11 @@ public class ListSongs {
         for (SourceSong sourceSong: sourceSongs){
             List<Song> listBs = mSongDao.getSongsOnPhone(sourceSong.getTitre(),RecordSource.BANDE_SON);
 
-           // Log.d(LOG_TAG, "LS getSongOnPhoneBS: listBS "+ listBs.size());
+            Log.d(LOG_TAG, "LS getSongOnPhoneBS: listBS "+ listBs.size());
 
             if(listBs!=null){
                 for (int i = 0; i <listBs.size() ; i++) {
-                  //  Log.d(LOG_TAG, "LS getSongOnPhoneBS: listBs songs "+listBs.get(i).getSourceSongTitre()+" "+listBs.get(i).getPupitre()+" "+listBs.get(i).getUrlCloudMp3());
+                    Log.d(LOG_TAG, "LS getSongOnPhoneBS: listBs songs "+listBs.get(i).getSourceSongTitre()+" "+listBs.get(i).getPupitre()+" "+listBs.get(i).getUrlCloudMp3());
                 }
             }
 
@@ -220,7 +217,7 @@ public class ListSongs {
         }
 
         for (int i = 0; i <SongOnPhonesBS.size() ; i++) {
-          //  Log.d(LOG_TAG, "LS run: song onPhone BS "+ SongOnPhonesBS.get(i));
+            Log.d(LOG_TAG, "LS run: song onPhone BS "+ SongOnPhonesBS.get(i));
         }
     }
 

@@ -276,13 +276,15 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
     }
 
     void setSongToPlay(Song songToPlay) {
-        Log.d(TAG, "SVH setSongToPlay: "+pupitre);
+        Log.d(TAG, "SVH setSongToPlay: pupitre "+pupitre);
         if(pupitre != Pupitre.NA&&source !=RecordSource.NA) {
-            Log.d(TAG, "SVH setSongToPlay: "+source);
+            Log.d(TAG, "SVH setSongToPlay:  source"+source);
            setSongRecorded(songToPlay);
         }
         this.songToPlay=songToPlay;
-        Log.d(TAG, "SVH setSongToPlay: "+songToPlay);
+        if(songToPlay!=null) {
+            Log.d(TAG, "SVH setSongToPlay: songToplay " + songToPlay+ " "+songToPlay.getSourceSongTitre()+" "+songToPlay.getPupitre());
+        }
         if(songToPlay!=null) {
             pupitre = songToPlay.getPupitre();
             setCurrentSongActive(pupitre);
@@ -667,14 +669,13 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
             //PlayBackController
             initializePlaybackController();
         }
-        //todo revoir pour simplifier les cas null de songToPlay
+
             if (songToPlay != null) {
                 if(songToPlay.getPupitre()!=pupitre||songToPlay.getRecordSource()!=source){
-                    Log.d(TAG, "SVH setResourceToMediaPlayer: "+songToPlay.getSourceSongTitre()+songToPlay.getPupitre());
+                    Log.d(TAG, "SVH setResourceToMediaPlayer: A "+songToPlay.getSourceSongTitre()+songToPlay.getPupitre());
                     calculSongToPlay(pupitre,source);
                 }
 
-                if(songToPlay!=null) {
                     String resStrToPlay = songToPlay.getSongPath();
                     Log.d(TAG, "SVH setResourceToMediaPlayer: songPath " + resStrToPlay);
                     try {
@@ -683,9 +684,7 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                         e.printStackTrace();
                     }
                     isFirstTime = false;
-                }else {
-                    setTotalTime(0);
-                }
+
             } else {
                 setTotalTime(0);
             }
@@ -721,10 +720,10 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
                         if(songToPlay!=null) {
                             isMediaPlaying=mlistItemClickedListener.isPlaying();
                             isMediaPausing=mlistItemClickedListener.isPausing();
-                            Log.d("Hello", "SVH setPlayListener: "+isMediaPlaying+ " "+isMediaPausing);
+                            Log.d("coucou", "SVH setPlayListener: "+isMediaPlaying+ " "+isMediaPausing);
                             if(!isMediaPlaying||isMediaPausing) {
                                 mlistItemClickedListener.setPlaying(true);
-                                Log.d("Hello", "SVH setPlayListener: "+mlistItemClickedListener.isPlaying());
+                                Log.d("coucou", "SVH setPlayListener: "+mlistItemClickedListener.isPlaying());
                                 playSongs.setImageDrawable(animation);
                                 mlistItemClickedListener.setPausing(false);
                                 pause = false;
@@ -939,10 +938,6 @@ public class SongsViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     ImageView getPlaySongs() {
         return playSongs;
-    }
-
-    public Button getLiveBtn() {
-        return liveBtn;
     }
 
     void setListSongLocalRecorded(List<Song> songOnPhoneRecorded) {
