@@ -31,13 +31,8 @@ public class ListSongs {
     private SpectacleDao mSpectacleDao;
     private List<SourceSong> sourceSongs;
     private List<Song> songs;
-    private List<SourceSong> sourceSongsTemp;
-    private List<Song> songsTemp;
 
     private SharedPreferences sharedPreferences;
-    private Context context;
-
-
     private static final String LOG_TAG = "coucou";
 
 
@@ -45,15 +40,12 @@ public class ListSongs {
 
         this.mSongDao = mSongDao;
         this.mSourceSongDao = mSourceSongDao;
-        this.sourceSongsTemp = sourceSongs;
-        this.songsTemp = songs;
-        this.context=context;
         this.mSpectacleDao=mSpectacleDao;
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-        this.sourceSongs=getSSCurrentSpectacle(sourceSongsTemp);
-        this.songs=getSongCurrentSpectacle(this.sourceSongs,songsTemp);
+        this.sourceSongs=getSSCurrentSpectacle(sourceSongs);
+        this.songs=getSongCurrentSpectacle(this.sourceSongs, songs);
         Log.d(LOG_TAG, "LS CR ListSongs:constructeur A "+songs.size()+" local songs "+this.songs.size());
     }
 

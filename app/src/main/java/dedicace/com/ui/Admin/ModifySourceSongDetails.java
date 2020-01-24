@@ -119,6 +119,7 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
                     insertBackgroundInCloudStorage();
                 }else{
                     Log.d(TAG, "MSSD onCreate: id chorale vide");
+                    Toast.makeText(this, "Il faut préciser la Chorale !", Toast.LENGTH_SHORT).show();
                 }
 
             }else{

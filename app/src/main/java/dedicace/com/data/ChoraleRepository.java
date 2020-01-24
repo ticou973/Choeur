@@ -1362,8 +1362,8 @@ public class ChoraleRepository {
 
 
         if(newSongsList!=null&newSongsList.size()!=0){
-            Log.d(LOG_TAG, "CR DoWorkInRoom: create songs "+newSongsList);
             mSongDao.bulkInsert(newSongsList);
+            Log.d(LOG_TAG, "CR DoWorkInRoom: create songs "+newSongsList);
         }
 
         if(newSaisonsList!=null&&newSaisonsList.size()!=0){

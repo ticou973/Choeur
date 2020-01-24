@@ -501,8 +501,6 @@ public class ChoraleNetWorkDataSource {
 
         for (Song newSong : songs) {
             Log.d(LOG_TAG, "NDS onComplete: newsongs "+ newSong.getSourceSongTitre()+" " + newSong.getRecordSource()+" "+newSong.getPupitre() );
-            //todo tri sur le pupitre plus tard il faudra être capable de s'adapter aux préférences.faire une liste des pupitres à enregistrer
-            //todo préparer une page de setUp pour mettre les infos complémentaires sur le user comme son pupitre
 
             for(Pupitre pupitre: pupitreToUpload) {
                 if (newSong.getPupitre() == pupitre) {

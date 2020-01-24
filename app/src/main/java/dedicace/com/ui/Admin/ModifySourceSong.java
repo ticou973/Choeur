@@ -32,7 +32,7 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
     private static final String TAG ="coucou";
     private FirebaseFirestore db;
     private String origine;
-    private boolean newIntent = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +64,7 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
         getListSourceSongs();
     }
 
+    //todo plus tard voir comment ne prendre que les sources songs dd'une chorale donnée
     private void getListSourceSongs() {
         try {
             db.collection("sourceSongs")
