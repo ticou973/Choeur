@@ -1,21 +1,20 @@
 package dedicace.com.ui.Admin;
 
+import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -37,7 +36,7 @@ import dedicace.com.data.database.Song;
 //todo voir tout le doublonnage de code par rapport o Create SourceSong, à factoriser à tous les niveaux
 //todo voir pour plus tard les modifications de songs lorsque cela marchera au nieveau de la maj côté utilisateur
 public class ModifySongDetails extends AppCompatActivity implements DialogSuppFragment.DialogSuppListener {
-    private TextView oldTitre, oldPupitre, oldSource, oldMp3, newMp3;
+    private TextView oldTitre, oldPupitre, oldSource, oldMp3, newMp3,nomChorale;
     private EditText newPupitre, newSource;
 
     private String[] listMp3s;
@@ -50,9 +49,8 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
     private final static int REQUEST_CODE=100;
     private static final String TAG ="coucou";
     private int mp3Selected;
-    private String idChorale,idSong,oldTitreStr,oldPupitreStr,oldSourceStr,newPupitreStr,newMp3Str,newSourceStr;
+    private String idChorale,idSong,oldTitreStr,oldPupitreStr,oldSourceStr,newPupitreStr,newMp3Str,newSourceStr, nomChoraleStr;
 
-    private SharedPreferences sharedPreferences;
     private StorageReference mStorageRef;
     private FirebaseFirestore db;
     private Uri downloadUrl;
@@ -78,12 +76,13 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
         Button suppSong = findViewById(R.id.btn_supp_song);
         Button modifySong = findViewById(R.id.btn_modify_song);
         Button selectMp3 = findViewById(R.id.btn_select_new_mp3);
+        Button selectChorale = findViewById(R.id.btn_select_chorale_modify_song);
+        nomChorale = findViewById(R.id.tv_select_chorale_modify_song);
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
         db = FirebaseFirestore.getInstance();
 
-        sharedPreferences =PreferenceManager.getDefaultSharedPreferences(this);
-        idChorale=sharedPreferences.getString("idchorale","");
+
         Log.d(TAG, "MSD onCreate: idChorale "+ idChorale );
 
         getIntentBundle();
@@ -92,6 +91,12 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
 
         getLists();
 
+        selectChorale.setOnClickListener(view -> {
+            Intent startModifyChorale = new Intent(ModifySongDetails.this,ModifyChorale.class);
+            startModifyChorale.putExtra("origine","ModifySongDetails");
+            startActivityForResult(startModifyChorale,REQUEST_CODE);
+        });
+
         suppSong.setOnClickListener(view -> {
             DialogFragment dialogFragment = new DialogSuppFragment();
             dialogFragment.show(getSupportFragmentManager(),TAG);
@@ -99,6 +104,8 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
 
         //todo à remettre lorsque modify sera possible ou pas?
         modifySong.setOnClickListener(view -> {
+
+            //todo prévoir le if avec la chorale cf suppression
 
             Toast.makeText(ModifySongDetails.this, "Option A venir...", Toast.LENGTH_SHORT).show();
             //obligatoire
@@ -261,24 +268,27 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
 
     @Override
     public void onDialogSuppPositiveClick() {
-        modifyMajChorale();
-        modifyMajSourceSong();
-        suppSong();
-        Intent startModifySongActivity = new Intent(ModifySongDetails.this,ModifySong.class);
-        startModifySongActivity.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(startModifySongActivity);
+
+        if(!TextUtils.isEmpty(idChorale)) {
+            modifyMajChorale();
+            modifyMajSourceSong();
+            suppSong();
+            Intent startModifySongActivity = new Intent(ModifySongDetails.this,ModifySong.class);
+            startModifySongActivity.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(startModifySongActivity);
+
+        }else{
+            Log.d(TAG, "MSD onCreate: id chorale vide");
+            Toast.makeText(this, "Il faut préciser la Chorale !", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     private void suppSong() {
         db.collection("songs").document(idSong)
                 .delete()
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "MSD onSuccess: réussi Song supprimée"))
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "MSD onFailure: Song pas supprimé");
-                    }
-                });
+                .addOnFailureListener(e -> Log.d(TAG, "MSD onFailure: Song pas supprimé"));
 
 //todo faire la suppression dan sl ecloud storage de la song idem pour le background, difficulté, on ne connait pas le nom et storage ne le propose pas
 
@@ -332,5 +342,26 @@ public class ModifySongDetails extends AppCompatActivity implements DialogSuppFr
         Toast.makeText(this, "Vous avez souhaitez ne pas supprimer cette Song", Toast.LENGTH_SHORT).show();
         finish();
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode== Activity.RESULT_OK){
+            Log.d(TAG, "MSD onActivityResult: ok cela marche");
+            if(requestCode==REQUEST_CODE){
+                if (data != null) {
+                    idChorale = data.getStringExtra("idselected");
+                    nomChoraleStr=data.getStringExtra("nomChorale");
+                }
+                nomChorale.setText(nomChoraleStr);
+            }else{
+
+                Log.d(TAG, "MSDonActivityResult: pb result existe pas");
+
+            }
+        }else{
+            Log.d(TAG, "MSD onActivityResult: petit problème au retour ");
+        }
     }
 }

@@ -396,13 +396,20 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
 
     @Override
     public void onDialogSuppPositiveClick() {
-        modifyMajChorale();
-        getSuppSongs();
-        suppSourceSong();
-        Intent startModifySSActivity = new Intent(ModifySourceSongDetails.this,ModifySourceSong.class);
-        startModifySSActivity.putExtra("origine","AdminHome");
-        startModifySSActivity.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(startModifySSActivity);
+
+        if(!TextUtils.isEmpty(idChorale)) {
+            modifyMajChorale();
+            getSuppSongs();
+            suppSourceSong();
+            Intent startModifySSActivity = new Intent(ModifySourceSongDetails.this,ModifySourceSong.class);
+            startModifySSActivity.putExtra("origine","AdminHome");
+            startModifySSActivity.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(startModifySSActivity);
+
+        }else{
+            Log.d(TAG, "MSSD onCreate: id chorale vide");
+            Toast.makeText(this, "Il faut préciser la Chorale !", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void getSuppSongs() {

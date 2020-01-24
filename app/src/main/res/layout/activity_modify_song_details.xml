@@ -229,4 +229,39 @@
         app:layout_constraintEnd_toEndOf="@+id/tv_mp3_new_modify"
         app:layout_constraintStart_toStartOf="@+id/tv_mp3_new_modify"
         app:layout_constraintTop_toBottomOf="@+id/tv_mp3_new_modify" />
+
+    <TextView
+        android:id="@+id/textView54"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/roboto"
+        android:text="Chorale"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_select_new_mp3" />
+
+    <TextView
+        android:id="@+id/tv_select_chorale_modify_song"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:text="nom Chorale"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView54"
+        app:layout_constraintStart_toEndOf="@+id/textView54" />
+
+    <Button
+        android:id="@+id/btn_select_chorale_modify_song"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/roboto"
+        android:text="Selection..."
+        android:textColor="@android:color/black"
+        app:layout_constraintEnd_toEndOf="@+id/tv_select_chorale_modify_song"
+        app:layout_constraintStart_toStartOf="@+id/tv_select_chorale_modify_song"
+        app:layout_constraintTop_toBottomOf="@+id/tv_select_chorale_modify_song" />
 </android.support.constraint.ConstraintLayout>

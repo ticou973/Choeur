@@ -31,7 +31,8 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
     private List<String> listId = new ArrayList<>();
     private static final String TAG ="coucou";
     private FirebaseFirestore db;
-    private String origine;
+    private String origine, idChorale, currentSaison;
+    private List<String> idSpectacles= new ArrayList<>();
 
 
     @Override
@@ -62,9 +63,95 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
         db=FirebaseFirestore.getInstance();
 
         getListSourceSongs();
+
+        //getIdSSChorale();
     }
 
-    //todo plus tard voir comment ne prendre que les sources songs dd'une chorale donnée
+
+    //todo à activer à la place de getListSourceSongs en ajoutant le choix de la chorale en amont puis en supprimant les choix de chorale partout ailleurs. A tester d'abord
+    private void getIdSSChorale(){
+        try {
+            db.collection("chorale").document(idChorale)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (Objects.requireNonNull(task.getResult()).exists()) {
+                            currentSaison = (String) task.getResult().get("current_saison");
+                            Log.d(TAG, "MSS getIdSSChorale: "+currentSaison);
+
+                            db.collection("chorale").document(idChorale).collection("saisons").document(currentSaison)
+                                    .get()
+                                    .addOnCompleteListener(task1 -> {
+                                        if (Objects.requireNonNull(task.getResult()).exists()) {
+                                            idSpectacles =(ArrayList<String>) task.getResult().get("spectacles");
+                                            Log.d(TAG, "MSS getIdSSChorale: "+idSpectacles);
+
+
+                                            for(String idSpectacle:idSpectacles) {
+                                                db.collection("chorale").document(idChorale).collection("spectacles").document(idSpectacle)
+                                                        .get()
+                                                        .addOnCompleteListener(task2 -> {
+                                                            if (Objects.requireNonNull(task.getResult()).exists()) {
+                                                                listId = (ArrayList<String>) task.getResult().get("id_titres");
+                                                                getListSSongs();
+                                                            }
+
+                                                        }).addOnFailureListener(e -> {
+                                                    Log.d(TAG, "CR getIdSSChorale: pb pour le sepctacle");
+                                                        });
+                                            }
+                                        }
+
+                                    }).addOnFailureListener(e -> {
+                                Log.d(TAG, "CR getIdSSChorale: pb pour la saison");
+                                    });
+
+                        }
+
+                    }).addOnFailureListener(e -> {
+                Log.d(TAG, "CR getIdSSChorale: pb pour la chorale");
+
+                    });
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getListSSongs(){
+        for(String idSS :listId){
+            db.collection("sourceSongs").document(idSS)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (Objects.requireNonNull(task.getResult()).exists()) {
+
+                            Log.d(TAG, "NDS-exec deb Oncomplete ");
+
+                            String titre, groupe, baseUrlOriginalSong, urlCloudBackground,idDocument;
+                            Date maj;
+                            int duration;
+                            Timestamp majSS;
+
+                            titre = (String) task.getResult().get("titre");
+                            groupe = (String) task.getResult().get("groupe");
+                            duration = ((Long) Objects.requireNonNull(task.getResult().get("duration"))).intValue();
+                            baseUrlOriginalSong = (String) task.getResult().get("original_song");
+                            majSS= (Timestamp) task.getResult().get("maj");
+                            maj = Objects.requireNonNull(majSS).toDate();
+                            urlCloudBackground = (String) task.getResult().get("background");
+
+                            Log.d(TAG, "MSS-exec onComplete:A SourceSongs " + titre + " " + groupe + " " + duration + " " + baseUrlOriginalSong + " " + maj + " " + urlCloudBackground);
+                            SourceSong sourceSong = new SourceSong(titre, groupe, duration, urlCloudBackground, baseUrlOriginalSong, maj);
+                            listSourceSongs.add(sourceSong);
+                        }
+
+                    }).addOnFailureListener(e -> {
+                Log.d(TAG, "CR getListSSongs: pb sur les ids SS "+idSS);
+
+                    });
+        }
+    }
+
+    //todo plus tard voir comment ne prendre que les sources songs d'une chorale donnée voir plus haut
     private void getListSourceSongs() {
         try {
             db.collection("sourceSongs")
