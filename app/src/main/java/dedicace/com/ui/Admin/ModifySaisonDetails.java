@@ -27,19 +27,16 @@ import java.util.Map;
 import dedicace.com.R;
 
 public class ModifySaisonDetails extends AppCompatActivity implements DialogSuppFragment.DialogSuppListener{
-    private String oldNomStr, newNomStr, oldIdSaisonStr;
+    private String oldNomStr, newNomStr, oldIdSaisonStr, currentSaison;
     private ArrayList<String> oldSpectaclesStr, newSpectaclesStr,oldNamesSpectaclesStr, newNamesSpectaclesStr;
     private TextView oldNom, oldNameSpectacle, newNameSpectacle;
     private EditText newNom;
-    private Button modifSpectacles, suppSaison, modifSaison;
     private Map<String,Object> saison;
 
     private FirebaseFirestore db;
     private static final String TAG ="coucou";
     private String idChorale, nomChoraleStr;
     private final static int REQUEST_CODE=100;
-    private final static int REQUEST_CODEB=200;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,9 +49,9 @@ public class ModifySaisonDetails extends AppCompatActivity implements DialogSupp
         oldNameSpectacle = findViewById(R.id.tv_modif_saison_old_noms_spectacles);
         newNameSpectacle = findViewById(R.id.tv_modif_saison_new_nom_spectacles);
         newNom = findViewById(R.id.et_modif_saison_new_nom);
-        modifSpectacles = findViewById(R.id.btn_modif_saison_modif_nom_spectacle);
-        suppSaison = findViewById(R.id.btn_supp_saison);
-        modifSaison =findViewById(R.id.btn_modify_saison);
+        Button modifSpectacles = findViewById(R.id.btn_modif_saison_modif_nom_spectacle);
+        Button suppSaison = findViewById(R.id.btn_supp_saison);
+        Button modifSaison = findViewById(R.id.btn_modify_saison);
 
         db = FirebaseFirestore.getInstance();
 
@@ -64,6 +61,8 @@ public class ModifySaisonDetails extends AppCompatActivity implements DialogSupp
 
         completeOld();
 
+        verifyCurrentSaison();
+
 
         suppSaison.setOnClickListener(view -> {
             DialogFragment dialogFragment = new DialogSuppFragment();
@@ -71,21 +70,26 @@ public class ModifySaisonDetails extends AppCompatActivity implements DialogSupp
         });
 
         modifSpectacles.setOnClickListener(view -> {
-            Intent startActivityList = new Intent(ModifySaisonDetails.this,GenList.class);
-            if(newSpectaclesStr!=null&&newSpectaclesStr.size()!=0){
-                startActivityList.putStringArrayListExtra("nomsSpectacles", newSpectaclesStr);
-                startActivityList.putStringArrayListExtra("oldSpectaclesNames", newNamesSpectaclesStr);
+            if(oldNamesSpectaclesStr!=null&&oldNamesSpectaclesStr.size()!=0) {
+                Intent startActivityList = new Intent(ModifySaisonDetails.this, GenList.class);
+                if (newSpectaclesStr != null && newSpectaclesStr.size() != 0) {
+                    startActivityList.putStringArrayListExtra("nomsSpectacles", newSpectaclesStr);
+                    startActivityList.putStringArrayListExtra("oldSpectaclesNames", newNamesSpectaclesStr);
 
-            }else {
-                startActivityList.putStringArrayListExtra("nomsSpectacles", oldSpectaclesStr);
-                startActivityList.putStringArrayListExtra("oldSpectaclesNames", oldNamesSpectaclesStr);
+                } else {
+                    startActivityList.putStringArrayListExtra("nomsSpectacles", oldSpectaclesStr);
+                    startActivityList.putStringArrayListExtra("oldSpectaclesNames", oldNamesSpectaclesStr);
+                }
+                Bundle args = new Bundle();
+                args.putString("idChorale", idChorale);
+                args.putString("nomChorale", nomChoraleStr);
+                startActivityList.putExtra("bundleChorale", args);
+                startActivityList.putExtra("origine", "modifNomsSaisons");
+                startActivityForResult(startActivityList, REQUEST_CODE);
+            }else{
+                Log.d(TAG, "MSD onCreate: pas le droit");
+                Toast.makeText(this, "Pas le droit car spectacles vide", Toast.LENGTH_SHORT).show();
             }
-            Bundle args = new Bundle();
-            args.putString("idChorale",idChorale);
-            args.putString("nomChorale",nomChoraleStr);
-            startActivityList.putExtra("bundleChorale",args);
-            startActivityList.putExtra("origine","modifNomsSaisons");
-            startActivityForResult(startActivityList,REQUEST_CODE);
         });
 
         modifSaison.setOnClickListener(view -> {
@@ -144,14 +148,9 @@ public class ModifySaisonDetails extends AppCompatActivity implements DialogSupp
                     for(String titre:newNamesSpectaclesStr){
                         i++;
                         String listTitres = i+". "+titre+newLine;
-                        sb.append(listTitres+newLine);
+                        sb.append(listTitres).append(newLine);
                     }
                     newNameSpectacle.setText(sb.toString());
-                }
-
-            }else if(requestCode==REQUEST_CODEB){
-                if (data != null) {
-
                 }
 
             }
@@ -165,16 +164,21 @@ public class ModifySaisonDetails extends AppCompatActivity implements DialogSupp
 
         StringBuilder sb = new StringBuilder(" ");
         String newLine = System.getProperty("line.separator");
-        int i=0;
-        for(String titre:oldNamesSpectaclesStr){
-            i++;
-            String listTitres = i+". "+titre+newLine;
-            sb.append(listTitres+newLine);
+
+        if(oldNamesSpectaclesStr!=null&&oldNamesSpectaclesStr.size()!=0) {
+            int i = 0;
+            for (String titre : oldNamesSpectaclesStr) {
+                i++;
+                String listTitres = i + ". " + titre + newLine;
+                sb.append(listTitres).append(newLine);
+            }
+
+            Log.d(TAG, "MSaD completed Old: noms spectacles" + sb.toString());
+            oldNameSpectacle.setText(sb.toString());
+        }else{
+            oldNameSpectacle.setText("");
         }
 
-        Log.d(TAG, "MSaD completed Old: noms spectacles"+ sb.toString() );
-
-        oldNameSpectacle.setText(sb.toString());
     }
 
     private void getIntentBundle() {
@@ -217,10 +221,7 @@ public class ModifySaisonDetails extends AppCompatActivity implements DialogSupp
                     Log.d(TAG, "MSpD OnSucess: suppSpectacles");
                     Toast.makeText(ModifySaisonDetails.this, "Réussi saison deleted", Toast.LENGTH_SHORT).show();
 
-
-                }).addOnFailureListener(e -> {
-            Log.d(TAG, "MSpD OnFailure: suppSaisons");
-                });
+                }).addOnFailureListener(e -> Log.d(TAG, "MSpD OnFailure: suppSaisons"));
 
     }
 
@@ -233,26 +234,53 @@ public class ModifySaisonDetails extends AppCompatActivity implements DialogSupp
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "MSpD onSuccess: maj chorale done");
+                        Log.d(TAG, "MSD onSuccess: maj chorale done");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "MSSD onSuccess: maj chorale failed");
+                        Log.d(TAG, "MSD onSuccess: maj chorale failed");
                     }
                 });
     }
 
+    private void verifyCurrentSaison() {
+        Log.d(TAG, "MSD verifyCurrentSaison: début");
+        db.collection("chorale").document(idChorale)
+                .get()
+                .addOnCompleteListener(task -> {
+                    Log.d(TAG, "MSD verifyCurrentSaison: avant success ");
+                    if(task.isSuccessful()){
+                        Log.d(TAG, "MSD verifyCurrentSaison: successfull ");
+                        if(task.getResult().exists()){
+                            currentSaison=(String) task.getResult().get("current_saison");
+                            Log.d(TAG, "MSD verifyCurrentSaison: "+currentSaison);
+                        }
+                    }
+                }).addOnFailureListener(e -> {
+            Log.d(TAG, "MSD verifyCurrentSaison: pb verify chorale");
+                });
+
+    }
+
     @Override
     public void onDialogSuppPositiveClick() {
-        suppSaisons();
-        modifyMajChorale();
-        Intent startModifySaisonActivity = new Intent(ModifySaisonDetails.this,ChooseChorale.class);
-        startModifySaisonActivity.putExtra("origine","AdminHomeModifSaison");
-        startModifySaisonActivity.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(startModifySaisonActivity);
+        if(!currentSaison.equals(oldIdSaisonStr)) {
+            suppSaisons();
+            modifyMajChorale();
+            Intent startModifySaisonActivity = new Intent(ModifySaisonDetails.this, ChooseChorale.class);
+            startModifySaisonActivity.putExtra("origine", "AdminHomeModifSaison");
+            startModifySaisonActivity.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(startModifySaisonActivity);
+        }else{
+            Log.d(TAG, "MSD onDialogSuppPositiveClick: pas le droit de supprimer saison courrante");
+            Toast.makeText(this, "Attention on ne peut pas supprimer une saison courante !", Toast.LENGTH_SHORT).show();
+        }
     }
+
+
+
     @Override
     public void onDialogSuppNegativeClick() {
         Toast.makeText(this, "Vous avez souhaitez ne pas supprimer cette Saison", Toast.LENGTH_SHORT).show();

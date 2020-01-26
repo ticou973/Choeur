@@ -108,8 +108,11 @@ public class ModifySpectacle extends AppCompatActivity implements SpectacleAdapt
                                 lieuxConcerts =(ArrayList<String>) document.getData().get("concerts_lieux");
                                 timeStampsConcerts=(ArrayList<Timestamp>) document.getData().get("concerts_dates");
 
+
                                 for(Timestamp timestamp:timeStampsConcerts){
-                                    datesConcerts.add(timestamp.toDate());
+                                    if(timestamp!=null) {
+                                        datesConcerts.add(timestamp.toDate());
+                                    }
                                 }
 
                                 Log.d(TAG, "MSp-exec onComplete:A Spectacles " + nom + " " + idTitres+" "+lieuxConcerts+" "+maj);

@@ -3,7 +3,6 @@ package dedicace.com.ui.Admin;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
@@ -14,7 +13,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -36,7 +34,6 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
     private ArrayList<String> oldTitresNameStr,newTitresNameStr;
     private TextView oldNom, oldLieux, oldDates, oldTitres, newLieux, newDates, newTitres;
     private EditText newNom;
-    private Button modifTitres, modifConcerts, suppSpectacle, modifSpectacle;
     private Map<String,Object> spectacle;
 
     private FirebaseFirestore db;
@@ -63,10 +60,10 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
         newDates = findViewById(R.id.tv_modif_spectacle_new_dates2);
         newTitres = findViewById(R.id.tv_modif_spectacle_new_titres2);
         newNom = findViewById(R.id.et_modif_spectacle_new_nom);
-        modifTitres = findViewById(R.id.btn_modif_spectacle_modif_titres);
-        modifConcerts = findViewById(R.id.btn_modif_spectacle_modif_concerts);
-        suppSpectacle = findViewById(R.id.btn_supp_spectacle);
-        modifSpectacle = findViewById(R.id.btn_modify_spectacle);
+        Button modifTitres = findViewById(R.id.btn_modif_spectacle_modif_titres);
+        Button modifConcerts = findViewById(R.id.btn_modif_spectacle_modif_concerts);
+        Button suppSpectacle = findViewById(R.id.btn_supp_spectacle);
+        Button modifSpectacle = findViewById(R.id.btn_modify_spectacle);
 
         db = FirebaseFirestore.getInstance();
 
@@ -189,7 +186,7 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
                     for(String titre:newTitresNameStr){
                         i++;
                         String listTitres = i+". "+titre+newLine;
-                        sb.append(listTitres+newLine);
+                        sb.append(listTitres).append(newLine);
                     }
                     newTitres.setText(sb.toString());
                 }
@@ -205,7 +202,7 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
                     for(String lieu:newLieuxStr){
                         i++;
                         String listLieu = i+". "+lieu+newLine;
-                        sb.append(listLieu+newLine);
+                        sb.append(listLieu).append(newLine);
                     }
                     newLieux.setText(sb.toString());
 
@@ -216,7 +213,7 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
                         Date date1 = new Date(dateLong);
                         j++;
                         String listTitres = j+". "+date1.toString()+newLine;
-                        sb1.append(listTitres+newLine);
+                        sb1.append(listTitres).append(newLine);
                     }
                     newDates.setText(sb1.toString());
 
@@ -235,7 +232,7 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
         for(String titre:oldTitresNameStr){
             i++;
             String listTitres = i+". "+titre+newLine;
-            sb.append(listTitres+newLine);
+            sb.append(listTitres).append(newLine);
         }
 
         Log.d(TAG, "MspD completed Old: titres"+ sb.toString() );
@@ -246,7 +243,7 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
         for(String lieu:oldLieuxStr){
             j++;
             String listLieux = j+". "+lieu+newLine;
-            sb1.append(listLieux+newLine);
+            sb1.append(listLieux).append(newLine);
         }
 
         Log.d(TAG, "MspD completed Old: lieux"+ sb1.toString() );
@@ -262,10 +259,10 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
 
             Log.d(TAG, "MSpD completeOld: "+date);
             String listDates = k+". "+date.toString().substring(0,20)+newLine;
-            sb2.append(listDates+newLine);
+            sb2.append(listDates).append(newLine);
         }
 
-        Log.d(TAG, "MspD completed Old: dates"+ sb2.subSequence(0,24).toString() );
+      //  Log.d(TAG, "MspD completed Old: dates"+ sb2.subSequence(0,24).toString() );
         oldDates.setText(sb2.toString());
     }
 
@@ -302,16 +299,11 @@ public class ModifySpectaclesDetails extends AppCompatActivity implements Dialog
 
                                 if(task1.isSuccessful()) {
                                     Log.d(TAG, "MSpD onComplete: spectacles in saison réussi ");
-                                    Toast.makeText(ModifySpectaclesDetails.this, "Réussi saison", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ModifySpectaclesDetails.this, "Réussi supp spectacle dans saison", Toast.LENGTH_SHORT).show();
                                 }else{
                                     Log.d(TAG, "MSp onComplete: pb dans le onComplete");
                                 }
-                            }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.d(TAG, "MSp onFailure: pb sur update");
-                        }
-                    });
+                            }).addOnFailureListener(e -> Log.d(TAG, "MSp onFailure: pb sur update"));
                 }
 
             }else{

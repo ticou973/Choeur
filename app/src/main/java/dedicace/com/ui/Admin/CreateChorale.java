@@ -2,11 +2,9 @@ package dedicace.com.ui.Admin;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -16,20 +14,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageException;
@@ -38,23 +29,23 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import dedicace.com.R;
 
 public class CreateChorale extends AppCompatActivity implements DialogNewSSFragment.DialogNewSSListener, OnFailureListener {
-    private SharedPreferences sharedPreferences;
 
     //Firebase
     private StorageReference mStorageRef;
     private FirebaseFirestore db;
-    private FirebaseAuth mAuth;
-    public static String current_user_id;
-    private String idChorale;
+    private String idChorale, idSpectacle1, idCurrentSaison;
     private static final String TAG ="coucou";
-    private static final int REQUEST_CODE_B = 200;
     private EditText nomChorale;
     private TextView logo;
     private Button selectLogo, createChorale;
@@ -66,22 +57,20 @@ public class CreateChorale extends AppCompatActivity implements DialogNewSSFragm
     private int imageSelected;
     private String pathSelected;
     private String fileNameSelected;
-    private String logoStr;
     private String nomChoraleStr,logoImageStr;
     private Uri fileSelected;
     private Uri downloadUrl;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_chorale);
 
-
         nomChorale=findViewById(R.id.et_nom_chorale);
         logo=findViewById(R.id.tv_logo_chorale);
         selectLogo=findViewById(R.id.btn_select_logo_chorale);
         createChorale=findViewById(R.id.btn_create_chorale);
-
 
         ActionBar actionBar = this.getSupportActionBar();
 
@@ -91,45 +80,31 @@ public class CreateChorale extends AppCompatActivity implements DialogNewSSFragm
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
         db = FirebaseFirestore.getInstance();
-        mAuth = FirebaseAuth.getInstance();
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        idChorale=sharedPreferences.getString("idchorale"," ");
         Log.d(TAG, "onCreate: idChorale "+ idChorale );
 
-        selectLogo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                logoStr="Logo";
-                getLists();
-                selectLogo();
-            }
+        selectLogo.setOnClickListener(view -> {
+            getLists();
+            selectLogo();
         });
 
+        createChorale.setOnClickListener(view -> {
 
-        createChorale.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+           nomChoraleStr=nomChorale.getText().toString();
+           logoImageStr=logo.getText().toString();
 
-               nomChoraleStr=nomChorale.getText().toString();
-               logoImageStr=logo.getText().toString();
-
-               if(!TextUtils.isEmpty(nomChoraleStr)){
-                   Log.d(TAG, "CC,onClick: conditions passées "+nomChoraleStr+" "+logoImageStr);
-                   if(!TextUtils.isEmpty(logoImageStr)) {
-                           Log.d(TAG, "CC onClick: if logo");
-                           insertLogosInCloudStorage();
-
-                   }else{
-                       Log.d(TAG, "CC onClick: else logo");
-                       insertChoraleInDb();
-                   }
-
+           if(!TextUtils.isEmpty(nomChoraleStr)){
+               Log.d(TAG, "CC,onClick: conditions passées "+nomChoraleStr+" "+logoImageStr);
+               if(!TextUtils.isEmpty(logoImageStr)) {
+                       Log.d(TAG, "CC onClick: if logo");
+                       insertLogosInCloudStorage();
                }else{
-                   Toast.makeText(CreateChorale.this, "Il manque des éléments", Toast.LENGTH_SHORT).show();
+                   Log.d(TAG, "CC onClick: else logo");
+                   insertChoraleInDb();
                }
-
-            }
+           }else{
+               Toast.makeText(CreateChorale.this, "Il manque des éléments", Toast.LENGTH_SHORT).show();
+           }
         });
     }
 
@@ -139,48 +114,27 @@ public class CreateChorale extends AppCompatActivity implements DialogNewSSFragm
         StorageReference imageRef = mStorageRef.child("chorales/logo_titre/"+fileNameSelected);
 
         UploadTask uploadTask = imageRef.putFile(fileSelected);
-
-        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Log.d(TAG, "CC onSuccess: bravo c'est uploadé");
-
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle unsuccessful uploads
-                        // ...
-                        Log.d(TAG, "CC onFailure: dommage c'est raté");
-                    }
+        uploadTask.addOnSuccessListener(taskSnapshot -> Log.d(TAG, "CC onSuccess: bravo c'est uploadé"))
+                .addOnFailureListener(exception -> {
+                    // Handle unsuccessful uploads
+                    // ...
+                    Log.d(TAG, "CC onFailure: dommage c'est raté");
                 });
 
 
-        uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-            @Override
-            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                if (!task.isSuccessful()) {
-                    throw task.getException();
-                }
-
-
-                // Continue with the task to get the download URL
-                return imageRef.getDownloadUrl();
+        uploadTask.continueWithTask(task -> {
+            if (!task.isSuccessful()) {
+                throw Objects.requireNonNull(task.getException());
             }
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
-                if (task.isSuccessful()) {
-                    downloadUrl = task.getResult();
-                    insertChoraleInDb();
-                    Log.d(TAG, "CC onComplete: "+downloadUrl);
-                } else {
-                    // Handle failures
-
-                    // ...
-                    Log.d(TAG, "CC onComplete: Il y a eu un pb "+task.getException().getMessage());
-                }
+            // Continue with the task to get the download URL
+            return imageRef.getDownloadUrl();
+        }).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                downloadUrl = task.getResult();
+                insertChoraleInDb();
+                Log.d(TAG, "CC onComplete: "+downloadUrl);
+            } else {
+                Log.d(TAG, "CC onComplete: Il y a eu un pb "+ Objects.requireNonNull(task.getException()).getMessage());
             }
         });
     }
@@ -198,30 +152,87 @@ public class CreateChorale extends AppCompatActivity implements DialogNewSSFragm
 
         db.collection("chorale")
                 .add(chorale)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                        if(pathSelected!=null) {
-                            File file = new File(pathSelected);
-                            if (file.delete()) {
-                                Log.d(TAG, "CC onSuccess: le fichier est supprimé du local");
-                            } else {
-                                Log.d(TAG, "CC onSuccess: problème de suppression en local du fichier");
-                            }
+                .addOnSuccessListener(documentReference -> {
+                    Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                    idChorale=documentReference.getId();
+
+                    if(pathSelected!=null) {
+                        File file = new File(pathSelected);
+                        if (file.delete()) {
+                            Log.d(TAG, "CC onSuccess: le fichier est supprimé du local");
+                        } else {
+                            Log.d(TAG, "CC onSuccess: problème de suppression en local du fichier");
                         }
-
-                        newChorale();
                     }
+                    CreateSpectacle1();
+                    newChorale();
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "CC Error adding document", e);
-                    }
-                });
+                .addOnFailureListener(e -> Log.d(TAG, "CC Error adding document", e));
 
+    }
 
+    private void CreateSpectacle1() {
+
+        List<String> newLieuxStr = new ArrayList<>();
+        List<String> newTitreStr = new ArrayList<>();
+        List<Date> newdates = new ArrayList<>();
+
+        newLieuxStr.add("lieu 1");
+        newTitreStr.add("5lRdsWgJY4wYgVA4aJaC");
+        Calendar calendar = Calendar.getInstance();
+        newdates.add(calendar.getTime());
+
+        Map<String,Object> spectacle = new HashMap<>();
+        spectacle.put("maj",Timestamp.now());
+        spectacle.put("nom", "spectacle 1");
+        spectacle.put("concerts_dates",newdates);
+        spectacle.put("concerts_lieux",newLieuxStr);
+        spectacle.put("id_titres",newTitreStr);
+
+        db.collection("chorale").document(idChorale).collection("spectacles")
+                .add(spectacle)
+                .addOnSuccessListener(documentReference -> {
+                    Toast.makeText(CreateChorale.this, "Youpi spectacle 1", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "onSuccess: Spectacle 1");
+                    idSpectacle1 =documentReference.getId();
+                    createSaison1();
+
+                }).addOnFailureListener(e -> Log.d(TAG, "CC onSuccess: problème de création de spectacle"));
+    }
+
+    private void createSaison1() {
+        Map<String,Object> saison = new HashMap<>();
+        saison.put("maj", Timestamp.now());
+        saison.put("nom","Saison 1");
+
+        List<String> listIdSpectacles = new ArrayList<>();
+        listIdSpectacles.add(idSpectacle1);
+
+        saison.put("spectacles",listIdSpectacles);
+
+        db.collection("chorale").document(idChorale).collection("saisons")
+                .add(saison)
+                .addOnSuccessListener(documentReference -> {
+                    idCurrentSaison=documentReference.getId();
+                    Log.d(TAG, "CC insertChoraleInDb: Youpi saison 1 "+idCurrentSaison);
+                    Toast.makeText(this, "Youpi succès saison 1", Toast.LENGTH_SHORT).show();
+
+                    PutCurrentSaisonInChorale();
+
+                }).addOnFailureListener(e -> Log.d(TAG, "CC onSuccess: problème de création de saison"));
+    }
+
+    private void PutCurrentSaisonInChorale() {
+        Map<String,Object> choraleSuite = new HashMap<>();
+        choraleSuite.put("current_saison",idCurrentSaison);
+
+        db.collection("chorale").document(idChorale)
+                .update(choraleSuite)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "CC insertChoraleInDb: youpi current saison "+idCurrentSaison);
+                    Toast.makeText(this, "Youpi current saisons ", Toast.LENGTH_SHORT).show();
+
+                }).addOnFailureListener(e -> Log.d(TAG, "CC onSuccess: problème de création de currentsaison"));
     }
 
     private void newChorale() {
@@ -245,7 +256,7 @@ public class CreateChorale extends AppCompatActivity implements DialogNewSSFragm
         if(file.exists()) {
             listFiles = file.listFiles();
 
-            Log.d(TAG, "CC getLists: " + listFiles);
+            Log.d(TAG, "CC getLists: " + Arrays.toString(listFiles));
 
             if (listFiles != null && listFiles.length != 0) {
                 for (File image : listFiles) {

@@ -19,10 +19,12 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import dedicace.com.R;
 
@@ -77,10 +79,11 @@ public class CreateSpectacle extends AppCompatActivity implements DialogNewSSFra
                 Map<String,Object> spectacle = new HashMap<>();
                 spectacle.put("nom",nomSpectacleStr);
                 if(lieux==null||lieux.size()==0) {
-                    lieux.add("");
+                    Objects.requireNonNull(lieux).add("A venir");
                 }
                 if(dates==null||dates.size()==0) {
-                    dates.add(null);
+                    Calendar calendar = Calendar.getInstance();
+                    dates.add(calendar.getTime());
                 }
 
                 spectacle.put("concerts_lieux", lieux);
@@ -121,16 +124,6 @@ public class CreateSpectacle extends AppCompatActivity implements DialogNewSSFra
 
     }
 
-
-    private void modifyMajChorale() {
-        Map<String,Object> data = new HashMap<>();
-        data.put("maj",Timestamp.now());
-
-        db.collection("chorale").document(idChorale)
-                .update(data)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "CSS onSuccess: maj chorale done"))
-                .addOnFailureListener(e -> Log.d(TAG, "CSS onSuccess: maj chorale failed"));
-    }
 
     private void newSpectacle() {
         DialogFragment dialog = new DialogNewSSFragment();

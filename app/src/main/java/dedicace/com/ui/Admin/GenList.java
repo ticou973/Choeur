@@ -155,8 +155,10 @@ public class GenList extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull GenViewHolder genViewHolder, int i) {
-            genViewHolder.genName.setText(listGenComp.get(i));
-            genViewHolder.genSubName.setText(listGen.get(i));
+            if(listGen!=null&&listGen.size()!=0&&listGenComp!=null&&listGenComp.size()!=0) {
+                genViewHolder.genName.setText(listGenComp.get(i));
+                genViewHolder.genSubName.setText(listGen.get(i));
+            }
         }
 
         @Override

@@ -2,7 +2,6 @@ package dedicace.com.ui.Admin;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
@@ -12,7 +11,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -33,8 +31,6 @@ public class ModifySaison extends AppCompatActivity implements SaisonAdapter.OnI
     private List<Saison> listSaisons = new ArrayList<>();
     private ArrayList<String> oldNameStr = new ArrayList<>();
     private RecyclerView recyclerSaison;
-    private FloatingActionButton fab;
-    private RecyclerView.LayoutManager layoutManager;
     private SaisonAdapter saisonAdapter;
     private FirebaseFirestore db;
     private Intent startDetailsSaisonsActivity;
@@ -54,7 +50,7 @@ public class ModifySaison extends AppCompatActivity implements SaisonAdapter.OnI
 
         getIntentBundle();
 
-        fab = findViewById(R.id.fab_Saison);
+        FloatingActionButton fab = findViewById(R.id.fab_Saison);
 
         fab.setOnClickListener(view -> {
             Intent startCreateSaisonActivity = new Intent(ModifySaison.this,CreateSaison.class);
@@ -62,7 +58,7 @@ public class ModifySaison extends AppCompatActivity implements SaisonAdapter.OnI
         });
 
         recyclerSaison = findViewById(R.id.recyclerview_cloud_saison);
-        layoutManager = new LinearLayoutManager(ModifySaison.this);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(ModifySaison.this);
         recyclerSaison.setLayoutManager(layoutManager);
         recyclerSaison.setHasFixedSize(true);
 
@@ -79,7 +75,7 @@ public class ModifySaison extends AppCompatActivity implements SaisonAdapter.OnI
                     .addOnCompleteListener(task -> {
                         Log.d(TAG, "MSp getListSaisons: on Complete saison");
                         if(task.isSuccessful()){
-                            for(QueryDocumentSnapshot document : task.getResult()){
+                            for(QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())){
                                 Log.d(TAG, "Msp getListSaisons: "+document.getId()+" "+document.getData().get("maj"));
                                 String idDocument, nom;
                                 Date maj;
@@ -91,7 +87,7 @@ public class ModifySaison extends AppCompatActivity implements SaisonAdapter.OnI
 
                                 nom = (String) document.getData().get("nom");
                                 majSaison = (Timestamp) document.getData().get("maj");
-                                maj = majSaison.toDate();
+                                maj = Objects.requireNonNull(majSaison).toDate();
                                 idSpectacles =(ArrayList<String>) document.getData().get("spectacles");
 
                                 Log.d(TAG, "MSa-exec onComplete:A Spectacles " + nom + " " + idSpectacles+" "+maj);
@@ -99,7 +95,16 @@ public class ModifySaison extends AppCompatActivity implements SaisonAdapter.OnI
                                 listSaisons.add(saison);
                             }
 
-                            Log.d(TAG, "MSp onComplete: pas de new intent");
+                            Log.d(TAG, "MSp onComplete: pas de new intent ");
+
+                            if(listSaisons!=null&&listSaisons.size()!=0) {
+                                for(Saison saison:listSaisons) {
+                                    Log.d(TAG, "MSp getListSaisons: "+saison.getSaisonName());
+                                }
+                            }else{
+                                Log.d(TAG, "MSp getListSaisons: liste vide de saisons liste");
+                            }
+
                             saisonAdapter = new SaisonAdapter(listSaisons);
                             recyclerSaison.setAdapter(saisonAdapter);
 
@@ -107,12 +112,7 @@ public class ModifySaison extends AppCompatActivity implements SaisonAdapter.OnI
                             Log.d(TAG, "MSp Error getting documents.", task.getException());
                         }
 
-                    }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Log.d(TAG, "MSa onFailure: pb getLisrSaisons");
-                }
-            });
+                    }).addOnFailureListener(e -> Log.d(TAG, "MSa onFailure: pb getLisrSaisons"));
 
 
         }catch (Exception e) {
@@ -122,41 +122,51 @@ public class ModifySaison extends AppCompatActivity implements SaisonAdapter.OnI
     }
 
     private void getNomsSpectacle(ArrayList<String> idSpectacles) {
-        entier=0;
-        //todo voir une méthode plus esthétique ?
-        for (int i = 0; i < idSpectacles.size(); i++) {
-            oldNameStr.add("A supprimer");
-        }
+        Log.d(TAG, "MS getNomsSpectacle: arrivée"+idSpectacles);
 
-        for(String idSpectacle:idSpectacles){
-            db.collection("chorale").document(idChorale).collection("spectacles").document(idSpectacle)
-                    .get()
-                    .addOnCompleteListener(task -> {
-                        if(task.isSuccessful()){
-                            entier++;
-                            Log.d(TAG, "MSa onComplete: réussi getNomSaison "+idSpectacles.lastIndexOf(idSpectacle)+"/"+idSpectacles.size());
 
-                            if(Objects.requireNonNull(task.getResult()).exists()){
-                                String name = (String) task.getResult().get("nom");
-                                oldNameStr.add(idSpectacles.indexOf(idSpectacle),name);
-                                oldNameStr.remove("A supprimer");
-                                Log.d(TAG, "MSa getNomSaison: réussi "+name);
+        if(idSpectacles!=null&&idSpectacles.size()!=0) {
+            entier=0;
+            //todo voir une méthode plus esthétique ?
+            for (int i = 0; i < idSpectacles.size(); i++) {
+                oldNameStr.add("A supprimer");
+            }
 
-                                if(entier ==idSpectacles.size()){
-                                    Log.d(TAG, "MSa getNomSaison: if"+oldNameStr);
-                                    args.putStringArrayList("OldSpectaclesNames",oldNameStr);
-                                    startDetailsSaisonsActivity.putExtra("bundleSpectacle", args);
-                                    startActivity(startDetailsSaisonsActivity);
+            for (String idSpectacle : idSpectacles) {
+                Log.d(TAG, "MS getNomsSpectacle: " + idSpectacle);
+                db.collection("chorale").document(idChorale).collection("spectacles").document(idSpectacle)
+                        .get()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                entier++;
+                                Log.d(TAG, "MSa onComplete: réussi getNomSaison " + idSpectacles.lastIndexOf(idSpectacle) + "/" + idSpectacles.size());
+
+                                if (Objects.requireNonNull(task.getResult()).exists()) {
+                                    String name = (String) task.getResult().get("nom");
+                                    oldNameStr.add(idSpectacles.indexOf(idSpectacle), name);
+                                    oldNameStr.remove("A supprimer");
+                                    Log.d(TAG, "MSa getNomSaison: réussi " + name);
+
+                                    if (entier == idSpectacles.size()) {
+                                        Log.d(TAG, "MSa getNomSaison: if" + oldNameStr);
+                                        args.putStringArrayList("OldSpectaclesNames", oldNameStr);
+                                        startDetailsSaisonsActivity.putExtra("bundleSpectacle", args);
+                                        startActivity(startDetailsSaisonsActivity);
+                                    }
+                                } else {
+                                    Log.d(TAG, "Msa getNomsSpectacle:  pb de task result ");
                                 }
-                            }else{
-                                Log.d(TAG, "Msa getNomsSpectacle:  pb de task result ");
+
+                            } else {
+                                Log.d(TAG, "MSp onComplete: failure getTitresSong ");
                             }
 
-                        }else{
-                            Log.d(TAG, "MSp onComplete: failure getTitresSong ");
-                        }
-
-                    }).addOnFailureListener(e -> Log.d(TAG, "MSpD onFailure: getTitresSongs"));
+                        }).addOnFailureListener(e -> Log.d(TAG, "MSpD onFailure: getTitresSongs"));
+            }
+        }else{
+            args.putStringArrayList("OldSpectaclesNames", null);
+            startDetailsSaisonsActivity.putExtra("bundleSpectacle", args);
+            startActivity(startDetailsSaisonsActivity);
         }
     }
 

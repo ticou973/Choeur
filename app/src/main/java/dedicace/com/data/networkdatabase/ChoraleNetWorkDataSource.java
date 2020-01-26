@@ -534,7 +534,6 @@ public class ChoraleNetWorkDataSource {
 
             String filename = mStorageRef.getName();
 
-            //todo essayer de mettre un dossier sons.mp3
             localFileMp3 = new File(mContext.getFilesDir(), filename);
             String pathLocalMp3 = localFileMp3.getAbsolutePath();
             song.setSongPath(pathLocalMp3);
@@ -542,7 +541,6 @@ public class ChoraleNetWorkDataSource {
             Log.d(LOG_TAG, "NDS uploadOnPhoneMp3: " + localFileMp3.getParent() + " " + filename + " " + localFileMp3.getPath() + " " + localFileMp3.getAbsolutePath()+" "+ mContext.getFilesDir()+" "+Thread.currentThread().getName());
 
             //todo voir comment utiliser download manager
-            //todo voir comment intégrer l'avancement des données dans un retour utilisateur
             mStorageRef.getFile(localFileMp3)
                     .addOnSuccessListener(taskSnapshot -> {
                         // Successfully downloaded data to local file
@@ -583,7 +581,6 @@ public class ChoraleNetWorkDataSource {
     }
 
     public Context getContext() {
-
         return mContext;
     }
 
@@ -643,13 +640,9 @@ public class ChoraleNetWorkDataSource {
                 source.setUpdateBgPhone(null);
             }
         });
-
-
     }
 
     public MutableLiveData<String> getDownloads() {
-
-
         return downloads;
     }
 

@@ -3,7 +3,6 @@ package dedicace.com.ui.Admin;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.NavUtils;
@@ -12,16 +11,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -33,7 +28,6 @@ import dedicace.com.R;
 
 public class CreateSaison extends AppCompatActivity implements DialogNewSSFragment.DialogNewSSListener{
 
-    private Button addSpectacles, createSaisonInDb, selectChorale;
     private EditText nomSaison;
     private TextView nomChorale, listSpectacles;
     private String nomSaisonStr, idChorale, nomChoraleStr, nomSpectacle, idSpectacle;
@@ -51,9 +45,9 @@ public class CreateSaison extends AppCompatActivity implements DialogNewSSFragme
 
         Log.d(TAG, "CSa onCreate: arrivée");
 
-        addSpectacles = findViewById(R.id.btn_add_spectacles_saison);
-        selectChorale = findViewById(R.id.btn_select_chorale_saison);
-        createSaisonInDb = findViewById(R.id.btn_create_saison_db);
+        Button addSpectacles = findViewById(R.id.btn_add_spectacles_saison);
+        Button selectChorale = findViewById(R.id.btn_select_chorale_saison);
+        Button createSaisonInDb = findViewById(R.id.btn_create_saison_db);
         nomSaison = findViewById(R.id.et_nom_saison);
         nomChorale=findViewById(R.id.et_select_chorale_saison);
         listSpectacles = findViewById(R.id.tv_list_noms_spectacle);
@@ -68,43 +62,33 @@ public class CreateSaison extends AppCompatActivity implements DialogNewSSFragme
 
         db = FirebaseFirestore.getInstance();
 
-        createSaisonInDb.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        createSaisonInDb.setOnClickListener(view -> {
 
-                nomChoraleStr = nomChorale.getText().toString();
-                nomSaisonStr =nomSaison.getText().toString();
+            nomChoraleStr = nomChorale.getText().toString();
+            nomSaisonStr =nomSaison.getText().toString();
 
-                Log.d(TAG, "CSa Click: create in DB "+ nomSaisonStr+" "+nomChoraleStr+ " "+idChorale+" "+nomsSpectacles+ " "+listIds);
-                if(!TextUtils.isEmpty(nomSaisonStr)&&!TextUtils.isEmpty(nomChoraleStr)&&listIds!=null&&listIds.size()!=0){
+            Log.d(TAG, "CSa Click: create in DB "+ nomSaisonStr+" "+nomChoraleStr+ " "+idChorale+" "+nomsSpectacles+ " "+listIds);
+            if(!TextUtils.isEmpty(nomSaisonStr)&&!TextUtils.isEmpty(nomChoraleStr)){
 
-                    Map<String,Object> saison = new HashMap<>();
-                    saison.put("nom",nomSaisonStr);
+                Map<String,Object> saison = new HashMap<>();
+                saison.put("nom",nomSaisonStr);
 
-                    saison.put("spectacles", listIds);
-                    saison.put("maj", Timestamp.now());
+                saison.put("spectacles", listIds);
+                saison.put("maj", Timestamp.now());
 
-                    db.collection("chorale").document(idChorale).collection("saisons")
-                            .add(saison)
-                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                @Override
-                                public void onSuccess(DocumentReference documentReference) {
-                                    Log.d(TAG, "CS DocumentSnapshot added with ID: " + documentReference.getId());
-                                    newSaison();
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.d(TAG, "CSa Error adding document", e);
-                                }
-                            });
-                }else {
-                    Log.d(TAG, "CSa onClick: else create in Db ");
-                    Toast.makeText(CreateSaison.this, "tout n'est pas rempli !", Toast.LENGTH_SHORT).show();
-                }
-
+                db.collection("chorale").document(idChorale).collection("saisons")
+                        .add(saison)
+                        .addOnSuccessListener(documentReference -> {
+                            Log.d(TAG, "CS DocumentSnapshot added with ID: " + documentReference.getId());
+                            newSaison();
+                            modifyMajChorale();
+                        })
+                        .addOnFailureListener(e -> Log.d(TAG, "CSa Error adding document", e));
+            }else {
+                Log.d(TAG, "CSa onClick: else create in Db ");
+                Toast.makeText(CreateSaison.this, "tout n'est pas rempli !", Toast.LENGTH_SHORT).show();
             }
+
         });
 
         addSpectacles.setOnClickListener(view -> {
@@ -138,18 +122,8 @@ public class CreateSaison extends AppCompatActivity implements DialogNewSSFragme
 
         db.collection("chorale").document(idChorale)
                 .update(data)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "CSS onSuccess: maj chorale done");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "CSS onSuccess: maj chorale failed");
-                    }
-                });
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "CSS onSuccess: maj chorale done"))
+                .addOnFailureListener(e -> Log.d(TAG, "CSS onSuccess: maj chorale failed"));
     }
 
     @Override
@@ -179,7 +153,7 @@ public class CreateSaison extends AppCompatActivity implements DialogNewSSFragme
                 for(String nom:nomsSpectacles){
                     i++;
                     String listNoms = i+". "+nom+newLine;
-                    sb.append(listNoms+newLine);
+                    sb.append(listNoms).append(newLine);
                 }
 
                 Log.d(TAG, "CSa onActivityResult: "+ sb.toString() );
