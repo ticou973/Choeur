@@ -26,20 +26,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         String message = remoteMessage.getNotification().getBody();
         Log.d(TAG, "MFMS onMessageReceived: "+message);
 
-        //action
-
-
-
 
         //créer une notification
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CANAL);
         notificationBuilder.setContentTitle("MAJ Chansons");
         notificationBuilder.setContentText(message);
-        notificationBuilder.setSmallIcon(R.drawable.bell);
+        notificationBuilder.setSmallIcon(R.drawable.logo_dedicace);
 
         ActivityManager activityManager = (ActivityManager) this.getSystemService(ACTIVITY_SERVICE);
 
 
+        //todo voir comment faire pour que cela relance l'ensemble du processus avec la maj
         //permet de vérifie qu'une application donné par son package est en cours
         List<ActivityManager.RunningAppProcessInfo> procInfos = activityManager.getRunningAppProcesses();
         for (int i = 0; i < procInfos.size(); i++) {

@@ -3,9 +3,12 @@ package dedicace.com.ui;
 import android.Manifest;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -120,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d("coucou", "MA onCreate: " + Thread.currentThread().getName());
+        Log.d(TAG, "MA onCreate: connection internet "+haveInternetConnection());
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
@@ -148,6 +152,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(songsAdapter);
+
+
 
 
 
@@ -1155,6 +1161,25 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             dataBase.songsDao().deleteAll();
             dataBase.sourceSongDao().deleteAll();
         });
+    }
+
+    private boolean haveInternetConnection(){
+        // Fonction haveInternetConnection : return true si connecté, return false dans le cas contraire
+        NetworkInfo network = ((ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+
+        boolean wifi = network.getType()==ConnectivityManager.TYPE_WIFI;
+        boolean res = network.getType()==ConnectivityManager.TYPE_MOBILE;
+
+        Log.d(TAG, "MA haveInternetConnection: wifi "+ wifi+ " réseau 4G "+ res);
+
+        if (network==null || !network.isConnected())
+        {
+
+            // Le périphérique n'est pas connecté à Internet
+            return false;
+        }
+        // Le périphérique est connecté à Internet
+        return true;
     }
 }
 
