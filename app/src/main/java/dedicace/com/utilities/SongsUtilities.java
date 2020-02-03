@@ -10,7 +10,7 @@ import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SongsDao;
 import dedicace.com.data.database.SourceSong;
-import dedicace.com.ui.SongsAdapter;
+import dedicace.com.ui.PlaySong.SongsAdapter;
 
 public class SongsUtilities {
     private static List<List<RecordSource>> RecordSources = new ArrayList<>();

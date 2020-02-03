@@ -8,18 +8,18 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true">
+
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.PlaySong.MainActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
-
         <activity
-            android:name=".ui.LoginActivity"
+            android:name=".ui.PlaySong.LoginActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeLogin" />
         <activity
-            android:name=".ui.SplashActivity"
+            android:name=".ui.PlaySong.SplashActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeLogin">
@@ -30,17 +30,38 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.SettingsActivity"
-            android:label="preferences"
-            android:parentActivityName=".ui.MainActivity"
+            android:name=".ui.Trombinoscope.TrombiActivity"
+            android:label="Trombinoscope"
+            android:parentActivityName=".ui.PlaySong.MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.MainActivity" />
+                android:value=".ui.PlaySong.MainActivity" />
+        </activity>
+
+        <activity
+            android:name=".ui.Trombinoscope.TrombiDetailsActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Trombinoscope.TrombiActivity"/>
+
+        </activity>
+        <activity
+            android:name=".ui.PlaySong.SettingsActivity"
+            android:label="preferences"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".ui.PlaySong.MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.PlaySong.MainActivity" />
         </activity>
         <activity
             android:name=".ui.Admin.AdminHome"
-            android:parentActivityName=".ui.MainActivity"
+            android:parentActivityName=".ui.PlaySong.MainActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
@@ -233,22 +254,23 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.Admin.ModifySpectaclesDetails" />
         </activity>
+
         <service
-            android:name=".ui.MyFirebaseMessagingService"
+            android:name=".ui.PlaySong.MyFirebaseMessagingService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
         <service
-            android:name=".data.networkdatabase.ChoraleSyncIntentService"
+            android:name=".ui.PlaySong.ChoraleSyncIntentService"
             android:exported="false" />
     </application>
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 </manifest>

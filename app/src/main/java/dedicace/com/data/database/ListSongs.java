@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import dedicace.com.ui.SongsAdapter;
+import dedicace.com.ui.PlaySong.SongsAdapter;
 
 public class ListSongs {
 

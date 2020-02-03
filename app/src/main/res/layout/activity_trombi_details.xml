@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primaryLightColor"
+    tools:context=".ui.Trombinoscope.TrombiDetailsActivity">
+
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/img_photo_destails"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/ic_allmusic_black_24dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_nom_choriste_details"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/roboto"
+            android:text="nom Choriste"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="@+id/img_photo_destails"
+            app:layout_constraintStart_toStartOf="@+id/img_photo_destails"
+            app:layout_constraintTop_toBottomOf="@+id/img_photo_destails" />
+
+        <TextView
+            android:id="@+id/tv_pupitre_details"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/roboto"
+            android:text="Pupitre"
+            android:textColor="@android:color/black"
+            android:textSize="16dp"
+            app:layout_constraintEnd_toEndOf="@+id/tv_nom_choriste_details"
+            app:layout_constraintStart_toStartOf="@+id/tv_nom_choriste_details"
+            app:layout_constraintTop_toBottomOf="@+id/tv_nom_choriste_details" />
+
+        <TextView
+            android:id="@+id/tv_email_choriste_details"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto"
+            android:text="Email"
+            android:textColor="@android:color/black"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textView73"
+            app:layout_constraintEnd_toEndOf="@+id/tv_choriste_role_admin"
+            app:layout_constraintStart_toStartOf="@+id/tv_choriste_role_admin" />
+
+        <TextView
+            android:id="@+id/tv_choriste_adresse_details"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/roboto"
+            android:text="Adresse"
+            android:textColor="@android:color/black"
+            app:layout_constraintEnd_toEndOf="@+id/tv_tel_port_choriste_details"
+            app:layout_constraintStart_toStartOf="@+id/tv_tel_port_choriste_details"
+            app:layout_constraintTop_toBottomOf="@+id/tv_tel_port_choriste_details" />
+
+        <TextView
+            android:id="@+id/tv_tel_fixe_choriste_details"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/roboto"
+            android:text="Tel. Fixe"
+            android:textColor="@android:color/black"
+            app:layout_constraintEnd_toEndOf="@+id/tv_email_choriste_details"
+            app:layout_constraintStart_toStartOf="@+id/tv_email_choriste_details"
+            app:layout_constraintTop_toBottomOf="@+id/tv_email_choriste_details" />
+
+        <TextView
+            android:id="@+id/tv_tel_port_choriste_details"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/roboto"
+            android:text="Tel. Portable"
+            android:textColor="@android:color/black"
+            app:layout_constraintEnd_toEndOf="@+id/tv_tel_fixe_choriste_details"
+            app:layout_constraintStart_toStartOf="@+id/tv_tel_fixe_choriste_details"
+            app:layout_constraintTop_toBottomOf="@+id/tv_tel_fixe_choriste_details" />
+
+        <TextView
+            android:id="@+id/textView66"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:fontFamily="@font/roboto"
+            android:text="Adresse"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBaseline_toBaselineOf="@+id/tv_choriste_adresse_details"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/textView67"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:fontFamily="@font/roboto"
+            android:text="Tel. Fixe"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBaseline_toBaselineOf="@+id/tv_tel_fixe_choriste_details"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/textView68"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:fontFamily="@font/roboto"
+            android:text="Tel. Port."
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBaseline_toBaselineOf="@+id/tv_tel_port_choriste_details"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_choriste_role_choeur"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/roboto"
+            android:text="Rôle Choeur"
+            android:textColor="@android:color/black"
+            android:textSize="16dp"
+            app:layout_constraintEnd_toEndOf="@+id/tv_pupitre_details"
+            app:layout_constraintStart_toStartOf="@+id/tv_pupitre_details"
+            app:layout_constraintTop_toBottomOf="@+id/tv_pupitre_details" />
+
+        <TextView
+            android:id="@+id/tv_choriste_role_admin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/roboto"
+            android:text="Rôle Admin"
+            android:textColor="@android:color/black"
+            android:textSize="16dp"
+            app:layout_constraintEnd_toEndOf="@+id/tv_choriste_role_choeur"
+            app:layout_constraintStart_toStartOf="@+id/tv_choriste_role_choeur"
+            app:layout_constraintTop_toBottomOf="@+id/tv_choriste_role_choeur" />
+
+        <TextView
+            android:id="@+id/textView72"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="32dp"
+            android:fontFamily="@font/roboto"
+            android:text="Coordonnées"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_choriste_role_admin" />
+
+        <TextView
+            android:id="@+id/textView73"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/roboto"
+            android:text="Email"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView72" />
+
+    </android.support.constraint.ConstraintLayout>
+</android.support.v4.widget.NestedScrollView>

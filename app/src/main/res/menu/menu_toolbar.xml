@@ -2,10 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+
     <item
-        android:id="@+id/parametres"
-        android:title="@string/preferences"
+        android:id="@+id/trombi"
+        android:title="@string/trombinoscope"
         app:showAsAction="never" />
+
     <item
         android:id="@+id/load_pupitre"
         android:title="@string/charger_les_chansons_d_un_pupitre"
@@ -14,6 +16,17 @@
         android:id="@+id/delete_pupitre"
         android:title="@string/supprimer_les_chansons_d_un_pupitre"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/parametres"
+        android:title="@string/preferences"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/contact"
+        android:title="@string/contact"
+        app:showAsAction="never"/>
+
     <item
         android:id="@+id/admin"
         android:title="@string/admin"
@@ -23,9 +36,5 @@
         android:id="@+id/spectacles"
         android:title="@string/tous"
         app:showAsAction="ifRoom"/>
-    <item
-        android:id="@+id/contact"
-        android:title="@string/contact"
-        app:showAsAction="never"/>
 
 </menu>

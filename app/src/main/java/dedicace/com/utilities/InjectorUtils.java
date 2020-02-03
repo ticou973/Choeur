@@ -2,11 +2,10 @@ package dedicace.com.utilities;
 
 import android.content.Context;
 
-import dedicace.com.AppExecutors;
-import dedicace.com.data.ChoraleRepository;
+import dedicace.com.ui.PlaySong.ChoraleRepository;
 import dedicace.com.data.database.AppDataBase;
-import dedicace.com.data.networkdatabase.ChoraleNetWorkDataSource;
-import dedicace.com.ui.MainActivityViewModelFactory;
+import dedicace.com.ui.PlaySong.ChoraleNetWorkDataSource;
+import dedicace.com.ui.PlaySong.MainActivityViewModelFactory;
 
 public class InjectorUtils {
 
@@ -15,7 +14,7 @@ public class InjectorUtils {
         AppExecutors executors = AppExecutors.getInstance();
         ChoraleNetWorkDataSource networkDataSource =
                 ChoraleNetWorkDataSource.getInstance(context.getApplicationContext(), mAContext,executors);
-        return ChoraleRepository.getInstance(database.songsDao(), database.sourceSongDao(),database.saisonDao(),database.spectacleDao(),networkDataSource, executors);
+        return ChoraleRepository.getInstance(database.songsDao(), database.sourceSongDao(),database.saisonDao(),database.spectacleDao(), networkDataSource, executors);
     }
 
     public static ChoraleNetWorkDataSource provideNetworkDataSource(Context context, Context mAContext) {
