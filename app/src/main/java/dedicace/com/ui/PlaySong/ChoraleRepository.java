@@ -31,7 +31,6 @@ import dedicace.com.data.database.SourceSong;
 import dedicace.com.data.database.SourceSongDao;
 import dedicace.com.data.database.Spectacle;
 import dedicace.com.data.database.SpectacleDao;
-import dedicace.com.utilities.AppExecutors;
 
 public class ChoraleRepository {
     // For Singleton instantiation
@@ -43,7 +42,6 @@ public class ChoraleRepository {
     private final SaisonDao mSaisonDao;
     private final  SpectacleDao mSpectacleDao;
     private final ChoraleNetWorkDataSource mChoraleNetworkDataSource;
-    private final AppExecutors mExecutors;
     private boolean mInitialized = false;
     private Thread currentThread,t2,t1,t3,t4,t5,t6,t7, threadSaisons;
     private static Context context;
@@ -116,7 +114,7 @@ public class ChoraleRepository {
     private Song songToDelete;
 
 
-    private ChoraleRepository(SongsDao songsDao, SourceSongDao sourceSongDao, SaisonDao saisonDao, SpectacleDao spectacleDao, final ChoraleNetWorkDataSource choraleNetworkDataSource, AppExecutors executors) {
+    private ChoraleRepository(SongsDao songsDao, SourceSongDao sourceSongDao, SaisonDao saisonDao, SpectacleDao spectacleDao, final ChoraleNetWorkDataSource choraleNetworkDataSource) {
         Log.d(LOG_TAG, "CR Repository: constructor");
 
         mSongDao = songsDao;
@@ -124,11 +122,8 @@ public class ChoraleRepository {
         mSaisonDao=saisonDao;
         mSpectacleDao=spectacleDao;
         mChoraleNetworkDataSource = choraleNetworkDataSource;
-        mExecutors = executors;
 
-        //todo à modifier éventuellement sur préférences veut - on regarder si on veut télécharger automatique ou non (à la demande) ou si la dernière date de maj à changer
         context = mChoraleNetworkDataSource.getContext();
-        //todo à modifier dans le listener pour appliquer les changements
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         modifEnCours=false;
 
@@ -152,8 +147,6 @@ public class ChoraleRepository {
                    File tempFile = new File(path);
                    String name = tempFile.getName();
                    Log.d(LOG_TAG, "CR patch fichier disparu " + name);
-
-
 
                    if (tempFile.exists()) {
                        Log.d(LOG_TAG, "CR ChoraleRepository: old Songs A " + song.getSourceSongTitre() + " " + song.getPupitre() + " " + song.getSongIdCloud() + " " + song.getUpdatePhone() + " " + song.getSongPath());
@@ -406,13 +399,12 @@ public class ChoraleRepository {
         t1.start();
     }
 
-    public synchronized static ChoraleRepository getInstance(SongsDao songsDao, SourceSongDao sourceSongDao, SaisonDao saisonDao, SpectacleDao spectacleDao, ChoraleNetWorkDataSource choraleNetworkDataSource, AppExecutors executors) {
+    public synchronized static ChoraleRepository getInstance(SongsDao songsDao, SourceSongDao sourceSongDao, SaisonDao saisonDao, SpectacleDao spectacleDao, ChoraleNetWorkDataSource choraleNetworkDataSource) {
 
         Log.d(LOG_TAG, "CR getInstance: repository");
         if (sInstance == null) {
             synchronized (LOCK) {
-                sInstance = new ChoraleRepository(songsDao, sourceSongDao, saisonDao,spectacleDao, choraleNetworkDataSource,
-                        executors);
+                sInstance = new ChoraleRepository(songsDao, sourceSongDao, saisonDao,spectacleDao, choraleNetworkDataSource);
 
                 Log.d(LOG_TAG, "CR getInstance: new repository");
             }
@@ -1470,12 +1462,11 @@ public class ChoraleRepository {
             if(oldSourcesSongs!=null&&oldSourcesSongs.size()!=0){
                 isFromLocal=true;
                 typeSS="oldSS";
-                //todo voir comment retirer les arguments qui sont inutiles
                 DoSynchronization(oldSourcesSongs,oldSongs);
                 Log.d(LOG_TAG, "CR run: getOldSongs et SourcesSongs : données initiales "+oldSourcesSongs+" "+oldSongs);
             }else{
                 Log.d(LOG_TAG, "CR run: getOldSongs et SourcesSongs : pas de données initiales ");
-                //todo ajouter une alerte éventuelle si nécessaire ?
+
             }
             Log.d(LOG_TAG, "CR ChoraleRepository: Stop startFectch pas lancé !");
         }

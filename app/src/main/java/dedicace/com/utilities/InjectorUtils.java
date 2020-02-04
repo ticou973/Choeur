@@ -2,10 +2,13 @@ package dedicace.com.utilities;
 
 import android.content.Context;
 
-import dedicace.com.ui.PlaySong.ChoraleRepository;
 import dedicace.com.data.database.AppDataBase;
 import dedicace.com.ui.PlaySong.ChoraleNetWorkDataSource;
+import dedicace.com.ui.PlaySong.ChoraleRepository;
 import dedicace.com.ui.PlaySong.MainActivityViewModelFactory;
+import dedicace.com.ui.Trombinoscope.TrombiActivityViewModelFactory;
+import dedicace.com.ui.Trombinoscope.TrombiNetWorkDataSource;
+import dedicace.com.ui.Trombinoscope.TrombiRepository;
 
 public class InjectorUtils {
 
@@ -14,7 +17,7 @@ public class InjectorUtils {
         AppExecutors executors = AppExecutors.getInstance();
         ChoraleNetWorkDataSource networkDataSource =
                 ChoraleNetWorkDataSource.getInstance(context.getApplicationContext(), mAContext,executors);
-        return ChoraleRepository.getInstance(database.songsDao(), database.sourceSongDao(),database.saisonDao(),database.spectacleDao(), networkDataSource, executors);
+        return ChoraleRepository.getInstance(database.songsDao(), database.sourceSongDao(),database.saisonDao(),database.spectacleDao(), networkDataSource);
     }
 
     public static ChoraleNetWorkDataSource provideNetworkDataSource(Context context, Context mAContext) {
@@ -29,4 +32,19 @@ public class InjectorUtils {
         ChoraleRepository repository = provideRepository(context.getApplicationContext(),mAContext);
         return new MainActivityViewModelFactory(repository);
     }
+
+
+    private static TrombiRepository provideTrombiRepository(Context context, Context mAContext) {
+        AppDataBase database = AppDataBase.getInstance(context.getApplicationContext());
+        AppExecutors executors = AppExecutors.getInstance();
+        TrombiNetWorkDataSource networkDataSource =
+                TrombiNetWorkDataSource.getInstance(context.getApplicationContext(), mAContext,executors);
+        return TrombiRepository.getInstance(database.choristeDao(), networkDataSource);
+    }
+
+    public static TrombiActivityViewModelFactory provideChoristeViewModelFactory(Context context, Context mAContext) {
+        TrombiRepository repository = provideTrombiRepository(context.getApplicationContext(),mAContext);
+        return new TrombiActivityViewModelFactory(repository);
+    }
+
 }

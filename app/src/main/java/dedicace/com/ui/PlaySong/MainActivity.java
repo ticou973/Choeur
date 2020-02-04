@@ -73,7 +73,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private ListSongs listSongs;
     private Thread currentThread;
 
-    //todo à retirer seulement pour les tests
     private LiveData<List<SourceSong>> sourceSongs;
     private List<SourceSong> sourceSongList = new ArrayList<>();
     private Song firstSongPlayed;

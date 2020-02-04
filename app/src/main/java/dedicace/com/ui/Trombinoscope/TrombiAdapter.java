@@ -22,11 +22,17 @@ class TrombiAdapter extends RecyclerView.Adapter<TrombiAdapter.TrombiViewHolder>
 
     private List<Choriste> choristes;
     private Context mContext;
+    private ListItemClickListener listItemClickListener;
 
 
-    public TrombiAdapter(Context context,List<Choriste> choristes) {
-        this.choristes = choristes;
+    public TrombiAdapter(Context context,ListItemClickListener handler) {
+
         this.mContext =context;
+        this.listItemClickListener=handler;
+    }
+
+    public interface ListItemClickListener {
+        void OnClickItem();
     }
 
     @NonNull

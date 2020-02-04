@@ -42,7 +42,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsViewHolder>  {
     private String origine = "Default";
 
     //todo voir si il faut envoyer dans le constructeur les songs
-    public SongsAdapter(Context context, ListemClickedListener handler ) {
+    public SongsAdapter(Context context, ListemClickedListener handler) {
         this.context = context;
         //todo voir si à enlever ?
         mlistemClickedListener=handler;

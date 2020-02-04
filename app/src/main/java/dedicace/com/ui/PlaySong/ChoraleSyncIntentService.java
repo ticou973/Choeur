@@ -26,10 +26,6 @@ public class ChoraleSyncIntentService extends IntentService {
                 networkDataSource.fetchMajClouDb();
                 Log.d("coucou", "CSIS onHandleIntent: fin du travail maj " + Thread.currentThread().getName());
                 break;
-            case "download":
-                // networkDataSource.downloadImagesMp3();
-                Log.d("coucou", "CSIS onHandleIntent: fin du travail download " + Thread.currentThread().getName());
-                break;
         }
     }
 }

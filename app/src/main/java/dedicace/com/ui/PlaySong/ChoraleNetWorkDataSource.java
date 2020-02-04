@@ -32,15 +32,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import dedicace.com.utilities.AppExecutors;
 import dedicace.com.R;
-import dedicace.com.utilities.WorkerThread;
 import dedicace.com.data.database.Pupitre;
 import dedicace.com.data.database.RecordSource;
 import dedicace.com.data.database.Saison;
 import dedicace.com.data.database.Song;
 import dedicace.com.data.database.SourceSong;
 import dedicace.com.data.database.Spectacle;
+import dedicace.com.utilities.AppExecutors;
 import dedicace.com.utilities.SongsUtilities;
 
 public class ChoraleNetWorkDataSource {
@@ -51,11 +50,11 @@ public class ChoraleNetWorkDataSource {
     private static ChoraleNetWorkDataSource sInstance;
     private final Context mContext;
     private boolean aloneCreate, deleted = false;
-    private DialogFragment dialog;
+
 
     //Utils
     private AppExecutors mExecutors;
-    private WorkerThread workerThread;
+
 
     //todo remplacer par un join ?
     private Handler handler = new Handler(Looper.getMainLooper()){
@@ -144,10 +143,9 @@ public class ChoraleNetWorkDataSource {
         mAuth = FirebaseAuth.getInstance();
         current_user_id= Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
 
-        workerThread = new WorkerThread();
         sharedPreferences =PreferenceManager.getDefaultSharedPreferences(mContext);
         current_user_id =sharedPreferences.getString("userId", "");
-        dialog = new DialogDownload();
+
         Log.d(LOG_TAG, "NDS ChoraleNetWorkDataSource: constructor ref de storage et db");
         Log.d(LOG_TAG, "NDS ChoraleNetWorkDataSource: constructor "+ current_user_id);
 
@@ -247,19 +245,6 @@ public class ChoraleNetWorkDataSource {
         }else{
             Log.d(LOG_TAG, "NDS getMajDateCloudDataBase: pas d'Id chorale");
         }
-    }
-
-    public void startDownloadService(List<SourceSong> bgSourcesToDownLoad, List<SourceSong> newSourceSongsList, List<Song> mp3SongsToDownload, List<Song> newSongsList){
-        Log.d(LOG_TAG, "NDS startFetchSongsService: début pour Download");
-        bgDownload=bgSourcesToDownLoad;
-       newBgDownload=newSourceSongsList;
-        mp3Download=mp3SongsToDownload;
-        newMp3Download=newSongsList;
-
-        Intent intentToDowload = new Intent(mContext, ChoraleSyncIntentService.class);
-        intentToDowload.putExtra("origine","download");
-        mContext.startService(intentToDowload);
-        Log.d(LOG_TAG, "NDS Service created pour Download");
     }
 
 
