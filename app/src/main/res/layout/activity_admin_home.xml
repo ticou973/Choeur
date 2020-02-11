@@ -26,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="20dp"
         android:fontFamily="@font/roboto"
         android:text="Sources"
         android:textColor="@android:color/black"
@@ -274,4 +274,47 @@
         android:textStyle="bold"
         app:layout_constraintBaseline_toBaselineOf="@+id/btn_create_saison"
         app:layout_constraintStart_toEndOf="@+id/btn_create_saison" />
+
+    <TextView
+        android:id="@+id/textView55"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="60dp"
+        android:fontFamily="@font/roboto"
+        android:text="Choristes"
+        android:textColor="@android:color/black"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView38" />
+
+    <Button
+        android:id="@+id/btn_create_choriste"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/secondaryColor"
+        android:fontFamily="@font/roboto"
+        android:text="Créer"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView55"
+        app:layout_constraintEnd_toEndOf="@+id/btn_create_saison"
+        app:layout_constraintStart_toStartOf="@+id/btn_create_saison" />
+
+    <Button
+        android:id="@+id/btn_modify_choriste"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:background="@color/secondaryColor"
+        android:fontFamily="@font/roboto"
+        android:padding="10dp"
+        android:text="modifier"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@+id/btn_create_choriste"
+        app:layout_constraintStart_toEndOf="@+id/btn_create_choriste" />
 </android.support.constraint.ConstraintLayout>

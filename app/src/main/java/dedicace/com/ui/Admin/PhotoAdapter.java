@@ -14,15 +14,14 @@ import java.util.List;
 
 import dedicace.com.R;
 
-class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImagesViewHolder> {
-
+public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotosViewHolder> {
     private List<String> listImages;
     private static final String TAG="coucou";
     private OnItemListener mListener;
 
-    public ImageAdapter(List<String> listImages) {
+    public PhotoAdapter(List<String> listImages) {
         this.listImages = listImages;
-        Log.d(TAG, "IA ImageAdapter: "+listImages);
+        Log.d(TAG, "PA ImageAdapter: "+listImages);
     }
 
     public interface OnItemListener {
@@ -31,17 +30,16 @@ class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImagesViewHolder> {
 
     @NonNull
     @Override
-    public ImagesViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_background, viewGroup, false);
+    public PhotosViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
 
-        return new ImagesViewHolder(view);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_photo, viewGroup, false);
+
+        return new PhotosViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ImagesViewHolder imagesViewHolder, int i) {
-
-        imagesViewHolder.imageName.setText(listImages.get(i));
-
+    public void onBindViewHolder(@NonNull PhotosViewHolder photosViewHolder, int i) {
+        photosViewHolder.imageName.setText(listImages.get(i));
     }
 
     @Override
@@ -70,26 +68,29 @@ class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImagesViewHolder> {
         mListener = null;
     }
 
-    private void selectBackground(int numItem){
+    private void selectPhoto(int numItem){
         if(mListener!=null){
-            Log.d(TAG, "IA selectBackground: "+numItem);
+            Log.d(TAG, "PA selectPhoto: "+numItem);
             mListener.onItemClick(numItem);
         }
     }
 
-    class ImagesViewHolder extends RecyclerView.ViewHolder {
+
+    class PhotosViewHolder extends RecyclerView.ViewHolder {
         TextView imageName;
         CardView cv;
-        ImagesViewHolder(@NonNull View itemView) {
+
+        PhotosViewHolder(@NonNull View itemView) {
             super(itemView);
-            imageName = itemView.findViewById(R.id.imageName);
-            cv=itemView.findViewById(R.id.cv_list_image);
+            imageName = itemView.findViewById(R.id.photoName);
+            cv=itemView.findViewById(R.id.cv_list_photo);
 
             cv.setOnClickListener(view -> {
-                Log.d(TAG, "IA onClick: "+getAdapterPosition());
+                Log.d(TAG, "PA onClick: "+getAdapterPosition());
                 int i = getAdapterPosition();
-                selectBackground(i);
+                selectPhoto(i);
             });
+
         }
     }
 }

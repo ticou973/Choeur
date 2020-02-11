@@ -19,6 +19,9 @@ public class Choriste {
     @ColumnInfo(name ="id_choriste_cloud")
     private String idChoristeCloud;
 
+    @ColumnInfo(name="id_chorale")
+    private String idChorale;
+
     @ColumnInfo(name = "nom")
     private String nom;
 
@@ -41,10 +44,10 @@ public class Choriste {
     private String email;
 
     @ColumnInfo(name = "role_choeur")
-    String roleChoeur;
+    private String roleChoeur;
 
     @ColumnInfo(name = "role_admin")
-    String roleAdmin;
+    private String roleAdmin;
 
     @ColumnInfo(name = "url_local_photo")
     private String urlLocalPhoto;
@@ -58,9 +61,10 @@ public class Choriste {
     @ColumnInfo(name ="update_bg_phone")
     private Date updatePhotoPhone;
 
-    public Choriste(int choristeId, String idChoristeCloud, String nom, String prenom, Pupitre pupitre, String adresse, String fixTel, String portTel, String email, String roleChoeur, String roleAdmin, String urlLocalPhoto, String urlCloudPhoto, Date updatePhone, Date updatePhotoPhone) {
+    public Choriste(int choristeId, String idChoristeCloud, String idChorale, String nom, String prenom, Pupitre pupitre, String adresse, String fixTel, String portTel, String email, String roleChoeur, String roleAdmin, String urlLocalPhoto, String urlCloudPhoto, Date updatePhone, Date updatePhotoPhone) {
         this.choristeId = choristeId;
         this.idChoristeCloud = idChoristeCloud;
+        this.idChorale = idChorale;
         this.nom = nom;
         this.prenom = prenom;
         this.pupitre = pupitre;
@@ -90,6 +94,14 @@ public class Choriste {
 
     @Ignore
     public Choriste() {
+    }
+
+    public String getIdChorale() {
+        return idChorale;
+    }
+
+    public void setIdChorale(String idChorale) {
+        this.idChorale = idChorale;
     }
 
     public int getChoristeId() {

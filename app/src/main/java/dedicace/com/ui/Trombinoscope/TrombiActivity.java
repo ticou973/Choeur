@@ -34,7 +34,7 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        //faitr une liste de chorsites pour que cela marche
+        //faire une liste de choristes pour que cela marche
 
         RecyclerView recyclerView = findViewById(R.id.recyclerview_trombi);
         //Adapter
@@ -51,6 +51,7 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
         choristes = mViewModel.getChoristes();
 
         choristes.observe(this, choristes -> {
+
 
 
 

@@ -263,6 +263,5 @@ public class CreateSourceSong extends AppCompatActivity implements DialogNewSSFr
         String errorMessage = e.getMessage();
 
         Log.d(TAG, "CSS onFailure: "+ errorMessage+" "+errorCode);
-
     }
 }

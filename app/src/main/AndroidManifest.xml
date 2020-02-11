@@ -39,21 +39,43 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.PlaySong.MainActivity" />
         </activity>
-
         <activity
             android:name=".ui.Trombinoscope.TrombiDetailsActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.Trombinoscope.TrombiActivity"/>
-
+                android:value=".ui.Trombinoscope.TrombiActivity" />
+        </activity>
+        <activity
+            android:name=".ui.Admin.CreateChoristeMode"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.AdminHome" />
+        </activity>
+        <activity
+            android:name=".ui.Admin.CreateChoristeCsv"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.CreateChoristeMode" />
+        </activity>
+        <activity
+            android:name=".ui.Admin.CreateChoristeUnit"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.CreateChoristeMode" />
         </activity>
         <activity
             android:name=".ui.PlaySong.SettingsActivity"
             android:label="preferences"
-            android:screenOrientation="portrait"
             android:parentActivityName=".ui.PlaySong.MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -77,6 +99,11 @@
             android:name=".ui.Admin.ChooseBackground"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
+
+        <activity android:name=".ui.Admin.ChoosePhoto"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
+        </activity>
         <activity
             android:name=".ui.Admin.ModifySourceSong"
             android:parentActivityName=".ui.Admin.AdminHome"

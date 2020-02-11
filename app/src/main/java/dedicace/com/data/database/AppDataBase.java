@@ -10,7 +10,7 @@ import android.arch.persistence.room.migration.Migration;
 import android.content.Context;
 import android.util.Log;
 
-@Database(entities ={Song.class, SourceSong.class, Saison.class, Spectacle.class, Choriste.class}, version = 12, exportSchema = false)
+@Database(entities ={Song.class, SourceSong.class, Saison.class, Spectacle.class, Choriste.class}, version = 13, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDataBase extends RoomDatabase {
 
@@ -47,14 +47,13 @@ public abstract class AppDataBase extends RoomDatabase {
         }
     };
 
-    static final Migration MIGRATION_2_3 = new Migration(2, 3) {
+    static final Migration MIGRATION_12_13 = new Migration(12, 13) {
         @Override
         public void migrate(SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE Book "
-                    + " ADD COLUMN pub_year INTEGER");
+            database.execSQL("ALTER TABLE Choriste "
+                    + " ADD COLUMN id_chorale TEXT");
         }
     };
-
 
     public static AppDataBase getInstance(Context context) {
         Log.d(LOG_TAG, "Getting the database");
@@ -63,7 +62,7 @@ public abstract class AppDataBase extends RoomDatabase {
             synchronized (LOCK) {
                 sInstance = Room.databaseBuilder(context.getApplicationContext(),
                         AppDataBase.class, AppDataBase.DATABASE_NAME)
-                        .addMigrations(MIGRATION_11_12)
+                        .addMigrations(MIGRATION_11_12,MIGRATION_12_13)
                         .fallbackToDestructiveMigration().build();
                 Log.d(LOG_TAG, "Made new database");
                 Log.d("coucou", "DB getInstance: new database");

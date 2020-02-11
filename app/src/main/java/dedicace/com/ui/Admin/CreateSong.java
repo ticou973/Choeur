@@ -88,11 +88,11 @@ public class CreateSong extends AppCompatActivity implements DialogNewSSFragment
         db = FirebaseFirestore.getInstance();
 
         createSongInDb.setOnClickListener(view -> {
-            //obligatoire
+
             titreSong=titre.getText().toString();
             mp3Song = fileMp3.getText().toString();
-            int idRb = rgb.getCheckedRadioButtonId();
 
+            int idRb = rgb.getCheckedRadioButtonId();
             switch (idRb){
                 case R.id.rb_tutti_cs:
                     pupitreSong="TUTTI";

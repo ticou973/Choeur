@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primaryColor"
+    tools:context=".ui.Admin.CreateChoristeUnit">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/textView56"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/roboto"
+            android:text="Choriste"
+            android:textColor="@android:color/black"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView58"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/roboto"
+            android:text="Chorale"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView56" />
+
+        <TextView
+            android:id="@+id/tv_nom_chorale_create_choriste"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="100dp"
+            android:fontFamily="@font/roboto"
+            android:text="nom Chorale"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textView58"
+            app:layout_constraintStart_toEndOf="@+id/textView58" />
+
+        <Button
+            android:id="@+id/btn_select_chorale_create_choriste"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@color/secondaryColor"
+            android:fontFamily="@font/roboto"
+            android:text="Selection..."
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="@+id/tv_nom_chorale_create_choriste"
+            app:layout_constraintStart_toStartOf="@+id/tv_nom_chorale_create_choriste"
+            app:layout_constraintTop_toBottomOf="@+id/tv_nom_chorale_create_choriste" />
+
+        <TextView
+            android:id="@+id/textView61"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/roboto"
+            android:text="Nom"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_select_chorale_create_choriste" />
+
+        <EditText
+            android:id="@+id/et_nom_choriste_create_choriste"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:fontFamily="@font/roboto"
+            android:hint="nom du choriste"
+            android:inputType="textPersonName"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textView61"
+            app:layout_constraintEnd_toEndOf="@+id/btn_select_chorale_create_choriste"
+            app:layout_constraintStart_toStartOf="@+id/btn_select_chorale_create_choriste" />
+
+        <TextView
+            android:id="@+id/textView62"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/roboto"
+            android:text="Prénom"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView61" />
+
+        <EditText
+            android:id="@+id/et_prenom_choriste_create_choriste"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:fontFamily="@font/roboto"
+            android:hint="Prénom du choriste"
+            android:inputType="textPersonName"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textView62"
+            app:layout_constraintEnd_toEndOf="@+id/et_nom_choriste_create_choriste"
+            app:layout_constraintStart_toStartOf="@+id/et_nom_choriste_create_choriste" />
+
+        <TextView
+            android:id="@+id/textView63"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="30dp"
+            android:fontFamily="@font/roboto"
+            android:text="Pupitre"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView62" />
+
+        <RadioGroup
+            android:id="@+id/rg_choriste_pupitre"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="@+id/et_prenom_choriste_create_choriste"
+            app:layout_constraintStart_toStartOf="@+id/et_prenom_choriste_create_choriste"
+            app:layout_constraintTop_toBottomOf="@+id/et_prenom_choriste_create_choriste">
+
+            <RadioButton
+                android:id="@+id/rb_choriste_aucun"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto"
+                android:text="Aucun"
+                android:textColor="@android:color/black" />
+
+            <RadioButton
+                android:id="@+id/rb_choriste_basse"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto"
+                android:text="@string/bass_value"
+                android:textColor="@android:color/black" />
+
+            <RadioButton
+                android:id="@+id/rb_choriste_tenor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto"
+                android:text="@string/tenor_value"
+                android:textColor="@android:color/black" />
+
+            <RadioButton
+                android:id="@+id/rb_choriste_alto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto"
+                android:text="@string/alto_value"
+                android:textColor="@android:color/black" />
+
+            <RadioButton
+                android:id="@+id/rb_choriste_soprano"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto"
+                android:text="@string/soprano_value"
+                android:textColor="@android:color/black" />
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/textView64"
+            android:layout_width="114dp"
+            android:layout_height="25dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="50dp"
+            android:fontFamily="@font/roboto"
+            android:text="Role Choeur"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/rg_choriste_pupitre" />
+
+        <RadioGroup
+            android:id="@+id/rg_role_choeur"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="@+id/rg_choriste_pupitre"
+            app:layout_constraintStart_toStartOf="@+id/rg_choriste_pupitre"
+            app:layout_constraintTop_toBottomOf="@+id/rg_choriste_pupitre">
+
+            <RadioButton
+                android:id="@+id/rb_role_choeur_choriste"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto"
+                android:text="Choriste"
+                android:textColor="@android:color/black" />
+
+            <RadioButton
+                android:id="@+id/rb_role_choeur_chef_choeur"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto"
+                android:text="Chef de Choeur"
+                android:textColor="@android:color/black" />
+
+            <RadioButton
+                android:id="@+id/rb_role_choeur_musicien"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto"
+                android:text="Musicien"
+                android:textColor="@android:color/black" />
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/textView60"
+            android:layout_width="101dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="30dp"
+            android:fontFamily="@font/roboto"
+            android:text="Role Admin"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_select_photo_choriste" />
+
+        <RadioGroup
+            android:id="@+id/rg_role_admin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:layout_constraintEnd_toEndOf="@+id/rg_role_choeur"
+            app:layout_constraintStart_toStartOf="@+id/rg_role_choeur"
+            app:layout_constraintTop_toBottomOf="@+id/btn_select_photo_choriste">
+
+            <RadioButton
+                android:id="@+id/rb_role_admin_aucun"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto"
+                android:text="Aucun"
+                android:textColor="@android:color/black" />
+
+            <RadioButton
+                android:id="@+id/rb_role_admin_admin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto"
+                android:text="Administrateur"
+                android:textColor="@android:color/black" />
+
+            <RadioButton
+                android:id="@+id/rb_role_admin_president"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto"
+                android:text="Président"
+                android:textColor="@android:color/black" />
+
+            <RadioButton
+                android:id="@+id/rb_role_admin_tresorier"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto"
+                android:text="Trésorier"
+                android:textColor="@android:color/black" />
+
+            <RadioButton
+                android:id="@+id/rb_role_admin_secretaire"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto"
+                android:text="Secrétaire"
+                android:textColor="@android:color/black" />
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/textView65"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/roboto"
+            android:text="Email"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/rg_role_admin" />
+
+        <EditText
+            android:id="@+id/et_create_choriste_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:fontFamily="@font/roboto"
+            android:hint="@string/email_hint"
+            android:inputType="textPersonName|textEmailAddress"
+            android:phoneNumber="false"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textView65"
+            app:layout_constraintEnd_toEndOf="@+id/rg_role_admin"
+            app:layout_constraintStart_toStartOf="@+id/rg_role_admin" />
+
+        <TextView
+            android:id="@+id/textView70"
+            android:layout_width="77dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/roboto"
+            android:text="Tel. Fixe"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView65" />
+
+        <EditText
+            android:id="@+id/et_tel_fixe_choriste"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Votre Tel. fixe"
+            android:inputType="textPersonName|phone"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textView70"
+            app:layout_constraintEnd_toEndOf="@+id/et_create_choriste_email"
+            app:layout_constraintStart_toStartOf="@+id/et_create_choriste_email" />
+
+        <TextView
+            android:id="@+id/textView74"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/roboto"
+            android:text="Tel. Port."
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView70" />
+
+        <EditText
+            android:id="@+id/et_tel_port_choriste"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:fontFamily="@font/roboto"
+            android:hint="Votre Tel. port."
+            android:inputType="number"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textView74"
+            app:layout_constraintEnd_toEndOf="@+id/et_tel_fixe_choriste"
+            app:layout_constraintStart_toStartOf="@+id/et_tel_fixe_choriste" />
+
+        <TextView
+            android:id="@+id/textView75"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/roboto"
+            android:text="Photo"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/rg_role_choeur" />
+
+        <TextView
+            android:id="@+id/tv_url_photo_choriste"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto"
+            android:text="url photo"
+            android:textColor="@android:color/black"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textView75"
+            app:layout_constraintEnd_toEndOf="@+id/rg_role_choeur"
+            app:layout_constraintStart_toStartOf="@+id/rg_role_choeur" />
+
+        <Button
+            android:id="@+id/btn_select_photo_choriste"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@color/secondaryColor"
+            android:fontFamily="@font/roboto"
+            android:text="@string/selection"
+            android:textColor="@android:color/black"
+            app:layout_constraintEnd_toEndOf="@+id/tv_url_photo_choriste"
+            app:layout_constraintStart_toStartOf="@+id/tv_url_photo_choriste"
+            app:layout_constraintTop_toBottomOf="@+id/tv_url_photo_choriste" />
+
+        <TextView
+            android:id="@+id/textView77"
+            android:layout_width="81dp"
+            android:layout_height="21dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/roboto"
+            android:text="Adresse"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView74" />
+
+        <EditText
+            android:id="@+id/et_adresse_choriste"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:fontFamily="@font/roboto"
+            android:hint="Votre Rue..."
+            android:inputType="textPersonName|textPostalAddress"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textView77"
+            app:layout_constraintEnd_toEndOf="@+id/et_tel_port_choriste"
+            app:layout_constraintStart_toStartOf="@+id/et_tel_port_choriste" />
+
+        <Button
+            android:id="@+id/btn_create_choriste_cloud"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:background="@color/secondaryColor"
+            android:fontFamily="@font/roboto"
+            android:padding="10dp"
+            android:text="Créer Choriste in Db."
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.489"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/et_zip_code_choriste" />
+
+        <EditText
+            android:id="@+id/et_ville_choriste"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ems="10"
+            android:fontFamily="@font/roboto"
+            android:hint="Votre Ville..."
+            android:inputType="textPersonName"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="@+id/et_adresse_choriste"
+            app:layout_constraintStart_toStartOf="@+id/et_adresse_choriste"
+            app:layout_constraintTop_toBottomOf="@+id/et_adresse_choriste" />
+
+        <EditText
+            android:id="@+id/et_zip_code_choriste"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ems="10"
+            android:fontFamily="@font/roboto"
+            android:hint="Votre Code Postal"
+            android:inputType="number"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="@+id/et_ville_choriste"
+            app:layout_constraintStart_toStartOf="@+id/et_ville_choriste"
+            app:layout_constraintTop_toBottomOf="@+id/et_ville_choriste" />
+    </android.support.constraint.ConstraintLayout>
+
+
+
+</android.support.v4.widget.NestedScrollView>
