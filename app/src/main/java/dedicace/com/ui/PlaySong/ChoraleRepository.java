@@ -98,7 +98,6 @@ public class ChoraleRepository {
     private List<Spectacle> modifiedSpectaclesList = new ArrayList<>();
     private List<Saison> newSaisonsList = new ArrayList<>();
     private List<Spectacle> newSpectaclesList = new ArrayList<>();
-    private List<Song> listSongSansMp3 = new ArrayList<>();
     private boolean modifEnCours;
 
     private ListSongs listSongs;
@@ -279,11 +278,12 @@ public class ChoraleRepository {
         final LiveData<List<SourceSong>> networkDataSourceSongs = mChoraleNetworkDataSource.getSourceSongs();
         Log.d(LOG_TAG, "CR ChoraleRepository: LiveData mChoraleNetworkdtasource SS "+mChoraleNetworkDataSource+" "+ networkDataSourceSongs);
         networkDataSourceSongs.observeForever(sourceSongs -> {
+
+            sourceSongs1=sourceSongs;
             //todo vérifier utilité de sourceSongs1
             if(sourceSongs1!=null&&sourceSongs1.size()!=0){
                 Log.d(LOG_TAG, "NDS ChoraleRepository: "+sourceSongs1.size()+sourceSongs.size());
             }
-            sourceSongs1=sourceSongs;
 
             Log.d(LOG_TAG, "CR Repository: observers Alerte cela bouge ! "+" "+sourceSongs1.size()+" "+sourceSongs1+Thread.currentThread().getName());
             songs = choraleNetworkDataSource.getSongs();
@@ -443,9 +443,7 @@ public class ChoraleRepository {
 
 
     private void getListSongsA() {
-        for(Song song : songsAfterSync){
-          //  Log.d(LOG_TAG, "CR GetList list songs "+song.getSourceSongTitre()+" "+song.getPupitre());
-        }
+
         listSongs= new ListSongs(mSongDao,mSourceDao,mSpectacleDao,sourceSongsAfterSync,songsAfterSync,context);
         listSongs.getSongOnClouds();
         listSongs.getSongOnPhoneBS();
@@ -1466,7 +1464,6 @@ public class ChoraleRepository {
                 Log.d(LOG_TAG, "CR run: getOldSongs et SourcesSongs : données initiales "+oldSourcesSongs+" "+oldSongs);
             }else{
                 Log.d(LOG_TAG, "CR run: getOldSongs et SourcesSongs : pas de données initiales ");
-
             }
             Log.d(LOG_TAG, "CR ChoraleRepository: Stop startFectch pas lancé !");
         }

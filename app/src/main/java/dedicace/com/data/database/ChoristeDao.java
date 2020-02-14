@@ -19,6 +19,9 @@ public interface ChoristeDao {
     @Query("SELECT * FROM choriste")
     LiveData<List<Choriste>> getAllChoristesLive();
 
+    @Query("SELECT * FROM choriste WHERE id_choriste_cloud in (:idCloud)")
+    Choriste getChoristeByIdCloud(String idCloud);
+
 //    @Query("SELECT * FROM choriste WHERE (nom IN (:nom) AND (prenom IN (:prenom))")
  //   Choriste getChorsiteByNomPrenom(String nom,String prenom);
 
@@ -36,5 +39,5 @@ public interface ChoristeDao {
     int upDateChoristes(List<Choriste> choristes);
 
     @Delete
-    void deleteChoristes(List<Choriste> choristes);
+    int deleteChoristes(List<Choriste> choristes);
 }

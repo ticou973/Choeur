@@ -10,7 +10,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -79,28 +78,17 @@ public class ChoraleNetWorkDataSource {
     private List<SourceSong> sourceSongs = new ArrayList<>();
     private List<Saison> saisons = new ArrayList<>();
     private List<Spectacle> spectacles = new ArrayList<>();
-    private List<Song> listDownloadMp3;
     private List<Song> oldSongs = new ArrayList<>();
     private List<Song> songs = new ArrayList<>();
     private String titre;
     private String currentPupitreStr;
     private List<Pupitre> pupitreToUpload = new ArrayList<>();
-    private List<SourceSong> bgDownload = new ArrayList<>();
-    private List<SourceSong> newBgDownload = new ArrayList<>();
-    private List<Song> mp3Download = new ArrayList<>();
-    private List<Song> newMp3Download = new ArrayList<>();
     private List<String> listIdSS = new ArrayList<>();
     private List<String> listIdSSTemp = new ArrayList<>();
 
-    //todo à retirer dès que test fini
-    private List<String> listIdSSTemp1 = new ArrayList<>();
-    private List<SourceSong> sourceSongs1 = new ArrayList<>();
-    private List<Song> songs1 = new ArrayList<>();
-    List<String> listIdSpectacles1 = new ArrayList<>();
 
     private List<String> listIdSpectacles = new ArrayList<>();
     private String current_saisonId;
-    private DialogFragment dialogWait;
 
 
     //DB
@@ -109,7 +97,6 @@ public class ChoraleNetWorkDataSource {
     private StorageReference mStorageRef;
     private String current_user_id;
     private Pupitre pupitreUser;
-    private FirebaseAuth mAuth;
 
     private Date majDateCloudDataBase;
     private String idChorale;
@@ -117,10 +104,7 @@ public class ChoraleNetWorkDataSource {
 
     //Local Storage
     private File localFileMp3;
-    private File localFileImage;
 
-
-    private Thread threadMaj;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
 
@@ -140,7 +124,7 @@ public class ChoraleNetWorkDataSource {
         Log.d(LOG_TAG, "NetworkDataSource: constructor " + mDownloaderSourceSongs);
         db = FirebaseFirestore.getInstance();
         mStorage = FirebaseStorage.getInstance();
-        mAuth = FirebaseAuth.getInstance();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         current_user_id= Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
 
         sharedPreferences =PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -218,7 +202,7 @@ public class ChoraleNetWorkDataSource {
                         .addOnCompleteListener(task -> {
                             Log.d(LOG_TAG, "NDS onComplete avant existe: "+task+" "+task.getResult());
                             if(Objects.requireNonNull(task.getResult()).exists()){
-                            threadMaj =Thread.currentThread();
+
 
                             Timestamp majDCBB =(Timestamp) task.getResult().get("maj");
                             majDateCloudDataBase = Objects.requireNonNull(majDCBB).toDate();
@@ -417,7 +401,7 @@ public class ChoraleNetWorkDataSource {
             String cloudPath = source.getUrlCloudBackground();
             mStorageRef = mStorage.getReferenceFromUrl(cloudPath);
             String filename = mStorageRef.getName();
-            localFileImage = new File(mContext.getFilesDir(), filename);
+            File localFileImage = new File(mContext.getFilesDir(), filename);
             String pathImage = localFileImage.getAbsolutePath();
             source.setBackground(pathImage);
             source.setUpdateBgPhone(new Date(System.currentTimeMillis()));
@@ -446,10 +430,10 @@ public class ChoraleNetWorkDataSource {
 
     public void downloadMp3(List<Song> songs) {
 
-        listDownloadMp3 =getListDownloadMp3(songs);
-        Log.d(LOG_TAG, "NDS downloadMp3: coucou "+listDownloadMp3);
+        List<Song> listDownloadMp3 = getListDownloadMp3(songs);
+        Log.d(LOG_TAG, "NDS downloadMp3: coucou "+ listDownloadMp3);
 
-        if (listDownloadMp3 != null&&listDownloadMp3.size()!=0) {
+        if (listDownloadMp3 != null&& listDownloadMp3.size()!=0) {
             Log.d(LOG_TAG, "NDS : uploadMP3 "+ listDownloadMp3.size()+" "+Thread.currentThread().getName());
             uploadOnPhoneMp3(listDownloadMp3);
         }else {
@@ -836,7 +820,6 @@ public class ChoraleNetWorkDataSource {
                 .get()
                 .addOnCompleteListener(task -> {
                     if(Objects.requireNonNull(task.getResult()).exists()){
-                        threadMaj =Thread.currentThread();
 
                         //todo peut être ne pas aller chercher car inutile si pas en initialisation
 
@@ -965,7 +948,6 @@ public class ChoraleNetWorkDataSource {
                 }).addOnFailureListener(e -> {
 
                 });
-
     }
 }
 

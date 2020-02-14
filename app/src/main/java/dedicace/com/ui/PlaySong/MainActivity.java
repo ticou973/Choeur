@@ -82,7 +82,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private List<List<Song>> songOnClouds;
     private List<List<Song>> SongOnPhonesLive = new ArrayList<>();
     private List<List<Song>> SongOnPhonesBS = new ArrayList<>();
-    private Pupitre pupitreToDownload;
     private Song songToPlay;
     private ArrayList<String> namesSpectacles = new ArrayList<>();
     private String spectacle = "Tous";
@@ -583,8 +582,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
      */
     private void showSongsDataView() {
         Log.d(TAG, "MA showSongsDataView: ");
-        //alertDialog.dismiss();
-        //dialogWait.dismiss();
+
         // First, hide the loading indicator
         mLoadingIndicator.setVisibility(View.INVISIBLE);
         // Finally, make sure the weather data is visible

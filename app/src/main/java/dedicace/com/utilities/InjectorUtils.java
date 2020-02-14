@@ -47,4 +47,11 @@ public class InjectorUtils {
         return new TrombiActivityViewModelFactory(repository);
     }
 
+    public static TrombiNetWorkDataSource provideChoristeNetworkDataSource(Context context, Context mAContext) {
+        // This call to provide repository is necessary if the app starts from a service - in this
+        // case the repository will not exist unless it is specifically created.
+        provideTrombiRepository(context.getApplicationContext(),mAContext);
+        AppExecutors executors = AppExecutors.getInstance();
+        return TrombiNetWorkDataSource.getInstance(context.getApplicationContext(), mAContext,executors);
+    }
 }

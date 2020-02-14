@@ -10,7 +10,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import dedicace.com.R;
 import dedicace.com.data.database.Song;
@@ -27,11 +26,6 @@ public class DialogMA extends DialogFragment {
 
     public DialogMA() { }
 
-    public void putProgress(int nbSong, int nbSongTotal) {
-        builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
-        builder.setMessage("Veuillez attendre la mise à jour des données..."+nbSong+"/"+nbSongTotal+" chansons chargées sur votre téléphone !");
-        builder.create();
-    }
 
     public interface DialogMAListener {
         void onDialogMAPositiveClick(int position, Song song);

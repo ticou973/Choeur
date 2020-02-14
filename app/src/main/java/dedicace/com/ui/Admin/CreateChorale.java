@@ -149,6 +149,7 @@ public class CreateChorale extends AppCompatActivity implements DialogNewSSFragm
         }else{
             chorale.put("logo","");
         }
+        chorale.put("maj_trombi",Timestamp.now());
 
         db.collection("chorale")
                 .add(chorale)

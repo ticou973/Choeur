@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,7 @@ class TrombiAdapter extends RecyclerView.Adapter<TrombiAdapter.TrombiViewHolder>
     private List<Choriste> choristes;
     private Context mContext;
     private ListItemClickListener listItemClickListener;
+    public static final String TAG = "coucou";
 
 
     public TrombiAdapter(Context context,ListItemClickListener handler) {
@@ -30,6 +32,7 @@ class TrombiAdapter extends RecyclerView.Adapter<TrombiAdapter.TrombiViewHolder>
         this.mContext =context;
         this.listItemClickListener=handler;
     }
+
 
     public interface ListItemClickListener {
         void OnClickItem();
@@ -69,19 +72,23 @@ class TrombiAdapter extends RecyclerView.Adapter<TrombiAdapter.TrombiViewHolder>
         return choristes.size();
     }
 
-    public class TrombiViewHolder extends RecyclerView.ViewHolder {
+    void swapChoristes(List<Choriste> choristes) {
+        Log.d(TAG, "TAd swapChoristes: ");
+        this.choristes=choristes;
+    }
+
+    class TrombiViewHolder extends RecyclerView.ViewHolder {
         TextView tvNom, tvPupitre;
         ImageView imgChoriste;
         CardView cv;
 
-        public TrombiViewHolder(@NonNull View itemView) {
+        TrombiViewHolder(@NonNull View itemView) {
             super(itemView);
 
             tvNom = itemView.findViewById(R.id.tv_choriste_nom);
             tvPupitre = itemView.findViewById(R.id.tv_choriste_pupitre);
             imgChoriste = itemView.findViewById(R.id.img_choriste);
             cv = itemView.findViewById(R.id.cardview_choriste);
-
 
         }
     }

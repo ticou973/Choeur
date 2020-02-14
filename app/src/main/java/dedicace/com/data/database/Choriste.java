@@ -96,6 +96,23 @@ public class Choriste {
     public Choriste() {
     }
 
+    @Ignore
+    public Choriste(String idChoristeCloud, String idChorale, String nom, String prenom, Pupitre pupitre, String adresse, String fixTel, String portTel, String email, String roleChoeur, String roleAdmin, String urlCloudPhoto, Date updatePhone) {
+        this.idChoristeCloud = idChoristeCloud;
+        this.idChorale = idChorale;
+        this.nom = nom;
+        this.prenom = prenom;
+        this.pupitre = pupitre;
+        this.adresse = adresse;
+        this.fixTel = fixTel;
+        this.portTel = portTel;
+        this.email = email;
+        this.roleChoeur = roleChoeur;
+        this.roleAdmin = roleAdmin;
+        this.urlCloudPhoto = urlCloudPhoto;
+        this.updatePhone = updatePhone;
+    }
+
     public String getIdChorale() {
         return idChorale;
     }
