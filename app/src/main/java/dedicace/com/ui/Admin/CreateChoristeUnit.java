@@ -241,9 +241,21 @@ public class CreateChoristeUnit extends AppCompatActivity implements DialogNewSS
                         Log.d(TAG, "CCU onSuccess: problème de suppression en local du fichier");
                     }
 
+                    majChoraleTrombi();
+
                     newChoriste();
 
                 }).addOnFailureListener(e -> Log.d(TAG, "CCU Error adding document", e));
+    }
+
+    private void majChoraleTrombi() {
+        Map<String,Object> data = new HashMap<>();
+        data.put("maj_trombi",Timestamp.now());
+
+        db.collection("chorale").document(idChorale)
+                .update(data)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "CSU onSuccess: maj chorale done"))
+                .addOnFailureListener(e -> Log.d(TAG, "CSU onSuccess: maj chorale failed"));
     }
 
     private void newChoriste() {

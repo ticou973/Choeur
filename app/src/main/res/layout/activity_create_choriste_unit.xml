@@ -348,7 +348,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="Votre Tel. fixe"
-            android:inputType="textPersonName|phone"
+            android:inputType="number|phone"
             android:textColor="@android:color/black"
             android:textSize="14sp"
             app:layout_constraintBaseline_toBaselineOf="@+id/textView70"

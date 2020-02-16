@@ -211,7 +211,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             sourceSongs = mViewModel.getChoeurSourceSongs();
             Log.d(TAG, "MA onCreate: getChoeurSourcesongs " + sourceSongs);
             sourceSongs.observe(this, sourceSongs -> {
-
                 Log.d(TAG, "MA onChanged: Alerte, ça bouge dans le coin !" + sourceSongs + " " + mViewModel.getChoeurSourceSongs() + " " + Thread.currentThread().getName());
 
                 currentThread = mViewModel.getCurrentThread();

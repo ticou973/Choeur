@@ -51,8 +51,14 @@ class TrombiAdapter extends RecyclerView.Adapter<TrombiAdapter.TrombiViewHolder>
     @Override
     public void onBindViewHolder(@NonNull TrombiViewHolder trombiViewHolder, int i) {
 
-        trombiViewHolder.tvPupitre.setText(choristes.get(i).getPupitre().toString());
-        trombiViewHolder.tvNom.setText(choristes.get(i).getNom());
+        if(choristes.get(i).getPupitre().toString().equals("Aucun")){
+            trombiViewHolder.tvPupitre.setText(choristes.get(i).getRoleChoeur());
+        }else{
+            trombiViewHolder.tvPupitre.setText(choristes.get(i).getPupitre().toString());
+        }
+
+        String prenomNom = choristes.get(i).getPrenom()+" "+choristes.get(i).getNom();
+        trombiViewHolder.tvNom.setText(prenomNom);
 
         GlideApp.with(mContext)
                 .load(choristes.get(i).getUrlLocalPhoto())
@@ -63,18 +69,37 @@ class TrombiAdapter extends RecyclerView.Adapter<TrombiAdapter.TrombiViewHolder>
             Intent intent = new Intent(mContext,TrombiDetailsActivity.class);
             intent.putExtra("nom", choristes.get(i).getNom());
             intent.putExtra("prenom", choristes.get(i).getPrenom());
+            intent.putExtra("pupitre", choristes.get(i).getPupitre().toString());
+            intent.putExtra("role_choeur", choristes.get(i).getRoleChoeur());
+            intent.putExtra("role_admin", choristes.get(i).getRoleAdmin());
+            intent.putExtra("email", choristes.get(i).getEmail());
+            intent.putExtra("tel_fixe",choristes.get(i).getFixTel());
+            intent.putExtra("tel_port",choristes.get(i).getPortTel());
+            intent.putExtra("adresse",choristes.get(i).getAdresse());
+            intent.putExtra("url_photo",choristes.get(i).getUrlLocalPhoto());
             mContext.startActivity(intent);
         });
     }
 
     @Override
     public int getItemCount() {
+        if(choristes==null){
+            return 0;
+        }
         return choristes.size();
     }
 
     void swapChoristes(List<Choriste> choristes) {
-        Log.d(TAG, "TAd swapChoristes: ");
+        Log.d(TAG, "TAd swapChoristes: "+choristes.size());
         this.choristes=choristes;
+
+        if(choristes!=null){
+            for(Choriste choriste : this.choristes){
+                Log.d(TAG, "TAd swapChoristes: "+choriste.getNom()+" "+choriste.getPrenom());
+            }
+        }
+
+        notifyDataSetChanged();
     }
 
     class TrombiViewHolder extends RecyclerView.ViewHolder {

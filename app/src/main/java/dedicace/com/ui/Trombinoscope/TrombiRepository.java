@@ -53,6 +53,7 @@ public class TrombiRepository {
     public TrombiRepository(ChoristeDao mChoristeDao, TrombiNetWorkDataSource trombiNetWorkDataSource) {
         this.mChoristeDao = mChoristeDao;
         this.trombiNetWorkDataSource = trombiNetWorkDataSource;
+        Log.d(TAG, "TrombiRepository: ");
 
         context = trombiNetWorkDataSource.getContext();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -61,9 +62,10 @@ public class TrombiRepository {
             oldChoristes = mChoristeDao.getAllChoristes();
 
             for(Choriste choriste :oldChoristes){
-                Log.d(TAG, "TR TrombiRepository: "+choriste.getNom()+" "+choriste.getPrenom());
+                Log.d(TAG, "TR TrombiRepository: old data"+choriste.getNom()+" "+choriste.getPrenom());
             }
         });
+        threadOldData.start();
 
 
         LiveData<Long> majDBCloudLong = trombiNetWorkDataSource.getMajDBCloudLong();
@@ -269,7 +271,7 @@ public class TrombiRepository {
                 mChoristeDao.updateChoriste(oldChoristes.get(0));
                 choristesAfterSync=oldChoristes;
             }
-            Log.d(TAG, "TR ChoraleRepository LiveData après sync choristes : "+choristes.size()+ " "+choristesAfterSync.size()+" "+Thread.currentThread().getName());
+            Log.d(TAG, "TR TrombiRepository LiveData après sync choristes : "+choristes.size()+ " "+choristesAfterSync.size()+" "+Thread.currentThread().getName());
 
         });
 
@@ -437,8 +439,8 @@ public class TrombiRepository {
     }
 
 
-
     private void initializeData() {
+        Log.d(TAG, "TR initializeData: début ");
 
         if(isFetchNeeded()){
 
@@ -464,12 +466,10 @@ public class TrombiRepository {
                 Log.d(TAG, "TR run: getOldSongs et SourcesSongs : pas de données initiales ");
             }
             Log.d(TAG, "TR ChoraleRepository: Stop startFectch pas lancé !");
-
         }
     }
 
     private boolean isFetchNeeded() {
-
         return true;
     }
 
@@ -479,15 +479,10 @@ public class TrombiRepository {
 
     private void LoadMajCloudDB() {
         trombiNetWorkDataSource.getMajDateCloudDataBase();
-
     }
 
-
-
     public LiveData<List<Choriste>> getChoristes() {
-
         initializeData();
-
         return mChoristeDao.getAllChoristesLive();
     }
 

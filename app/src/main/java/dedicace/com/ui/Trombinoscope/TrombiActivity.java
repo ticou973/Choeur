@@ -22,12 +22,11 @@ import java.util.List;
 import dedicace.com.R;
 import dedicace.com.data.database.AppDataBase;
 import dedicace.com.data.database.Choriste;
-import dedicace.com.ui.PlaySong.DialogMA;
 import dedicace.com.ui.PlaySong.DialogMajSS;
 import dedicace.com.utilities.AppExecutors;
 import dedicace.com.utilities.InjectorUtils;
 
-public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.ListItemClickListener, DialogMajChoristes.DialogMajChoristesListener {
+public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.ListItemClickListener, DialogMajChoristes.DialogMajChoristesListener, DialogTA.DialogTAListener {
 
     private LiveData<List<Choriste>> choristes;
     //ViewModel
@@ -42,10 +41,11 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
     private String typeChoriste;
     private  RecyclerView recyclerView;
     private ProgressBar mLoadingIndicator;
-    private DialogMA dialogWait;
+    private DialogTA dialogWait;
     private int mPosition = RecyclerView.NO_POSITION;
     private TrombiAdapter trombiAdapter;
     private List<Choriste> choristes1;
+    private SharedPreferences.Editor editor;
 
 
     @Override
@@ -60,6 +60,7 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         //faire une liste de choristes pour que cela marche
+        dataBase = AppDataBase.getInstance(getApplicationContext());
 
 
         mLoadingIndicator = findViewById(R.id.pb_loading_indicator_choriste);
@@ -72,17 +73,17 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
         recyclerView.setAdapter(trombiAdapter);
 
         mfactory = InjectorUtils.provideChoristeViewModelFactory(this.getApplicationContext(),this);
+        Log.d(TAG, "TA onCreate: mFactory done");
 
         mViewModel = ViewModelProviders.of(this,mfactory).get(TrombiActivityViewModel.class);
+        Log.d(TAG, "TA onCreate: mViewModel done");
 
         setUp();
 
         choristes = mViewModel.getChoristes();
 
         choristes.observe(this, choristes -> {
-
             choristes1=choristes;
-
             Log.d(TAG, "TA onChanged: Alerte, ça bouge dans le coin !" + choristes + " " + mViewModel.getChoristes() + " " + Thread.currentThread().getName());
 
             currentThread = mViewModel.getCurrentThread();
@@ -109,26 +110,24 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
                     Log.d(TAG, "TA onChanged: interrupted exception");
                 }
                 Log.d("coucou", "TA onCreate: Thread fini " + typeChoriste);
-
             }
 
-
-            if (choristes != null) {
-
-                    Log.d(TAG, "TA onChanged: conditions toutes réunies" + typeChoriste);
-                    switch (typeChoriste) {
-                        case "oldChoriste":
-                            Log.d(TAG, "TA onChanged: type OldChoriste");
-                            if (dialogWait != null) {
-                                dialogWait.dismiss();
-                            }
-                            if(choristes.size()!=0) {
-                                Log.d(TAG, "TA visualisation: if old");
-                                affichageRecyclerView(choristes);
-                                trombiAdapter.swapChoristes(choristes);
-                            }
-                            break;
-                        case "modificationChoriste":
+            if (choristes != null&&choristes.size()!=0) {
+                    Log.d(TAG, "TA onChanged: conditions toutes réunies " + typeChoriste+" "+choristes.size());
+                    if(typeChoriste!=null) {
+                        switch (typeChoriste) {
+                            case "oldChoriste":
+                                Log.d(TAG, "TA onChanged: type OldChoriste");
+                                if (dialogWait != null) {
+                                    dialogWait.dismiss();
+                                }
+                                if (choristes.size() != 0) {
+                                    Log.d(TAG, "TA visualisation: if old");
+                                    affichageRecyclerView(choristes);
+                                    trombiAdapter.swapChoristes(choristes);
+                                }
+                                break;
+                            case "modificationChoriste":
                                 //mettre un dialogue pour changer ou non
                                 Log.d(TAG, "TA onChanged: modification avant dialogAlert ");
                                 if (dialogWait != null) {
@@ -136,16 +135,20 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
                                 }
                                 DialogFragment dialog = new DialogMajSS();
                                 dialog.show(getSupportFragmentManager(), "TAG");
-                            break;
-                        case "newChoriste":
-                            Toast.makeText(TrombiActivity.this, "Veuillez patienter le temps de mettre en place toutes les chansons...", Toast.LENGTH_LONG).show();
-                            Log.d(TAG, "MA onChanged: newSS ");
-                            if (dialogWait != null) {
-                                dialogWait.dismiss();
-                            }
-                            affichageRecyclerView(choristes);
-                            trombiAdapter.swapChoristes(choristes);
-                            break;
+                                break;
+                            case "newChoriste":
+                                Toast.makeText(TrombiActivity.this, "Veuillez patienter le temps de mettre en place tous les choristes...", Toast.LENGTH_LONG).show();
+                                Log.d(TAG, "TA onChanged: newChoriste ");
+                                if (dialogWait != null) {
+                                    dialogWait.dismiss();
+                                }
+                                affichageRecyclerView(choristes);
+                                trombiAdapter.swapChoristes(choristes);
+                                break;
+                        }
+
+                    }else{
+                        Log.d(TAG, "TA onCreate: type choriste null ");
                     }
 
             } else {
@@ -189,7 +192,7 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
 
     private void AlertBox() {
         Log.d(TAG, "TA AlertBox: ");
-        dialogWait = new DialogMA();
+        dialogWait = new DialogTA();
         Bundle args = new Bundle();
         args.putString("origine", "waitChoristes");
         dialogWait.setArguments(args);
@@ -206,12 +209,15 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
 
     private void setUp() {
         installation = sharedPreferences.getBoolean("installationTrombi", true);
+        boolean installation = sharedPreferences.getBoolean("installation", true);
+        editor = sharedPreferences.edit();
 
         if (installation) {
             //getData();
+            editor = sharedPreferences.edit();
+            editor.putBoolean("installation", false);
             Log.d(TAG, "TA setUpSharedPreferences: installation ");
             deleteDbRoom();
-
         } else {
             Log.d(TAG, "TA setUpSharedPreferences: plus une installation ");
         }
@@ -249,5 +255,16 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
     @Override
     public void onDialogNegativeClick() {
         Toast.makeText(this, "Les nouveaux choristes appraitront au prochain lancement de l'application", Toast.LENGTH_LONG).show();
+    }
+
+    //todo à retirer car surement inutile
+    @Override
+    public void onDialogTAPositiveClick() {
+
+    }
+
+    @Override
+    public void onDialogTANegativeClick() {
+
     }
 }

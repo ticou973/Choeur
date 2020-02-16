@@ -27,7 +27,8 @@
             android:fontFamily="@font/roboto"
             android:text="Nom"
             android:textAlignment="center"
-            android:textColor="@android:color/black" />
+            android:textColor="@android:color/black"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tv_choriste_pupitre"
@@ -36,7 +37,8 @@
             android:fontFamily="@font/roboto"
             android:text="Pupitre"
             android:textAlignment="center"
-            android:textColor="@android:color/black" />
+            android:textColor="@android:color/black"
+            android:textSize="12sp" />
 
 
     </LinearLayout>

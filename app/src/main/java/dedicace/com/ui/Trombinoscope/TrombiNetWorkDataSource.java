@@ -74,10 +74,11 @@ public class TrombiNetWorkDataSource {
         mStorage = FirebaseStorage.getInstance();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
-        //todo voir si cela fonctionne dans tous les cas et supprimer si pas utile dans le progress
+
+       /* //todo voir si cela fonctionne dans tous les cas et supprimer si pas utile dans le progress
         if(mAContext!=context){
-            mlistener = (TrombiNetWorkDataSource.OnChoristeNDSListener) mAContext;
-        }
+            mlistener = (OnChoristeNDSListener) mAContext;
+        }*/
     }
 
     public Context getContext() {
@@ -225,6 +226,7 @@ public class TrombiNetWorkDataSource {
 
     public void fetchChoristes() {
         Log.d(LOG_TAG, "TDS fetchChoristes: début");
+
         try{
             db.collection("chorale").document(idChorale).collection("choristes")
                     .get()
