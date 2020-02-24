@@ -56,7 +56,7 @@ public class TrombiDetailsActivity extends AppCompatActivity {
                 .centerCrop() // scale to fill the ImageView and crop any extra
                 .into(imgChoriste);
 
-        String nomPrenom = prenom + " "+ nom;
+        String nomPrenom = nom + " "+ prenom;
         tvNom.setText(nomPrenom);
 
         if(pupitre.equals("Aucun")){

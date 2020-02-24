@@ -28,18 +28,15 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
-import dedicace.com.utilities.AppExecutors;
 import dedicace.com.R;
 import dedicace.com.data.database.AppDataBase;
 import dedicace.com.data.database.ListSongs;
@@ -50,6 +47,7 @@ import dedicace.com.data.database.SourceSong;
 import dedicace.com.data.database.Spectacle;
 import dedicace.com.ui.Admin.AdminHome;
 import dedicace.com.ui.Trombinoscope.TrombiActivity;
+import dedicace.com.utilities.AppExecutors;
 import dedicace.com.utilities.InjectorUtils;
 import dedicace.com.utilities.SongsUtilities;
 
@@ -63,7 +61,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     //Adapter
     private SongsAdapter songsAdapter;
-    private RecyclerView.LayoutManager layoutManager;
 
     //Songs
     private Toast mToast;
@@ -73,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     private ListSongs listSongs;
     private Thread currentThread;
 
-    private LiveData<List<SourceSong>> sourceSongs;
     private List<SourceSong> sourceSongList = new ArrayList<>();
     private Song firstSongPlayed;
     private List<List<RecordSource>> recordSources;
@@ -90,20 +86,15 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     //ViewModel
     private MainActivityViewModel mViewModel;
-    private MainActivityViewModelFactory mfactory;
 
     //Firebase
     public static String current_user_id;
-    private FirebaseAuth mAuth;
     private String mCurrentAuthRole;
     private String typeSS;
-    private boolean installation;
-    private boolean installationAuth;
 
 
     //Utils
     private OnPositiveClickListener mPositiveClickListener;
-    private AppExecutors mExecutors;
     private SharedPreferences sharedPreferences;
     private List<Pupitre> pupitresToDownloadDelete;
     private DialogMA dialogWait;
@@ -127,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         mCurrentAuthRole = sharedPreferences.getString("role", "Choriste");
         current_user_id =sharedPreferences.getString("userId", "");
-        installationAuth = sharedPreferences.getBoolean("installationAuth", true);
+        boolean installationAuth = sharedPreferences.getBoolean("installationAuth", true);
         dataBase = AppDataBase.getInstance(getApplicationContext());
 
         if(sharedPreferences.getBoolean("spectacleDeleted",false)) {
@@ -146,32 +137,31 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         mLoadingIndicator = findViewById(R.id.pb_loading_indicator);
         recyclerView = findViewById(R.id.recyclerview_media_item);
         songsAdapter = new SongsAdapter(this, this);
-        layoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(songsAdapter);
 
         if(!installationAuth){
-            mAuth = FirebaseAuth.getInstance();
+            if(haveInternetConnection()) {
+                FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
-            if(mAuth.getCurrentUser()!=null){
-                Log.d("coucou", "MA onCreate: current user non null");
-                mAuth.signOut();
-                mAuth = FirebaseAuth.getInstance();
-            }
+                if (mAuth.getCurrentUser() != null) {
+                    Log.d("coucou", "MA onCreate: current user non null");
+                    mAuth.signOut();
+                    mAuth = FirebaseAuth.getInstance();
+                }
 
-            Log.d("coucou", "MA onCreate: installationAuth "+ mAuth+" "+installationAuth);
-            String loginEmail = sharedPreferences.getString("loginEmail","");
-            String loginPass = sharedPreferences.getString("loginMdp","");
+                Log.d("coucou", "MA onCreate: installationAuth " + mAuth + " " + installationAuth);
+                String loginEmail = sharedPreferences.getString("loginEmail", "");
+                String loginPass = sharedPreferences.getString("loginMdp", "");
 
-            Log.d("coucou", "MA onCreate: login et mdp connus "+ loginEmail+" "+loginPass);
+                Log.d("coucou", "MA onCreate: login et mdp connus " + loginEmail + " " + loginPass);
 
-            if(!TextUtils.isEmpty(loginEmail)&&!TextUtils.isEmpty(loginPass)){
-                mAuth.signInWithEmailAndPassword(loginEmail, loginPass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
+                if (!TextUtils.isEmpty(loginEmail) && !TextUtils.isEmpty(loginPass)) {
+                    mAuth.signInWithEmailAndPassword(Objects.requireNonNull(loginEmail), Objects.requireNonNull(loginPass)).addOnCompleteListener(task -> {
 
-                        if(task.isSuccessful()){
+                        if (task.isSuccessful()) {
                             Log.d(TAG, "MA onComplete: login automatique");
                             visualisation();
 
@@ -179,11 +169,14 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                             String errorMessage = task.getException().getMessage();
                             Toast.makeText(MainActivity.this, "Error : " + errorMessage, Toast.LENGTH_LONG).show();
                         }
-                    }
-                });
+                    });
+                } else {
+                    Toast.makeText(this, "Pb de connexion", Toast.LENGTH_SHORT).show();
+                    Log.d("coucou", "LA onCreate: pb de reconnexion");
+                }
             }else{
-                Toast.makeText(this, "Pb de connexion", Toast.LENGTH_SHORT).show();
-                Log.d("coucou", "LA onCreate: pb de reconnexion");
+                Log.d(TAG, "MA onCreate: pas de connexion internet mais on y va quand même avec sa connection");
+                visualisation();
             }
 
         }else{
@@ -200,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         if (!TextUtils.isEmpty(current_user_id)) {
             Log.d(TAG, "" + "MA onCreate: avant Onrequest permission " + current_user_id);
             OnRequestPermission();
-            mfactory = InjectorUtils.provideViewModelFactory(this.getApplicationContext(), this);
+            MainActivityViewModelFactory mfactory = InjectorUtils.provideViewModelFactory(this.getApplicationContext(), this);
             Log.d("coucou", "MA onCreate: fin de la factory");
             mViewModel = ViewModelProviders.of(this, mfactory).get(MainActivityViewModel.class);
             Log.d("coucou", "MA onCreate: fin du viewModel");
@@ -208,9 +201,9 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
             getCurrentSpectacles();
 
-            sourceSongs = mViewModel.getChoeurSourceSongs();
-            Log.d(TAG, "MA onCreate: getChoeurSourcesongs " + sourceSongs);
-            sourceSongs.observe(this, sourceSongs -> {
+            LiveData<List<SourceSong>> sourceSongs1 = mViewModel.getChoeurSourceSongs();
+            Log.d(TAG, "MA onCreate: getChoeurSourcesongs " + sourceSongs1);
+            sourceSongs1.observe(this, sourceSongs -> {
                 Log.d(TAG, "MA onChanged: Alerte, ça bouge dans le coin !" + sourceSongs + " " + mViewModel.getChoeurSourceSongs() + " " + Thread.currentThread().getName());
 
                 currentThread = mViewModel.getCurrentThread();
@@ -389,7 +382,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     }
 
     private void setUpSharedPreferences() {
-        installation = sharedPreferences.getBoolean("installation", true);
+        boolean installation = sharedPreferences.getBoolean("installation", true);
 
         if (installation) {
 
@@ -506,9 +499,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
             songToPlays = listSongs.getSongToPlaysA();
             Log.d(TAG, "MA getListSongs: juste après" + songToPlays);
-            if (songToPlays.size() > 1) {
-                //          Log.d(TAG, "MA getSongElements songToplays: " + songToPlays + " " + songToPlays.get(0).getSourceSongTitre() + " " + songToPlays.get(0).getPupitre() + " " + songToPlays.get(1).getSourceSongTitre() + " " + songToPlays.get(1).getPupitre());
-            }
+
             songOnClouds = listSongs.getSongsOnCloudsA();
             Log.d(TAG, "MA getSongElements songOnclouds: " + songOnClouds);
 
@@ -707,20 +698,17 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             namesSpectacles = new ArrayList<>();
         }
 
-        threadSpectacles = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (currentSpectacles != null) {
-                    for (String idSpectacle : currentSpectacles) {
-                        Spectacle spectacle = dataBase.spectacleDao().getSpectacleById(idSpectacle);
-                        Log.d(TAG, "MA run: getCurrentSpectacles " + idSpectacle+" "+spectacle);
-                        if (spectacle != null) {
-                            String spectacleName = spectacle.getSpectacleName();
-                            Log.d(TAG, "MA run: nom du spectacle " + spectacleName);
-                            namesSpectacles.add(spectacleName);
-                        } else {
-                            Log.d(TAG, "MA run: else getCurrent Spectacles null "+idSpectacle);
-                        }
+        threadSpectacles = new Thread(() -> {
+            if (currentSpectacles != null) {
+                for (String idSpectacle : currentSpectacles) {
+                    Spectacle spectacle = dataBase.spectacleDao().getSpectacleById(idSpectacle);
+                    Log.d(TAG, "MA run: getCurrentSpectacles " + idSpectacle+" "+spectacle);
+                    if (spectacle != null) {
+                        String spectacleName = spectacle.getSpectacleName();
+                        Log.d(TAG, "MA run: nom du spectacle " + spectacleName);
+                        namesSpectacles.add(spectacleName);
+                    } else {
+                        Log.d(TAG, "MA run: else getCurrent Spectacles null "+idSpectacle);
                     }
                 }
             }
@@ -1159,7 +1147,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     }
 
     private void deleteDbRoom() {
-        mExecutors = AppExecutors.getInstance();
+        AppExecutors mExecutors = AppExecutors.getInstance();
         mExecutors.diskIO().execute(() -> {
             dataBase.songsDao().deleteAll();
             dataBase.sourceSongDao().deleteAll();
@@ -1170,19 +1158,23 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         // Fonction haveInternetConnection : return true si connecté, return false dans le cas contraire
         NetworkInfo network = ((ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
 
-        boolean wifi = network.getType()==ConnectivityManager.TYPE_WIFI;
-        boolean res = network.getType()==ConnectivityManager.TYPE_MOBILE;
-
-        Log.d(TAG, "MA haveInternetConnection: wifi "+ wifi+ " réseau 4G "+ res);
-
         if (network==null || !network.isConnected())
         {
+            Log.d(TAG, "MA haveInternetConnection: network pas connecté à internet ");
 
             // Le périphérique n'est pas connecté à Internet
             return false;
+        }else{
+            boolean wifi = network.getType() == ConnectivityManager.TYPE_WIFI;
+            boolean res = network.getType() == ConnectivityManager.TYPE_MOBILE;
+
+
+            Log.d(TAG, "MA haveInternetConnection: wifi " + wifi + " réseau 4G " + res);
+            return true;
+
         }
         // Le périphérique est connecté à Internet
-        return true;
+
     }
 }
 

@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import dedicace.com.R;
@@ -32,6 +34,7 @@ class TrombiAdapter extends RecyclerView.Adapter<TrombiAdapter.TrombiViewHolder>
         this.mContext =context;
         this.listItemClickListener=handler;
     }
+
 
 
     public interface ListItemClickListener {
@@ -57,7 +60,7 @@ class TrombiAdapter extends RecyclerView.Adapter<TrombiAdapter.TrombiViewHolder>
             trombiViewHolder.tvPupitre.setText(choristes.get(i).getPupitre().toString());
         }
 
-        String prenomNom = choristes.get(i).getPrenom()+" "+choristes.get(i).getNom();
+        String prenomNom =choristes.get(i).getNom() +" "+choristes.get(i).getPrenom();
         trombiViewHolder.tvNom.setText(prenomNom);
 
         GlideApp.with(mContext)
@@ -93,6 +96,8 @@ class TrombiAdapter extends RecyclerView.Adapter<TrombiAdapter.TrombiViewHolder>
         Log.d(TAG, "TAd swapChoristes: "+choristes.size());
         this.choristes=choristes;
 
+        Collections.sort(this.choristes,new comparatorChoristes());
+
         if(choristes!=null){
             for(Choriste choriste : this.choristes){
                 Log.d(TAG, "TAd swapChoristes: "+choriste.getNom()+" "+choriste.getPrenom());
@@ -115,6 +120,21 @@ class TrombiAdapter extends RecyclerView.Adapter<TrombiAdapter.TrombiViewHolder>
             imgChoriste = itemView.findViewById(R.id.img_choriste);
             cv = itemView.findViewById(R.id.cardview_choriste);
 
+        }
+    }
+
+    public class comparatorChoristes implements Comparator<Choriste> {
+        public comparatorChoristes() {
+        }
+
+        @Override
+        public int compare(Choriste choriste, Choriste choriste1) {
+            return choriste.getNom().compareTo(choriste1.getNom());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return false;
         }
     }
 }

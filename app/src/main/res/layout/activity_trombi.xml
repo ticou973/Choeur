@@ -32,4 +32,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/recyclerview_trombi" />
 
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/bnv_navigation_pupitre"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_gravity="start"
+        android:background="@color/primaryColor"
+        android:elevation="8dp"
+        android:orientation="horizontal"
+        app:itemIconSize="27dp"
+        app:itemIconTint="@drawable/selector"
+        app:itemTextColor="@drawable/selector"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/navigation_filtre_pupitre" />
+
 </android.support.constraint.ConstraintLayout>

@@ -5,6 +5,8 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
@@ -17,14 +19,16 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import dedicace.com.R;
 import dedicace.com.data.database.AppDataBase;
 import dedicace.com.data.database.Choriste;
-import dedicace.com.ui.PlaySong.DialogMajSS;
+import dedicace.com.data.database.Pupitre;
 import dedicace.com.utilities.AppExecutors;
 import dedicace.com.utilities.InjectorUtils;
+import dedicace.com.utilities.SongsUtilities;
 
 public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.ListItemClickListener, DialogMajChoristes.DialogMajChoristesListener, DialogTA.DialogTAListener {
 
@@ -46,6 +50,7 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
     private TrombiAdapter trombiAdapter;
     private List<Choriste> choristes1;
     private SharedPreferences.Editor editor;
+    private BottomNavigationView navigationView;
 
 
     @Override
@@ -62,6 +67,38 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
         //faire une liste de choristes pour que cela marche
         dataBase = AppDataBase.getInstance(getApplicationContext());
 
+        navigationView = findViewById(R.id.bnv_navigation_pupitre);
+
+        navigationView.setSelectedItemId(R.id.item_tous);
+
+
+        navigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+
+
+                switch (menuItem.getItemId()) {
+                    case R.id.item_tous:
+                        filterPupitre("TOUS");
+                        return true;
+                    case R.id.item_basse:
+                        filterPupitre("BASS");
+                        return true;
+                    case R.id.item_tenor:
+                        filterPupitre("TENOR");
+                        return true;
+                    case R.id.item_alto:
+                        filterPupitre("ALTO");
+                        return true;
+                    case R.id.item_soprano:
+                        filterPupitre("SOPRANO");
+                        return true;
+                    default:
+                        Toast.makeText(TrombiActivity.this, "default", Toast.LENGTH_SHORT).show();
+                        return false;
+                }
+            }
+        });
 
         mLoadingIndicator = findViewById(R.id.pb_loading_indicator_choriste);
         recyclerView = findViewById(R.id.recyclerview_trombi);
@@ -133,7 +170,7 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
                                 if (dialogWait != null) {
                                     dialogWait.dismiss();
                                 }
-                                DialogFragment dialog = new DialogMajSS();
+                                DialogFragment dialog = new DialogMajChoristes();
                                 dialog.show(getSupportFragmentManager(), "TAG");
                                 break;
                             case "newChoriste":
@@ -146,7 +183,6 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
                                 trombiAdapter.swapChoristes(choristes);
                                 break;
                         }
-
                     }else{
                         Log.d(TAG, "TA onCreate: type choriste null ");
                     }
@@ -154,8 +190,24 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
             } else {
                 Log.d(TAG, "TA onChanged: choristes null ");
             }
-
         });
+    }
+
+    private void filterPupitre(String pupitreStr) {
+        List<Choriste> tempChoristes = new ArrayList<>();
+        List<Choriste> choristesFiltre = new ArrayList<>(choristes1);
+
+        if(!pupitreStr.equals("TOUS")) {
+            for (Choriste choriste : choristes1) {
+                Pupitre pupitre = SongsUtilities.converttoPupitre(pupitreStr);
+
+                if (choriste.getPupitre() != pupitre) {
+                    tempChoristes.add(choriste);
+                }
+            }
+            choristesFiltre.removeAll(tempChoristes);
+        }
+        trombiAdapter.swapChoristes(choristesFiltre);
     }
 
     private void affichageRecyclerView(List<Choriste> choristes) {
@@ -249,6 +301,7 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
     @Override
     public void onDialogPositiveClick() {
         Log.d(TAG, "TA onDialogPositiveClick dialog positif: " + choristes);
+        affichageRecyclerView(choristes1);
         trombiAdapter.swapChoristes(choristes1);
     }
 
