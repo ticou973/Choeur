@@ -215,7 +215,7 @@ public final class MediaPlayerHolder implements PlayerAdapter {
     }
 
     @Override
-    public void reset() throws IOException {
+    public void reset() {
         if (mMediaPlayer != null) {
 
             mMediaPlayer.reset();

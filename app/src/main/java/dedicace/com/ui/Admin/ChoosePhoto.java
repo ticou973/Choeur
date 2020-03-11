@@ -20,6 +20,8 @@ public class ChoosePhoto extends AppCompatActivity implements PhotoAdapter.OnIte
     private String[] listArrayImages;
     private RecyclerView.LayoutManager layoutManager;
     private static final String TAG ="coucou";
+    private int position;
+    private String origine;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +31,11 @@ public class ChoosePhoto extends AppCompatActivity implements PhotoAdapter.OnIte
         recyclerImage = findViewById(R.id.recyclerview_local_photo);
 
         Intent intent = getIntent();
+        origine = intent.getStringExtra("origine");
+
+        if(origine.equals("csv")){
+            position = intent.getIntExtra("position",0);
+        }
         listArrayImages=intent.getStringArrayExtra("listimages");
 
         for (String name:listArrayImages) {
@@ -48,6 +55,9 @@ public class ChoosePhoto extends AppCompatActivity implements PhotoAdapter.OnIte
         Log.d(TAG, "CP onItemClick: "+i);
         Intent result = new Intent();
         result.putExtra("imageselected",i);
+        if(origine.equals("csv")){
+            result.putExtra("position",position);
+        }
         setResult(RESULT_OK,result);
         finish();
     }

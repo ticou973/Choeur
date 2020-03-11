@@ -113,6 +113,20 @@ public class Choriste {
         this.updatePhone = updatePhone;
     }
 
+    @Ignore
+    public Choriste(String idChorale, String nom, String prenom, Pupitre pupitre, String adresse, String fixTel, String portTel, String email, String roleChoeur, String roleAdmin) {
+        this.idChorale = idChorale;
+        this.nom = nom;
+        this.prenom = prenom;
+        this.pupitre = pupitre;
+        this.adresse = adresse;
+        this.fixTel = fixTel;
+        this.portTel = portTel;
+        this.email = email;
+        this.roleChoeur = roleChoeur;
+        this.roleAdmin = roleAdmin;
+    }
+
     public String getIdChorale() {
         return idChorale;
     }

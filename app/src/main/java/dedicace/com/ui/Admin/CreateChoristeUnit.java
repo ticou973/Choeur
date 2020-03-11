@@ -316,6 +316,7 @@ public class CreateChoristeUnit extends AppCompatActivity implements DialogNewSS
     private void selectPhoto() {
         Log.d(TAG, "CSS selectBackground: ");
         Intent startChooseBackgroundActivity = new Intent(CreateChoristeUnit.this,ChoosePhoto.class);
+        startChooseBackgroundActivity.putExtra("origine","unit");
         startChooseBackgroundActivity.putExtra("listimages",listImages);
         startActivityForResult(startChooseBackgroundActivity,REQUEST_CODE_B);
     }
@@ -328,12 +329,12 @@ public class CreateChoristeUnit extends AppCompatActivity implements DialogNewSS
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE_A) {
-            Log.d(TAG, "CCU onActivityResult: request_codeB");
+            Log.d(TAG, "CCU onActivityResult: request_codeA");
 
             idChorale = data.getStringExtra("idselected");
             nomChorale = data.getStringExtra("nomChorale");
             tvNomChorale.setText(nomChorale);
-            Log.d(TAG, "CCU onActivityResult: request_codeB " + idChorale);
+            Log.d(TAG, "CCU onActivityResult: request_codeA " + idChorale);
 
         } else if(requestCode==REQUEST_CODE_B){
 

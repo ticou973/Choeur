@@ -161,32 +161,18 @@
             app:layout_constraintTop_toBottomOf="@+id/tv_nom_choriste_details" />
 
         <TextView
-            android:id="@+id/textView72"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="136dp"
-            android:fontFamily="@font/roboto"
-            android:text="Coordonnées :"
-            android:textColor="@android:color/black"
-            android:textSize="18sp"
-            android:textStyle="bold|italic"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_nom_choriste_details" />
-
-        <TextView
             android:id="@+id/textView73"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="152dp"
             android:fontFamily="@font/roboto"
             android:text="Email."
             android:textColor="@android:color/black"
             android:textSize="16sp"
             android:textStyle="bold|italic"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView72" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_nom_choriste_details" />
 
     </android.support.constraint.ConstraintLayout>
 </android.support.v4.widget.NestedScrollView>

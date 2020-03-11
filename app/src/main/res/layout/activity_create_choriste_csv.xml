@@ -4,6 +4,119 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/primaryColor"
     tools:context=".ui.Admin.CreateChoristeCsv">
 
+    <TextView
+        android:id="@+id/textView69"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="Création trombi CSV"
+        android:textColor="@color/secondaryColor"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView76"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/roboto"
+        android:text="Chorale"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView69" />
+
+    <TextView
+        android:id="@+id/tv_nom_chorale_trombi_csv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="nom Chorale"
+        android:textColor="@android:color/black"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView76"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView76" />
+
+    <Button
+        android:id="@+id/btn_select_chorale_trombi_csv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Selection..."
+        app:layout_constraintEnd_toEndOf="@+id/tv_nom_chorale_trombi_csv"
+        app:layout_constraintStart_toStartOf="@+id/tv_nom_chorale_trombi_csv"
+        app:layout_constraintTop_toBottomOf="@+id/tv_nom_chorale_trombi_csv" />
+
+    <TextView
+        android:id="@+id/textView79"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="64dp"
+        android:text="Fichier CSV"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_select_chorale_trombi_csv" />
+
+    <TextView
+        android:id="@+id/tv_name_csv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="fichier Scv"
+        android:textColor="@android:color/black"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView79"
+        app:layout_constraintEnd_toEndOf="@+id/btn_select_chorale_trombi_csv"
+        app:layout_constraintStart_toStartOf="@+id/btn_select_chorale_trombi_csv" />
+
+    <Button
+        android:id="@+id/btn_select_csv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/roboto"
+        android:text="SELECTION..."
+        android:textColor="@android:color/black"
+        app:layout_constraintEnd_toEndOf="@+id/tv_name_csv"
+        app:layout_constraintStart_toStartOf="@+id/tv_name_csv"
+        app:layout_constraintTop_toBottomOf="@+id/tv_name_csv" />
+
+    <Button
+        android:id="@+id/btn_visualisation_csv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/roboto"
+        android:text="Visualisation CSV"
+        android:textColor="@android:color/black"
+        app:layout_constraintEnd_toEndOf="@+id/btn_select_csv"
+        app:layout_constraintStart_toStartOf="@+id/btn_select_csv"
+        app:layout_constraintTop_toBottomOf="@+id/btn_select_csv" />
+
+    <Button
+        android:id="@+id/btn_create_in_db_csv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:background="@color/secondaryColor"
+        android:padding="10dp"
+        android:text="Create in DB"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_visualisation_csv" />
 </android.support.constraint.ConstraintLayout>

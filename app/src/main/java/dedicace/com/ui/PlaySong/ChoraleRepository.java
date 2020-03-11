@@ -137,6 +137,11 @@ public class ChoraleRepository {
                Log.d(LOG_TAG, "CR ChoraleRepository: old SS "+sourceSong.getTitre()+" "+ sourceSong.getIdSourceSongCloud()+" "+sourceSong.getUpdatePhone());
            }
            for(Song song:oldSongs){
+               //patch pour des Idcloud ayant disparu ou nul
+               if(song.getSongIdCloud()==null){
+                   Log.d(LOG_TAG, "CR ChoraleRepository: idCloud null "+ song.getSourceSongTitre() + " " + song.getPupitre() + " " + song.getSongIdCloud() + " " + song.getUpdatePhone() + " " + song.getSongPath());
+
+               }
                //patch pour récupérer les chansons qui n'ont plus leur fichier mp3
                String path = song.getSongPath();
                Log.d(LOG_TAG, "CR ChoraleRepository: old Songs début " + song.getSourceSongTitre() + " " + song.getPupitre() + " " + song.getSongIdCloud() + " " + song.getUpdatePhone() + " " + song.getSongPath());
@@ -288,7 +293,7 @@ public class ChoraleRepository {
             Log.d(LOG_TAG, "CR Repository: observers Alerte cela bouge ! "+" "+sourceSongs1.size()+" "+sourceSongs1+Thread.currentThread().getName());
             songs = choraleNetworkDataSource.getSongs();
             for(Song song : songs){
-               // Log.d(LOG_TAG, "CR fetchSongs: list songs "+song.getSourceSongTitre()+" "+song.getPupitre()+" "+song.getSongIdCloud()+" ");
+                Log.d(LOG_TAG, "CR fetchSongs: list songs "+song.getSourceSongTitre()+" "+song.getPupitre()+" "+song.getSongIdCloud()+" ");
             }
             Log.d(LOG_TAG, "CR ChoraleRepository LiveData: songs " +songs.size());
 
@@ -922,10 +927,15 @@ public class ChoraleRepository {
 
         for(Song song : oldTest){
             for(Song song1 :oldTest){
-                if(song.getSongIdCloud().equals(song1.getSongIdCloud())&&song.getSongId()!=song1.getSongId()){
-                    if(!listRestOldSong.contains(song1)) {
-                        listRestOldSong.add(song);
-                        break;
+                Log.d(LOG_TAG, "CR deletedSongsList: song old "+ song.getSourceSongTitre()+" "+song.getSongIdCloud()+" "+song.getSongId());
+                if(song.getSongIdCloud()!=null) {
+                    if (song.getSongIdCloud().equals(song1.getSongIdCloud()) && song.getSongId() != song1.getSongId()) {
+                        Log.d(LOG_TAG, "CR deletedSongsList: song old 1 " + song.getSourceSongTitre() + " " + song.getSongIdCloud() + " " + song.getSongId());
+                        if (!listRestOldSong.contains(song1)) {
+                            Log.d(LOG_TAG, "CR deletedSongsList: song old 2 " + song.getSourceSongTitre() + " " + song.getSongIdCloud() + " " + song.getSongId());
+                            listRestOldSong.add(song);
+                            break;
+                        }
                     }
                 }
             }
@@ -946,9 +956,11 @@ public class ChoraleRepository {
         //patch problèmes sur les songs qui n'ont pas le bon Id
         for(Song song:oldSongs){
             for(Song song1:songs){
-                if(song.getSourceSongTitre().equals(song1.getSourceSongTitre())&&!song.getSongIdCloud().equals(song1.getSongIdCloud())&&song.getPupitre()==song1.getPupitre()){
-                    deletedSongsList.add(song);
-                    Log.d(LOG_TAG, "CR deletedSongsList: patch id et titre diff activé "+ song.getSourceSongTitre()+" "+song.getSongIdCloud()+" "+song.getPupitre());
+                if(song.getSongIdCloud()!=null) {
+                    if (song.getSourceSongTitre().equals(song1.getSourceSongTitre()) && !song.getSongIdCloud().equals(song1.getSongIdCloud()) && song.getPupitre() == song1.getPupitre()) {
+                        deletedSongsList.add(song);
+                        Log.d(LOG_TAG, "CR deletedSongsList: patch id et titre diff activé " + song.getSourceSongTitre() + " " + song.getSongIdCloud() + " " + song.getPupitre());
+                    }
                 }
             }
         }
@@ -1001,17 +1013,19 @@ public class ChoraleRepository {
         for (Song song:songs) {
             for (Song oldSong: oldSongs) {
                 if (oldSong.getRecordSource() == RecordSource.BANDE_SON) {
-                    if (oldSong.getSongIdCloud().equals(song.getSongIdCloud())) {
-                        if (oldSong.getUpdatePhone().getTime() < song.getUpdatePhone().getTime()) {
-                            modifiedSongsList.add(song);
-                            if (!oldSong.getUrlCloudMp3().equals(song.getUrlCloudMp3())) {
-                                mp3SongsToDelete.add(oldSong);
-                                mp3SongsToDownload.add(song);
+                    if(oldSong.getSongIdCloud()!=null) {
+                        if (oldSong.getSongIdCloud().equals(song.getSongIdCloud())) {
+                            if (oldSong.getUpdatePhone().getTime() < song.getUpdatePhone().getTime()) {
+                                modifiedSongsList.add(song);
+                                if (!oldSong.getUrlCloudMp3().equals(song.getUrlCloudMp3())) {
+                                    mp3SongsToDelete.add(oldSong);
+                                    mp3SongsToDownload.add(song);
+                                }
+                                if (!oldSong.getSourceSongTitre().equals(song.getSourceSongTitre())) {
+                                    modifiedSongsTitresList.add(oldSong);
+                                }
+                                titress.put(song.getSourceSongTitre(), oldSong.getSourceSongTitre());
                             }
-                            if(!oldSong.getSourceSongTitre().equals(song.getSourceSongTitre())){
-                                modifiedSongsTitresList.add(oldSong);
-                            }
-                            titress.put(song.getSourceSongTitre(), oldSong.getSourceSongTitre());
                         }
                     }
                 }
@@ -1066,9 +1080,11 @@ public class ChoraleRepository {
        for(Song song:oldSongs){
            if(!modifiedSongsTitresList.contains(song)) {
                for (Song song1 : songs) {
-                   if (!song.getSourceSongTitre().equals(song1.getSourceSongTitre()) && song.getSongIdCloud().equals(song1.getSongIdCloud())) {
-                       newSongsList.add(song1);
-                       Log.d(LOG_TAG, "CR newSongsList: patch id et titre diff activé " + song1.getSourceSongTitre() + " " + song1.getSongIdCloud() + " " + song1.getPupitre());
+                   if(song.getSongIdCloud()!=null) {
+                       if (!song.getSourceSongTitre().equals(song1.getSourceSongTitre()) && song.getSongIdCloud().equals(song1.getSongIdCloud())) {
+                           newSongsList.add(song1);
+                           Log.d(LOG_TAG, "CR newSongsList: patch id et titre diff activé " + song1.getSourceSongTitre() + " " + song1.getSongIdCloud() + " " + song1.getPupitre());
+                       }
                    }
                }
            }else{
