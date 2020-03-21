@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-
     package="dedicace.com">
 
     <application
@@ -10,13 +9,12 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        tools:ignore="LockedOrientationActivity"
-        >
+        tools:ignore="LockedOrientationActivity">
 
         <activity
             android:name=".ui.Admin.ChooseCsv"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.PlaySong.MainActivity"
             android:launchMode="singleTop"
@@ -55,7 +53,6 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.Admin.CreateChoristeCsv" />
-
         </activity>
         <activity
             android:name=".ui.Trombinoscope.TrombiDetailsActivity"
@@ -131,12 +128,29 @@
                 android:value=".ui.Admin.AdminHome" />
         </activity>
         <activity
+            android:name=".ui.Admin.ModifyChoriste"
+            android:parentActivityName=".ui.Admin.AdminHome"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.AdminHome" />
+        </activity>
+        <activity
             android:name=".ui.Admin.ModifySourceSongDetails"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.Admin.AdminHome" />
+        </activity>
+        <activity android:name=".ui.Admin.ChoristeModifyDetails"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Admin.AdminHome" />
+
         </activity>
         <activity
             android:name=".ui.Admin.CreateSong"
@@ -314,10 +328,10 @@
             android:name=".ui.PlaySong.ChoraleSyncIntentService"
             android:exported="false" />
     </application>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
 </manifest>

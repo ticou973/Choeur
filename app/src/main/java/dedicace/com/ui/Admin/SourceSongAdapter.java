@@ -84,13 +84,10 @@ class SourceSongAdapter extends RecyclerView.Adapter<SourceSongAdapter.SourceSon
             titre = itemView.findViewById(R.id.sourceSongName);
             cv=itemView.findViewById(R.id.cv_list_source_song);
 
-            cv.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Log.d(TAG, "SSA onClick: "+getAdapterPosition());
-                    int i = getAdapterPosition();
-                    selectSourceSong(i);
-                }
+            cv.setOnClickListener(view -> {
+                Log.d(TAG, "SSA onClick: "+getAdapterPosition());
+                int i = getAdapterPosition();
+                selectSourceSong(i);
             });
         }
     }

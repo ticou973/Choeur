@@ -45,6 +45,8 @@ public class ChooseChorale extends AppCompatActivity {
                         startModify = new Intent(ChooseChorale.this,ModifySpectacle.class);
                     }else if(origine.equals("AdminHomeModifSaison")){
                         startModify = new Intent(ChooseChorale.this,ModifySaison.class);
+                    }else if(origine.equals("AdminHomeModifChoriste")){
+                        startModify = new Intent(ChooseChorale.this,ModifyChoriste.class);
                     }
                     Bundle args = new Bundle();
                     args.putString("idChorale",idChorale);

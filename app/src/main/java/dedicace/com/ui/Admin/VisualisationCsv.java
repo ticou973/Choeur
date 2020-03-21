@@ -259,7 +259,6 @@ public class VisualisationCsv extends AppCompatActivity implements ChoristeAdapt
             if (mClickedListener != null) {
                 Log.d(TAG, "CA selectPhoto: "+i+" "+ listImages);
                 mClickedListener.selectPhoto(i,listImages,listFiles);
-
             }
         }
 

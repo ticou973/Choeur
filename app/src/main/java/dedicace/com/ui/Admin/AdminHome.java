@@ -121,7 +121,9 @@ public class AdminHome extends AppCompatActivity {
         });
 
         modifyChoriste.setOnClickListener(view -> {
-
+            Intent startModifyChoristeActivity = new Intent(AdminHome.this,ChooseChorale.class);
+            startModifyChoristeActivity.putExtra("origine","AdminHomeModifChoriste");
+            startActivity(startModifyChoristeActivity);
         });
     }
     @Override

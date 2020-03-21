@@ -201,7 +201,6 @@ public class ModifySourceSong extends AppCompatActivity implements SourceSongAda
 
     @Override
     public void onItemClick(int i) {
-
         if (origine.equals("AdminHome")||origine.equals("ModifySSDetails")) {
             Log.d(TAG, "MSS onItemClick: A "+i);
         Intent startDetailsSSActivity = new Intent(ModifySourceSong.this, ModifySourceSongDetails.class);

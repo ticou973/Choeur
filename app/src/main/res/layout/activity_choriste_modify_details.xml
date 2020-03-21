@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primaryColor"
+    tools:context=".ui.Admin.ChoristeModifyDetails">
+
+    <EditText
+        android:id="@+id/et_prenom_new"
+        android:layout_width="137dp"
+        android:layout_height="42dp"
+        android:ems="10"
+        android:hint="prenom"
+        android:inputType="textPersonName"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_prenom_choriste_old"
+        app:layout_constraintEnd_toEndOf="@+id/textView140"
+        app:layout_constraintStart_toStartOf="@+id/textView140" />
+
+    <EditText
+        android:id="@+id/et_pupitre_choriste_new"
+        android:layout_width="137dp"
+        android:layout_height="42dp"
+        android:ems="10"
+        android:hint="Pupitre"
+        android:inputType="text"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_pupitre_choriste_old"
+        app:layout_constraintEnd_toEndOf="@+id/textView140"
+        app:layout_constraintStart_toStartOf="@+id/textView140" />
+
+    <TextView
+        android:id="@+id/textView80"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="Modification Choriste"
+        android:textColor="@color/secondaryColor"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView90"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="90dp"
+        android:fontFamily="@font/roboto"
+        android:text="Nom"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView80" />
+
+    <TextView
+        android:id="@+id/textView100"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/roboto"
+        android:text="Prénom"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView90" />
+
+    <TextView
+        android:id="@+id/textView110"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/roboto"
+        android:text="Pupitre"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView100" />
+
+    <TextView
+        android:id="@+id/textView120"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/roboto"
+        android:text="UrlP"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView110" />
+
+    <Button
+        android:id="@+id/btn_supp_choriste"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginBottom="16dp"
+        android:background="@color/secondaryColor"
+        android:fontFamily="@font/roboto"
+        android:padding="10dp"
+        android:text="@string/supprimer"
+        android:textColor="@android:color/black"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btn_modify_choriste_modify"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="16dp"
+        android:background="@color/secondaryColor"
+        android:fontFamily="@font/roboto"
+        android:padding="10dp"
+        android:text="Modifier"
+        android:textColor="@android:color/black"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/textView130"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="40dp"
+        android:fontFamily="@font/roboto"
+        android:text="Old"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/textView110"
+        app:layout_constraintTop_toBottomOf="@+id/textView80" />
+
+    <TextView
+        android:id="@+id/textView140"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="@font/roboto"
+        android:text="new"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView130"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView130" />
+
+    <TextView
+        android:id="@+id/tv_nom_old"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="OldNom"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="italic"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView90"
+        app:layout_constraintEnd_toEndOf="@+id/textView130"
+        app:layout_constraintStart_toStartOf="@+id/textView130" />
+
+    <TextView
+        android:id="@+id/tv_prenom_choriste_old"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/oldgroupe"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="italic"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView100"
+        app:layout_constraintEnd_toEndOf="@+id/tv_nom_old"
+        app:layout_constraintStart_toStartOf="@+id/tv_nom_old" />
+
+    <TextView
+        android:id="@+id/tv_pupitre_choriste_old"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="OldPupitre"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="italic"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView110"
+        app:layout_constraintEnd_toEndOf="@+id/tv_prenom_choriste_old"
+        app:layout_constraintStart_toStartOf="@+id/tv_prenom_choriste_old" />
+
+    <TextView
+        android:id="@+id/tv_url_old"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="oldUrl"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="italic"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView120"
+        app:layout_constraintEnd_toEndOf="@+id/tv_pupitre_choriste_old"
+        app:layout_constraintStart_toStartOf="@+id/tv_pupitre_choriste_old" />
+
+    <EditText
+        android:id="@+id/et_nom_new"
+        android:layout_width="137dp"
+        android:layout_height="42dp"
+        android:ems="10"
+        android:hint="Nom"
+        android:inputType="textPersonName"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_nom_old"
+        app:layout_constraintEnd_toEndOf="@+id/textView140"
+        app:layout_constraintStart_toStartOf="@+id/textView140" />
+
+    <TextView
+        android:id="@+id/tv_photo_new"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:fontFamily="@font/roboto"
+        android:text="Select Photo"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_url_old"
+        app:layout_constraintEnd_toEndOf="@+id/et_pupitre_choriste_new"
+        app:layout_constraintStart_toStartOf="@+id/et_pupitre_choriste_new" />
+
+    <Button
+        android:id="@+id/btn_select_new_photo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/roboto"
+        android:padding="10dp"
+        android:text="@string/selection"
+        app:layout_constraintEnd_toEndOf="@+id/tv_photo_new"
+        app:layout_constraintStart_toStartOf="@+id/tv_photo_new"
+        app:layout_constraintTop_toBottomOf="@+id/tv_photo_new" />
+
+    <TextView
+        android:id="@+id/textView72"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/roboto"
+        android:text="RoleC"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_select_new_photo" />
+
+    <TextView
+        android:id="@+id/textView94"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/roboto"
+        android:text="RoleC"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_select_new_photo" />
+
+    <TextView
+        android:id="@+id/textView78"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/roboto"
+        android:text="RoleA"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView72" />
+
+    <TextView
+        android:id="@+id/textView81"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/roboto"
+        android:text="Email"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView78" />
+
+    <TextView
+        android:id="@+id/textView83"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/roboto"
+        android:text="Adr."
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView81" />
+
+    <TextView
+        android:id="@+id/textView84"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/roboto"
+        android:text="Fixe"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView83" />
+
+    <TextView
+        android:id="@+id/textView85"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/roboto"
+        android:text="Port."
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView84" />
+
+    <TextView
+        android:id="@+id/tv_rolec_old"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="oldRoleC"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView72"
+        app:layout_constraintEnd_toStartOf="@+id/et_rolec_new"
+        app:layout_constraintStart_toEndOf="@+id/textView72" />
+
+    <TextView
+        android:id="@+id/tv_rolea_old"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="OldRoleA"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView78"
+        app:layout_constraintEnd_toStartOf="@+id/et_rolea_new"
+        app:layout_constraintStart_toEndOf="@+id/textView78" />
+
+    <TextView
+        android:id="@+id/tv_email_choriste_modify_old"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="OldEmail"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView81"
+        app:layout_constraintEnd_toStartOf="@+id/et_email_modify_new"
+        app:layout_constraintStart_toEndOf="@+id/textView81" />
+
+    <TextView
+        android:id="@+id/tv_adresse_modify_choriste"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="OldAdress"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView83"
+        app:layout_constraintEnd_toStartOf="@+id/et_adresse_new_modify"
+        app:layout_constraintStart_toEndOf="@+id/textView83" />
+
+    <TextView
+        android:id="@+id/tv_fixe_old"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="OldFixe"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView84"
+        app:layout_constraintEnd_toStartOf="@+id/et_fixe_new"
+        app:layout_constraintStart_toEndOf="@+id/textView84" />
+
+    <TextView
+        android:id="@+id/tv_port_old"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="OldPort"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView85"
+        app:layout_constraintEnd_toStartOf="@+id/et_port_new"
+        app:layout_constraintStart_toEndOf="@+id/textView85" />
+
+    <EditText
+        android:id="@+id/et_email_modify_new"
+        android:layout_width="137dp"
+        android:layout_height="42dp"
+        android:ems="10"
+        android:fontFamily="@font/roboto"
+        android:hint="Email"
+        android:inputType="textPersonName"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_email_choriste_modify_old"
+        app:layout_constraintEnd_toEndOf="@+id/et_rolea_new"
+        app:layout_constraintStart_toStartOf="@+id/et_rolea_new" />
+
+    <EditText
+        android:id="@+id/et_port_new"
+        android:layout_width="137dp"
+        android:layout_height="42dp"
+        android:ems="10"
+        android:fontFamily="@font/roboto"
+        android:hint="Port."
+        android:inputType="textPersonName"
+        android:textSize="14sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_port_old"
+        app:layout_constraintEnd_toEndOf="@+id/et_fixe_new"
+        app:layout_constraintStart_toStartOf="@+id/et_fixe_new" />
+
+    <EditText
+        android:id="@+id/et_fixe_new"
+        android:layout_width="137dp"
+        android:layout_height="42dp"
+        android:ems="10"
+        android:fontFamily="@font/roboto"
+        android:hint="Fixe"
+        android:inputType="textPersonName"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_fixe_old"
+        app:layout_constraintEnd_toEndOf="@+id/et_adresse_new_modify"
+        app:layout_constraintStart_toStartOf="@+id/et_adresse_new_modify" />
+
+    <EditText
+        android:id="@+id/et_adresse_new_modify"
+        android:layout_width="137dp"
+        android:layout_height="42dp"
+        android:ems="10"
+        android:fontFamily="@font/roboto"
+        android:hint="Adress"
+        android:inputType="textPersonName"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_adresse_modify_choriste"
+        app:layout_constraintEnd_toEndOf="@+id/et_email_modify_new"
+        app:layout_constraintStart_toStartOf="@+id/et_email_modify_new" />
+
+    <EditText
+        android:id="@+id/et_rolea_new"
+        android:layout_width="137dp"
+        android:layout_height="42dp"
+        android:ems="10"
+        android:fontFamily="@font/roboto"
+        android:hint="RoleA"
+        android:inputType="textPersonName"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_rolea_old"
+        app:layout_constraintEnd_toEndOf="@+id/et_rolec_new"
+        app:layout_constraintStart_toStartOf="@+id/et_rolec_new" />
+
+    <EditText
+        android:id="@+id/et_rolec_new"
+        android:layout_width="137dp"
+        android:layout_height="42dp"
+        android:ems="10"
+        android:fontFamily="@font/roboto"
+        android:hint="RoleC"
+        android:inputType="textPersonName"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_rolec_old"
+        app:layout_constraintEnd_toEndOf="@+id/btn_select_new_photo"
+        app:layout_constraintStart_toStartOf="@+id/btn_select_new_photo" />
+
+
+</android.support.constraint.ConstraintLayout>
