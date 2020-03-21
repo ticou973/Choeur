@@ -26,10 +26,7 @@ import dedicace.com.R;
 
 public class GenList extends AppCompatActivity {
 
-    private RecyclerView recyclerView;
-    private FloatingActionButton fab;
     private GenAdapter genAdapter;
-    private LinearLayoutManager layoutManager;
     private ArrayList<String> listGen = new ArrayList<>();
     private ArrayList<String> listGenComp = new ArrayList<>();
     private ArrayList<String> listGenTemp = new ArrayList<>();
@@ -49,9 +46,9 @@ public class GenList extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gen_list);
-        fab = findViewById(R.id.fab_modif_gen);
-        recyclerView =findViewById(R.id.recycler_gen);
-        layoutManager = new LinearLayoutManager(GenList.this);
+        FloatingActionButton fab = findViewById(R.id.fab_modif_gen);
+        RecyclerView recyclerView = findViewById(R.id.recycler_gen);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(GenList.this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
 

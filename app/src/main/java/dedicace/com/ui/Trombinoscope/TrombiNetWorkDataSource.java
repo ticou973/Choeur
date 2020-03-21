@@ -60,6 +60,7 @@ public class TrombiNetWorkDataSource {
 
 
     private List<Choriste> choristes = new ArrayList<>();
+    private List<Choriste> choristesAvecPhotos = new ArrayList<>();
 
 
 
@@ -176,40 +177,50 @@ public class TrombiNetWorkDataSource {
 
     private void uploadOnPhonePhotos(List<Choriste> choristes) {
         increment1 =0;
-        int photoSize = choristes.size();
+        for (Choriste choriste : choristes) {
+            String cloudPath = choriste.getUrlCloudPhoto();
+            if(!cloudPath.isEmpty()){
+                choristesAvecPhotos.add(choriste);
+            }else{
+                Log.d(LOG_TAG, "TDS uploadOnPhonePhotos: pas de photos");
+            }
+        }
 
-        if(choristes.size()==0){
+        int photoSize = choristesAvecPhotos.size();
+        Log.d(LOG_TAG, "TNS uploadOnPhonePhotos: liste chorristes avec Photos "+choristesAvecPhotos.size());
+
+        if(choristesAvecPhotos.size()==0){
             Log.d(LOG_TAG, "TDS size 0 pour ne pas louper les BG: ");
             downloads.postValue("Done");
         }
-        for (Choriste choriste : choristes) {
-            String cloudPath = choriste.getUrlCloudPhoto();
-            mStorageRef = mStorage.getReferenceFromUrl(cloudPath);
-            String filename = mStorageRef.getName();
-            File localFileImage = new File(mContext.getFilesDir(), filename);
-            String pathImage = localFileImage.getAbsolutePath();
-            choriste.setUrlLocalPhoto(pathImage);
-            choriste.setUpdatePhotoPhone(new Date(System.currentTimeMillis()));
+        for (Choriste choriste : choristesAvecPhotos) {
+                String cloudPath = choriste.getUrlCloudPhoto();
+                mStorageRef = mStorage.getReferenceFromUrl(cloudPath);
+                String filename = mStorageRef.getName();
+                File localFileImage = new File(mContext.getFilesDir(), filename);
+                String pathImage = localFileImage.getAbsolutePath();
+                choriste.setUrlLocalPhoto(pathImage);
+                choriste.setUpdatePhotoPhone(new Date(System.currentTimeMillis()));
 
-            Log.d(LOG_TAG, "TDS uploadOnPhoneBgImages: "+" "+choriste.getUrlLocalPhoto() + localFileImage.getParent() + " " + filename + " " + localFileImage.getPath() + " " + localFileImage.getAbsolutePath()+" "+Thread.currentThread().getName());
+                Log.d(LOG_TAG, "TDS uploadOnPhoneBgImages: " + " " + choriste.getUrlLocalPhoto() + localFileImage.getParent() + " " + filename + " " + localFileImage.getPath() + " " + localFileImage.getAbsolutePath() + " " + Thread.currentThread().getName());
 
-            mStorageRef.getFile(localFileImage)
-                    .addOnSuccessListener(taskSnapshot -> {
-                        // Successfully downloaded data to local file
-                        //todo modifier le texte pour l'utilisateur
-                        increment1++;
-                        if(increment1==photoSize){
-                            Log.d(LOG_TAG, "TDS onSuccess pour ne pas louper les photos: ");
-                            downloads.postValue("Done");
-                        }
-                        Log.d(LOG_TAG, "TDS onSuccess: storage upload photos "+Thread.currentThread().getName());
-                        // Toast.makeText(mContext, "Vos images de fond sont enregistrées sur votre téléphone", Toast.LENGTH_LONG).show();
-                        // ...
-                    }).addOnFailureListener(exception -> {
-                // Handle failed download
-                // ...
-                Toast.makeText(mContext, "Il y a eu un problème de téléchargement, veuillez réessayer plus tard...", Toast.LENGTH_LONG).show();
-            });
+                mStorageRef.getFile(localFileImage)
+                        .addOnSuccessListener(taskSnapshot -> {
+                            // Successfully downloaded data to local file
+                            //todo modifier le texte pour l'utilisateur
+                            increment1++;
+                            if (increment1 == photoSize) {
+                                Log.d(LOG_TAG, "TDS onSuccess pour ne pas louper les photos: ");
+                                downloads.postValue("Done");
+                            }
+                            Log.d(LOG_TAG, "TDS onSuccess: storage upload photos " + Thread.currentThread().getName());
+                            // Toast.makeText(mContext, "Vos images de fond sont enregistrées sur votre téléphone", Toast.LENGTH_LONG).show();
+                            // ...
+                        }).addOnFailureListener(exception -> {
+                    // Handle failed download
+                    // ...
+                    Toast.makeText(mContext, "Il y a eu un problème de téléchargement, veuillez réessayer plus tard...", Toast.LENGTH_LONG).show();
+                });
         }
     }
 

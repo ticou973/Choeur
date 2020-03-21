@@ -15,40 +15,34 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import dedicace.com.R;
 
 public class ChooseCsv extends AppCompatActivity implements CsvAdapter.OnItemListener {
 
-    private RecyclerView recyclerCsv;
-    private CsvAdapter csvAdapter;
     private List<String> listCsv = new ArrayList<>();
-    private String[] listArrayCsv;
-    private RecyclerView.LayoutManager layoutManager;
     private static final String TAG ="coucou";
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_csv);
 
-        recyclerCsv = findViewById(R.id.recyclerview_local_csv);
+        RecyclerView recyclerCsv = findViewById(R.id.recyclerview_local_csv);
 
         Intent intent = getIntent();
-        listArrayCsv=intent.getStringArrayExtra("listCsv");
+        String[] listArrayCsv = intent.getStringArrayExtra("listCsv");
 
-        Log.d(TAG, "CCsv onCreate: "+listArrayCsv);
+        Log.d(TAG, "CCsv onCreate: "+ listArrayCsv);
 
-        for (String name:listArrayCsv) {
-            listCsv.add(name);
-        }
+        listCsv.addAll(Arrays.asList(listArrayCsv));
+
         Log.d(TAG, "CC onCreate: "+listCsv);
 
-        csvAdapter = new CsvAdapter(listCsv);
-        layoutManager = new LinearLayoutManager(this);
+        CsvAdapter csvAdapter = new CsvAdapter(listCsv);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerCsv.setLayoutManager(layoutManager);
         recyclerCsv.setHasFixedSize(true);
         recyclerCsv.setAdapter(csvAdapter);
@@ -72,7 +66,7 @@ class CsvAdapter extends RecyclerView.Adapter<CsvAdapter.CsvViewHolder>{
 
     public CsvAdapter(List<String> listCsv) {
         this.listCsv = listCsv;
-        Log.d(TAG, "CsvA ImageAdapter: "+listCsv);
+        Log.d(TAG, "CsvA ImageAdapter: "+listCsv+ " "+this.listCsv+ " "+this.listCsv.size());
     }
 
     public interface OnItemListener {
@@ -84,21 +78,25 @@ class CsvAdapter extends RecyclerView.Adapter<CsvAdapter.CsvViewHolder>{
     public CsvViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_csv_file, viewGroup, false);
 
+        Log.d(TAG, "CCSV onCreateViewHolder: ");
         return new CsvViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull CsvViewHolder csvViewHolder, int i) {
+        Log.d(TAG, "CCSV onBindViewHolder: "+i+ listCsv.get(i));
         csvViewHolder.csvName.setText(listCsv.get(i));
+        Log.d(TAG, "CCSV onBindViewHolder: B "+i+ listCsv.get(i));
     }
 
     @Override
     public int getItemCount() {
+        Log.d(TAG, "CCSV getItemCount: "+listCsv.size());
         return listCsv.size();
     }
 
     @Override
-    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
 
         Context context = recyclerView.getContext();
@@ -112,9 +110,8 @@ class CsvAdapter extends RecyclerView.Adapter<CsvAdapter.CsvViewHolder>{
     }
 
     @Override
-    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
-
         mListener = null;
     }
 
@@ -124,11 +121,12 @@ class CsvAdapter extends RecyclerView.Adapter<CsvAdapter.CsvViewHolder>{
 
         public CsvViewHolder(@NonNull View itemView) {
             super(itemView);
+            Log.d(TAG, "CCA onClick: A "+getAdapterPosition());
             cv = itemView.findViewById(R.id.cv_csv);
             csvName = itemView.findViewById(R.id.tv_csv_name);
 
             cv.setOnClickListener(view -> {
-                Log.d(TAG, "CCA onClick: "+getAdapterPosition());
+                Log.d(TAG, "CCA onClick: B "+getAdapterPosition());
                 int i = getAdapterPosition();
                 selectCsv(i);
             });

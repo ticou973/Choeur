@@ -66,6 +66,7 @@ class TrombiAdapter extends RecyclerView.Adapter<TrombiAdapter.TrombiViewHolder>
         GlideApp.with(mContext)
                 .load(choristes.get(i).getUrlLocalPhoto())
                 .centerCrop() // scale to fill the ImageView and crop any extra
+                .placeholder(R.drawable.avatar)
                 .into(trombiViewHolder.imgChoriste);
 
         trombiViewHolder.cv.setOnClickListener(view -> {

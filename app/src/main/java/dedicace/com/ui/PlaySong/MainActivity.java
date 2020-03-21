@@ -1096,7 +1096,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
         Log.d(TAG, "MA checkPermissionFromDevice: " + (write_external_storage_result == PackageManager.PERMISSION_GRANTED && record_audio_result == PackageManager.PERMISSION_GRANTED));
         return write_external_storage_result == PackageManager.PERMISSION_GRANTED && record_audio_result == PackageManager.PERMISSION_GRANTED;
-
     }
 
     @Override

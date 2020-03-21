@@ -22,8 +22,8 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,7 +39,7 @@ import dedicace.com.utilities.SongsUtilities;
 public class CreateChoristeCsv extends AppCompatActivity {
 
     TextView nomChorale, nomCsv;
-    String nomChoraleStr, idChorale, nomCsvStr;
+    String nomChoraleStr, idChorale, nomCsvStr,rueChoriste, villeChoriste, zipChoriste;
     private static final int REQUEST_CODE_B = 200;
     private static final int REQUEST_CODE_A = 100;
     private static final int REQUEST_CODE_C = 300;
@@ -54,8 +54,11 @@ public class CreateChoristeCsv extends AppCompatActivity {
     private List<Choriste> choristes = new ArrayList<>();
     private StorageReference mStorageRef;
     private FirebaseFirestore db;
-    private Uri downloadUrl;
     private ArrayList<String> listUrlPhoto = new ArrayList<>();
+    private File file;
+    private int zipInt;
+    private List<List<String>> adresses = new ArrayList<>();
+    private List<Uri> downloadUris = new ArrayList<>();
 
 
     @Override
@@ -63,11 +66,9 @@ public class CreateChoristeCsv extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_choriste_csv);
         ActionBar actionBar = this.getSupportActionBar();
-
         if(actionBar != null){
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
         db = FirebaseFirestore.getInstance();
@@ -79,6 +80,7 @@ public class CreateChoristeCsv extends AppCompatActivity {
         Button visualisationCsv = findViewById(R.id.btn_visualisation_csv);
 
         Button insertDb = findViewById(R.id.btn_create_in_db_csv);
+        Button downloadPhotos = findViewById(R.id.btn_download_photos_choristes);
 
         selectChorale.setOnClickListener(view -> {
             Intent startModifyChoraleActivity = new Intent(CreateChoristeCsv.this,ModifyChorale.class);
@@ -98,10 +100,13 @@ public class CreateChoristeCsv extends AppCompatActivity {
 
 
         visualisationCsv.setOnClickListener(view -> {
-            if(!TextUtils.isEmpty(fileNameSelected)) {
+            String folder = file.getAbsolutePath();
+            nomCsvStr =nomCsv.getText().toString();
+            if(!TextUtils.isEmpty(nomCsvStr)) {
                 Log.d(TAG, "CCCsv onCreate: début visualisation");
                 Intent startVisualisation = new Intent(CreateChoristeCsv.this, VisualisationCsv.class);
-                startVisualisation.putExtra("CsvName", fileNameSelected);
+                startVisualisation.putExtra("CsvName", nomCsvStr);
+                startVisualisation.putExtra("path",folder);
                 startVisualisation.putStringArrayListExtra("listUrl",listUrlPhoto);
                 startActivityForResult(startVisualisation,REQUEST_CODE_C);
             }else{
@@ -111,35 +116,41 @@ public class CreateChoristeCsv extends AppCompatActivity {
 
         });
 
+        downloadPhotos.setOnClickListener(view -> {
+            if(!TextUtils.isEmpty(idChorale)&&listResult!=null&&listResult.size()!=0){
+               insertPhotoInCloudStorage();
+            }else{
+                Log.d(TAG, "CCCsv onCreate download: il manque des éléments");
+                Toast.makeText(this, "Il manque des éléments download !", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         insertDb.setOnClickListener(view -> {
+            //todo éventuellement ajouter une condition pour attendre la fin du storage
             if(!TextUtils.isEmpty(idChorale)&&listResult!=null&&listResult.size()!=0){
-               // insertPhotoInCloudStorage();
-
-
+                insertChoristeinDb();
             }else{
-                Log.d(TAG, "CCCsv onCreate: il manque des éléments");
-                Toast.makeText(this, "Il manque des éléments !", Toast.LENGTH_SHORT).show();
-                String essai = "bonjour/monsieur/le/président";
-                String[] morceaux = essai.split("/");
-
-                Log.d(TAG, "onCreate: "+morceaux[0]+" "+morceaux[1]+" "+morceaux[2]);
+                Log.d(TAG, "CCCsv onCreate insert : il manque des éléments");
+                Toast.makeText(this, "Il manque des éléments db !", Toast.LENGTH_SHORT).show();
             }
         });
 
     }
 
     private void insertPhotoInCloudStorage() {
-
-        for(String pathSelected:paths) {
+        for(String pathSelected:listUrlPhoto) {
+            if(!pathSelected.isEmpty()){
+            int indexListPhoto = listUrlPhoto.indexOf(pathSelected);
+            File tempFile = new File(pathSelected);
+            fileNameSelected =tempFile.getName();
 
             Uri fileSelected = Uri.fromFile(new File(pathSelected));
             StorageReference imageRef = mStorageRef.child("songs/photos_choristes/" + fileNameSelected);
 
             UploadTask uploadTask = imageRef.putFile(fileSelected);
 
-            uploadTask.addOnSuccessListener(taskSnapshot -> Log.d(TAG, "CSU onSuccess: bravo c'est uploadé"))
-                    .addOnFailureListener(exception -> Log.d(TAG, "CSU onFailure: dommage c'est raté"));
+            uploadTask.addOnSuccessListener(taskSnapshot -> Log.d(TAG, "CCC onSuccess: bravo c'est uploadé"))
+                    .addOnFailureListener(exception -> Log.d(TAG, "CCC onFailure: dommage c'est raté"));
 
 
             uploadTask.continueWithTask(task -> {
@@ -151,52 +162,92 @@ public class CreateChoristeCsv extends AppCompatActivity {
                 return imageRef.getDownloadUrl();
             }).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
+                    Uri downloadUrl;
                     downloadUrl = task.getResult();
-                    insertChoristeinDb(pathSelected);
+                    downloadUris.add(downloadUrl);
                     Log.d(TAG, "CCU onComplete: " + downloadUrl);
                 } else {
                     Log.d(TAG, "CCU onComplete: Il y a eu un pb " + Objects.requireNonNull(task.getException()).getMessage());
                 }
             });
+             }else{
+                downloadUris.add(null);
+                Log.d(TAG, "CCC insertPhotoInCloudStorage: pas de photos");
+            }
         }
     }
 
-    private void insertChoristeinDb(String pathSelected) {
-       /*
-        List<String> adresse = new ArrayList<>();
-        adresse.add(rueChoriste);
-        adresse.add(villeChoriste);
-        adresse.add(zipChoriste);
+    private void insertChoristeinDb() {
+        for(Choriste tempChoriste:choristes) {
+            int index = choristes.indexOf(tempChoriste);
+            Map<String, Object> choriste = new HashMap<>();
+            choriste.put("nom_choriste", tempChoriste.getNom());
+            choriste.put("prenom_choriste", tempChoriste.getPrenom());
+            if(downloadUris.get(index)!=null) {
+                choriste.put("url_photo", downloadUris.get(index).toString());
+            }else{
+                choriste.put("url_photo", "");
+            }
+            choriste.put("pupitre", tempChoriste.getPupitre().toString());
+            choriste.put("role_choeur", tempChoriste.getRoleChoeur());
+            choriste.put("role_admin", tempChoriste.getRoleAdmin());
+            choriste.put("email", tempChoriste.getEmail());
+            choriste.put("tel_fixe", tempChoriste.getFixTel());
+            choriste.put("tel_port", tempChoriste.getPortTel());
+            choriste.put("adresse", adresses.get(index));
+            choriste.put("maj", Timestamp.now());
+
+            db.collection("chorale").document(idChorale).collection("choristes")
+                    .add(choriste)
+                    .addOnSuccessListener(documentReference -> {
+                        Log.d(TAG, "CCC DocumentSnapshot added with ID: " + documentReference.getId());
+                        File file = new File(pathSelected);
+                       /* if (file.delete()) {
+                            Log.d(TAG, "CCC onSuccess: le fichier est supprimé du local");
+                        } else {
+                            Log.d(TAG, "CCC onSuccess: problème de suppression en local du fichier");
+                        }*/
 
 
-        Map<String,Object> choriste = new HashMap<>();
-        choriste.put("nom_choriste",nomChoriste);
-        choriste.put("prenom_choriste",prenomChoriste);
-        choriste.put("url_photo",downloadUrl.toString());
-        choriste.put("pupitre",pupitreStr);
-        choriste.put("role_choeur",roleChoeurStr);
-        choriste.put("role_admin",roleAdminStr);
-        choriste.put("email",mailChoriste);
-        choriste.put("tel_fixe",telFixeChoriste);
-        choriste.put("tel_port",telPortChoriste);
-        choriste.put("adresse",adresse);
-        choriste.put("maj", Timestamp.now());
 
-        db.collection("chorale").document(idChorale).collection("choristes")
-                .add(choriste)
-                .addOnSuccessListener(documentReference -> {
-                    Log.d(TAG, "CCU DocumentSnapshot added with ID: " + documentReference.getId());
-                    File file = new File(pathSelected);
-                    if(file.delete()){
-                        Log.d(TAG, "CCU onSuccess: le fichier est supprimé du local");
-                    }else{
-                        Log.d(TAG, "CCU onSuccess: problème de suppression en local du fichier");
+                    }).addOnFailureListener(e -> Log.d(TAG, "CCC Error adding document", e));
+        }
+        majChoraleTrombi();
+    }
+
+    private void getAdresse() {
+        int index;
+        for(index =0;index<listResult.size();index++) {
+            String adresse = listResult.get(index)[8];
+            char[] cs = adresse.toCharArray();
+            boolean boucle = true;
+            int j = 0;
+            while (boucle && j < cs.length) {
+               // Log.d(TAG, "CCC getAdresse: avant if "+boucle+" "+j+" "+cs.length);
+                if (Character.isDigit(cs[j])) {
+                    String zip = adresse.substring(j, j + 5);
+                 //   Log.d(TAG, "getAdresse: zip substring "+ zip);
+                    try {
+                        zipInt = Integer.parseInt(zip);
+                        List<String> tempadresse = new ArrayList<>();
+                        tempadresse.add(adresse.substring(0, j - 1));
+                        tempadresse.add(adresse.substring(j + 6));
+                        tempadresse.add(String.valueOf(zipInt));
+                        adresses.add(tempadresse);
+
+                        Log.d(TAG, "CCC getAdresse: adresse "+ tempadresse);
+                        boucle = false;
+                    } catch (NumberFormatException nfe) {
+                     //   Log.d(TAG, "CSS getAdresse: Ce n'est pas un entier ");
+                        // traitement à faire dans ce cas
+                        j++;
                     }
-
-                    majChoraleTrombi();
-
-
-                }).addOnFailureListener(e -> Log.d(TAG, "CCU Error adding document", e));*/
+                } else {
+                  //  Log.d(TAG, "CCC getAdresse: else");
+                    j++;
+                }
+            }
+        }
     }
 
     private void majChoraleTrombi() {
@@ -220,29 +271,22 @@ public class CreateChoristeCsv extends AppCompatActivity {
     //todo voir comment ne mettre le csv qu'à un seul endroit au lieu de 2 (DedicaceAdmin et le interne data/data/files)
     private void getLists() {
         File path = Environment.getExternalStorageDirectory();
-        File file = new File(path,"DedicaceAdmin/csv_Choristes");
+        file = new File(path,"DedicaceAdmin/csv_Choristes");
 
-        if(file.mkdirs()){
-            Log.d(TAG, "CCC insertCsvInCloudStorage: le dossier est fait");
-
+        if(file.mkdirs()){ Log.d(TAG, "CCC insertCsvInCloudStorage: le dossier est fait");
         }else{
-            Log.d(TAG, "CCC insertCsvInCloudStorage: dossier non réalisé ou déjà fait");
+            Log.d(TAG, "CCC insertCsvInCloudStorage: dossier non réalisé ou déjà fait "+file.exists());
         }
-
         if(file.exists()) {
             listFiles = file.listFiles();
-
             Log.d(TAG, "CCU getLists: " + Arrays.toString(listFiles));
 
-            if (listFiles != null && listFiles.length != 0) {
-
+            if ((listFiles != null) && (listFiles.length != 0)) {
                 Log.d(TAG, "CCU selectBackground: " + " " + listFiles.length);
-
                 listCsv = new String[listFiles.length];
 
                 for (int i = 0; i < listFiles.length; i++) {
                     listCsv[i] = listFiles[i].getName();
-
                     Log.d(TAG, "CCC selectBackground: " + listFiles[i].getName());
                 }
             }else{
@@ -264,24 +308,22 @@ public class CreateChoristeCsv extends AppCompatActivity {
             nomChorale.setText(nomChoraleStr);
             Log.d(TAG, "CCC onActivityResult: request_codeA " + idChorale);
         }else if(requestCode==REQUEST_CODE_B){
-
             if (data != null) {
                 csvSelected = data.getIntExtra("csvselected",-1);
                 Log.d(TAG, "CCC onActivityResult: "+csvSelected);
             }
-
             if(csvSelected!=-1) {
                 String name = listCsv[csvSelected];
+                Log.d(TAG, "CCC onActivityResult: name "+name);
                 nomCsv.setText(name);
                 pathSelected=listFiles[csvSelected].getAbsolutePath();
-                fileNameSelected = name;
+                Log.d(TAG, "CCC onCreate: path " + pathSelected);
 
-                readCsv(name);
+                File myFile = new File(file,name);
+                readCsv(myFile);
                 Log.d(TAG, "CCC onCreate: " + pathSelected+" "+listResult.size());
+                CompleteData();
 
-                for (int j = 0; j <listResult.size() ; j++) {
-                    listUrlPhoto.add("");
-                }
             }
         }else if(requestCode==REQUEST_CODE_C){
             if (data != null) {
@@ -295,11 +337,33 @@ public class CreateChoristeCsv extends AppCompatActivity {
         }
     }
 
-    private void readCsv(String name) {
-        InputStream inputStream = null;
+    private void CompleteData() {
+        for(String[] row : listResult){
+            Log.d(TAG, "CCC CompleteData: "+listResult.size());
+            Log.d(TAG, "CCC readCsv: row "+ Arrays.toString(row));
+            Log.d(TAG, "CCC readcsv: "+row.length+" "+row[0]);
+            Pupitre pupitre = SongsUtilities.converttoPupitre(row[2]);
+
+            Choriste newChoriste = new Choriste(idChorale,row[0],row[1],pupitre,row[8],row[7],row[6],row[5],row[3],row[4]);
+            choristes.add(newChoriste);
+        }
+        Log.d(TAG, "CCC CompleteData: chorsites "+choristes.size());
+
+        getAdresse();
+
+        for (int j = 0; j <listResult.size() ; j++) {
+            listUrlPhoto.add("");
+        }
+    }
+
+    private void readCsv(File myFile) {
+        Log.d(TAG, "CCSV readCsv: "+myFile);
+        FileInputStream inputStream = null;
         try {
-            inputStream = openFileInput(name);
+            Log.d(TAG, "CCSV readCsv: try");
+            inputStream = new FileInputStream(myFile);
         } catch (FileNotFoundException e) {
+            Log.d(TAG, "CCSV readCsv: catch "+e.toString());
             e.printStackTrace();
         }
 
@@ -308,13 +372,7 @@ public class CreateChoristeCsv extends AppCompatActivity {
 
         listResult = csvReader.read();
 
-        for(String[] row : listResult){
-            Log.d(TAG, "CCC onActivityResult: "+row[1]);
-            Pupitre pupitre = SongsUtilities.converttoPupitre(row[2]);
-
-            Choriste newChoriste = new Choriste(idChorale,row[0],row[1],pupitre,row[8],row[7],row[6],row[5],row[3],row[4]);
-            choristes.add(newChoriste);
-        }
+        Log.d(TAG, "CCCsv readCsv: list result size "+listResult.size());
     }
 
     @Override

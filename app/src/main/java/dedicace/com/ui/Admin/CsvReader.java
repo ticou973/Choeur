@@ -12,25 +12,30 @@ import java.util.List;
 public class CsvReader {
     private InputStream inputStream;
     private static final String TAG ="coucou";
+    private BufferedReader reader;
 
     public CsvReader(InputStream inputStream) {
 
         this.inputStream = inputStream;
-        Log.d(TAG, "CsvReader: "+inputStream.toString());
+        if(inputStream!=null) {
+            Log.d(TAG, "CsvReader: " + inputStream.toString());
+        }
     }
 
     public List<String[]> read(){
         List<String[]> resultList = new ArrayList<String[]>();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        if(inputStream!=null) {
+            reader = new BufferedReader(new InputStreamReader(inputStream));
+        }
 
         try{
             String csvLine;
             while ((csvLine=reader.readLine())!=null){
                 String[] row = csvLine.split(";");
                 resultList.add(row);
-                Log.d(TAG, "Csv read: row "+row);
+               // Log.d(TAG, "Csv read: row "+row);
             }
-            Log.d(TAG, "CsvR read: "+resultList);
+            Log.d(TAG, "CsvR read: "+resultList.size());
 
         }catch(IOException e){
             throw new RuntimeException("Error in Reading CSV file "+e);

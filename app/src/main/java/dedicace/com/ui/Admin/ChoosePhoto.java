@@ -14,11 +14,7 @@ import dedicace.com.R;
 
 public class ChoosePhoto extends AppCompatActivity implements PhotoAdapter.OnItemListener{
 
-    private RecyclerView recyclerImage;
-    private PhotoAdapter photoAdapter;
     private List<String> listImages = new ArrayList<>();
-    private String[] listArrayImages;
-    private RecyclerView.LayoutManager layoutManager;
     private static final String TAG ="coucou";
     private int position;
     private String origine;
@@ -28,7 +24,7 @@ public class ChoosePhoto extends AppCompatActivity implements PhotoAdapter.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_photo);
 
-        recyclerImage = findViewById(R.id.recyclerview_local_photo);
+        RecyclerView recyclerImage = findViewById(R.id.recyclerview_local_photo);
 
         Intent intent = getIntent();
         origine = intent.getStringExtra("origine");
@@ -36,15 +32,15 @@ public class ChoosePhoto extends AppCompatActivity implements PhotoAdapter.OnIte
         if(origine.equals("csv")){
             position = intent.getIntExtra("position",0);
         }
-        listArrayImages=intent.getStringArrayExtra("listimages");
+        String[] listArrayImages = intent.getStringArrayExtra("listimages");
 
-        for (String name:listArrayImages) {
+        for (String name: listArrayImages) {
             listImages.add(name);
         }
         Log.d(TAG, "CB onCreate: "+listImages);
 
-        photoAdapter = new PhotoAdapter(listImages);
-        layoutManager = new LinearLayoutManager(this);
+        PhotoAdapter photoAdapter = new PhotoAdapter(listImages);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerImage.setLayoutManager(layoutManager);
         recyclerImage.setHasFixedSize(true);
         recyclerImage.setAdapter(photoAdapter);

@@ -22,8 +22,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,7 +61,10 @@ public class VisualisationCsv extends AppCompatActivity implements ChoristeAdapt
 
         Intent intent = getIntent();
         String nameCsv = intent.getStringExtra("CsvName");
+        String folder = intent.getStringExtra("path");
         listUrlPhoto  = intent.getStringArrayListExtra("listUrl");
+
+        Log.d(TAG, "VCS onCreate: "+nameCsv+ " "+folder+ " "+listUrlPhoto.size());
 
         fab =findViewById(R.id.fab_choriste);
 
@@ -73,7 +76,8 @@ public class VisualisationCsv extends AppCompatActivity implements ChoristeAdapt
             finish();
         });
 
-        readCsv(nameCsv);
+        File file = new File(folder,nameCsv);
+        readCsv(file);
 
         RecyclerView recycler = findViewById(R.id.recyclerview_local_csv_choristes);
         choristeAdapter = new ChoristeAdapter(listResult, listUrlPhoto,this);
@@ -83,11 +87,12 @@ public class VisualisationCsv extends AppCompatActivity implements ChoristeAdapt
         recycler.setAdapter(choristeAdapter);
     }
 
-    private void readCsv(String name) {
-        InputStream inputStream = null;
+    private void readCsv(File myFile) {
+        FileInputStream inputStream = null;
         try {
-            inputStream = openFileInput(name);
+            inputStream = new FileInputStream(myFile);
         } catch (FileNotFoundException e) {
+            Log.d(TAG, "CCSV readCsv: catch "+e.toString());
             e.printStackTrace();
         }
 
