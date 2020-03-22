@@ -36,6 +36,7 @@ class ChoristeModifAdapter extends RecyclerView.Adapter<ChoristeModifAdapter.Cho
     public ChoristeModifAdapter(Context mContext, List<Choriste> listChoristes) {
         this.mContext = mContext;
         this.listChoristes = listChoristes;
+        Log.d(TAG, "CMA ChoristeModifAdapter: "+listChoristes);
     }
 
     interface clickedListener {
@@ -64,7 +65,7 @@ class ChoristeModifAdapter extends RecyclerView.Adapter<ChoristeModifAdapter.Cho
         choristeViewHolder.adresse.setText(listChoristes.get(i).getAdresse());
 
         GlideApp.with(mContext)
-                .load(listChoristes.get(i).getUrlLocalPhoto())
+                .load(listChoristes.get(i).getUrlCloudPhoto())
                 .centerCrop() // scale to fill the ImageView and crop any extra
                 .placeholder(R.drawable.avatar)
                 .into(choristeViewHolder.imgChoriste);
@@ -72,7 +73,7 @@ class ChoristeModifAdapter extends RecyclerView.Adapter<ChoristeModifAdapter.Cho
 
     @Override
     public int getItemCount() {
-        return listResult.size();
+        return listChoristes.size();
     }
 
     @Override

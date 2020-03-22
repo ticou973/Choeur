@@ -14,9 +14,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import dedicace.com.R;
 
@@ -26,7 +30,7 @@ public class ChoristeModifyDetails extends AppCompatActivity implements DialogSu
     private StorageReference mStorageRef;
     private FirebaseFirestore db;
     private String oldNomStr, oldPrenomStr, oldPupitreStr,oldUrlStr,oldRoleCStr,oldRoleAStr,oldEmailStr,oldAdressStr,oldFixeStr,oldPortStr,newUrlStr;
-    private String newNomStr,newPrenomStr,newPupitreStr,newRoleCStr, newRoleAStr, newEmailStr, newAdressStr,newFixeStr,newPortStr,idChoriste,idChorale;
+    private String newNomStr,newPrenomStr,newPupitreStr,newRoleCStr, newRoleAStr, newEmailStr, newAdressStr,newFixeStr,newPortStr,idChoriste,idChorale,nomChoraleStr,origine;
     private static final String TAG ="coucou";
 
     @Override
@@ -121,7 +125,8 @@ public class ChoristeModifyDetails extends AppCompatActivity implements DialogSu
         oldUrlStr=args.getString("url_photo");
         idChoriste=args.getString("idChoriste");
         idChorale=args.getString("idChorale");
-
+        nomChoraleStr=args.getString("nomChorale");
+        origine=args.getString("origine");
         Log.d(TAG, "CMD getIntentBundle: "+oldNomStr+" "+oldPrenomStr+" "+oldPupitreStr+" "+oldRoleCStr+" "+oldRoleAStr+" "+oldEmailStr+" "+oldAdressStr+" "+oldFixeStr+" "+oldPortStr+" "+oldUrlStr+" "+idChorale+ " "+idChoriste);
     }
 
@@ -136,8 +141,48 @@ public class ChoristeModifyDetails extends AppCompatActivity implements DialogSu
 
     @Override
     public void onDialogSuppPositiveClick() {
+        if(!TextUtils.isEmpty(idChorale)) {
+            modifyMajChorale();
+            suppChoristes();
+            Bundle args = new Bundle();
+            args.putString("idChorale",idChorale);
+            args.putString("nomChorale",nomChoraleStr);
+            args.putString("origine",origine);
+
+            Intent startModifyChoristeActivity = new Intent(ChoristeModifyDetails.this,ModifyChoriste.class);
+            startModifyChoristeActivity.putExtra("bundleChorale",args);
+            startModifyChoristeActivity.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(startModifyChoristeActivity);
+
+        }else{
+            Log.d(TAG, "MSSD onCreate: id chorale vide");
+            Toast.makeText(this, "Il faut préciser la Chorale !", Toast.LENGTH_SHORT).show();
+        }
 
 
+    }
+
+    private void suppChoristes() {
+        try{
+            db.collection("chorale").document(idChorale).collection("choristes").document(idChoriste)
+                    .delete()
+                    .addOnSuccessListener(aVoid -> Log.d(TAG, "CMD onSuccess: réussi choriste supprimé"))
+                    .addOnFailureListener(e -> Log.d(TAG, "CMD onFailure: Chorsite pas supprimé"));
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+    private void modifyMajChorale() {
+        Map<String,Object> data = new HashMap<>();
+        data.put("maj", Timestamp.now());
+
+        db.collection("chorale").document(idChorale)
+                .update(data)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "CMD onSuccess: maj chorale done"))
+                .addOnFailureListener(e -> Log.d(TAG, "CMD onSuccess: maj chorale failed"));
     }
 
     @Override

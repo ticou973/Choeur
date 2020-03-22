@@ -138,7 +138,8 @@ public class ModifyChoriste extends AppCompatActivity implements ChoristeModifAd
 
     @Override
     public void onItemClick(int i) {
-        if (origine.equals("AdminHome")||origine.equals("ChoristeModifyDetails")) {
+        Log.d(TAG, "onItemClick: ");
+        if (origine.equals("AdminHome")||origine.equals("ChoristeModifyDetails")||origine.equals("ChooseChorale")) {
             Log.d(TAG, "MCh onItemClick: A "+i);
             Intent startDetailsChoristesActivity = new Intent(ModifyChoriste.this, ChoristeModifyDetails.class);
             Bundle args = new Bundle();
@@ -151,12 +152,15 @@ public class ModifyChoriste extends AppCompatActivity implements ChoristeModifAd
             args.putString("adresse",listChoristes.get(i).getAdresse());
             args.putString("tel_fixe",listChoristes.get(i).getFixTel());
             args.putString("tel_port",listChoristes.get(i).getPortTel());
-            args.putString("url_photo",listChoristes.get(i).getUrlLocalPhoto());
+            args.putString("url_photo",listChoristes.get(i).getUrlCloudPhoto());
             args.putString("idChoriste",listChoristes.get(i).getIdChoristeCloud());
             args.putString("idChorale",idChorale);
+            args.putString("origine",origine);
+            args.putString("nomChorale",nomChoraleStr);
             startDetailsChoristesActivity.putExtra("bundleChoriste", args);
-
             startActivity(startDetailsChoristesActivity);
+        }else{
+            Log.d(TAG, "MC onItemClick: pas traité "+origine);
         }
     }
 }
