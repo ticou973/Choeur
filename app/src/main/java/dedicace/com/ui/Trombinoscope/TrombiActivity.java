@@ -2,6 +2,7 @@ package dedicace.com.ui.Trombinoscope;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -30,7 +31,7 @@ import dedicace.com.utilities.AppExecutors;
 import dedicace.com.utilities.InjectorUtils;
 import dedicace.com.utilities.SongsUtilities;
 
-public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.ListItemClickListener, DialogMajChoristes.DialogMajChoristesListener, DialogTA.DialogTAListener {
+public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.ListItemClickListener, DialogMajChoristes.DialogMajChoristesListener {
 
     private LiveData<List<Choriste>> choristes;
     //ViewModel
@@ -51,7 +52,7 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
     private List<Choriste> choristes1;
     private SharedPreferences.Editor editor;
     private BottomNavigationView navigationView;
-
+    private String origine;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,8 +76,6 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
         navigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-
-
                 switch (menuItem.getItemId()) {
                     case R.id.item_tous:
                         filterPupitre("TOUS");
@@ -109,6 +108,15 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(trombiAdapter);
 
+        Intent intent= getIntent();
+        if(intent!=null){
+            origine = intent.getStringExtra("origine");
+            Log.d(TAG, "TA onCreate: origine "+origine);
+        }else{
+            Log.d(TAG, "TA onCreate intent : null");
+        }
+        Log.d(TAG, "TA onCreate: typeChoriste "+typeChoriste);
+
         mfactory = InjectorUtils.provideChoristeViewModelFactory(this.getApplicationContext(),this);
         Log.d(TAG, "TA onCreate: mFactory done");
 
@@ -124,15 +132,16 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
             Log.d(TAG, "TA onChanged: Alerte, ça bouge dans le coin !" + choristes + " " + mViewModel.getChoristes() + " " + Thread.currentThread().getName());
 
             currentThread = mViewModel.getCurrentThread();
+
             typeChoriste = mViewModel.getTypeChoriste();
 
             //permet que la listsongs de CR se calcule
             if (typeChoriste == null) {
-                Log.d(TAG, "TA onChanged: typeChoraiste null et alertbox");
+                Log.d(TAG, "TA onChanged: typeChoriste null et alertbox");
                 showLoading();
                 AlertBox();
             } else {
-                if (!typeChoriste.equals("modificationSS")) {
+                if (!typeChoriste.equals("modificationChoriste")) {
                     Log.d(TAG, "TA onChanged: typeChoriste non null et alertbox " + typeChoriste);
                     showLoading();
                 }
@@ -170,8 +179,10 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
                                 if (dialogWait != null) {
                                     dialogWait.dismiss();
                                 }
-                                DialogFragment dialog = new DialogMajChoristes();
-                                dialog.show(getSupportFragmentManager(), "TAG");
+                                if(origine!=null) {
+                                    DialogFragment dialog = new DialogMajChoristes();
+                                    dialog.show(getSupportFragmentManager(), "TAG");
+                                }
                                 break;
                             case "newChoriste":
                                 Toast.makeText(TrombiActivity.this, "Veuillez patienter le temps de mettre en place tous les choristes...", Toast.LENGTH_LONG).show();
@@ -310,14 +321,4 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
         Toast.makeText(this, "Les nouveaux choristes appraitront au prochain lancement de l'application", Toast.LENGTH_LONG).show();
     }
 
-    //todo à retirer car surement inutile
-    @Override
-    public void onDialogTAPositiveClick() {
-
-    }
-
-    @Override
-    public void onDialogTANegativeClick() {
-
-    }
 }

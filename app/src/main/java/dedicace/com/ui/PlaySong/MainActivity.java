@@ -688,6 +688,7 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
     private void launchTrombiActivity() {
         Intent startTrombiActivity = new Intent(this, TrombiActivity.class);
+        startTrombiActivity.putExtra("origine","Initial");
         startActivity(startTrombiActivity);
     }
 

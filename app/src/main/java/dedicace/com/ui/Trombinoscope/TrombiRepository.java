@@ -17,7 +17,7 @@ public class TrombiRepository {
     private static TrombiRepository sInstance;
     private static final Object LOCK = new Object();
     private static final String TAG ="coucou" ;
-    private Thread threadOldData,threadSynchro, currentThread, threadDoworkInRoom,threadReinit;
+    private Thread threadOldData,threadOldData1,threadSynchro, currentThread, threadDoworkInRoom,threadReinit;
     private boolean isFromLocal;
     private String typeChoriste;
     private static Context context;
@@ -62,7 +62,7 @@ public class TrombiRepository {
             oldChoristes = mChoristeDao.getAllChoristes();
 
             for(Choriste choriste :oldChoristes){
-                Log.d(TAG, "TR TrombiRepository: old data"+choriste.getNom()+" "+choriste.getPrenom());
+                Log.d(TAG, "TR TrombiRepository: old data "+choriste.getNom()+" "+choriste.getPrenom());
             }
         });
         threadOldData.start();
@@ -74,7 +74,6 @@ public class TrombiRepository {
         majDBCloudLong.observeForever(majclouddblong -> {
             majCloudDBLong = majclouddblong;
             Log.d(TAG, "TR Alerte Maj TRombiRepository: majCloudLong "+ majclouddblong);
-
             if(majLocalDBLong<majCloudDBLong){
                 if(oldChoristes!=null&&oldChoristes.size()!=0){
                     typeChoriste="oldChoriste";
@@ -90,7 +89,6 @@ public class TrombiRepository {
                     }
                         Log.d(TAG, "TR ChoraleRepository: getData");
                         startFetchChoristesService();
-
                 }else{
                     typeChoriste="newChoriste";
                     Log.d(TAG, "CR TrombiRepository new choriste : ok on lance startFetchSongService");
@@ -101,6 +99,22 @@ public class TrombiRepository {
 
             }else{
                 //pour le cas aucune modif
+
+                //maj des old après une relancement suite à modification
+                threadOldData1 = new Thread(() -> {
+                    oldChoristes = mChoristeDao.getAllChoristes();
+
+                    for(Choriste choriste :oldChoristes){
+                        Log.d(TAG, "TR TrombiRepository: old data B "+choriste.getNom()+" "+choriste.getPrenom());
+                    }
+                });
+                threadOldData1.start();
+
+                try{
+                    threadOldData1.join();
+                }catch  (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 if(oldChoristes!=null&&oldChoristes.size()!=0){
                     //chemin A aucune modification et données initiales
                     isFromLocal=true;
@@ -182,7 +196,6 @@ public class TrombiRepository {
 
 
     private void DoWorkInRoom() {
-
         Log.d(TAG, "TR DoWorkInRoom: entrée ");
         if(deletedChoristesList!=null&&deletedChoristesList.size()!=0){
             int temp = mChoristeDao.deleteChoristes(deletedChoristesList);
@@ -223,6 +236,10 @@ public class TrombiRepository {
                 //relance la bête pour s'afficher
                 int tempInt = mChoristeDao.upDateChoristes(tempChoristes);
                 Log.d(TAG, "TR synchronisationLocalDataBase: nb d'update choristes " + tempInt);
+
+                for(Choriste choriste:tempChoristes){
+                    Log.d(TAG, "TR DoWorkInRoom: choriste corrigé "+choriste.getNom());
+                }
             }
         }
 

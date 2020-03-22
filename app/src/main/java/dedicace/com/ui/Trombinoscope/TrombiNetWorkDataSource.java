@@ -187,10 +187,10 @@ public class TrombiNetWorkDataSource {
         }
 
         int photoSize = choristesAvecPhotos.size();
-        Log.d(LOG_TAG, "TNS uploadOnPhonePhotos: liste chorristes avec Photos "+choristesAvecPhotos.size());
+        Log.d(LOG_TAG, "TNS uploadOnPhonePhotos: liste choristes avec Photos "+choristesAvecPhotos.size());
 
         if(choristesAvecPhotos.size()==0){
-            Log.d(LOG_TAG, "TDS size 0 pour ne pas louper les BG: ");
+            Log.d(LOG_TAG, "TDS size 0 pour ne pas louper les photos : ");
             downloads.postValue("Done");
         }
         for (Choriste choriste : choristesAvecPhotos) {

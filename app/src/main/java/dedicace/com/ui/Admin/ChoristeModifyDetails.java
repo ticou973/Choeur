@@ -394,7 +394,7 @@ public class ChoristeModifyDetails extends AppCompatActivity implements DialogSu
 
     private void modifyMajChorale() {
         Map<String,Object> data = new HashMap<>();
-        data.put("maj", Timestamp.now());
+        data.put("maj_trombi", Timestamp.now());
 
         db.collection("chorale").document(idChorale)
                 .update(data)

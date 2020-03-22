@@ -101,7 +101,7 @@ class TrombiAdapter extends RecyclerView.Adapter<TrombiAdapter.TrombiViewHolder>
 
         if(choristes!=null){
             for(Choriste choriste : this.choristes){
-                Log.d(TAG, "TAd swapChoristes: "+choriste.getNom()+" "+choriste.getPrenom());
+               // Log.d(TAG, "TAd swapChoristes: "+choriste.getNom()+" "+choriste.getPrenom());
             }
         }
 
