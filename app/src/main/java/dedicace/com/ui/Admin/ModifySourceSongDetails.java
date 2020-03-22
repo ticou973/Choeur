@@ -255,7 +255,6 @@ public class ModifySourceSongDetails extends AppCompatActivity implements Dialog
     }
 
     private void completeOld() {
-
         oldTitre.setText(oldTitreStr);
         oldGroupe.setText(oldGroupeStr);
         oldDuration.setText(String.valueOf(oldDurationInt));

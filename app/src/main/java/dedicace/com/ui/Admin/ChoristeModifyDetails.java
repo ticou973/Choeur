@@ -1,7 +1,10 @@
 package dedicace.com.ui.Admin;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
@@ -19,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +36,12 @@ public class ChoristeModifyDetails extends AppCompatActivity implements DialogSu
     private String oldNomStr, oldPrenomStr, oldPupitreStr,oldUrlStr,oldRoleCStr,oldRoleAStr,oldEmailStr,oldAdressStr,oldFixeStr,oldPortStr,newUrlStr;
     private String newNomStr,newPrenomStr,newPupitreStr,newRoleCStr, newRoleAStr, newEmailStr, newAdressStr,newFixeStr,newPortStr,idChoriste,idChorale,nomChoraleStr,origine;
     private static final String TAG ="coucou";
+    private final static int REQUEST_CODE=100;
+    private String[] listImages;
+    private String pathSelected;
+    private String fileNameSelected;
+    private File[] listFiles;
+    private int imageSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,9 +86,7 @@ public class ChoristeModifyDetails extends AppCompatActivity implements DialogSu
 
         completeOld();
 
-        selectPhoto.setOnClickListener(view -> {
 
-        });
 
         suppChoriste.setOnClickListener(view -> {
             if(!TextUtils.isEmpty(idChorale)) {
@@ -90,9 +98,51 @@ public class ChoristeModifyDetails extends AppCompatActivity implements DialogSu
 
         });
 
+        selectPhoto.setOnClickListener(view -> {
+            getLists();
+            selectPhoto();
+
+        });
+
+
         modifyChoriste.setOnClickListener(view -> {
 
         });
+
+    }
+
+    private void selectPhoto() {
+        Log.d(TAG, "CMD selectPhotos : ");
+        Intent startChoosePhotosActivity = new Intent(ChoristeModifyDetails.this,ChooseBackground.class);
+        startChoosePhotosActivity.putExtra("listimages",listImages);
+        startActivityForResult(startChoosePhotosActivity,REQUEST_CODE);
+    }
+
+    private void getLists() {
+        File path = Environment.getExternalStorageDirectory();
+        File file = new File(path,"DedicaceAdmin/Photos_Choristes");
+
+        if(file.mkdirs()){
+            Log.d(TAG, "CMD insertBackgroundInCloudStorage: le dossier est fait");
+
+        }else{
+            Log.d(TAG, "CMD insertBackgroundInCloudStorage: dossier non réalisé ou déjà fait");
+        }
+
+        if(file.exists()){
+            listFiles = file.listFiles();
+
+            Log.d(TAG, "CMD selectPhotos "+" "+listFiles.length);
+
+            listImages = new String[listFiles.length];
+
+            for (int i = 0; i < listFiles.length; i++) {
+                listImages[i]=listFiles[i].getName();
+                Log.d(TAG, "CMD selectPhotos: "+listFiles[i].getName()+listImages[i]);
+            }
+        }
+
+        Log.d(TAG, "CMD : selectPhotos: "+ listImages.length);
 
     }
 
@@ -189,6 +239,29 @@ public class ChoristeModifyDetails extends AppCompatActivity implements DialogSu
     public void onDialogSuppNegativeClick() {
         Toast.makeText(this, "Vous avez souhaitez ne pas supprimer ce choriste", Toast.LENGTH_SHORT).show();
         finish();
+    }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode== Activity.RESULT_OK){
+            Log.d(TAG, "CMD onActivityResult: ok cela marche");
+            if(requestCode==REQUEST_CODE){
+
+                if (data != null) {
+                    imageSelected = data.getIntExtra("imageselected",-1);
+                }
+
+                if(imageSelected!=-1) {
+                    String name = listImages[imageSelected];
+                    newUrl.setText(name);
+                    pathSelected=listFiles[imageSelected].getAbsolutePath();
+                    fileNameSelected = name;
+                    Log.d(TAG, "MSS onCreate: " + pathSelected);
+                }
+            }
+        }else{
+            Log.d(TAG, "MSSD onActivityResult: petit problème au retour ");
+        }
     }
 }
