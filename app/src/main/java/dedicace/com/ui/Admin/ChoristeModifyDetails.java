@@ -2,6 +2,7 @@ package dedicace.com.ui.Admin;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
@@ -21,10 +22,14 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import dedicace.com.R;
 
@@ -42,6 +47,9 @@ public class ChoristeModifyDetails extends AppCompatActivity implements DialogSu
     private String fileNameSelected;
     private File[] listFiles;
     private int imageSelected;
+    private Map<String,Object> choriste;
+    private Uri downloadUrl;
+    private List<String> tempadresse;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,9 +114,168 @@ public class ChoristeModifyDetails extends AppCompatActivity implements DialogSu
 
 
         modifyChoriste.setOnClickListener(view -> {
+            newNomStr=newNom.getText().toString();
+            newPrenomStr=newPrenom.getText().toString();
+            newPupitreStr=newPupitre.getText().toString();
+            newUrlStr=newUrl.getText().toString();
+            newRoleCStr=newRoleC.getText().toString();
+            newRoleAStr=newRoleA.getText().toString();
+            newEmailStr=newEmail.getText().toString();
+            newAdressStr=newAdress.getText().toString();
+            newFixeStr=newFixe.getText().toString();
+            newPortStr=newPort.getText().toString();
 
+            if(!newNomStr.isEmpty()||!newPrenomStr.isEmpty()||!newPupitreStr.isEmpty()||!newUrlStr.equals("Select Photo")||!newRoleCStr.isEmpty()||!newRoleAStr.isEmpty()||!newEmailStr.isEmpty()||!newAdressStr.isEmpty()||!newFixeStr.isEmpty()||!newPortStr.isEmpty()){
+                Log.d(TAG, "CMD onClick: conditions passées "+ newNomStr+ " "+newPrenomStr+" "+newPupitreStr+" "+newUrlStr+ " "+newRoleCStr+" "+newRoleAStr+" "+newEmailStr+ " "+newAdressStr+" "+newFixeStr+" "+newPortStr);
+                insertPhotosInCloudStorage();
+
+            }else{
+                Log.d(TAG, "CMD onCreate: il manque des éléments");
+                Toast.makeText(this, "Il manque des éléments !", Toast.LENGTH_SHORT).show();
+            }
         });
 
+    }
+
+    private void insertPhotosInCloudStorage() {
+        choriste = new HashMap<>();
+        choriste.put("maj",Timestamp.now());
+        Log.d(TAG, "CMD insertchoristeinDb: "+idChoriste);
+
+        if(!newUrlStr.equals("Select Photo")){
+            Log.d(TAG, "CMD insertChoristeinDb: if photo");
+
+            Uri fileSelected = Uri.fromFile(new File(pathSelected));
+            StorageReference imageRef = mStorageRef.child("songs/photos_choristes/"+fileNameSelected);
+
+            UploadTask uploadTask = imageRef.putFile(fileSelected);
+
+            uploadTask.addOnSuccessListener(taskSnapshot -> Log.d(TAG, "CMD onSuccess: bravo c'est uploadé !"))
+                    .addOnFailureListener(exception -> Log.d(TAG, "CMD onFailure: dommage c'est raté"));
+
+
+            uploadTask.continueWithTask(task -> {
+                if (!task.isSuccessful()) {
+                    throw Objects.requireNonNull(task.getException());
+                }
+                // Continue with the task to get the download URL
+                return imageRef.getDownloadUrl();
+            }).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    downloadUrl = task.getResult();
+                    choriste.put("url_photo", Objects.requireNonNull(downloadUrl).toString());
+                    insertChoristeinDb();
+                    Log.d(TAG, "CMD onComplete: "+downloadUrl);
+                } else {
+                    Log.d(TAG, "CMD onComplete: Il y a eu un pb");
+                }
+            });
+
+        }else{
+            //todo mettre insert plus bas et enlever les 2 du if else
+            Log.d(TAG, "MSSD insertPhotosInCloudStorage: else if background");
+            insertChoristeinDb();
+        }
+    }
+
+    private void insertChoristeinDb() {
+        if(!newNomStr.isEmpty()){
+            Log.d(TAG, "CMD insertChoristeinDb: if nom");
+            choriste.put("nom_choriste",newNomStr);
+        }
+        if(!newPrenomStr.isEmpty()){
+            Log.d(TAG, "CMD insertChoristeinDb: if prenom");
+            choriste.put("prenom_choriste",newPrenomStr);
+        }
+        if(!newPupitreStr.isEmpty()){
+            Log.d(TAG, "CMD insertChoristeinDb: if pupitre");
+            choriste.put("pupitre",newPupitreStr);
+        }
+
+        if(!newRoleCStr.isEmpty()){
+            Log.d(TAG, "CMD insertChoristeinDb: if RoleC");
+            choriste.put("role_choeur",newRoleCStr);
+        }
+        if(!newRoleAStr.isEmpty()){
+            Log.d(TAG, "CMD insertChoristeinDb: if RoleA");
+            choriste.put("role_admin",newRoleAStr);
+        }
+        if(!newEmailStr.isEmpty()){
+            Log.d(TAG, "CMD insertChoristeinDb: if Email");
+            choriste.put("email",newEmailStr);
+        }
+        if(!newAdressStr.isEmpty()){
+            getAdresseSplit(newAdressStr);
+
+            if(tempadresse!=null) {
+                Log.d(TAG, "CMD insertChoristeinDb: if Adresse");
+                choriste.put("adresse", tempadresse);
+            }
+        }
+        if(!newFixeStr.isEmpty()){
+            Log.d(TAG, "CMD insertChoristeinDb: if fixe");
+            choriste.put("tel_fixe",newFixeStr);
+        }
+        if(!newPortStr.isEmpty()){
+            Log.d(TAG, "CMD insertChoristeinDb: if port");
+            choriste.put("tel_port",newPortStr);
+        }
+
+        insertCloud();
+    }
+
+    private void insertCloud() {
+        Log.d(TAG, "CMD insertCloud: "+choriste);
+
+        db.collection("chorale").document(idChorale).collection("choristes").document(idChoriste)
+                .update(choriste)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "CMD onSuccess: maj choriste done");
+                    if(pathSelected!=null) {
+                        File file = new File(pathSelected);
+                        if (file.delete()) {
+                            Log.d(TAG, "CMD onSuccess: le fichier est supprimé du local");
+                        } else {
+                            Log.d(TAG, "CMD onSuccess: problème de suppression en local du fichier");
+                        }
+                    }else{
+                        Log.d(TAG, "CMD onSuccess: il n'y a pas de fichier à supprimer car pas de modif de background");
+                    }
+                    modifyMajChorale();
+                    Bundle args = new Bundle();
+                    args.putString("idChorale",idChorale);
+                    args.putString("nomChorale",nomChoraleStr);
+                    args.putString("origine",origine);
+                    Intent startModifyChoriste = new Intent(ChoristeModifyDetails.this,ModifyChoriste.class);
+                    startModifyChoriste.putExtra("bundleChorale",args);
+                    startModifyChoriste.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(startModifyChoriste);
+                }).addOnFailureListener(e -> Log.d(TAG, "MSSD onSuccess: maj sourceSong failed"));
+
+    }
+
+    private void getAdresseSplit(String adresse) {
+        char[] cs = adresse.toCharArray();
+        boolean boucle = true;
+        int j = 0;
+        while (boucle && j < cs.length) {
+            if (Character.isDigit(cs[j])) {
+                String zip = adresse.substring(j, j + 5);
+                try {
+                    int zipInt = Integer.parseInt(zip);
+                    tempadresse = new ArrayList<>();
+                    tempadresse.add(adresse.substring(0, j - 1));
+                    tempadresse.add(adresse.substring(j + 6));
+                    tempadresse.add(String.valueOf(zipInt));
+                    Log.d(TAG, "CCC getAdresse: adresse "+ tempadresse);
+                    boucle = false;
+                } catch (NumberFormatException nfe) {
+                    j++;
+                }
+            } else {
+                j++;
+            }
+        }
     }
 
     private void selectPhoto() {

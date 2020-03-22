@@ -56,7 +56,6 @@ public class CreateChoristeCsv extends AppCompatActivity {
     private FirebaseFirestore db;
     private ArrayList<String> listUrlPhoto = new ArrayList<>();
     private File file;
-    private int zipInt;
     private List<List<String>> adresses = new ArrayList<>();
     private List<Uri> downloadUris = new ArrayList<>();
 
@@ -219,33 +218,31 @@ public class CreateChoristeCsv extends AppCompatActivity {
         int index;
         for(index =0;index<listResult.size();index++) {
             String adresse = listResult.get(index)[8];
-            char[] cs = adresse.toCharArray();
-            boolean boucle = true;
-            int j = 0;
-            while (boucle && j < cs.length) {
-               // Log.d(TAG, "CCC getAdresse: avant if "+boucle+" "+j+" "+cs.length);
-                if (Character.isDigit(cs[j])) {
-                    String zip = adresse.substring(j, j + 5);
-                 //   Log.d(TAG, "getAdresse: zip substring "+ zip);
-                    try {
-                        zipInt = Integer.parseInt(zip);
-                        List<String> tempadresse = new ArrayList<>();
-                        tempadresse.add(adresse.substring(0, j - 1));
-                        tempadresse.add(adresse.substring(j + 6));
-                        tempadresse.add(String.valueOf(zipInt));
-                        adresses.add(tempadresse);
+            getAdresseSplit(adresse);
+        }
+    }
 
-                        Log.d(TAG, "CCC getAdresse: adresse "+ tempadresse);
-                        boucle = false;
-                    } catch (NumberFormatException nfe) {
-                     //   Log.d(TAG, "CSS getAdresse: Ce n'est pas un entier ");
-                        // traitement à faire dans ce cas
-                        j++;
-                    }
-                } else {
-                  //  Log.d(TAG, "CCC getAdresse: else");
+    private void getAdresseSplit(String adresse) {
+        char[] cs = adresse.toCharArray();
+        boolean boucle = true;
+        int j = 0;
+        while (boucle && j < cs.length) {
+            if (Character.isDigit(cs[j])) {
+                String zip = adresse.substring(j, j + 5);
+                try {
+                    int zipInt = Integer.parseInt(zip);
+                    List<String> tempadresse = new ArrayList<>();
+                    tempadresse.add(adresse.substring(0, j - 1));
+                    tempadresse.add(adresse.substring(j + 6));
+                    tempadresse.add(String.valueOf(zipInt));
+                    adresses.add(tempadresse);
+                    Log.d(TAG, "CCC getAdresse: adresse "+ tempadresse);
+                    boucle = false;
+                } catch (NumberFormatException nfe) {
                     j++;
                 }
+            } else {
+                j++;
             }
         }
     }
