@@ -106,11 +106,11 @@ public class TrombiDetailsActivity extends AppCompatActivity {
         }
 
         imgMail.setOnClickListener(view -> {
-            Intent i = new Intent(Intent.ACTION_SENDTO);
-            i.setType("text/plain");
-            i.putExtra(android.content.Intent.EXTRA_EMAIL, email);
+            Intent i = new Intent(Intent.ACTION_SEND);
+            i.setType("message/rfc822");
+            i.putExtra(android.content.Intent.EXTRA_EMAIL, new String[] { email });
             i.putExtra(Intent.EXTRA_SUBJECT, "Contact Chorale ");
-            startActivity(Intent.createChooser(i, "Envoi Mail"));
+            startActivity(Intent.createChooser(i, "Choix de votre Service Email"));
         });
 
         if(telFixe.isEmpty()){

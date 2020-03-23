@@ -52,7 +52,7 @@ import dedicace.com.utilities.InjectorUtils;
 import dedicace.com.utilities.SongsUtilities;
 
 //todo revoir dans tout le logiciel les new Object lorsqu'ils sont déjà définis
-public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener, DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener, DialogMajSS.DialogMajSSListener, DialogMA.DialogMAListener, ChoraleNetWorkDataSource.OnNDSListener, DialogSpectacleFragment.DialogSpectacleFragmentListener {
+public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener, DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener, DialogMajSS.DialogMajSSListener, DialogMA.DialogMAListener, ChoraleNetWorkDataSource.OnNDSListener, DialogSpectacleFragment.DialogSpectacleFragmentListener,DialogInfo.DialogInfoFragmentListener {
 
     //UI
     private RecyclerView recyclerView;
@@ -660,8 +660,19 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                     startActivity(contactMail);
                 }
                 break;
+
+            case R.id.info_app_main:
+                launchInfo();
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void launchInfo() {
+        Log.d(TAG, "MA launchInfo:  ");
+        DialogFragment dialog = new DialogInfo();
+        dialog.show(getSupportFragmentManager(), "TAG");
+        Log.d(TAG, "MA OnDialogInfo fragment: ");
     }
 
 
@@ -1135,8 +1146,23 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
        // Log.d(TAG, "MA OnProgressSongs: il y a "+nbSong+" sur "+nbSongTotal+ "chansons chargées sur votre téléphone");
 
         //dialogWait.putProgress(nbSong,nbSongTotal);
+    }
 
+    @Override
+    public void onDialogInfoPositiveClick() {
+        Log.d(TAG, "MA onDialogInfoPositiveClick: Ok message");
+    }
 
+    @Override
+    public void onDialogInfoNegativeClick() {
+        String url = "https://youtu.be/6EawN4zmsDA";
+        Uri uri = Uri.parse(url);
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        // Verify that the intent will resolve to an activity
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            // Here we use an intent without a Chooser unlike the next example
+            startActivity(intent);
+        }
     }
 
     //todo à renommer

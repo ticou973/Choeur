@@ -36,5 +36,9 @@
         android:id="@+id/spectacles"
         android:title="@string/tous"
         app:showAsAction="ifRoom"/>
-
+    <item
+        android:id="@+id/info_app_main"
+        android:title="@string/tous"
+        android:icon="@drawable/ic_info_outline_white_24dp"
+        app:showAsAction="ifRoom"/>
 </menu>

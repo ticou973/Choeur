@@ -73,6 +73,10 @@
     <string name="notification_channel_title">myTitle</string>
     <string name="notification_channel_description">Channel pour les notifications</string>
     <string name="trombinoscope">Trombinoscope</string>
+    <string name="btn_gris_clair">Bouton Gris clair - la Bande Son n\'existe pas.</string>
+    <string name="btn_gris_fonce">Bouton Gris foncé - la Bande Son existe mais n\'est pas chargée sur le téléphone. Appuyez longuement pour charger.</string>
+    <string name="btn_orange_fonce">Bouton Orange foncé - la Bande Son est sur le téléphone et est active. Appuyez sur Play pour l\'écouter</string>
+    <string name="btn_orange_clair">Bouton Orange Clair - la Bande Son est sur le téléphone mais non active. Appuyez dessus pour l\'activer et l\'écouter</string>
 
 
 </resources>
