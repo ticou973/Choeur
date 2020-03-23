@@ -70,6 +70,7 @@ public class ChoraleAdapter extends RecyclerView.Adapter<ChoraleAdapter.ChoraleV
 
     private void selectChorale(int i) {
         if(mListener!=null){
+            Log.d(TAG, "CA selectChorale: "+i);
             mListener.onItemClick(i);
         }
     }

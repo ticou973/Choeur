@@ -53,12 +53,6 @@ public class ModifyChorale extends AppCompatActivity implements ChoraleAdapter.O
         Intent intent = getIntent();
         origine = intent.getStringExtra("origine");
 
-        //todo voir l'utilité de new Intent ?
-
-       /* if(origine.equals("ModifyChoraleDetails")){
-            newIntent=true;
-        }*/
-
         fab = findViewById(R.id.fab_chorale);
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -131,9 +125,9 @@ public class ModifyChorale extends AppCompatActivity implements ChoraleAdapter.O
 
     @Override
     public void onItemClick(int i) {
-
+        Log.d(TAG, "oMC nItemClick: "+i);
         if (origine.equals("AdminHome")||origine.equals("ModifyChoraleDetails")) {
-            Log.d(TAG, "MC onItemClick: "+i+" "+origine);
+            Log.d(TAG, "MC onItemClick: "+i);
             Intent startDetailsChoraleActivity = new Intent(ModifyChorale.this, ModifyChoraleDetails.class);
             Bundle args = new Bundle();
             args.putString("idChorale", listId.get(i));
@@ -142,7 +136,7 @@ public class ModifyChorale extends AppCompatActivity implements ChoraleAdapter.O
             startActivity(startDetailsChoraleActivity);
 
         }else if(origine.equals("CreateUser")||origine.equals("CreateSpectacle")||origine.equals("ChooseChorale")||origine.equals("CreateSaison")||origine.equals("ModifySSDetails")||origine.equals("CreateSong")||origine.equals("ModifySongDetails")||origine.equals("CreateChoristeUnit")||origine.equals("CreateChoristeCSV")){
-            Log.d(TAG, "MC onItemClick: 1"+i+ " "+origine);
+            Log.d(TAG, "MC onItemClick: 1 "+i+ " "+origine);
             Intent result = new Intent();
             result.putExtra("idselected",listId.get(i));
             result.putExtra("nomChorale",listChorales.get(i));

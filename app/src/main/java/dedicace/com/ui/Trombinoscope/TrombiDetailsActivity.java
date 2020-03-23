@@ -1,10 +1,12 @@
 package dedicace.com.ui.Trombinoscope;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -15,8 +17,9 @@ import dedicace.com.ui.PlaySong.GlideApp;
 
 public class TrombiDetailsActivity extends AppCompatActivity {
     String nom, prenom, pupitre, adresse, telFixe, telPort, email, roleChoeur, roleAdmin, urlPhoto;
-    TextView tvNom, tvPupitre, tvAdresse, tvEmail, tvTelFixe, tvTelPort, tvRoleChoeur, tvRoleAdmin;
-    ImageView imgChoriste;
+    TextView tvNom, tvPupitre, tvAdresse, tvEmail, tvTelFixe, tvTelPort, tvRoleChoeur, tvRoleAdmin, intEmail,intTelFixe,intTelPort,intAdresse,tvZip;
+    ImageView imgChoriste, imgMail, imgTelFixe,imgTelPort;
+    String zipVille, rue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +40,15 @@ public class TrombiDetailsActivity extends AppCompatActivity {
         tvTelFixe = findViewById(R.id.tv_tel_fixe_choriste_details);
         tvTelPort = findViewById(R.id.tv_tel_port_choriste_details);
         imgChoriste = findViewById(R.id.img_photo_destails);
+        imgMail = findViewById(R.id.img_mail);
+        imgTelFixe=findViewById(R.id.img_tel_fixe);
+        imgTelPort=findViewById(R.id.img_tel_port);
+        intEmail = findViewById(R.id.tv_intitule_email);
+        intTelPort = findViewById(R.id.tv_intitule_port);
+        intTelFixe = findViewById(R.id.tv_intitulé_tel_fixe);
+        intAdresse = findViewById(R.id.tv_intitule_adresse);
+        tvZip=findViewById(R.id.tv_zip_ville);
+
 
         Intent intent = getIntent();
         nom = intent.getStringExtra("nom");
@@ -50,6 +62,7 @@ public class TrombiDetailsActivity extends AppCompatActivity {
         adresse = intent.getStringExtra("adresse");
         urlPhoto = intent.getStringExtra("url_photo");
 
+        getAdresseSplit(adresse);
 
         GlideApp.with(this)
                 .load(urlPhoto)
@@ -72,10 +85,81 @@ public class TrombiDetailsActivity extends AppCompatActivity {
         }else{
             tvRoleAdmin.setVisibility(View.GONE);
         }
-        tvEmail.setText(email);
-        tvTelFixe.setText(telFixe);
-        tvTelPort.setText(telPort);
-        tvAdresse.setText(adresse);
+
+        if(adresse.isEmpty()){
+            intAdresse.setVisibility(View.GONE);
+            tvZip.setVisibility(View.GONE);
+            tvAdresse.setVisibility(View.GONE);
+        }else{
+            tvAdresse.setText(rue);
+            tvZip.setText(zipVille);
+        }
+
+
+
+        if(email.isEmpty()){
+            imgMail.setVisibility(View.GONE);
+            intEmail.setVisibility(View.GONE);
+            tvEmail.setVisibility(View.GONE);
+        }else{
+            tvEmail.setText(email);
+        }
+
+        imgMail.setOnClickListener(view -> {
+            Intent i = new Intent(Intent.ACTION_SENDTO);
+            i.setType("text/plain");
+            i.putExtra(android.content.Intent.EXTRA_EMAIL, email);
+            i.putExtra(Intent.EXTRA_SUBJECT, "Contact Chorale ");
+            startActivity(Intent.createChooser(i, "Envoi Mail"));
+        });
+
+        if(telFixe.isEmpty()){
+            imgTelFixe.setVisibility(View.GONE);
+            intTelFixe.setVisibility(View.GONE);
+            tvTelFixe.setVisibility(View.GONE);
+        }else{
+            tvTelFixe.setText(telFixe);
+        }
+
+        imgTelFixe.setOnClickListener(view -> {
+            Intent appel = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"+telFixe));
+            startActivity(appel);
+        });
+
+        if(telPort.isEmpty()){
+            imgTelPort.setVisibility(View.GONE);
+            intTelPort.setVisibility(View.GONE);
+            tvTelPort.setVisibility(View.GONE);
+        }else{
+            tvTelPort.setText(telPort);
+        }
+
+        imgTelPort.setOnClickListener(view -> {
+            Intent appel = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"+telPort));
+            startActivity(appel);
+        });
+    }
+
+    private void getAdresseSplit(String adresse) {
+        char[] cs = adresse.toCharArray();
+        boolean boucle = true;
+        int j = 0;
+        while (boucle && j < cs.length) {
+            if (Character.isDigit(cs[j])) {
+                String zip = adresse.substring(j, j + 5);
+                try {
+                    int zipInt = Integer.parseInt(zip);
+                    zipVille =adresse.substring(j);
+                    rue = adresse.substring(0,j-1);
+                    Log.d("coucou", "TDA getAdresseSplit: "+zipInt+" "+zipVille+rue);
+                    boucle = false;
+                } catch (NumberFormatException nfe) {
+                    j++;
+                }
+            } else {
+                j++;
+            }
+        }
     }
 
 
