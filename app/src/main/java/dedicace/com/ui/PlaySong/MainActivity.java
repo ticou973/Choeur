@@ -16,9 +16,11 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -104,13 +106,20 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
     boolean deletedSpectacles;
 
 
-
-
     //todo vérifier si extras dans des intents avec HasExtras
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        ActionBar myActionBar = getSupportActionBar();
+        myActionBar.setLogo(R.drawable.logo_dedicace_action4);
+        myActionBar.setDisplayShowTitleEnabled(false);
+
+
         Log.d("coucou", "MA onCreate: " + Thread.currentThread().getName());
         Log.d(TAG, "MA onCreate: connection internet "+haveInternetConnection());
 

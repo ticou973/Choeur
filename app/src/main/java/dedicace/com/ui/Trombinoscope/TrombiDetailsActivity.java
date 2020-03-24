@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,7 +27,10 @@ public class TrombiDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trombi_details);
 
-        ActionBar actionBar = this.getSupportActionBar();
+        Toolbar toolbar = findViewById(R.id.toolbar_trombi_details);
+        setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
         if(actionBar != null){
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
@@ -106,11 +110,13 @@ public class TrombiDetailsActivity extends AppCompatActivity {
         }
 
         imgMail.setOnClickListener(view -> {
-            Intent i = new Intent(Intent.ACTION_SEND);
-            i.setType("message/rfc822");
-            i.putExtra(android.content.Intent.EXTRA_EMAIL, new String[] { email });
-            i.putExtra(Intent.EXTRA_SUBJECT, "Contact Chorale ");
-            startActivity(Intent.createChooser(i, "Choix de votre Service Email"));
+            Intent contactMail = new Intent(Intent.ACTION_SENDTO);
+            contactMail.setData(Uri.parse("mailto:"));
+            contactMail.putExtra(android.content.Intent.EXTRA_EMAIL, new String[] { email });
+            contactMail.putExtra(Intent.EXTRA_SUBJECT, "Contact Chorale ");
+            if (contactMail.resolveActivity(getPackageManager()) != null) {
+                startActivity(contactMail);
+            }
         });
 
         if(telFixe.isEmpty()){

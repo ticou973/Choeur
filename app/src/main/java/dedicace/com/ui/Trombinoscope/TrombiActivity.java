@@ -14,6 +14,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -59,7 +60,10 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trombi);
 
-        ActionBar actionBar = this.getSupportActionBar();
+        Toolbar toolbar = findViewById(R.id.toolbar_trombi);
+        setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
         if(actionBar != null){
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
@@ -294,16 +298,6 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
         });
     }
 
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if(id==android.R.id.home){
-            NavUtils.navigateUpFromSameTask(this);
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     @Override
     public void OnClickItem() {
 
@@ -319,6 +313,15 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
     @Override
     public void onDialogNegativeClick() {
         Toast.makeText(this, "Les nouveaux choristes appraitront au prochain lancement de l'application", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id==android.R.id.home){
+            NavUtils.navigateUpFromSameTask(this);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }
