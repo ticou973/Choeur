@@ -11,5 +11,5 @@
   <color name="whitePure">#ffffff</color>
   <color name="grey">#9e9e9e</color>
   <color name="whiteTransparentHalf">#80ffffff</color>
-
+  <color name="ic_launcher_background">#AAB5FF</color>
 </resources>
