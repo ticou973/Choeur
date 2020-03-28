@@ -350,7 +350,6 @@ public class ChoraleRepository {
 
             for(Saison saison : tempSaisons) {
                 Log.d(LOG_TAG, "CR majRoomDb: saisons"+ saison.getIdsaisonCloud()+" "+ saison.getSaisonName()+ " "+ saison.getIdSpectacles()+" "+saison.getUpdatePhone());
-
             }
 
             for(Spectacle spectacle : tempSpectacles){
@@ -915,7 +914,6 @@ public class ChoraleRepository {
         }
 
         Log.d(LOG_TAG, "CR newSongsList: res old "+listOldIdSongs.size()+listOldIdSourceSongs);
-
 
     }
 

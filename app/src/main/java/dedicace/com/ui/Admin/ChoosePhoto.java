@@ -54,6 +54,7 @@ public class ChoosePhoto extends AppCompatActivity implements PhotoAdapter.OnIte
         if(origine.equals("csv")){
             result.putExtra("position",position);
         }
+        Log.d(TAG, "CP onItemClick: position choriste "+position+ " position photo "+i);
         setResult(RESULT_OK,result);
         finish();
     }

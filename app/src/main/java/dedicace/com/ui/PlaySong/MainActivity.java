@@ -1151,10 +1151,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
         dialogWait.show(getSupportFragmentManager(), "TAG");
 
         Log.d(TAG, "MA OnProgressSongs: il y a "+nbSong+" sur "+nbSongTotal+ "chansons chargées sur votre téléphone");
-        //Toast.makeText(this, nbSong+ "/"+nbSongTotal+" chansons téléchargées", Toast.LENGTH_SHORT).show();
-       // Log.d(TAG, "MA OnProgressSongs: il y a "+nbSong+" sur "+nbSongTotal+ "chansons chargées sur votre téléphone");
-
-        //dialogWait.putProgress(nbSong,nbSongTotal);
     }
 
     @Override
@@ -1209,7 +1205,6 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
 
         }
         // Le périphérique est connecté à Internet
-
     }
 }
 

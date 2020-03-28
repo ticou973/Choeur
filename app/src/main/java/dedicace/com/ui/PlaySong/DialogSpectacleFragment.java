@@ -136,8 +136,6 @@ public class DialogSpectacleFragment extends DialogFragment {
         builder.setTitle("Choix des chansons");
 
         builder.setIcon(R.drawable.logo_dedicace);
-
-
         builder.setPositiveButton("Choisir", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // Send the positive button event back to the host activity

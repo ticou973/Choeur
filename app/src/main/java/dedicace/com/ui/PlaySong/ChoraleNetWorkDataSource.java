@@ -139,6 +139,8 @@ public class ChoraleNetWorkDataSource {
         }
     }
 
+
+
     public interface OnNDSListener {
         void OnProgressLoading(int progress);
         void OnProgressSongs(int nbSong, int nbSongTotal);
@@ -427,6 +429,8 @@ public class ChoraleNetWorkDataSource {
                     });
         }
     }
+
+
 
     public void downloadMp3(List<Song> songs) {
 
@@ -949,6 +953,8 @@ public class ChoraleNetWorkDataSource {
 
                 });
     }
+
+
 }
 
 

@@ -30,9 +30,7 @@ import java.util.List;
 import java.util.Objects;
 
 import dedicace.com.R;
-import dedicace.com.data.database.Pupitre;
 import dedicace.com.ui.PlaySong.GlideApp;
-import dedicace.com.utilities.SongsUtilities;
 
 public class VisualisationCsv extends AppCompatActivity implements ChoristeAdapter.clickedListener{
 
@@ -65,11 +63,13 @@ public class VisualisationCsv extends AppCompatActivity implements ChoristeAdapt
         listUrlPhoto  = intent.getStringArrayListExtra("listUrl");
 
         Log.d(TAG, "VCS onCreate: "+nameCsv+ " "+folder+ " "+listUrlPhoto.size());
+        Log.d(TAG, "VCS onCreate: "+listUrlPhoto.get(0));
 
         fab =findViewById(R.id.fab_choriste);
 
         fab.setOnClickListener(view -> {
-            Log.d(TAG, "Vcsv onCreate: On Click fab");
+            Log.d(TAG, "Vcsv onCreate: On Click fab "+listUrlPhoto);
+            Log.d(TAG, "Vcsv onCreate: On Click fab 2"+listResult);
             Intent result = new Intent();
             result.putStringArrayListExtra("listUrl",listUrlPhoto);
             setResult(RESULT_OK,result);
@@ -102,8 +102,8 @@ public class VisualisationCsv extends AppCompatActivity implements ChoristeAdapt
         listResult = csvReader.read();
 
         for (String[] row : listResult) {
-            Log.d(TAG, "CCC onActivityResult: " + row[1]);
-            Pupitre pupitre = SongsUtilities.converttoPupitre(row[2]);
+            Log.d(TAG, "CCC onActivityResult: " + row[1]+" "+row[2]+" "+ row[0]+" "+row[3]+" "+ row[4]+" "+row[5]+" "+ row[6]+" "+row[7]+" "+ row[8]);
+            //Pupitre pupitre = SongsUtilities.converttoPupitre(row[2]);
         }
     }
 
@@ -112,8 +112,20 @@ public class VisualisationCsv extends AppCompatActivity implements ChoristeAdapt
 
         this.listImages=listImages;
         this.listFiles=listFiles;
-        Log.d(TAG, "VSsv selectPhoto: "+listImages.length+" "+listFiles.length);
+        Log.d(TAG, "VSsv selectPhoto: "+i+" "+listImages.length+" "+listFiles.length);
 
+        int l=0;
+        for (String[] row : listResult) {
+            Log.d(TAG, "CCC onActivityResult: "+l+". " + row[0]+" "+ row[1]+" "+row[2]+" "+row[3]+" "+ row[4]+" "+row[5]+" "+ row[6]+" "+row[7]+" "+ row[8]);
+            //Pupitre pupitre = SongsUtilities.converttoPupitre(row[2]);
+            l++;
+        }
+
+        int k=0;
+        for(String image:listImages){
+            Log.d(TAG, "VCSV selectPhoto: "+k+". "+image);
+            k++;
+        }
 
         Intent startChooseBackgroundActivity = new Intent(VisualisationCsv.this,ChoosePhoto.class);
         startChooseBackgroundActivity.putExtra("origine","csv");
@@ -135,10 +147,11 @@ public class VisualisationCsv extends AppCompatActivity implements ChoristeAdapt
 
             if (imageSelected != -1) {
                 String name = listImages[imageSelected];
+                Log.d(TAG, "VCV onActivityResult: "+name);
                 //pathSelected = listPath.get(imageSelected);
                 pathSelected = listFiles[imageSelected].getAbsolutePath();
-                fileNameSelected = name;
                 choristeAdapter.setUrlPhoto(pathSelected,position);
+
                 listUrlPhoto.set(position,pathSelected);
                 Log.d(TAG, "CSS onCreate: " + pathSelected);
             }
@@ -153,8 +166,6 @@ public class VisualisationCsv extends AppCompatActivity implements ChoristeAdapt
         }
         return super.onOptionsItemSelected(item);
     }
-
-
 
 }
 
@@ -172,11 +183,10 @@ public class VisualisationCsv extends AppCompatActivity implements ChoristeAdapt
 
         public void setUrlPhoto(String urlPhoto, int position) {
 
+            Log.d(TAG, "CVCSV setUrlPhoto: "+position+ "url "+urlPhoto);
             listUrlPhoto.set(position,urlPhoto);
             notifyItemChanged(position);
         }
-
-        private String urlPhoto;
 
         private clickedListener mClickedListener;
 
@@ -246,7 +256,6 @@ public class VisualisationCsv extends AppCompatActivity implements ChoristeAdapt
 
                     for (int i = 0; i < listFiles.length; i++) {
                         listImages[i] = listFiles[i].getName();
-
                         Log.d(TAG, "CA selectBackground: " + listFiles[i].getName());
                     }
                 } else {

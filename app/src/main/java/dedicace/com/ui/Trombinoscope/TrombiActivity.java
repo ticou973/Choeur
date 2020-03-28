@@ -45,7 +45,7 @@ public class TrombiActivity extends AppCompatActivity implements TrombiAdapter.L
     private AppDataBase dataBase;
     private Thread currentThread;
     private String typeChoriste;
-    private  RecyclerView recyclerView;
+    private RecyclerView recyclerView;
     private ProgressBar mLoadingIndicator;
     private DialogTA dialogWait;
     private int mPosition = RecyclerView.NO_POSITION;

@@ -117,6 +117,11 @@ public class CreateChoristeCsv extends AppCompatActivity {
 
         downloadPhotos.setOnClickListener(view -> {
             if(!TextUtils.isEmpty(idChorale)&&listResult!=null&&listResult.size()!=0){
+                int nbItem = listResult.size();
+                Log.d(TAG, "onCreate: "+listResult.size());
+                for (int i = 0; i < nbItem; i++) {
+                    downloadUris.add(null);
+                }
                insertPhotoInCloudStorage();
             }else{
                 Log.d(TAG, "CCCsv onCreate download: il manque des éléments");
@@ -139,12 +144,12 @@ public class CreateChoristeCsv extends AppCompatActivity {
     private void insertPhotoInCloudStorage() {
         for(String pathSelected:listUrlPhoto) {
             if(!pathSelected.isEmpty()){
-            int indexListPhoto = listUrlPhoto.indexOf(pathSelected);
+
             File tempFile = new File(pathSelected);
             fileNameSelected =tempFile.getName();
 
             Uri fileSelected = Uri.fromFile(new File(pathSelected));
-            StorageReference imageRef = mStorageRef.child("songs/photos_choristes/" + fileNameSelected);
+            StorageReference imageRef = mStorageRef.child("users/photos_choristes/" + fileNameSelected);
 
             UploadTask uploadTask = imageRef.putFile(fileSelected);
 
@@ -161,19 +166,23 @@ public class CreateChoristeCsv extends AppCompatActivity {
                 return imageRef.getDownloadUrl();
             }).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
+                    int indexListPhoto = listUrlPhoto.indexOf(pathSelected);
                     Uri downloadUrl;
                     downloadUrl = task.getResult();
-                    downloadUris.add(downloadUrl);
+                    downloadUris.set(indexListPhoto,downloadUrl);
                     Log.d(TAG, "CCU onComplete: " + downloadUrl);
                 } else {
                     Log.d(TAG, "CCU onComplete: Il y a eu un pb " + Objects.requireNonNull(task.getException()).getMessage());
                 }
             });
              }else{
-                downloadUris.add(null);
+               // int indexListPhoto = listUrlPhoto.indexOf(pathSelected);
+               // downloadUris.set(indexListPhoto,null);
                 Log.d(TAG, "CCC insertPhotoInCloudStorage: pas de photos");
             }
         }
+
+        Log.d(TAG, "CCSV insertPhotoInCloudStorage: "+downloadUris);
     }
 
     private void insertChoristeinDb() {
@@ -326,7 +335,7 @@ public class CreateChoristeCsv extends AppCompatActivity {
             if (data != null) {
                 listUrlPhoto = new ArrayList<>();
                 listUrlPhoto = data.getStringArrayListExtra("listUrl");
-                Log.d(TAG, "CCCcv onActivityResult: "+listUrlPhoto.size());
+                Log.d(TAG, "CCCcv onActivityResult: "+listUrlPhoto.size()+" "+listUrlPhoto);
             }
 
         }else{

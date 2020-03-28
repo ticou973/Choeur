@@ -415,7 +415,6 @@ public class TrombiRepository {
     }
 
     private void modifiedSongsList(List<Choriste> choristes) {
-
         for (Choriste choriste:choristes) {
             for (Choriste oldChoriste: oldChoristes) {
                 if(oldChoriste.getIdChoristeCloud().equals(choriste.getIdChoristeCloud())){
@@ -442,6 +441,7 @@ public class TrombiRepository {
     }
 
     private void newSongsList(List<Choriste> choristes) {
+        newChoristesList=new ArrayList<>();
         List<String> tempIdChoristes = new ArrayList<>(listIdChoristes);
 
         tempIdChoristes.removeAll(listOldIdChoristes);

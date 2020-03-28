@@ -183,7 +183,7 @@ public class CreateChoristeUnit extends AppCompatActivity implements DialogNewSS
     private void insertPhotoInCloudStorage() {
 
         Uri fileSelected = Uri.fromFile(new File(pathSelected));
-        StorageReference imageRef = mStorageRef.child("songs/photos_choristes/"+fileNameSelected);
+        StorageReference imageRef = mStorageRef.child("users/photos_choristes/"+fileNameSelected);
 
         UploadTask uploadTask = imageRef.putFile(fileSelected);
 
