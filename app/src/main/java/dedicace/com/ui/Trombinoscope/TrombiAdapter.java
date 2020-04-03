@@ -54,7 +54,7 @@ class TrombiAdapter extends RecyclerView.Adapter<TrombiAdapter.TrombiViewHolder>
     @Override
     public void onBindViewHolder(@NonNull TrombiViewHolder trombiViewHolder, int i) {
 
-        if(choristes.get(i).getPupitre().toString().equals("Aucun")){
+        if(choristes.get(i).getPupitre().toString().equals("NA")){
             trombiViewHolder.tvPupitre.setText(choristes.get(i).getRoleChoeur());
         }else{
             trombiViewHolder.tvPupitre.setText(choristes.get(i).getPupitre().toString());

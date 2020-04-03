@@ -54,7 +54,7 @@ import dedicace.com.utilities.InjectorUtils;
 import dedicace.com.utilities.SongsUtilities;
 
 //todo revoir dans tout le logiciel les new Object lorsqu'ils sont déjà définis
-public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener, DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener, DialogMajSS.DialogMajSSListener, DialogMA.DialogMAListener, ChoraleNetWorkDataSource.OnNDSListener, DialogSpectacleFragment.DialogSpectacleFragmentListener,DialogInfo.DialogInfoFragmentListener {
+public class MainActivity extends AppCompatActivity implements SongsAdapter.ListemClickedListener, DialogRecordFragment.DialogRecordFragmentListener, SharedPreferences.OnSharedPreferenceChangeListener, DialogMajSS.DialogMajSSListener, DialogMA.DialogMAListener, ChoraleNetWorkDataSource.OnNDSListener, DialogSpectacleFragment.DialogSpectacleFragmentListener,DialogInfo.DialogInfoFragmentListener,DialogNewFeatureFragment.DialogNewFeatureListener {
 
     //UI
     private RecyclerView recyclerView;
@@ -349,6 +349,33 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
                 }
             });
         }
+
+        //cas du premier lancement suite à une nouvelle fonctionnalité à remettre dès qu'il y a une nouvelle fonctionnalité.
+
+        //editor = sharedPreferences.edit();
+        //editor.putBoolean("newFeature",true);
+        //editor.apply();
+
+        boolean isNewFeature =sharedPreferences.getBoolean("newFeature",true);
+        if(isNewFeature){
+            launchDialogNewFeature();
+        }else{
+            Log.d(TAG, "MA visualisation: pas de nouvelles fonctionnalités");
+        }
+    }
+
+    private void launchDialogNewFeature() {
+        DialogNewFeatureFragment dialogNewFeatureFragment=new DialogNewFeatureFragment();
+        dialogNewFeatureFragment.show(getSupportFragmentManager(), "TAG");
+        Log.d(TAG, "MA OnDialogNewfragment: ");
+    }
+
+    @Override
+    public void onDialogNewFeaturePositiveClick() {
+        Log.d(TAG, "MA onDialogNewFeaturePositiveClick: ");
+        editor = sharedPreferences.edit();
+        editor.putBoolean("newFeature",false);
+        editor.apply();
     }
 
     @Override
@@ -1169,6 +1196,8 @@ public class MainActivity extends AppCompatActivity implements SongsAdapter.List
             startActivity(intent);
         }
     }
+
+
 
     //todo à renommer
     public interface OnPositiveClickListener {
