@@ -27,7 +27,6 @@ public class DialogTA extends DialogFragment {
             Log.d("coucou", "DTA onCreateDialog: waitChoristes");
             builder.setMessage("Veuillez attendre la mise à jour des données... Lors de la première installation, cela peut prendre plusieurs minutes ! (temps de charge des chansons/choristes de votre pupitre)");
         }
-
         return builder.create();
     }
 }
